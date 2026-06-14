@@ -117,6 +117,18 @@ Assets/_Project/
   Resources/
 ```
 
+## Coding Rules
+
+- Use the `RuneGate` namespace.
+- Keep MonoBehaviours small and focused.
+- Use ScriptableObjects for balance and content data.
+- Prefer serialized private fields over public mutable fields.
+- Use events where UI observes battle state.
+- Keep battle logic separate from UI logic.
+- Add null guards and clear `Debug.LogWarning` messages.
+- Avoid singletons unless there is a strong reason.
+- Avoid networking, monetization, analytics, Addressables, and paid dependencies during the MVP.
+
 ## Validation
 
 Inside Unity, run:
