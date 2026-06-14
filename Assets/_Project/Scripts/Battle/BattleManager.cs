@@ -352,6 +352,7 @@ namespace RuneGate
 
             waveManager?.StopCurrentWave(!victory);
             SetState(victory ? BattleState.Victory : BattleState.Defeat);
+            AudioManager.Play(victory ? SfxKey.Victory : SfxKey.Defeat);
             int wavesCleared = victory ? currentWaveIndex + 1 : Mathf.Max(0, currentWaveIndex);
             BattleEnded?.Invoke(new BattleResult(victory, activeStageData, wavesCleared, goldEarned, message));
         }

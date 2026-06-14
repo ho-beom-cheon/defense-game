@@ -16,7 +16,7 @@ namespace RuneGate
         {
             if (upgradeManager == null)
             {
-                upgradeManager = FindFirstObjectByType<UpgradeManager>();
+                upgradeManager = FindAnyObjectByType<UpgradeManager>();
             }
 
             SaveManager.LoadOrCreate();
@@ -31,7 +31,7 @@ namespace RuneGate
 
             if (upgradeManager == null)
             {
-                upgradeManager = FindFirstObjectByType<UpgradeManager>();
+                upgradeManager = FindAnyObjectByType<UpgradeManager>();
             }
 
             GUILayout.BeginArea(panelRect, GUI.skin.box);
@@ -88,9 +88,13 @@ namespace RuneGate
             {
                 if (GUILayout.Button(buttonLabel, GUILayout.Height(30f)))
                 {
-                    feedbackMessage = upgradeManager.TryPurchase(upgradeData)
-                        ? $"Purchased {upgradeData.DisplayName}."
-                        : $"Not enough gold for {upgradeData.DisplayName}.";
+                    bool purchased = upgradeManager.TryPurchase(upgradeData);
+                    if (purchased)
+                    {
+                        AudioManager.Play(SfxKey.UpgradePurchase);
+                    }
+
+                    feedbackMessage = purchased ? $"Purchased {upgradeData.DisplayName}." : $"Not enough gold for {upgradeData.DisplayName}.";
                 }
             }
         }

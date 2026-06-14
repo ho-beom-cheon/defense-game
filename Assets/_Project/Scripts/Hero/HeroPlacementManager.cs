@@ -140,30 +140,70 @@ namespace RuneGate
 
         private HeroController CreateRuntimeHero(HeroData heroData, Vector3 position, int laneIndex, int slotIndex)
         {
-            GameObject heroObject = new GameObject($"Hero_{heroData.DisplayName}");
+            GameObject heroObject = heroData.Prefab != null
+                ? Instantiate(heroData.Prefab)
+                : new GameObject($"Hero_{heroData.DisplayName}");
+
+            heroObject.name = $"Hero_{heroData.DisplayName}";
             heroObject.transform.SetParent(heroRoot);
             heroObject.transform.position = position;
 
-            SpriteRenderer spriteRenderer = heroObject.AddComponent<SpriteRenderer>();
-            spriteRenderer.sortingOrder = 4;
-            if (heroData.Portrait != null)
+            SpriteRenderer spriteRenderer = heroObject.GetComponentInChildren<SpriteRenderer>();
+            if (spriteRenderer == null)
             {
-                spriteRenderer.sprite = heroData.Portrait;
+                GameObject visualObject = new GameObject("Visual");
+                visualObject.transform.SetParent(heroObject.transform);
+                visualObject.transform.localPosition = Vector3.zero;
+                spriteRenderer = visualObject.AddComponent<SpriteRenderer>();
             }
-            else
+
+            spriteRenderer.sortingOrder = 4;
+            if (heroData.BattleSprite != null)
             {
-                PlaceholderSprite placeholder = heroObject.AddComponent<PlaceholderSprite>();
+                spriteRenderer.sprite = heroData.BattleSprite;
+            }
+            else if (spriteRenderer.sprite == null && heroObject.GetComponentInChildren<PlaceholderSprite>() == null)
+            {
+                PlaceholderSprite placeholder = spriteRenderer.gameObject.AddComponent<PlaceholderSprite>();
                 placeholder.Configure(GetHeroColor(heroData), heroPlaceholderSize, 4);
             }
 
-            if (heroData.AnimatorController != null)
+            Animator animator = heroObject.GetComponentInChildren<Animator>();
+            if (heroData.AnimatorController != null && animator == null)
             {
-                Animator animator = heroObject.AddComponent<Animator>();
+                animator = spriteRenderer.gameObject.AddComponent<Animator>();
+                animator.runtimeAnimatorController = heroData.AnimatorController;
+            }
+            else if (animator != null && heroData.AnimatorController != null)
+            {
                 animator.runtimeAnimatorController = heroData.AnimatorController;
             }
 
-            SkillController skillController = heroObject.AddComponent<SkillController>();
-            HeroController heroController = heroObject.AddComponent<HeroController>();
+            CharacterVisualController visualController = heroObject.GetComponentInChildren<CharacterVisualController>();
+            if (visualController == null)
+            {
+                visualController = heroObject.AddComponent<CharacterVisualController>();
+            }
+
+            visualController.Initialize(heroData.BattleSprite, heroData.AnimatorController);
+
+            if (heroObject.GetComponentInChildren<HitFlashController>() == null)
+            {
+                heroObject.AddComponent<HitFlashController>();
+            }
+
+            SkillController skillController = heroObject.GetComponent<SkillController>();
+            if (skillController == null)
+            {
+                skillController = heroObject.AddComponent<SkillController>();
+            }
+
+            HeroController heroController = heroObject.GetComponent<HeroController>();
+            if (heroController == null)
+            {
+                heroController = heroObject.AddComponent<HeroController>();
+            }
+
             heroController.SetLogicalPlacement(laneIndex, slotIndex);
             heroController.Initialize(heroData);
 

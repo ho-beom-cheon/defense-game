@@ -9,11 +9,18 @@ namespace RuneGate
         [SerializeField] private MonsterData monsterData;
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private Animator animator;
+        [SerializeField] private CharacterVisualController visualController;
+        [SerializeField] private HitFlashController hitFlashController;
+        [SerializeField] private AutoDestroyEffect hitEffectPrefab;
+        [SerializeField] private AutoDestroyEffect deathEffectPrefab;
+        [SerializeField] private DamageText damageTextPrefab;
+        [SerializeField] private Transform hitEffectAnchor;
         [SerializeField] private float reachDistance = 0.08f;
         [SerializeField] private bool createRuntimeHpBar = true;
         [SerializeField] private Vector2 hpBarSize = new Vector2(0.7f, 0.08f);
         [SerializeField] private float hpBarYOffset = 0.48f;
         [SerializeField] private float hitFlashDuration = 0.08f;
+        [SerializeField] private float deathDestroyDelay = 0.35f;
 
         private int maxHp;
         private int currentHp;
@@ -38,7 +45,7 @@ namespace RuneGate
         public int MaxHp => maxHp;
         public int CurrentHp => currentHp;
         public int LaneIndex => laneIndex;
-        public bool IsBoss => monsterData != null && monsterData.MonsterType == MonsterType.Boss;
+        public bool IsBoss => monsterData != null && monsterData.IsBoss;
         public bool IsAlive => initialized && currentHp > 0 && !removedFromWave;
 
         private void Awake()
@@ -53,6 +60,7 @@ namespace RuneGate
                 animator = GetComponentInChildren<Animator>();
             }
 
+            AutoAssignFeedbackReferences();
             CaptureOriginalSpriteColor();
         }
 
@@ -64,7 +72,10 @@ namespace RuneGate
             }
 
             float speed = monsterData != null ? monsterData.MoveSpeed : 0f;
+            Vector3 previousPosition = transform.position;
             transform.position = Vector3.MoveTowards(transform.position, crystalTargetPosition, speed * speedMultiplier * Time.deltaTime);
+            visualController?.FlipByDirection(transform.position - previousPosition);
+            visualController?.PlayMove();
 
             if (Vector3.Distance(transform.position, crystalTargetPosition) <= reachDistance)
             {
@@ -92,12 +103,13 @@ namespace RuneGate
             revivedOnce = false;
             initialized = true;
 
-            if (data.MonsterType == MonsterType.Boss)
+            if (data.IsBoss)
             {
                 hpBarSize = new Vector2(1.2f, 0.12f);
                 hpBarYOffset = 0.68f;
             }
 
+            AutoAssignFeedbackReferences();
             if (spriteRenderer != null && data.Sprite != null)
             {
                 spriteRenderer.sprite = data.Sprite;
@@ -108,6 +120,7 @@ namespace RuneGate
                 animator.runtimeAnimatorController = data.AnimatorController;
             }
 
+            visualController?.Initialize(data.Sprite, data.AnimatorController);
             CaptureOriginalSpriteColor();
             EnsureRuntimeHpBar();
             UpdateHpBar();
@@ -121,7 +134,7 @@ namespace RuneGate
                 return;
             }
 
-            PlayHitFlash();
+            PlayHitFeedback(damage);
             currentHp = Mathf.Max(0, currentHp - damage);
             HpChanged?.Invoke(currentHp, maxHp);
             UpdateHpBar();
@@ -151,7 +164,11 @@ namespace RuneGate
             removedFromWave = true;
             Died?.Invoke(this);
             ownerWaveManager?.NotifyMonsterKilled(this);
-            Destroy(gameObject);
+            visualController?.PlayDeath();
+            SpawnEffect(deathEffectPrefab, GetEffectPosition(), new Color(0.7f, 0.7f, 0.7f, 0.85f), new Vector2(0.78f, 0.78f), 6);
+            AudioManager.Play(SfxKey.MonsterDeath);
+            DisableColliders();
+            Destroy(gameObject, Mathf.Max(0.05f, deathDestroyDelay));
         }
 
         private void DamageCrystalAndRemove()
@@ -177,6 +194,80 @@ namespace RuneGate
             if (spriteRenderer != null)
             {
                 originalSpriteColor = spriteRenderer.color;
+            }
+        }
+
+        private void AutoAssignFeedbackReferences()
+        {
+            if (visualController == null)
+            {
+                visualController = GetComponentInChildren<CharacterVisualController>();
+            }
+
+            if (hitFlashController == null)
+            {
+                hitFlashController = GetComponentInChildren<HitFlashController>();
+            }
+
+            if (hitEffectAnchor == null)
+            {
+                hitEffectAnchor = transform;
+            }
+        }
+
+        private void PlayHitFeedback(int damage)
+        {
+            visualController?.PlayHit();
+            if (hitFlashController != null)
+            {
+                hitFlashController.Flash();
+            }
+            else
+            {
+                PlayHitFlash();
+            }
+
+            SpawnEffect(hitEffectPrefab, GetEffectPosition(), new Color(1f, 0.95f, 0.45f, 0.9f), new Vector2(0.42f, 0.42f), 7);
+            SpawnDamageText(damage);
+            AudioManager.Play(SfxKey.MonsterHit);
+        }
+
+        private Vector3 GetEffectPosition()
+        {
+            return hitEffectAnchor != null ? hitEffectAnchor.position : transform.position;
+        }
+
+        private void SpawnEffect(AutoDestroyEffect prefab, Vector3 position, Color fallbackColor, Vector2 fallbackSize, int sortingOrder)
+        {
+            if (prefab != null)
+            {
+                Instantiate(prefab, position, Quaternion.identity);
+                return;
+            }
+
+            GameObject effectObject = new GameObject("Effect_Runtime");
+            effectObject.transform.position = position;
+            effectObject.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholderSprite = effectObject.AddComponent<PlaceholderSprite>();
+            placeholderSprite.Configure(fallbackColor, fallbackSize, sortingOrder);
+            effectObject.AddComponent<AutoDestroyEffect>();
+        }
+
+        private void SpawnDamageText(int damage)
+        {
+            Vector3 position = transform.position + new Vector3(0f, 0.72f, 0f);
+            DamageText damageText = damageTextPrefab != null
+                ? Instantiate(damageTextPrefab, position, Quaternion.identity)
+                : new GameObject("DamageText_Runtime").AddComponent<DamageText>();
+            damageText.Show(damage, position);
+        }
+
+        private void DisableColliders()
+        {
+            Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                colliders[i].enabled = false;
             }
         }
 

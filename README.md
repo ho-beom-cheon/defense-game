@@ -69,6 +69,23 @@ This creates or updates:
 
 Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Play.
 
+## Bootstrap v0.5 Art Prototype
+
+In Unity, run:
+
+`Tools/RuneGate/Bootstrap v0.5 Art Prototype`
+
+This keeps the v0.4 content/progression loop and adds the first package-free art integration pipeline:
+
+- Knight and Goblin placeholder combat prefabs
+- Arrow projectile and small hit/death effect prefabs
+- Knight and Goblin prototype AnimatorControllers
+- Character visual, hit flash, damage text, death delay, and optional audio hooks
+- v0.5 art/audio folder structure
+- Knight/Goblin data links for prefab and animator controller usage
+
+Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Play.
+
 ## Project Docs
 
 - `RUNEGATE_MASTER_PLAN.md`
@@ -84,10 +101,11 @@ Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Pla
 - `docs/12_TASK_V04_CONTENT_EXPANSION_AND_PLACEMENT.md`
 - `docs/art-guide.md`
 - `docs/asset-list.md`
+- `docs/v05-art-integration-plan.md`
 
 ## How To Play
 
-1. Run `Tools/RuneGate/Bootstrap Progression Prototype`.
+1. Run `Tools/RuneGate/Bootstrap v0.5 Art Prototype`.
 2. Open `Assets/_Project/Scenes/TitleScene.unity`.
 3. Press Play.
 4. Start or Continue to Stage Select.
@@ -139,6 +157,10 @@ Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Pla
   - `boss_damage_percent`
   - `monster_slow_percent`
 - Package-free placeholder visuals
+- v0.5 Knight and Goblin placeholder prefab art pipeline
+- Character visual controller hooks for move, attack, hit, death, skill, and facing direction
+- Runtime hit flash, damage text, projectile fallback, and delayed death cleanup
+- Optional local SFX manager hooks for combat, rune, upgrade, victory, and defeat feedback
 - Package-free Play Mode GUI
 - Unity Editor bootstrapper and project validator
 - Unity `.gitignore`
@@ -188,6 +210,8 @@ Assets/_Project/
   Prefabs/
     Heroes/
     Monsters/
+    Projectiles/
+    Effects/
     UI/
   Scenes/
   Art/
@@ -196,6 +220,8 @@ Assets/_Project/
     UI/
     Backgrounds/
   Audio/
+    SFX/
+    BGM/
   Resources/
 ```
 
@@ -216,6 +242,10 @@ Assets/_Project/
 Inside Unity, run:
 
 `Tools/RuneGate/Validate Project`
+
+For the v0.5 art pipeline after bootstrapping, run:
+
+`Tools/RuneGate/Validate v0.5 Art Prototype`
 
 For command-line validation when `Unity.exe` is available:
 

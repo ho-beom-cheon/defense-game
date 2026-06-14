@@ -12,6 +12,7 @@ namespace RuneGate
 
         private readonly List<RuneData> displayedRunes = new List<RuneData>();
         private bool isVisible;
+        private Vector2 scrollPosition;
 
         public IReadOnlyList<RuneData> DisplayedRunes => displayedRunes;
         public bool IsVisible => isVisible;
@@ -47,6 +48,7 @@ namespace RuneGate
             GUILayout.Label("Choose 1 Rune");
             GUILayout.Space(8f);
 
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
             for (int i = 0; i < displayedRunes.Count; i++)
             {
                 RuneData runeData = displayedRunes[i];
@@ -55,13 +57,20 @@ namespace RuneGate
                     continue;
                 }
 
-                string buttonText = $"{runeData.DisplayName} ({runeData.Rarity})\n{runeData.Description}\n{runeData.EffectKey}: {runeData.Value:0.##}";
-                if (GUILayout.Button(buttonText, GUILayout.Height(78f)))
+                GUILayout.BeginVertical(GUI.skin.box);
+                GUILayout.Label($"{runeData.DisplayName} ({runeData.Rarity})");
+                GUILayout.Label(runeData.Description);
+                GUILayout.Label($"{runeData.EffectKey}: {runeData.Value:0.##}");
+                if (GUILayout.Button("Select", GUILayout.Height(28f)))
                 {
                     SelectOption(i);
                 }
+
+                GUILayout.EndVertical();
+                GUILayout.Space(6f);
             }
 
+            GUILayout.EndScrollView();
             GUILayout.EndArea();
         }
 
@@ -105,12 +114,12 @@ namespace RuneGate
         {
             if (battleManager == null)
             {
-                battleManager = FindFirstObjectByType<BattleManager>();
+                battleManager = FindAnyObjectByType<BattleManager>();
             }
 
             if (runeManager == null)
             {
-                runeManager = FindFirstObjectByType<RuneManager>();
+                runeManager = FindAnyObjectByType<RuneManager>();
             }
         }
     }
