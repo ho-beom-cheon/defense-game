@@ -782,7 +782,6 @@ namespace RuneGate.Editor
             RuneManager runeManager = root.AddComponent<RuneManager>();
             RuneEffectApplier runeEffectApplier = root.AddComponent<RuneEffectApplier>();
             HeroPlacementManager heroPlacementManager = root.AddComponent<HeroPlacementManager>();
-            root.AddComponent<AudioSource>();
             root.AddComponent<AudioManager>();
 
             GameObject crystalObject = CreatePlaceholderObject("Kingdom Crystal", null, new Vector3(-5.5f, 0f, 0f), new Color(0.25f, 0.92f, 1f), new Vector2(0.7f, 3.2f), 3);

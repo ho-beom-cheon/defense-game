@@ -1,19 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace RuneGate
 {
     public sealed class AudioManager : MonoBehaviour
     {
-        [SerializeField] private AudioSource audioSource;
         [SerializeField] private List<SfxEntry> sfxEntries = new List<SfxEntry>();
         [SerializeField] private bool warnWhenClipMissing;
 
         private static AudioManager instance;
         private static readonly HashSet<SfxKey> warnedMissingKeys = new HashSet<SfxKey>();
 
-        private readonly Dictionary<SfxKey, AudioClip> clipsByKey = new Dictionary<SfxKey, AudioClip>();
+        private readonly Dictionary<SfxKey, UnityEngine.Object> clipsByKey = new Dictionary<SfxKey, UnityEngine.Object>();
+        private Component audioSource;
+        private Type audioClipType;
+        private MethodInfo playOneShotMethod;
 
         private void Awake()
         {
@@ -24,16 +27,7 @@ namespace RuneGate
             }
 
             instance = this;
-            if (audioSource == null)
-            {
-                audioSource = GetComponent<AudioSource>();
-            }
-
-            if (audioSource == null)
-            {
-                audioSource = gameObject.AddComponent<AudioSource>();
-            }
-
+            TryBindAudioSource();
             RebuildClipLookup();
         }
 
@@ -49,7 +43,7 @@ namespace RuneGate
 
         public void PlayLocal(SfxKey key)
         {
-            if (!clipsByKey.TryGetValue(key, out AudioClip clip) || clip == null)
+            if (!clipsByKey.TryGetValue(key, out UnityEngine.Object clip) || clip == null)
             {
                 if (warnWhenClipMissing && warnedMissingKeys.Add(key))
                 {
@@ -59,7 +53,12 @@ namespace RuneGate
                 return;
             }
 
-            audioSource.PlayOneShot(clip);
+            if (audioSource == null || playOneShotMethod == null || audioClipType == null || !audioClipType.IsInstanceOfType(clip))
+            {
+                return;
+            }
+
+            playOneShotMethod.Invoke(audioSource, new object[] { clip });
         }
 
         private void RebuildClipLookup()
@@ -75,14 +74,37 @@ namespace RuneGate
             }
         }
 
+        private void TryBindAudioSource()
+        {
+            Type audioSourceType = Type.GetType("UnityEngine.AudioSource, UnityEngine.AudioModule");
+            if (audioSourceType == null)
+            {
+                return;
+            }
+
+            audioSource = GetComponent(audioSourceType);
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent(audioSourceType);
+            }
+
+            audioClipType = Type.GetType("UnityEngine.AudioClip, UnityEngine.AudioModule");
+            if (audioClipType == null)
+            {
+                return;
+            }
+
+            playOneShotMethod = audioSourceType.GetMethod("PlayOneShot", new[] { audioClipType });
+        }
+
         [Serializable]
         private sealed class SfxEntry
         {
             [SerializeField] private SfxKey key;
-            [SerializeField] private AudioClip clip;
+            [SerializeField] private UnityEngine.Object clip;
 
             public SfxKey Key => key;
-            public AudioClip Clip => clip;
+            public UnityEngine.Object Clip => clip;
         }
     }
 }
