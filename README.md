@@ -16,7 +16,9 @@ RuneGate Defense is a Unity 6 mobile 2D portrait defense prototype. Monsters inv
 4. Open `Assets/_Project/Scenes/BattleScene.unity`.
 5. Press Play.
 
-The bootstrapper creates sample ScriptableObject assets for Knight, Archer, Goblin, Orc, Shield Bash, Rapid Shot, Sword Rune, Bow Rune, Healing Rune, and Goblin Forest 1. It also creates a basic BattleScene with lane points, a crystal, two heroes, and runtime managers.
+The bootstrapper creates sample ScriptableObject assets for Knight, Archer, Goblin, Orc, Shield Bash, Rapid Shot, Sword Rune, Bow Rune, Healing Rune, and Goblin Forest 1. It also creates a basic BattleScene with lane points, visible placeholder objects, a crystal, two heroes, runtime managers, and a package-free Play-mode GUI.
+
+In Play Mode, Goblins and Orcs spawn from the wave data and move toward the crystal. Knight and Archer auto-attack when monsters enter range. After the first non-boss wave, click one of the three rune choices to apply a runtime stat effect and continue to the next wave.
 
 ## MVP Scope
 

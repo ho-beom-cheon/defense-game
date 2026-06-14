@@ -7,6 +7,8 @@ namespace RuneGate
     {
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private RuneManager runeManager;
+        [SerializeField] private bool drawRuntimeGui = true;
+        [SerializeField] private Rect panelRect = new Rect(220f, 120f, 420f, 290f);
 
         private readonly List<RuneData> displayedRunes = new List<RuneData>();
         private bool isVisible;
@@ -81,6 +83,35 @@ namespace RuneGate
             {
                 runeManager = FindFirstObjectByType<RuneManager>();
             }
+        }
+
+        private void OnGUI()
+        {
+            if (!drawRuntimeGui || !isVisible)
+            {
+                return;
+            }
+
+            GUILayout.BeginArea(panelRect, GUI.skin.box);
+            GUILayout.Label("Choose a Rune");
+            GUILayout.Space(8f);
+
+            for (int i = 0; i < displayedRunes.Count; i++)
+            {
+                RuneData runeData = displayedRunes[i];
+                if (runeData == null)
+                {
+                    continue;
+                }
+
+                string buttonText = $"{runeData.DisplayName} ({runeData.Rarity})\n{runeData.Description}\n{runeData.EffectKey} + {runeData.Value:0.##}";
+                if (GUILayout.Button(buttonText, GUILayout.Height(72f)))
+                {
+                    SelectOption(i);
+                }
+            }
+
+            GUILayout.EndArea();
         }
     }
 }

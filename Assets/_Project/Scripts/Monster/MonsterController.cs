@@ -82,12 +82,12 @@ namespace RuneGate
             removedFromWave = false;
             initialized = true;
 
-            if (spriteRenderer != null)
+            if (spriteRenderer != null && data.Sprite != null)
             {
                 spriteRenderer.sprite = data.Sprite;
             }
 
-            if (animator != null)
+            if (animator != null && data.AnimatorController != null)
             {
                 animator.runtimeAnimatorController = data.AnimatorController;
             }

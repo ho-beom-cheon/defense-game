@@ -5,6 +5,8 @@ namespace RuneGate
     public sealed class HeroSkillButton : MonoBehaviour
     {
         [SerializeField] private HeroController heroController;
+        [SerializeField] private bool drawRuntimeGui;
+        [SerializeField] private Rect buttonRect = new Rect(16f, 176f, 160f, 44f);
 
         private float cooldownRemaining;
         private float cooldownDuration;
@@ -61,6 +63,30 @@ namespace RuneGate
             cooldownRemaining = remaining;
             cooldownDuration = duration;
             isInteractable = remaining <= 0f;
+        }
+
+        private void OnGUI()
+        {
+            if (!drawRuntimeGui || heroController == null)
+            {
+                return;
+            }
+
+            string heroName = heroController.Data != null ? heroController.Data.DisplayName : "Hero";
+            string skillName = heroController.SkillController != null && heroController.SkillController.Data != null
+                ? heroController.SkillController.Data.DisplayName
+                : "Skill";
+            string label = isInteractable
+                ? $"{heroName}: {skillName}"
+                : $"{heroName}: {cooldownRemaining:0.0}s";
+
+            GUI.enabled = isInteractable;
+            if (GUI.Button(buttonRect, label))
+            {
+                Press();
+            }
+
+            GUI.enabled = true;
         }
     }
 }

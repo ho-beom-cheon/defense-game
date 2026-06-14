@@ -227,6 +227,12 @@ namespace RuneGate
                 return;
             }
 
+            if (waveData != null && waveData.IsBossWave)
+            {
+                StartNextWave();
+                return;
+            }
+
             OfferRuneSelection();
         }
 

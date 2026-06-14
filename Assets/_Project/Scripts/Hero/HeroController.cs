@@ -28,6 +28,8 @@ namespace RuneGate
         public SkillController SkillController => skillController;
         public int CurrentHp => currentHp;
         public int MaxHp => maxHp;
+        public int EffectiveAttack => Mathf.Max(1, Mathf.RoundToInt(baseAttack * attackMultiplier));
+        public float EffectiveAttackSpeed => Mathf.Max(0.01f, baseAttackSpeed * attackSpeedMultiplier);
         public bool IsAlive => initialized && currentHp > 0;
 
         private void Awake()
@@ -163,7 +165,7 @@ namespace RuneGate
 
         private void BasicAttack(MonsterController target)
         {
-            int damage = Mathf.Max(1, Mathf.RoundToInt(baseAttack * attackMultiplier));
+            int damage = EffectiveAttack;
             Vector3 spawnPosition = projectileSpawnPoint != null ? projectileSpawnPoint.position : transform.position;
 
             if (projectilePrefab != null)

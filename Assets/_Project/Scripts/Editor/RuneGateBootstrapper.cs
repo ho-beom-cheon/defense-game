@@ -325,6 +325,7 @@ namespace RuneGate.Editor
             GameObject crystalObject = new GameObject("Kingdom Crystal");
             crystalObject.transform.position = new Vector3(-5.5f, 0f, 0f);
             crystalObject.AddComponent<SpriteRenderer>();
+            ConfigurePlaceholder(crystalObject.AddComponent<PlaceholderSprite>(), new Color(0.25f, 0.92f, 1f), new Vector2(0.7f, 3.2f), 3);
             CrystalController crystalController = crystalObject.AddComponent<CrystalController>();
 
             GameObject laneRoot = new GameObject("Lane Points");
@@ -333,6 +334,8 @@ namespace RuneGate.Editor
             for (int i = 0; i < 3; i++)
             {
                 float y = (i - 1) * 2.5f;
+                CreatePlaceholderObject($"Lane {i} Path", laneRoot.transform, new Vector3(0f, y, 0f), new Color(0.25f, 0.27f, 0.32f), new Vector2(10.8f, 0.08f), 0);
+
                 GameObject spawnPoint = new GameObject($"Lane {i} Spawn");
                 spawnPoint.transform.SetParent(laneRoot.transform);
                 spawnPoint.transform.position = new Vector3(5.5f, y, 0f);
@@ -348,6 +351,12 @@ namespace RuneGate.Editor
             GameObject heroRoot = new GameObject("Heroes");
             HeroController knightController = CreateHero("Knight", knight, new Vector3(-2.6f, -1.2f, 0f), heroRoot.transform);
             HeroController archerController = CreateHero("Archer", archer, new Vector3(-3.2f, 1.2f, 0f), heroRoot.transform);
+            GameObject uiRoot = new GameObject("Runtime Prototype UI");
+            BattleHUD battleHud = uiRoot.AddComponent<BattleHUD>();
+            RuneSelectionUI runeSelectionUI = uiRoot.AddComponent<RuneSelectionUI>();
+            StageResultUI stageResultUI = uiRoot.AddComponent<StageResultUI>();
+            HeroSkillButton knightSkillButton = uiRoot.AddComponent<HeroSkillButton>();
+            HeroSkillButton archerSkillButton = uiRoot.AddComponent<HeroSkillButton>();
 
             EditComponent(laneManager, serializedObject =>
             {
@@ -387,6 +396,43 @@ namespace RuneGate.Editor
                 SetBool(serializedObject, "autoStartOnStart", true);
             });
 
+            EditComponent(battleHud, serializedObject =>
+            {
+                SetObject(serializedObject, "battleManager", battleManager);
+                SetObject(serializedObject, "crystalController", crystalController);
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "panelRect", new Rect(16f, 16f, 280f, 150f));
+            });
+
+            EditComponent(runeSelectionUI, serializedObject =>
+            {
+                SetObject(serializedObject, "battleManager", battleManager);
+                SetObject(serializedObject, "runeManager", runeManager);
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "panelRect", new Rect(300f, 110f, 440f, 300f));
+            });
+
+            EditComponent(stageResultUI, serializedObject =>
+            {
+                SetObject(serializedObject, "battleManager", battleManager);
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "panelRect", new Rect(300f, 170f, 390f, 130f));
+            });
+
+            EditComponent(knightSkillButton, serializedObject =>
+            {
+                SetObject(serializedObject, "heroController", knightController);
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "buttonRect", new Rect(16f, 178f, 180f, 42f));
+            });
+
+            EditComponent(archerSkillButton, serializedObject =>
+            {
+                SetObject(serializedObject, "heroController", archerController);
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "buttonRect", new Rect(16f, 226f, 180f, 42f));
+            });
+
             EditorSceneManager.SaveScene(scene, BattleScenePath);
         }
 
@@ -396,6 +442,8 @@ namespace RuneGate.Editor
             heroObject.transform.SetParent(parent);
             heroObject.transform.position = position;
             heroObject.AddComponent<SpriteRenderer>();
+            Color heroColor = heroData.Role == HeroRole.Tank ? new Color(0.45f, 0.62f, 1f) : new Color(0.95f, 0.78f, 0.28f);
+            ConfigurePlaceholder(heroObject.AddComponent<PlaceholderSprite>(), heroColor, new Vector2(0.72f, 0.72f), 4);
             SkillController skillController = heroObject.AddComponent<SkillController>();
             HeroController heroController = heroObject.AddComponent<HeroController>();
 
@@ -414,6 +462,32 @@ namespace RuneGate.Editor
             });
 
             return heroController;
+        }
+
+        private static GameObject CreatePlaceholderObject(
+            string objectName,
+            Transform parent,
+            Vector3 position,
+            Color color,
+            Vector2 size,
+            int sortingOrder)
+        {
+            GameObject placeholderObject = new GameObject(objectName);
+            placeholderObject.transform.SetParent(parent);
+            placeholderObject.transform.position = position;
+            placeholderObject.AddComponent<SpriteRenderer>();
+            ConfigurePlaceholder(placeholderObject.AddComponent<PlaceholderSprite>(), color, size, sortingOrder);
+            return placeholderObject;
+        }
+
+        private static void ConfigurePlaceholder(PlaceholderSprite placeholderSprite, Color color, Vector2 size, int sortingOrder)
+        {
+            EditComponent(placeholderSprite, serializedObject =>
+            {
+                SetColor(serializedObject, "color", color);
+                SetVector2(serializedObject, "size", size);
+                SetInt(serializedObject, "sortingOrder", sortingOrder);
+            });
         }
 
         private static UnityEngine.Object[] ToObjectArray<T>(IReadOnlyList<T> values) where T : UnityEngine.Object
@@ -480,6 +554,24 @@ namespace RuneGate.Editor
         {
             SerializedProperty property = FindProperty(serializedObject, propertyName);
             property.boolValue = value;
+        }
+
+        private static void SetColor(SerializedObject serializedObject, string propertyName, Color value)
+        {
+            SerializedProperty property = FindProperty(serializedObject, propertyName);
+            property.colorValue = value;
+        }
+
+        private static void SetVector2(SerializedObject serializedObject, string propertyName, Vector2 value)
+        {
+            SerializedProperty property = FindProperty(serializedObject, propertyName);
+            property.vector2Value = value;
+        }
+
+        private static void SetRect(SerializedObject serializedObject, string propertyName, Rect value)
+        {
+            SerializedProperty property = FindProperty(serializedObject, propertyName);
+            property.rectValue = value;
         }
 
         private static void SetEnum<TEnum>(SerializedObject serializedObject, string propertyName, TEnum value) where TEnum : Enum

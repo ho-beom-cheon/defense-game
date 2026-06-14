@@ -138,14 +138,38 @@ namespace RuneGate
             monsterObject.transform.SetParent(monsterRoot);
             monsterObject.transform.position = spawnPosition;
             monsterObject.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholder = monsterObject.AddComponent<PlaceholderSprite>();
+            placeholder.Configure(GetPlaceholderColor(data), new Vector2(0.62f, 0.62f), 5);
 
             if (addDefaultColliderToGeneratedMonsters)
             {
                 CircleCollider2D collider = monsterObject.AddComponent<CircleCollider2D>();
-                collider.isTrigger = true;
+                collider.isTrigger = false;
             }
 
             return monsterObject.AddComponent<MonsterController>();
+        }
+
+        private Color GetPlaceholderColor(MonsterData data)
+        {
+            if (data == null)
+            {
+                return Color.gray;
+            }
+
+            switch (data.MonsterType)
+            {
+                case MonsterType.Tank:
+                    return new Color(0.72f, 0.36f, 0.18f);
+                case MonsterType.Fast:
+                    return new Color(0.95f, 0.86f, 0.22f);
+                case MonsterType.Boss:
+                    return new Color(0.72f, 0.12f, 0.12f);
+                case MonsterType.Flying:
+                    return new Color(0.55f, 0.76f, 1f);
+                default:
+                    return new Color(0.34f, 0.78f, 0.32f);
+            }
         }
 
         private int CountPendingSpawns(WaveData waveData)
