@@ -29,8 +29,11 @@
 - Placeholder 형태의 영웅과 몬스터가 화면에 나타남
 - 몬스터가 라인 위에서 이동함
 - 초기 전투 흐름이 작동함
+- 웨이브 사이 룬 선택이 작동함
+- Victory/Defeat 결과 흐름이 작동함
+- Title, Stage Select, Upgrade, local JSON save를 연결하는 v0.3 진행 루프를 구현 중임
 
-즉, 현재 단계는 **Battle Prototype v0.1**이다.
+즉, 현재 단계는 **Battle Prototype v0.2 이후 / Progression Loop v0.3**이다.
 
 ## 3. 최종 게임 핵심 문장
 
@@ -106,19 +109,17 @@ MVP에는 반드시 포함한다.
 
 ## 7. 현재 가장 중요한 다음 목표
 
-현재 다음 목표는 **Battle Prototype v0.2**다.
+현재 다음 목표는 **Progression Loop v0.3 완료 후 v0.4 콘텐츠/배치 준비**다.
 
-v0.2의 핵심은 다음이다.
+v0.3의 핵심은 다음이다.
 
-1. 웨이브 종료 감지
-2. 룬 선택 UI 표시
-3. 룬 선택 후 효과 적용
-4. 다음 웨이브 시작
-5. 마지막 웨이브 클리어 시 Victory
-6. Crystal HP 0 시 Defeat
-7. Restart 가능
-8. 몬스터 HP Bar 및 피격 피드백
-9. 스킬 쿨타임 UI 개선
+1. TitleScene
+2. StageSelectScene
+3. 선택 StageData 기반 BattleScene 진입
+4. Result flow에서 골드/클리어/해금 저장
+5. UpgradeScene
+6. 로컬 JSON SaveManager
+7. 영구 업그레이드 전투 반영
 
 ## 8. Codex 작업 기본 규칙
 

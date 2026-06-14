@@ -32,8 +32,9 @@ Canvas
   ResultPanel
     ResultTitleText
     RewardText
-    RestartButton
-    BackButtonPlaceholder
+    RetryButton
+    UpgradeButton
+    StageSelectButton
 ```
 
 ## 3. HUD
@@ -122,8 +123,9 @@ Knight: Shield Bash
 ```text
 Victory
 Gold Earned: 50
-[Restart]
-[Back - Placeholder]
+[Retry]
+[Upgrade]
+[Stage Select]
 ```
 
 ### 6.2 Defeat
@@ -133,8 +135,9 @@ Gold Earned: 50
 ```text
 Defeat
 Gold Earned: 12
-[Restart]
-[Back - Placeholder]
+[Retry]
+[Upgrade]
+[Stage Select]
 ```
 
 ## 7. 화면 전환 플로우
@@ -171,11 +174,15 @@ Preparing
 
 ## 10. 후속 UI 계획
 
-v0.5 이후:
+v0.3:
 
 - TitleScene
 - StageSelectScene
 - UpgradeScene
+- Result flow buttons: Retry, Upgrade, Stage Select
+
+v0.5 이후:
+
 - Collection/Character screen
 - Settings screen
 - Sound toggle

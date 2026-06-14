@@ -9,27 +9,32 @@
 | P2 | MVP 이후 품질 개선 |
 | P3 | 출시 이후 확장 |
 
-## 2. P0: v0.2 전투 루프 완성
+## 2. P0: v0.3 진행 루프
 
-- [ ] Wave clear detection 안정화
-- [ ] RuneSelection 상태 전환
-- [ ] RuneSelectionUI 카드 3개 표시
-- [ ] Rune 선택 이벤트 연결
-- [ ] Sword Rune 효과 적용
-- [ ] Bow Rune 효과 적용
-- [ ] Healing Rune 효과 적용
-- [ ] 다음 Wave 시작
-- [ ] Final wave clear 시 Victory
-- [ ] Crystal HP 0 시 Defeat
-- [ ] ResultPanel 표시
-- [ ] Restart 버튼
-- [ ] Monster HP Bar
-- [ ] Hit Flash
-- [ ] Crystal Hit Feedback
-- [ ] Skill cooldown 표시
+- [ ] TitleScene 생성
+- [ ] Start/Continue/Reset Save 버튼
+- [ ] StageSelectScene 생성
+- [ ] Stage 1/2/3 표시
+- [ ] Stage 1 기본 해금
+- [ ] Stage 1 클리어 후 Stage 2 해금
+- [ ] Stage 2 클리어 후 Stage 3 해금
+- [ ] GameSession으로 선택 StageData 전달
+- [ ] BattleScene fallback StageData 유지
+- [ ] Result flow에서 Victory/Defeat, 골드, 클리어 상태 표시
+- [ ] Retry/Upgrade/Stage Select 버튼
+- [ ] SaveData / SaveManager JSON 저장
+- [ ] UpgradeData / UpgradeManager
+- [ ] UpgradeScene placeholder
+- [ ] crystal_max_hp_flat 적용
+- [ ] hero_attack_percent 적용
+- [ ] hero_attack_speed_percent 적용
+- [ ] skill_cooldown_percent 적용
+- [ ] Bootstrap Progression Prototype 메뉴
+- [ ] Validate Project v0.3 항목
 
-## 3. P1: v0.3 콘텐츠 확장
+## 3. P1: v0.4 콘텐츠/배치 준비
 
+- [ ] Hero placement preparation
 - [ ] Mage HeroData
 - [ ] Priest HeroData
 - [ ] Engineer HeroData
@@ -43,21 +48,17 @@
 - [ ] Slime MonsterData
 - [ ] Skeleton MonsterData
 - [ ] Orc Warlord BossData
-- [ ] 추가 룬 10종
+- [ ] Boss wave flow
+- [ ] First art integration sample
+- [ ] Audio placeholders
 
-## 4. P1: v0.4 영구 성장
+## 4. P1: 진행 루프 후속 개선
 
-- [ ] SaveManager
-- [ ] Local save data model
-- [ ] Gold reward calculation
-- [ ] UpgradeData
-- [ ] UpgradeScene placeholder
-- [ ] Crystal HP upgrade
-- [ ] Hero Attack upgrade
-- [ ] Hero HP upgrade
-- [ ] Skill Cooldown upgrade
-- [ ] Reward Gold upgrade
-- [ ] Reset save debug button
+- [ ] Upgrade purchase feedback 개선
+- [ ] Reward Gold upgrade 검토
+- [ ] Result reward summary 개선
+- [ ] Save migration version 필드 검토
+- [ ] StageSelect world grouping 검토
 
 ## 5. P1: v0.5 스테이지 구조
 
@@ -140,7 +141,7 @@
 현재 가장 적절한 다음 작업:
 
 ```text
-Implement Battle Prototype v0.2.
+Implement RuneGate Defense v0.4 content and placement preparation.
 ```
 
 관련 문서:
