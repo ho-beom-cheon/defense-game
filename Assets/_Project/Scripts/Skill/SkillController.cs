@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace RuneGate
@@ -58,7 +57,6 @@ namespace RuneGate
             }
             else if (caster != null)
             {
-                // Healing behavior is intentionally a hook until skills have a dedicated type field.
                 caster.Heal(Mathf.Max(0, skillData.Power));
                 Debug.Log($"Skill {skillData.DisplayName} used heal placeholder because no valid monster target was found.");
             }
@@ -70,31 +68,6 @@ namespace RuneGate
 
             StartCooldown();
             return true;
-        }
-
-        public bool UseAreaDamagePlaceholder(IEnumerable<MonsterController> targets)
-        {
-            if (skillData == null || !CanUseSkill)
-            {
-                return false;
-            }
-
-            bool hitAnyTarget = false;
-            foreach (MonsterController target in targets)
-            {
-                if (target != null && target.IsAlive)
-                {
-                    target.TakeDamage(Mathf.Max(0, skillData.Power));
-                    hitAnyTarget = true;
-                }
-            }
-
-            if (hitAnyTarget)
-            {
-                StartCooldown();
-            }
-
-            return hitAnyTarget;
         }
 
         public void ApplyCooldownPercent(float percent)

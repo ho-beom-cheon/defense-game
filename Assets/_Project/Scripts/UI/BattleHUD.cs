@@ -6,10 +6,13 @@ namespace RuneGate
     {
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private CrystalController crystalController;
+        [SerializeField] private bool drawRuntimeGui = true;
+        [SerializeField] private Rect panelRect = new Rect(16f, 16f, 300f, 170f);
 
-        private string crystalHpText;
-        private string waveText;
-        private string battleStateText;
+        private string crystalHpText = "Crystal HP -";
+        private string waveText = "Wave -";
+        private string battleStateText = BattleState.None.ToString();
+        private int gold;
 
         public string CrystalHpText => crystalHpText;
         public string WaveText => waveText;
@@ -23,11 +26,13 @@ namespace RuneGate
             {
                 battleManager.BattleStateChanged += HandleBattleStateChanged;
                 battleManager.WaveChanged += HandleWaveChanged;
+                battleManager.GoldChanged += HandleGoldChanged;
             }
 
             if (crystalController != null)
             {
                 crystalController.HpChanged += HandleCrystalHpChanged;
+                HandleCrystalHpChanged(crystalController.CurrentHp, crystalController.MaxHp);
             }
         }
 
@@ -37,12 +42,45 @@ namespace RuneGate
             {
                 battleManager.BattleStateChanged -= HandleBattleStateChanged;
                 battleManager.WaveChanged -= HandleWaveChanged;
+                battleManager.GoldChanged -= HandleGoldChanged;
             }
 
             if (crystalController != null)
             {
                 crystalController.HpChanged -= HandleCrystalHpChanged;
             }
+        }
+
+        private void OnGUI()
+        {
+            if (!drawRuntimeGui)
+            {
+                return;
+            }
+
+            AutoAssignReferences();
+            GUILayout.BeginArea(panelRect, GUI.skin.box);
+            GUILayout.Label("RuneGate Defense");
+            GUILayout.Label(crystalHpText);
+            GUILayout.Label(waveText);
+            GUILayout.Label($"State {battleStateText}");
+            GUILayout.Label($"Gold {gold}");
+
+            if (battleManager != null)
+            {
+                for (int i = 0; i < battleManager.Heroes.Count; i++)
+                {
+                    HeroController hero = battleManager.Heroes[i];
+                    if (hero == null || hero.Data == null)
+                    {
+                        continue;
+                    }
+
+                    GUILayout.Label($"{hero.Data.DisplayName} ATK {hero.EffectiveAttack} SPD {hero.EffectiveAttackSpeed:0.00}");
+                }
+            }
+
+            GUILayout.EndArea();
         }
 
         private void AutoAssignReferences()
@@ -61,6 +99,7 @@ namespace RuneGate
         private void HandleCrystalHpChanged(int currentHp, int maxHp)
         {
             crystalHpText = $"Crystal HP {currentHp}/{maxHp}";
+            Debug.Log(crystalHpText);
         }
 
         private void HandleWaveChanged(int currentWave, int totalWaves)
@@ -71,6 +110,11 @@ namespace RuneGate
         private void HandleBattleStateChanged(BattleState battleState)
         {
             battleStateText = battleState.ToString();
+        }
+
+        private void HandleGoldChanged(int amount)
+        {
+            gold = amount;
         }
     }
 }

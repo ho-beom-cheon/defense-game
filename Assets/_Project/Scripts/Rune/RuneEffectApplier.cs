@@ -35,21 +35,13 @@ namespace RuneGate
                         crystalController.Heal(Mathf.RoundToInt(runeData.Value));
                     }
                     break;
-                case CrystalShieldFlat:
-                    if (crystalController != null)
-                    {
-                        crystalController.AddShield(Mathf.RoundToInt(runeData.Value));
-                    }
-                    Debug.Log("Crystal shield rune applied with placeholder shield visuals.");
-                    break;
                 case SkillCooldownPercent:
                     ApplyToHeroes(heroes, hero => hero.ApplySkillCooldownPercent(runeData.Value));
                     break;
+                case CrystalShieldFlat:
                 case MonsterSlowPercent:
-                    Debug.Log("Monster slow rune selected. Global monster slow targeting will be implemented in a later pass.");
-                    break;
                 case BossDamagePercent:
-                    Debug.Log("Boss damage rune selected. Boss-only damage modifier will be implemented in a later pass.");
+                    Debug.Log($"Rune effect '{runeData.EffectKey}' is reserved as a prototype hook.");
                     break;
                 default:
                     Debug.LogWarning($"RuneEffectApplier does not recognize rune effect key '{runeData.EffectKey}'.");

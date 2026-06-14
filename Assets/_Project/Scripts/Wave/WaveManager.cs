@@ -22,6 +22,7 @@ namespace RuneGate
         public event Action<WaveData> WaveStarted;
         public event Action<WaveData> WaveCompleted;
         public event Action<MonsterController> MonsterSpawned;
+        public event Action<MonsterController> MonsterKilled;
 
         public IReadOnlyList<MonsterController> AliveMonsters => aliveMonsters;
 
@@ -53,6 +54,7 @@ namespace RuneGate
             activeSpawnRoutines = 0;
 
             WaveStarted?.Invoke(waveData);
+            Debug.Log($"Wave {waveData.WaveNo} started with {pendingSpawns} pending monsters.");
 
             if (waveData.Spawns.Count == 0 || pendingSpawns == 0)
             {
@@ -73,6 +75,12 @@ namespace RuneGate
             }
 
             CheckWaveComplete();
+        }
+
+        public void NotifyMonsterKilled(MonsterController monster)
+        {
+            MonsterKilled?.Invoke(monster);
+            NotifyMonsterRemoved(monster);
         }
 
         public void NotifyMonsterRemoved(MonsterController monster)
@@ -138,14 +146,38 @@ namespace RuneGate
             monsterObject.transform.SetParent(monsterRoot);
             monsterObject.transform.position = spawnPosition;
             monsterObject.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholder = monsterObject.AddComponent<PlaceholderSprite>();
+            placeholder.Configure(GetPlaceholderColor(data), new Vector2(0.62f, 0.62f), 5);
 
             if (addDefaultColliderToGeneratedMonsters)
             {
                 CircleCollider2D collider = monsterObject.AddComponent<CircleCollider2D>();
-                collider.isTrigger = true;
+                collider.isTrigger = false;
             }
 
             return monsterObject.AddComponent<MonsterController>();
+        }
+
+        private Color GetPlaceholderColor(MonsterData data)
+        {
+            if (data == null)
+            {
+                return Color.gray;
+            }
+
+            switch (data.MonsterType)
+            {
+                case MonsterType.Tank:
+                    return new Color(0.72f, 0.36f, 0.18f);
+                case MonsterType.Fast:
+                    return new Color(0.95f, 0.86f, 0.22f);
+                case MonsterType.Boss:
+                    return new Color(0.72f, 0.12f, 0.12f);
+                case MonsterType.Flying:
+                    return new Color(0.55f, 0.76f, 1f);
+                default:
+                    return new Color(0.34f, 0.78f, 0.32f);
+            }
         }
 
         private int CountPendingSpawns(WaveData waveData)
@@ -179,6 +211,7 @@ namespace RuneGate
             WaveData completedWave = activeWave;
             activeWave = null;
             WaveCompleted?.Invoke(completedWave);
+            Debug.Log($"Wave {completedWave.WaveNo} completed.");
         }
 
         private void RemoveNullAliveMonsters()

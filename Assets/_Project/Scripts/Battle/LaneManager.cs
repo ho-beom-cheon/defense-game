@@ -5,9 +5,9 @@ namespace RuneGate
     public sealed class LaneManager : MonoBehaviour
     {
         [SerializeField] private int laneCount = 3;
-        [SerializeField] private float laneSpacing = 2.5f;
-        [SerializeField] private float spawnX = 5.5f;
-        [SerializeField] private float crystalX = -5.5f;
+        [SerializeField] private float laneSpacing = 2.4f;
+        [SerializeField] private float spawnX = 5.6f;
+        [SerializeField] private float crystalX = -5.4f;
         [SerializeField] private Transform[] laneSpawnPoints;
         [SerializeField] private Transform[] crystalTargetPoints;
 
@@ -20,40 +20,42 @@ namespace RuneGate
 
         public Vector3 GetSpawnPosition(int laneIndex)
         {
-            if (!IsValidLaneIndex(laneIndex))
+            int safeLaneIndex = ClampLaneIndex(laneIndex, "spawn");
+            if (laneSpawnPoints != null && safeLaneIndex < laneSpawnPoints.Length && laneSpawnPoints[safeLaneIndex] != null)
             {
-                Debug.LogWarning($"LaneManager received invalid spawn lane index {laneIndex}.");
-                laneIndex = Mathf.Clamp(laneIndex, 0, LaneCount - 1);
+                return laneSpawnPoints[safeLaneIndex].position;
             }
 
-            if (laneSpawnPoints != null && laneIndex < laneSpawnPoints.Length && laneSpawnPoints[laneIndex] != null)
-            {
-                return laneSpawnPoints[laneIndex].position;
-            }
-
-            return new Vector3(spawnX, GetLaneY(laneIndex), 0f);
+            return new Vector3(spawnX, GetLaneY(safeLaneIndex), 0f);
         }
 
         public Vector3 GetCrystalTargetPosition(int laneIndex)
         {
-            if (!IsValidLaneIndex(laneIndex))
+            int safeLaneIndex = ClampLaneIndex(laneIndex, "crystal target");
+            if (crystalTargetPoints != null && safeLaneIndex < crystalTargetPoints.Length && crystalTargetPoints[safeLaneIndex] != null)
             {
-                Debug.LogWarning($"LaneManager received invalid crystal target lane index {laneIndex}.");
-                laneIndex = Mathf.Clamp(laneIndex, 0, LaneCount - 1);
+                return crystalTargetPoints[safeLaneIndex].position;
             }
 
-            if (crystalTargetPoints != null && laneIndex < crystalTargetPoints.Length && crystalTargetPoints[laneIndex] != null)
-            {
-                return crystalTargetPoints[laneIndex].position;
-            }
-
-            return new Vector3(crystalX, GetLaneY(laneIndex), 0f);
+            return new Vector3(crystalX, GetLaneY(safeLaneIndex), 0f);
         }
 
-        private float GetLaneY(int laneIndex)
+        public float GetLaneY(int laneIndex)
         {
+            int safeLaneIndex = Mathf.Clamp(laneIndex, 0, LaneCount - 1);
             float centerOffset = (LaneCount - 1) * 0.5f;
-            return (laneIndex - centerOffset) * laneSpacing;
+            return (safeLaneIndex - centerOffset) * laneSpacing;
+        }
+
+        private int ClampLaneIndex(int laneIndex, string context)
+        {
+            if (IsValidLaneIndex(laneIndex))
+            {
+                return laneIndex;
+            }
+
+            Debug.LogWarning($"LaneManager received invalid {context} lane index {laneIndex}.");
+            return Mathf.Clamp(laneIndex, 0, LaneCount - 1);
         }
     }
 }

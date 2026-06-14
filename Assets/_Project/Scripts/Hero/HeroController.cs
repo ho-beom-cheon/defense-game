@@ -28,6 +28,8 @@ namespace RuneGate
         public SkillController SkillController => skillController;
         public int CurrentHp => currentHp;
         public int MaxHp => maxHp;
+        public int EffectiveAttack => Mathf.Max(1, Mathf.RoundToInt(baseAttack * attackMultiplier));
+        public float EffectiveAttackSpeed => Mathf.Max(0.01f, baseAttackSpeed * attackSpeedMultiplier);
         public bool IsAlive => initialized && currentHp > 0;
 
         private void Awake()
@@ -63,8 +65,7 @@ namespace RuneGate
             }
 
             BasicAttack(target);
-            float attacksPerSecond = Mathf.Max(0.01f, baseAttackSpeed * attackSpeedMultiplier);
-            attackCooldown = 1f / attacksPerSecond;
+            attackCooldown = 1f / EffectiveAttackSpeed;
         }
 
         public void InitializeFromSerializedData()
@@ -96,11 +97,7 @@ namespace RuneGate
                 skillController = GetComponent<SkillController>();
             }
 
-            if (skillController != null)
-            {
-                skillController.Initialize(data.SkillData);
-            }
-
+            skillController?.Initialize(data.SkillData);
             HpChanged?.Invoke(currentHp, maxHp);
         }
 
@@ -155,26 +152,25 @@ namespace RuneGate
 
         public void ApplySkillCooldownPercent(float percent)
         {
-            if (skillController != null)
-            {
-                skillController.ApplyCooldownPercent(percent);
-            }
+            skillController?.ApplyCooldownPercent(percent);
         }
 
         private void BasicAttack(MonsterController target)
         {
-            int damage = Mathf.Max(1, Mathf.RoundToInt(baseAttack * attackMultiplier));
-            Vector3 spawnPosition = projectileSpawnPoint != null ? projectileSpawnPoint.position : transform.position;
+            if (target == null)
+            {
+                return;
+            }
 
+            Vector3 spawnPosition = projectileSpawnPoint != null ? projectileSpawnPoint.position : transform.position;
             if (projectilePrefab != null)
             {
                 ProjectileController projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-                projectile.Initialize(target, damage);
+                projectile.Initialize(target, EffectiveAttack);
+                return;
             }
-            else
-            {
-                target.TakeDamage(damage);
-            }
+
+            target.TakeDamage(EffectiveAttack);
         }
 
         private MonsterController FindTarget(float range, TargetingType targetingType)

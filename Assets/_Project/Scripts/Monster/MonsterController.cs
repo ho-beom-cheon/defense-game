@@ -48,10 +48,7 @@ namespace RuneGate
             }
 
             float speed = monsterData != null ? monsterData.MoveSpeed : 0f;
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                crystalTargetPosition,
-                speed * speedMultiplier * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, crystalTargetPosition, speed * speedMultiplier * Time.deltaTime);
 
             if (Vector3.Distance(transform.position, crystalTargetPosition) <= reachDistance)
             {
@@ -59,12 +56,7 @@ namespace RuneGate
             }
         }
 
-        public void Initialize(
-            MonsterData data,
-            int assignedLaneIndex,
-            Vector3 targetPosition,
-            CrystalController targetCrystal,
-            WaveManager waveManager)
+        public void Initialize(MonsterData data, int assignedLaneIndex, Vector3 targetPosition, CrystalController targetCrystal, WaveManager waveManager)
         {
             if (data == null)
             {
@@ -82,17 +74,15 @@ namespace RuneGate
             removedFromWave = false;
             initialized = true;
 
-            if (spriteRenderer != null)
+            if (spriteRenderer != null && data.Sprite != null)
             {
                 spriteRenderer.sprite = data.Sprite;
             }
 
-            if (animator != null)
+            if (animator != null && data.AnimatorController != null)
             {
                 animator.runtimeAnimatorController = data.AnimatorController;
             }
-
-            ApplyMonsterTypeHooks(data.MonsterType);
         }
 
         public void TakeDamage(int damage)
@@ -123,7 +113,7 @@ namespace RuneGate
 
             removedFromWave = true;
             Died?.Invoke(this);
-            ownerWaveManager?.NotifyMonsterRemoved(this);
+            ownerWaveManager?.NotifyMonsterKilled(this);
             Destroy(gameObject);
         }
 
@@ -143,23 +133,6 @@ namespace RuneGate
             ReachedCrystal?.Invoke(this);
             ownerWaveManager?.NotifyMonsterRemoved(this);
             Destroy(gameObject);
-        }
-
-        private void ApplyMonsterTypeHooks(MonsterType monsterType)
-        {
-            switch (monsterType)
-            {
-                case MonsterType.Fast:
-                case MonsterType.Tank:
-                case MonsterType.Normal:
-                    break;
-                case MonsterType.Flying:
-                case MonsterType.Splitter:
-                case MonsterType.Undead:
-                case MonsterType.Boss:
-                    Debug.Log($"Monster type hook registered for {monsterType}. Special behavior is reserved for a later prototype pass.");
-                    break;
-            }
         }
     }
 }

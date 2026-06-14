@@ -11,7 +11,7 @@ namespace RuneGate
         [SerializeField] private ElementType element = ElementType.None;
         [SerializeField] private int maxHp = 40;
         [SerializeField] private float moveSpeed = 1f;
-        [SerializeField] private int damageToCrystal = 1;
+        [SerializeField] private int damageToCrystal = 5;
         [SerializeField] private int rewardGold = 1;
         [SerializeField] private Sprite sprite;
         [SerializeField] private RuntimeAnimatorController animatorController;

@@ -24,11 +24,7 @@ namespace RuneGate
                 return;
             }
 
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                target.transform.position,
-                moveSpeed * Time.deltaTime);
-
+            transform.position = Vector3.MoveTowards(transform.position, target.transform.position, moveSpeed * Time.deltaTime);
             if (Vector3.Distance(transform.position, target.transform.position) <= hitDistance)
             {
                 target.TakeDamage(damage);
