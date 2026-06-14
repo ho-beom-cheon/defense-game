@@ -12,8 +12,10 @@ namespace RuneGate
         [SerializeField] private WaveManager waveManager;
         [SerializeField] private RuneManager runeManager;
         [SerializeField] private RuneEffectApplier runeEffectApplier;
+        [SerializeField] private HeroPlacementManager heroPlacementManager;
         [SerializeField] private List<HeroController> heroes = new List<HeroController>();
         [SerializeField] private List<UpgradeData> permanentUpgrades = new List<UpgradeData>();
+        [SerializeField] private bool rebuildHeroesFromFormation = true;
         [SerializeField] private bool autoStartOnStart = true;
 
         private StageData activeStageData;
@@ -104,10 +106,7 @@ namespace RuneGate
                 Debug.LogWarning("BattleManager is missing WaveManager.");
             }
 
-            for (int i = 0; i < heroes.Count; i++)
-            {
-                heroes[i]?.InitializeFromSerializedData();
-            }
+            BuildAndInitializeHeroes();
 
             UpgradeManager.ApplyHeroUpgradeEffects(permanentUpgrades, heroes);
 
@@ -185,27 +184,53 @@ namespace RuneGate
         {
             if (laneManager == null)
             {
-                laneManager = FindFirstObjectByType<LaneManager>();
+                laneManager = FindAnyObjectByType<LaneManager>();
             }
 
             if (crystalController == null)
             {
-                crystalController = FindFirstObjectByType<CrystalController>();
+                crystalController = FindAnyObjectByType<CrystalController>();
             }
 
             if (waveManager == null)
             {
-                waveManager = FindFirstObjectByType<WaveManager>();
+                waveManager = FindAnyObjectByType<WaveManager>();
             }
 
             if (runeManager == null)
             {
-                runeManager = FindFirstObjectByType<RuneManager>();
+                runeManager = FindAnyObjectByType<RuneManager>();
             }
 
             if (runeEffectApplier == null)
             {
-                runeEffectApplier = FindFirstObjectByType<RuneEffectApplier>();
+                runeEffectApplier = FindAnyObjectByType<RuneEffectApplier>();
+            }
+
+            if (heroPlacementManager == null)
+            {
+                heroPlacementManager = FindAnyObjectByType<HeroPlacementManager>();
+            }
+        }
+
+        private void BuildAndInitializeHeroes()
+        {
+            if (rebuildHeroesFromFormation && heroPlacementManager != null)
+            {
+                IReadOnlyList<HeroController> runtimeHeroes = heroPlacementManager.BuildRuntimeFormation(laneManager);
+                heroes.Clear();
+                for (int i = 0; i < runtimeHeroes.Count; i++)
+                {
+                    if (runtimeHeroes[i] != null)
+                    {
+                        heroes.Add(runtimeHeroes[i]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < heroes.Count; i++)
+            {
+                heroes[i]?.InitializeFromSerializedData();
             }
         }
 

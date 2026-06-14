@@ -36,14 +36,32 @@ namespace RuneGate.Editor
             RootPath + "/Data/Runes",
             RootPath + "/Data/Stages",
             RootPath + "/Data/Upgrades",
+            RootPath + "/Data/Formations",
+            RootPath + "/Data/Rosters",
             RootPath + "/Prefabs/Heroes",
             RootPath + "/Prefabs/Monsters",
             RootPath + "/Prefabs/UI",
             RootPath + "/Scenes",
-            RootPath + "/Art/Characters",
-            RootPath + "/Art/Monsters",
-            RootPath + "/Art/Effects",
-            RootPath + "/Art/UI",
+            RootPath + "/Art/Characters/Heroes/Knight",
+            RootPath + "/Art/Characters/Heroes/Archer",
+            RootPath + "/Art/Characters/Heroes/FireMage",
+            RootPath + "/Art/Characters/Heroes/Cleric",
+            RootPath + "/Art/Characters/Heroes/DwarfEngineer",
+            RootPath + "/Art/Characters/Heroes/Assassin",
+            RootPath + "/Art/Characters/Monsters/Goblin",
+            RootPath + "/Art/Characters/Monsters/Wolf",
+            RootPath + "/Art/Characters/Monsters/Orc",
+            RootPath + "/Art/Characters/Monsters/Bat",
+            RootPath + "/Art/Characters/Monsters/Slime",
+            RootPath + "/Art/Characters/Monsters/Skeleton",
+            RootPath + "/Art/Characters/Bosses/OrcWarlord",
+            RootPath + "/Art/Effects/Skills",
+            RootPath + "/Art/Effects/Hit",
+            RootPath + "/Art/UI/Icons",
+            RootPath + "/Art/UI/Buttons",
+            RootPath + "/Art/UI/Panels",
+            RootPath + "/Art/UI/Runes",
+            RootPath + "/Art/Backgrounds",
             RootPath + "/Audio",
             RootPath + "/Resources"
         };
@@ -51,55 +69,37 @@ namespace RuneGate.Editor
         [MenuItem("Tools/RuneGate/Bootstrap Playable Prototype")]
         public static void BootstrapPlayablePrototype()
         {
-            EnsureRequiredFolders();
-
-            SkillData shieldBash = CreateShieldBash();
-            SkillData rapidShot = CreateRapidShot();
-            HeroData knight = CreateKnight(shieldBash);
-            HeroData archer = CreateArcher(rapidShot);
-            MonsterData goblin = CreateGoblin();
-            MonsterData orc = CreateOrc();
-            RuneData swordRune = CreateSwordRune();
-            RuneData bowRune = CreateBowRune();
-            RuneData healingRune = CreateHealingRune();
-            UpgradeData[] upgrades = CreateSampleUpgrades();
-            StageData stage = CreateSampleStage(goblin, orc);
-
-            CreateOrUpdateBattleScene(stage, knight, archer, new[] { swordRune, bowRune, healingRune }, upgrades, new[] { stage });
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
+            ContentBundle content = BootstrapContentAndScenes();
             Debug.Log("RuneGate playable prototype bootstrap complete. Open Assets/_Project/Scenes/BattleScene.unity and press Play.");
+            Selection.activeObject = content.Stages[0];
         }
 
         [MenuItem("Tools/RuneGate/Bootstrap Progression Prototype")]
         public static void BootstrapProgressionPrototype()
         {
-            EnsureRequiredFolders();
-
-            SkillData shieldBash = CreateShieldBash();
-            SkillData rapidShot = CreateRapidShot();
-            HeroData knight = CreateKnight(shieldBash);
-            HeroData archer = CreateArcher(rapidShot);
-            MonsterData goblin = CreateGoblin();
-            MonsterData orc = CreateOrc();
-            RuneData swordRune = CreateSwordRune();
-            RuneData bowRune = CreateBowRune();
-            RuneData healingRune = CreateHealingRune();
-            UpgradeData[] upgrades = CreateSampleUpgrades();
-            StageData[] stages = CreateSampleStages(goblin, orc);
-
-            CreateOrUpdateTitleScene();
-            CreateOrUpdateStageSelectScene(stages);
-            CreateOrUpdateBattleScene(stages[0], knight, archer, new[] { swordRune, bowRune, healingRune }, upgrades, stages);
-            CreateOrUpdateUpgradeScene(upgrades);
-            UpdateBuildSettings();
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
+            ContentBundle content = BootstrapContentAndScenes();
             Debug.Log("RuneGate progression prototype bootstrap complete. Open Assets/_Project/Scenes/TitleScene.unity and press Play.");
+            Selection.activeObject = content.Stages[0];
+        }
+
+        [MenuItem("Tools/RuneGate/Bootstrap v0.4 Content Prototype")]
+        public static void BootstrapV04ContentPrototype()
+        {
+            ContentBundle content = BootstrapContentAndScenes();
+            Debug.Log("RuneGate v0.4 content prototype bootstrap complete. Open Assets/_Project/Scenes/TitleScene.unity and press Play.");
+            Selection.activeObject = content.DefaultFormation;
+        }
+
+        [MenuItem("Tools/RuneGate/Bootstrap Content Prototype v0.4")]
+        public static void BootstrapV04ContentPrototypeAlias()
+        {
+            BootstrapV04ContentPrototype();
+        }
+
+        [MenuItem("Tools/RuneGate/Bootstrap Content v0.4")]
+        public static void BootstrapV04ContentAlias()
+        {
+            BootstrapV04ContentPrototype();
         }
 
         [MenuItem("Tools/RuneGate/Bootstrap MVP")]
@@ -118,222 +118,268 @@ namespace RuneGate.Editor
             AssetDatabase.Refresh();
         }
 
-        private static SkillData CreateShieldBash()
+        private static ContentBundle BootstrapContentAndScenes()
         {
-            SkillData asset = CreateOrLoadAsset<SkillData>(RootPath + "/Data/Skills/Shield Bash.asset");
+            EnsureRequiredFolders();
+
+            ContentBundle content = CreateV04Content();
+            UpgradeData[] upgrades = CreateSampleUpgrades();
+
+            CreateOrUpdateTitleScene();
+            CreateOrUpdateStageSelectScene(content.Stages);
+            CreateOrUpdateBattleScene(content.Stages[0], content.Runes, upgrades, content.Stages, content.HeroRoster, content.DefaultFormation);
+            CreateOrUpdateUpgradeScene(upgrades);
+            UpdateBuildSettings();
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            return content;
+        }
+
+        private static ContentBundle CreateV04Content()
+        {
+            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "Shield Bash", "Deals light damage to the nearest monster.", 8f, 60, 1, 2f, TargetingType.Nearest, ElementType.Light, "damage", 1f);
+            SkillData rapidShot = CreateSkill("Rapid Shot", "skill_rapid_shot", "Rapid Shot", "Hits the nearest monster 3 times.", 6f, 25, 3, 5f, TargetingType.Nearest, ElementType.Wind, "multi_hit_damage", 1f);
+            SkillData meteor = CreateSkill("Meteor", "skill_meteor", "Meteor", "Deals area fire damage around a target.", 11f, 55, 1, 4f, TargetingType.HighestHp, ElementType.Fire, "area_damage", 1.6f);
+            SkillData holyHeal = CreateSkill("Holy Heal", "skill_holy_heal", "Holy Heal", "Restores HP to the Kingdom Crystal.", 9f, 35, 1, 3.2f, TargetingType.LowestHp, ElementType.Light, "crystal_heal_flat", 1f);
+            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "Build Turret", "Prototype turret hook with fallback damage.", 12f, 35, 1, 3.2f, TargetingType.First, ElementType.Earth, "turret_placeholder", 1f);
+            SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "Shadow Strike", "High dark damage that prefers boss targets.", 10f, 120, 1, 2.2f, TargetingType.Boss, ElementType.Dark, "damage", 1f);
+
+            HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 420, 25, 1f, 1.2f, shieldBash);
+            HeroData archer = CreateHeroData("Archer", "hero_archer_001", "Archer", HeroRole.RangedDps, HeroPositionType.Back, ElementType.Wind, 180, 35, 1.5f, 4f, rapidShot);
+            HeroData fireMage = CreateHeroData("Fire Mage", "hero_mage_fire_001", "Fire Mage", HeroRole.Mage, HeroPositionType.Back, ElementType.Fire, 150, 55, 0.7f, 3.4f, meteor);
+            HeroData cleric = CreateHeroData("Cleric", "hero_cleric_001", "Cleric", HeroRole.Healer, HeroPositionType.Middle, ElementType.Light, 170, 10, 1f, 3.2f, holyHeal);
+            HeroData dwarfEngineer = CreateHeroData("Dwarf Engineer", "hero_engineer_dwarf_001", "Dwarf Engineer", HeroRole.Engineer, HeroPositionType.Middle, ElementType.Earth, 230, 20, 1f, 2.8f, buildTurret);
+            HeroData assassin = CreateHeroData("Shadow Assassin", "hero_assassin_001", "Shadow Assassin", HeroRole.Assassin, HeroPositionType.Front, ElementType.Dark, 210, 75, 0.8f, 1.5f, shadowStrike);
+            HeroData[] heroes = { knight, archer, fireMage, cleric, dwarfEngineer, assassin };
+
+            MonsterData goblin = CreateMonsterData("Goblin", "monster_goblin_001", "Goblin", MonsterType.Normal, ElementType.None, 80, 1.2f, 1, 5);
+            MonsterData wolf = CreateMonsterData("Wolf", "monster_wolf_001", "Wolf", MonsterType.Fast, ElementType.Wind, 60, 1.85f, 1, 6);
+            MonsterData orc = CreateMonsterData("Orc", "monster_orc_001", "Orc", MonsterType.Tank, ElementType.None, 230, 0.7f, 2, 12);
+            MonsterData bat = CreateMonsterData("Bat", "monster_bat_001", "Bat", MonsterType.Flying, ElementType.Wind, 55, 2f, 1, 8);
+            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", MonsterType.Splitter, ElementType.Earth, 130, 0.8f, 1, 10);
+            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", MonsterType.Undead, ElementType.Dark, 110, 1f, 1, 9);
+            MonsterData boss = CreateMonsterData("Orc Warlord", "boss_orc_warlord_001", "Orc Warlord", MonsterType.Boss, ElementType.None, 1400, 0.45f, 5, 120);
+
+            RuneData[] runes = CreateV04Runes();
+            StageData[] stages = CreateV04Stages(goblin, wolf, orc, bat, slime, skeleton, boss);
+            HeroRosterData roster = CreateHeroRoster(heroes);
+            FormationData formation = CreateDefaultFormation();
+
+            return new ContentBundle
+            {
+                Skills = new[] { shieldBash, rapidShot, meteor, holyHeal, buildTurret, shadowStrike },
+                Heroes = heroes,
+                Monsters = new[] { goblin, wolf, orc, bat, slime, skeleton },
+                Boss = boss,
+                Runes = runes,
+                Stages = stages,
+                HeroRoster = roster,
+                DefaultFormation = formation
+            };
+        }
+
+        private static RuneData[] CreateV04Runes()
+        {
+            return new[]
+            {
+                CreateRune("Sword Rune", "rune_sword", "Sword Rune", "Increases all hero attack.", RuneRarity.Common, ElementType.Fire, "hero_attack_percent", 0.18f),
+                CreateRune("Bow Rune", "rune_bow", "Bow Rune", "Increases all hero attack speed.", RuneRarity.Common, ElementType.Wind, "hero_attack_speed_percent", 0.12f),
+                CreateRune("Healing Rune", "rune_healing", "Healing Rune", "Restores flat HP to the Kingdom Crystal.", RuneRarity.Common, ElementType.Light, "crystal_heal_flat", 35f),
+                CreateRune("Fire Rune", "rune_fire", "Fire Rune", "Prototype hook for fire damage.", RuneRarity.Common, ElementType.Fire, "fire_damage_placeholder", 1f),
+                CreateRune("Guard Rune", "rune_guard", "Guard Rune", "Prototype hook for crystal shielding.", RuneRarity.Common, ElementType.Light, "crystal_shield_flat", 20f),
+                CreateRune("Command Rune", "rune_command", "Command Rune", "Slightly improves all hero stats.", RuneRarity.Rare, ElementType.Light, "all_hero_stats_percent", 0.07f),
+                CreateRune("Focus Rune", "rune_focus", "Focus Rune", "Increases hero attack.", RuneRarity.Common, ElementType.None, "hero_attack_percent", 0.1f),
+                CreateRune("Blast Rune", "rune_blast", "Blast Rune", "Prototype hook for blast damage.", RuneRarity.Rare, ElementType.Fire, "blast_placeholder", 1f),
+                CreateRune("Swiftness Rune", "rune_swiftness", "Swiftness Rune", "Increases attack speed.", RuneRarity.Common, ElementType.Wind, "hero_attack_speed_percent", 0.1f),
+                CreateRune("Frost Rune", "rune_frost", "Frost Rune", "Slows active monsters.", RuneRarity.Rare, ElementType.Ice, "monster_slow_percent", 0.2f),
+                CreateRune("Lightning Rune", "rune_lightning", "Lightning Rune", "Prototype hook for chain lightning.", RuneRarity.Rare, ElementType.Lightning, "lightning_placeholder", 1f),
+                CreateRune("Earth Rune", "rune_earth", "Earth Rune", "Increases hero max HP.", RuneRarity.Common, ElementType.Earth, "hero_hp_percent", 0.15f),
+                CreateRune("Sacrifice Rune", "rune_sacrifice", "Sacrifice Rune", "Damages the crystal to greatly increase hero attack.", RuneRarity.Rare, ElementType.Dark, "sacrifice_crystal_for_attack", 20f),
+                CreateRune("Protection Rune", "rune_protection", "Protection Rune", "Prototype hook for protection.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 25f),
+                CreateRune("Mana Rune", "rune_mana", "Mana Rune", "Reduces skill cooldowns.", RuneRarity.Rare, ElementType.None, "skill_cooldown_percent", 0.1f),
+                CreateRune("Hunter Rune", "rune_hunter", "Hunter Rune", "Increases damage dealt to bosses.", RuneRarity.Epic, ElementType.None, "boss_damage_percent", 0.25f),
+                CreateRune("Purify Rune", "rune_purify", "Purify Rune", "Prototype hook for cleansing.", RuneRarity.Common, ElementType.Light, "purify_placeholder", 1f),
+                CreateRune("Crush Rune", "rune_crush", "Crush Rune", "Prototype hook for armor break.", RuneRarity.Rare, ElementType.Earth, "crush_placeholder", 1f),
+                CreateRune("Chain Rune", "rune_chain", "Chain Rune", "Prototype hook for chain attacks.", RuneRarity.Rare, ElementType.Lightning, "chain_placeholder", 1f),
+                CreateRune("Turret Rune", "rune_turret", "Turret Rune", "Prototype hook for turret support.", RuneRarity.Epic, ElementType.Earth, "turret_placeholder", 1f)
+            };
+        }
+
+        private static StageData[] CreateV04Stages(MonsterData goblin, MonsterData wolf, MonsterData orc, MonsterData bat, MonsterData slime, MonsterData skeleton, MonsterData boss)
+        {
+            return new[]
+            {
+                CreateStageFromPlan(1, "Goblin Forest 1", 180, boss,
+                    new WavePlan(false, Spawn(goblin, 0, 3, 0.4f, 0.9f), Spawn(goblin, 1, 3, 0.8f, 0.9f)),
+                    new WavePlan(false, Spawn(goblin, 0, 4, 0.3f, 0.75f), Spawn(goblin, 2, 4, 0.7f, 0.75f))),
+                CreateStageFromPlan(2, "Goblin Forest 2", 185, boss,
+                    new WavePlan(false, Spawn(goblin, 0, 4, 0.3f, 0.7f), Spawn(wolf, 1, 2, 1f, 0.8f)),
+                    new WavePlan(false, Spawn(goblin, 1, 5, 0.4f, 0.65f), Spawn(wolf, 2, 3, 0.8f, 0.75f)),
+                    new WavePlan(false, Spawn(goblin, 0, 5, 0.4f, 0.6f), Spawn(wolf, 1, 3, 0.7f, 0.7f), Spawn(goblin, 2, 4, 0.9f, 0.6f))),
+                CreateStageFromPlan(3, "Goblin Forest 3", 190, boss,
+                    new WavePlan(false, Spawn(goblin, 0, 5, 0.3f, 0.6f), Spawn(goblin, 2, 5, 0.7f, 0.6f)),
+                    new WavePlan(false, Spawn(orc, 0, 1, 0.5f, 1f), Spawn(goblin, 1, 6, 0.7f, 0.55f), Spawn(orc, 2, 1, 1f, 1f)),
+                    new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 1.1f), Spawn(goblin, 1, 6, 0.8f, 0.5f), Spawn(orc, 2, 2, 1.2f, 1.1f))),
+                CreateStageFromPlan(4, "Goblin Forest 4", 195, boss,
+                    new WavePlan(false, Spawn(bat, 0, 3, 0.4f, 0.65f), Spawn(goblin, 1, 4, 0.8f, 0.65f)),
+                    new WavePlan(false, Spawn(wolf, 1, 4, 0.3f, 0.65f), Spawn(bat, 2, 4, 0.7f, 0.65f)),
+                    new WavePlan(false, Spawn(goblin, 0, 5, 0.4f, 0.55f), Spawn(bat, 1, 4, 0.8f, 0.6f), Spawn(wolf, 2, 3, 1.1f, 0.65f))),
+                CreateStageFromPlan(5, "Goblin Forest 5", 205, boss,
+                    new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 1f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
+                    new WavePlan(false, Spawn(goblin, 0, 5, 0.3f, 0.55f), Spawn(orc, 1, 2, 0.7f, 1f), Spawn(goblin, 2, 5, 1f, 0.55f)),
+                    new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 0.9f), Spawn(orc, 2, 2, 0.8f, 0.9f)),
+                    new WavePlan(false, Spawn(goblin, 0, 6, 0.4f, 0.5f), Spawn(orc, 1, 3, 0.6f, 0.9f), Spawn(wolf, 2, 4, 1f, 0.6f))),
+                CreateStageFromPlan(6, "Goblin Forest 6", 210, boss,
+                    new WavePlan(false, Spawn(slime, 0, 2, 0.4f, 1f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
+                    new WavePlan(false, Spawn(slime, 1, 3, 0.5f, 0.9f), Spawn(wolf, 2, 4, 0.9f, 0.6f)),
+                    new WavePlan(false, Spawn(goblin, 0, 6, 0.3f, 0.5f), Spawn(slime, 1, 3, 0.8f, 0.9f), Spawn(bat, 2, 4, 1f, 0.6f)),
+                    new WavePlan(false, Spawn(slime, 0, 3, 0.5f, 0.85f), Spawn(orc, 1, 2, 0.8f, 1f), Spawn(slime, 2, 3, 1.1f, 0.85f))),
+                CreateStageFromPlan(7, "Goblin Forest 7", 215, boss,
+                    new WavePlan(false, Spawn(skeleton, 0, 3, 0.4f, 0.75f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
+                    new WavePlan(false, Spawn(wolf, 0, 4, 0.3f, 0.6f), Spawn(skeleton, 2, 4, 0.8f, 0.75f)),
+                    new WavePlan(false, Spawn(skeleton, 0, 4, 0.5f, 0.7f), Spawn(bat, 1, 4, 0.8f, 0.6f), Spawn(goblin, 2, 5, 1f, 0.5f)),
+                    new WavePlan(false, Spawn(orc, 0, 2, 0.5f, 1f), Spawn(skeleton, 1, 5, 0.8f, 0.65f), Spawn(orc, 2, 2, 1.1f, 1f))),
+                CreateStageFromPlan(8, "Goblin Forest 8", 220, boss,
+                    new WavePlan(false, Spawn(goblin, 0, 6, 0.3f, 0.5f), Spawn(wolf, 1, 4, 0.8f, 0.55f), Spawn(bat, 2, 4, 1f, 0.6f)),
+                    new WavePlan(false, Spawn(slime, 0, 3, 0.4f, 0.8f), Spawn(skeleton, 2, 4, 0.8f, 0.7f)),
+                    new WavePlan(false, Spawn(orc, 0, 2, 0.5f, 1f), Spawn(wolf, 1, 5, 0.8f, 0.55f), Spawn(slime, 2, 3, 1.1f, 0.8f)),
+                    new WavePlan(false, Spawn(skeleton, 0, 5, 0.4f, 0.65f), Spawn(orc, 1, 3, 0.8f, 0.9f), Spawn(bat, 2, 5, 1f, 0.55f))),
+                CreateStageFromPlan(9, "Goblin Forest 9", 230, boss,
+                    new WavePlan(false, Spawn(wolf, 0, 5, 0.3f, 0.55f), Spawn(goblin, 1, 7, 0.7f, 0.45f)),
+                    new WavePlan(false, Spawn(slime, 0, 3, 0.4f, 0.8f), Spawn(skeleton, 1, 4, 0.7f, 0.65f), Spawn(bat, 2, 4, 1f, 0.55f)),
+                    new WavePlan(false, Spawn(orc, 0, 3, 0.5f, 0.9f), Spawn(wolf, 2, 5, 0.8f, 0.55f)),
+                    new WavePlan(false, Spawn(skeleton, 0, 5, 0.4f, 0.65f), Spawn(slime, 1, 4, 0.7f, 0.8f), Spawn(orc, 2, 3, 1f, 0.9f)),
+                    new WavePlan(false, Spawn(goblin, 0, 8, 0.3f, 0.42f), Spawn(orc, 1, 4, 0.6f, 0.85f), Spawn(wolf, 2, 6, 0.9f, 0.5f))),
+                CreateStageFromPlan(10, "Goblin Forest 10", 240, boss,
+                    new WavePlan(false, Spawn(goblin, 0, 7, 0.3f, 0.45f), Spawn(wolf, 2, 5, 0.8f, 0.55f)),
+                    new WavePlan(false, Spawn(slime, 0, 4, 0.4f, 0.75f), Spawn(skeleton, 1, 5, 0.7f, 0.6f), Spawn(bat, 2, 5, 1f, 0.55f)),
+                    new WavePlan(false, Spawn(orc, 0, 3, 0.4f, 0.85f), Spawn(orc, 2, 3, 0.8f, 0.85f), Spawn(goblin, 1, 8, 1f, 0.4f)),
+                    new WavePlan(false, Spawn(skeleton, 0, 5, 0.4f, 0.6f), Spawn(slime, 1, 4, 0.7f, 0.75f), Spawn(wolf, 2, 6, 1f, 0.5f)),
+                    new WavePlan(true, Spawn(goblin, 0, 8, 0.4f, 0.45f), Spawn(boss, 1, 1, 1.2f, 1f), Spawn(orc, 2, 4, 1.4f, 0.8f)))
+            };
+        }
+
+        private static SkillData CreateSkill(string assetName, string skillId, string displayName, string description, float cooldown, int power, int hitCount, float range, TargetingType targetingType, ElementType element, string effectKey, float radius)
+        {
+            SkillData asset = CreateOrLoadAsset<SkillData>($"{RootPath}/Data/Skills/{assetName}.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "skillId", "skill_shield_bash_001");
-                SetString(serializedObject, "displayName", "Shield Bash");
-                SetString(serializedObject, "description", "Deals direct light damage to the nearest monster in range.");
-                SetFloat(serializedObject, "cooldown", 8f);
-                SetInt(serializedObject, "power", 60);
-                SetInt(serializedObject, "damageHitCount", 1);
-                SetFloat(serializedObject, "range", 2f);
-                SetEnum(serializedObject, "targetingType", TargetingType.Nearest);
-                SetEnum(serializedObject, "element", ElementType.Light);
+                SetString(serializedObject, "skillId", skillId);
+                SetString(serializedObject, "displayName", displayName);
+                SetString(serializedObject, "description", description);
+                SetFloat(serializedObject, "cooldown", cooldown);
+                SetInt(serializedObject, "power", power);
+                SetInt(serializedObject, "damageHitCount", hitCount);
+                SetFloat(serializedObject, "range", range);
+                SetString(serializedObject, "effectKey", effectKey);
+                SetFloat(serializedObject, "radius", radius);
+                SetEnum(serializedObject, "targetingType", targetingType);
+                SetEnum(serializedObject, "element", element);
             });
             return asset;
         }
 
-        private static SkillData CreateRapidShot()
+        private static HeroData CreateHeroData(string assetName, string heroId, string displayName, HeroRole role, HeroPositionType positionType, ElementType element, int maxHp, int attack, float attackSpeed, float attackRange, SkillData skillData)
         {
-            SkillData asset = CreateOrLoadAsset<SkillData>(RootPath + "/Data/Skills/Rapid Shot.asset");
+            HeroData asset = CreateOrLoadAsset<HeroData>($"{RootPath}/Data/Heroes/{assetName}.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "skillId", "skill_rapid_shot_001");
-                SetString(serializedObject, "displayName", "Rapid Shot");
-                SetString(serializedObject, "description", "Rapidly hits the nearest monster 3 times.");
-                SetFloat(serializedObject, "cooldown", 6f);
-                SetInt(serializedObject, "power", 25);
-                SetInt(serializedObject, "damageHitCount", 3);
-                SetFloat(serializedObject, "range", 5f);
-                SetEnum(serializedObject, "targetingType", TargetingType.Nearest);
-                SetEnum(serializedObject, "element", ElementType.Wind);
-            });
-            return asset;
-        }
-
-        private static HeroData CreateKnight(SkillData shieldBash)
-        {
-            HeroData asset = CreateOrLoadAsset<HeroData>(RootPath + "/Data/Heroes/Knight.asset");
-            EditAsset(asset, serializedObject =>
-            {
-                SetString(serializedObject, "heroId", "hero_knight_001");
-                SetString(serializedObject, "displayName", "Knight");
-                SetEnum(serializedObject, "role", HeroRole.Tank);
-                SetEnum(serializedObject, "positionType", HeroPositionType.Front);
-                SetEnum(serializedObject, "element", ElementType.Light);
-                SetInt(serializedObject, "maxHp", 400);
-                SetInt(serializedObject, "attack", 20);
-                SetFloat(serializedObject, "attackSpeed", 1f);
-                SetFloat(serializedObject, "attackRange", 1.5f);
-                SetObject(serializedObject, "skillData", shieldBash);
+                SetString(serializedObject, "heroId", heroId);
+                SetString(serializedObject, "displayName", displayName);
+                SetEnum(serializedObject, "role", role);
+                SetEnum(serializedObject, "positionType", positionType);
+                SetEnum(serializedObject, "element", element);
+                SetInt(serializedObject, "maxHp", maxHp);
+                SetInt(serializedObject, "attack", attack);
+                SetFloat(serializedObject, "attackSpeed", attackSpeed);
+                SetFloat(serializedObject, "attackRange", attackRange);
+                SetObject(serializedObject, "skillData", skillData);
                 SetObject(serializedObject, "portrait", null);
                 SetObject(serializedObject, "animatorController", null);
             });
             return asset;
         }
 
-        private static HeroData CreateArcher(SkillData rapidShot)
+        private static MonsterData CreateMonsterData(string assetName, string monsterId, string displayName, MonsterType monsterType, ElementType element, int maxHp, float moveSpeed, int damageToCrystal, int rewardGold)
         {
-            HeroData asset = CreateOrLoadAsset<HeroData>(RootPath + "/Data/Heroes/Archer.asset");
+            MonsterData asset = CreateOrLoadAsset<MonsterData>($"{RootPath}/Data/Monsters/{assetName}.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "heroId", "hero_archer_001");
-                SetString(serializedObject, "displayName", "Archer");
-                SetEnum(serializedObject, "role", HeroRole.RangedDps);
-                SetEnum(serializedObject, "positionType", HeroPositionType.Back);
-                SetEnum(serializedObject, "element", ElementType.Wind);
-                SetInt(serializedObject, "maxHp", 180);
-                SetInt(serializedObject, "attack", 28);
-                SetFloat(serializedObject, "attackSpeed", 1.4f);
-                SetFloat(serializedObject, "attackRange", 5f);
-                SetObject(serializedObject, "skillData", rapidShot);
-                SetObject(serializedObject, "portrait", null);
-                SetObject(serializedObject, "animatorController", null);
-            });
-            return asset;
-        }
-
-        private static MonsterData CreateGoblin()
-        {
-            MonsterData asset = CreateOrLoadAsset<MonsterData>(RootPath + "/Data/Monsters/Goblin.asset");
-            EditAsset(asset, serializedObject =>
-            {
-                SetString(serializedObject, "monsterId", "monster_goblin_001");
-                SetString(serializedObject, "displayName", "Goblin");
-                SetEnum(serializedObject, "monsterType", MonsterType.Normal);
-                SetEnum(serializedObject, "element", ElementType.None);
-                SetInt(serializedObject, "maxHp", 60);
-                SetFloat(serializedObject, "moveSpeed", 1.2f);
-                SetInt(serializedObject, "damageToCrystal", 5);
-                SetInt(serializedObject, "rewardGold", 2);
+                SetString(serializedObject, "monsterId", monsterId);
+                SetString(serializedObject, "displayName", displayName);
+                SetEnum(serializedObject, "monsterType", monsterType);
+                SetEnum(serializedObject, "element", element);
+                SetInt(serializedObject, "maxHp", maxHp);
+                SetFloat(serializedObject, "moveSpeed", moveSpeed);
+                SetInt(serializedObject, "damageToCrystal", damageToCrystal);
+                SetInt(serializedObject, "rewardGold", rewardGold);
                 SetObject(serializedObject, "sprite", null);
                 SetObject(serializedObject, "animatorController", null);
             });
             return asset;
         }
 
-        private static MonsterData CreateOrc()
+        private static RuneData CreateRune(string assetName, string runeId, string displayName, string description, RuneRarity rarity, ElementType element, string effectKey, float value)
         {
-            MonsterData asset = CreateOrLoadAsset<MonsterData>(RootPath + "/Data/Monsters/Orc.asset");
+            RuneData asset = CreateOrLoadAsset<RuneData>($"{RootPath}/Data/Runes/{assetName}.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "monsterId", "monster_orc_001");
-                SetString(serializedObject, "displayName", "Orc");
-                SetEnum(serializedObject, "monsterType", MonsterType.Tank);
-                SetEnum(serializedObject, "element", ElementType.None);
-                SetInt(serializedObject, "maxHp", 180);
-                SetFloat(serializedObject, "moveSpeed", 0.7f);
-                SetInt(serializedObject, "damageToCrystal", 15);
-                SetInt(serializedObject, "rewardGold", 8);
-                SetObject(serializedObject, "sprite", null);
-                SetObject(serializedObject, "animatorController", null);
-            });
-            return asset;
-        }
-
-        private static RuneData CreateSwordRune()
-        {
-            RuneData asset = CreateOrLoadAsset<RuneData>(RootPath + "/Data/Runes/Sword Rune.asset");
-            EditAsset(asset, serializedObject =>
-            {
-                SetString(serializedObject, "runeId", "rune_sword_001");
-                SetString(serializedObject, "displayName", "Sword Rune");
-                SetString(serializedObject, "description", "Increases all hero attack.");
-                SetEnum(serializedObject, "rarity", RuneRarity.Common);
-                SetEnum(serializedObject, "element", ElementType.Fire);
-                SetString(serializedObject, "effectKey", "hero_attack_percent");
-                SetFloat(serializedObject, "value", 0.2f);
+                SetString(serializedObject, "runeId", runeId);
+                SetString(serializedObject, "displayName", displayName);
+                SetString(serializedObject, "description", description);
+                SetEnum(serializedObject, "rarity", rarity);
+                SetEnum(serializedObject, "element", element);
+                SetString(serializedObject, "effectKey", effectKey);
+                SetFloat(serializedObject, "value", value);
                 SetObject(serializedObject, "icon", null);
             });
             return asset;
         }
 
-        private static RuneData CreateBowRune()
+        private static HeroRosterData CreateHeroRoster(IReadOnlyList<HeroData> heroes)
         {
-            RuneData asset = CreateOrLoadAsset<RuneData>(RootPath + "/Data/Runes/Bow Rune.asset");
+            HeroRosterData asset = CreateOrLoadAsset<HeroRosterData>($"{RootPath}/Data/Rosters/MVP Hero Roster.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "runeId", "rune_bow_001");
-                SetString(serializedObject, "displayName", "Bow Rune");
-                SetString(serializedObject, "description", "Increases all hero attack speed.");
-                SetEnum(serializedObject, "rarity", RuneRarity.Common);
-                SetEnum(serializedObject, "element", ElementType.Wind);
-                SetString(serializedObject, "effectKey", "hero_attack_speed_percent");
-                SetFloat(serializedObject, "value", 0.15f);
-                SetObject(serializedObject, "icon", null);
+                SetObjectList(serializedObject, "heroes", ToObjectArray(heroes));
             });
             return asset;
         }
 
-        private static RuneData CreateHealingRune()
+        private static FormationData CreateDefaultFormation()
         {
-            RuneData asset = CreateOrLoadAsset<RuneData>(RootPath + "/Data/Runes/Healing Rune.asset");
+            FormationData asset = CreateOrLoadAsset<FormationData>($"{RootPath}/Data/Formations/Default Formation.asset");
+            List<FormationSlot> slots = SaveManager.CreateDefaultFormationSlots();
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "runeId", "rune_healing_001");
-                SetString(serializedObject, "displayName", "Healing Rune");
-                SetString(serializedObject, "description", "Restores flat HP to the Kingdom Crystal.");
-                SetEnum(serializedObject, "rarity", RuneRarity.Common);
-                SetEnum(serializedObject, "element", ElementType.Light);
-                SetString(serializedObject, "effectKey", "crystal_heal_flat");
-                SetFloat(serializedObject, "value", 30f);
-                SetObject(serializedObject, "icon", null);
+                SetString(serializedObject, "formationId", "formation_default_mvp");
+                SetString(serializedObject, "displayName", "MVP Default Formation");
+                SetFormationSlotList(serializedObject, "slots", slots);
             });
             return asset;
         }
 
-        private static StageData CreateSampleStage(MonsterData goblin, MonsterData orc)
+        private static StageData CreateStageFromPlan(int stageNumber, string displayName, int crystalHp, MonsterData bossMonster, params WavePlan[] wavePlans)
         {
-            return CreateSampleStages(goblin, orc)[0];
-        }
+            WaveData[] waves = new WaveData[wavePlans.Length];
+            for (int waveIndex = 0; waveIndex < wavePlans.Length; waveIndex++)
+            {
+                WavePlan wavePlan = wavePlans[waveIndex];
+                WaveSpawnData[] spawns = new WaveSpawnData[wavePlan.Spawns.Length];
+                for (int spawnIndex = 0; spawnIndex < wavePlan.Spawns.Length; spawnIndex++)
+                {
+                    SpawnPlan spawnPlan = wavePlan.Spawns[spawnIndex];
+                    string monsterName = spawnPlan.MonsterData != null ? spawnPlan.MonsterData.DisplayName : "Missing";
+                    string spawnName = $"Stage {stageNumber:00} Wave {waveIndex + 1} {monsterName} Lane {spawnPlan.LaneIndex} Spawn {spawnIndex + 1}";
+                    spawns[spawnIndex] = CreateSpawn(spawnName, spawnPlan.MonsterData, spawnPlan.LaneIndex, spawnPlan.Count, spawnPlan.StartDelay, spawnPlan.SpawnInterval);
+                }
 
-        private static StageData[] CreateSampleStages(MonsterData goblin, MonsterData orc)
-        {
-            WaveSpawnData wave1Lane0 = CreateSpawn("Wave 1 Goblin Lane 0", goblin, 0, 3, 0.5f, 1f);
-            WaveSpawnData wave1Lane1 = CreateSpawn("Wave 1 Goblin Lane 1", goblin, 1, 3, 1f, 1f);
-            WaveData wave1 = CreateWave("Wave 1", 1, false, new[] { wave1Lane0, wave1Lane1 });
+                string waveName = $"Stage {stageNumber:00} Wave {waveIndex + 1}";
+                waves[waveIndex] = CreateWave(waveName, waveIndex + 1, wavePlan.IsBossWave, spawns);
+            }
 
-            WaveSpawnData wave2GoblinLane0 = CreateSpawn("Wave 2 Goblin Lane 0", goblin, 0, 3, 0.5f, 0.8f);
-            WaveSpawnData wave2OrcLane1 = CreateSpawn("Wave 2 Orc Lane 1", orc, 1, 1, 1f, 1f);
-            WaveSpawnData wave2GoblinLane2 = CreateSpawn("Wave 2 Goblin Lane 2", goblin, 2, 3, 1.5f, 0.8f);
-            WaveData wave2 = CreateWave("Wave 2", 2, false, new[] { wave2GoblinLane0, wave2OrcLane1, wave2GoblinLane2 });
-            StageData stage1 = CreateStage("Goblin Forest 1", "stage_goblin_forest_01", "Goblin Forest 1", 180, orc, new[] { wave1, wave2 });
-
-            WaveSpawnData stage2Wave1Lane0 = CreateSpawn("Stage 2 Wave 1 Goblin Lane 0", goblin, 0, 4, 0.35f, 0.7f);
-            WaveSpawnData stage2Wave1Lane1 = CreateSpawn("Stage 2 Wave 1 Goblin Lane 1", goblin, 1, 4, 0.8f, 0.7f);
-            WaveData stage2Wave1 = CreateWave("Stage 2 Wave 1", 1, false, new[] { stage2Wave1Lane0, stage2Wave1Lane1 });
-
-            WaveSpawnData stage2Wave2OrcLane0 = CreateSpawn("Stage 2 Wave 2 Orc Lane 0", orc, 0, 1, 0.5f, 1f);
-            WaveSpawnData stage2Wave2GoblinLane1 = CreateSpawn("Stage 2 Wave 2 Goblin Lane 1", goblin, 1, 5, 0.7f, 0.6f);
-            WaveSpawnData stage2Wave2GoblinLane2 = CreateSpawn("Stage 2 Wave 2 Goblin Lane 2", goblin, 2, 4, 1f, 0.6f);
-            WaveData stage2Wave2 = CreateWave("Stage 2 Wave 2", 2, false, new[] { stage2Wave2OrcLane0, stage2Wave2GoblinLane1, stage2Wave2GoblinLane2 });
-
-            WaveSpawnData stage2Wave3OrcLane1 = CreateSpawn("Stage 2 Wave 3 Orc Lane 1", orc, 1, 2, 0.4f, 1.1f);
-            WaveSpawnData stage2Wave3GoblinLane0 = CreateSpawn("Stage 2 Wave 3 Goblin Lane 0", goblin, 0, 5, 0.7f, 0.55f);
-            WaveSpawnData stage2Wave3GoblinLane2 = CreateSpawn("Stage 2 Wave 3 Goblin Lane 2", goblin, 2, 5, 0.8f, 0.55f);
-            WaveData stage2Wave3 = CreateWave("Stage 2 Wave 3", 3, false, new[] { stage2Wave3OrcLane1, stage2Wave3GoblinLane0, stage2Wave3GoblinLane2 });
-            StageData stage2 = CreateStage("Goblin Forest 2", "stage_goblin_forest_02", "Goblin Forest 2", 175, orc, new[] { stage2Wave1, stage2Wave2, stage2Wave3 });
-
-            WaveSpawnData stage3Wave1GoblinLane0 = CreateSpawn("Stage 3 Wave 1 Goblin Lane 0", goblin, 0, 5, 0.5f, 0.6f);
-            WaveSpawnData stage3Wave1GoblinLane2 = CreateSpawn("Stage 3 Wave 1 Goblin Lane 2", goblin, 2, 5, 0.7f, 0.6f);
-            WaveData stage3Wave1 = CreateWave("Stage 3 Wave 1", 1, false, new[] { stage3Wave1GoblinLane0, stage3Wave1GoblinLane2 });
-
-            WaveSpawnData stage3Wave2OrcLane0 = CreateSpawn("Stage 3 Wave 2 Orc Lane 0", orc, 0, 2, 0.5f, 1.2f);
-            WaveSpawnData stage3Wave2GoblinLane1 = CreateSpawn("Stage 3 Wave 2 Goblin Lane 1", goblin, 1, 6, 0.7f, 0.55f);
-            WaveSpawnData stage3Wave2OrcLane2 = CreateSpawn("Stage 3 Wave 2 Orc Lane 2", orc, 2, 1, 0.9f, 1.2f);
-            WaveData stage3Wave2 = CreateWave("Stage 3 Wave 2", 2, false, new[] { stage3Wave2OrcLane0, stage3Wave2GoblinLane1, stage3Wave2OrcLane2 });
-
-            WaveSpawnData stage3Wave3OrcLane0 = CreateSpawn("Stage 3 Wave 3 Orc Lane 0", orc, 0, 2, 0.4f, 1f);
-            WaveSpawnData stage3Wave3OrcLane1 = CreateSpawn("Stage 3 Wave 3 Orc Lane 1", orc, 1, 2, 0.8f, 1f);
-            WaveSpawnData stage3Wave3OrcLane2 = CreateSpawn("Stage 3 Wave 3 Orc Lane 2", orc, 2, 2, 1.2f, 1f);
-            WaveSpawnData stage3Wave3GoblinLane1 = CreateSpawn("Stage 3 Wave 3 Goblin Lane 1", goblin, 1, 6, 0.6f, 0.5f);
-            WaveData stage3Wave3 = CreateWave("Stage 3 Wave 3", 3, false, new[] { stage3Wave3OrcLane0, stage3Wave3OrcLane1, stage3Wave3OrcLane2, stage3Wave3GoblinLane1 });
-            StageData stage3 = CreateStage("Goblin Forest 3", "stage_goblin_forest_03", "Goblin Forest 3", 170, orc, new[] { stage3Wave1, stage3Wave2, stage3Wave3 });
-
-            return new[] { stage1, stage2, stage3 };
+            return CreateStage($"Goblin Forest {stageNumber}", $"stage_goblin_forest_{stageNumber:00}", displayName, crystalHp, bossMonster, waves);
         }
 
         private static StageData CreateStage(string assetName, string stageId, string displayName, int crystalHp, MonsterData bossMonster, WaveData[] waves)
@@ -352,50 +398,10 @@ namespace RuneGate.Editor
 
         private static UpgradeData[] CreateSampleUpgrades()
         {
-            UpgradeData crystal = CreateUpgrade(
-                "Crystal Reinforcement",
-                "crystal_reinforcement",
-                "Crystal Reinforcement",
-                "Crystal max HP +20 per level.",
-                50,
-                1.35f,
-                10,
-                UpgradeManager.CrystalMaxHpFlat,
-                20f);
-
-            UpgradeData attack = CreateUpgrade(
-                "Hero Training",
-                "hero_training",
-                "Hero Training",
-                "All hero attack +5% per level.",
-                50,
-                1.35f,
-                10,
-                UpgradeManager.HeroAttackPercent,
-                0.05f);
-
-            UpgradeData rhythm = CreateUpgrade(
-                "Battle Rhythm",
-                "battle_rhythm",
-                "Battle Rhythm",
-                "All hero attack speed +3% per level.",
-                50,
-                1.35f,
-                10,
-                UpgradeManager.HeroAttackSpeedPercent,
-                0.03f);
-
-            UpgradeData practice = CreateUpgrade(
-                "Skill Practice",
-                "skill_practice",
-                "Skill Practice",
-                "All hero skill cooldown -3% per level.",
-                50,
-                1.35f,
-                10,
-                UpgradeManager.SkillCooldownPercent,
-                0.03f);
-
+            UpgradeData crystal = CreateUpgrade("Crystal Reinforcement", "crystal_reinforcement", "Crystal Reinforcement", "Crystal max HP +20 per level.", 50, 1.35f, 10, UpgradeManager.CrystalMaxHpFlat, 20f);
+            UpgradeData attack = CreateUpgrade("Hero Training", "hero_training", "Hero Training", "All hero attack +5% per level.", 50, 1.35f, 10, UpgradeManager.HeroAttackPercent, 0.05f);
+            UpgradeData rhythm = CreateUpgrade("Battle Rhythm", "battle_rhythm", "Battle Rhythm", "All hero attack speed +3% per level.", 50, 1.35f, 10, UpgradeManager.HeroAttackSpeedPercent, 0.03f);
+            UpgradeData practice = CreateUpgrade("Skill Practice", "skill_practice", "Skill Practice", "All hero skill cooldown -3% per level.", 50, 1.35f, 10, UpgradeManager.SkillCooldownPercent, 0.03f);
             return new[] { crystal, attack, rhythm, practice };
         }
 
@@ -442,7 +448,7 @@ namespace RuneGate.Editor
             return asset;
         }
 
-        private static void CreateOrUpdateBattleScene(StageData stageData, HeroData knight, HeroData archer, IReadOnlyList<RuneData> runes, IReadOnlyList<UpgradeData> upgrades, IReadOnlyList<StageData> stages)
+        private static void CreateOrUpdateBattleScene(StageData stageData, IReadOnlyList<RuneData> runes, IReadOnlyList<UpgradeData> upgrades, IReadOnlyList<StageData> stages, HeroRosterData heroRoster, FormationData defaultFormation)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -461,6 +467,7 @@ namespace RuneGate.Editor
             WaveManager waveManager = root.AddComponent<WaveManager>();
             RuneManager runeManager = root.AddComponent<RuneManager>();
             RuneEffectApplier runeEffectApplier = root.AddComponent<RuneEffectApplier>();
+            HeroPlacementManager heroPlacementManager = root.AddComponent<HeroPlacementManager>();
 
             GameObject crystalObject = CreatePlaceholderObject("Kingdom Crystal", null, new Vector3(-5.5f, 0f, 0f), new Color(0.25f, 0.92f, 1f), new Vector2(0.7f, 3.2f), 3);
             CrystalController crystalController = crystalObject.AddComponent<CrystalController>();
@@ -469,41 +476,44 @@ namespace RuneGate.Editor
             Transform[] spawnPoints = new Transform[3];
             Transform[] targetPoints = new Transform[3];
             Transform[] heroSlotPoints = new Transform[9];
-            for (int i = 0; i < 3; i++)
+            for (int laneIndex = 0; laneIndex < 3; laneIndex++)
             {
-                float y = (i - 1) * 2.4f;
-                CreatePlaceholderObject($"Lane {i} Path", laneRoot.transform, new Vector3(0f, y, 0f), new Color(0.25f, 0.27f, 0.32f), new Vector2(10.8f, 0.08f), 0);
+                float y = (laneIndex - 1) * 2.4f;
+                CreatePlaceholderObject($"Lane {laneIndex} Path", laneRoot.transform, new Vector3(0f, y, 0f), new Color(0.25f, 0.27f, 0.32f), new Vector2(10.8f, 0.08f), 0);
 
-                GameObject spawnPoint = new GameObject($"Lane {i} Monster Spawn");
+                GameObject spawnPoint = new GameObject($"Lane {laneIndex} Monster Spawn");
                 spawnPoint.transform.SetParent(laneRoot.transform);
                 spawnPoint.transform.position = new Vector3(5.6f, y, 0f);
-                spawnPoints[i] = spawnPoint.transform;
+                spawnPoints[laneIndex] = spawnPoint.transform;
 
-                GameObject targetPoint = new GameObject($"Lane {i} Crystal Target");
+                GameObject targetPoint = new GameObject($"Lane {laneIndex} Crystal Target");
                 targetPoint.transform.SetParent(laneRoot.transform);
                 targetPoint.transform.position = new Vector3(-5.2f, y, 0f);
-                targetPoints[i] = targetPoint.transform;
+                targetPoints[laneIndex] = targetPoint.transform;
 
-                for (int slot = 0; slot < 3; slot++)
+                for (int slotIndex = 0; slotIndex < 3; slotIndex++)
                 {
-                    int flatIndex = i * 3 + slot;
-                    float x = -2.4f - slot * 0.85f;
-                    GameObject slotPoint = CreatePlaceholderObject($"Lane {i} Hero Slot {slot}", laneRoot.transform, new Vector3(x, y, 0f), new Color(0.24f, 0.42f, 0.64f, 0.35f), new Vector2(0.46f, 0.46f), 1);
+                    int flatIndex = laneIndex * 3 + slotIndex;
+                    float x = -2.4f - slotIndex * 0.85f;
+                    GameObject slotPoint = CreatePlaceholderObject($"Lane {laneIndex} Hero Slot {slotIndex}", laneRoot.transform, new Vector3(x, y, 0f), new Color(0.24f, 0.42f, 0.64f, 0.35f), new Vector2(0.46f, 0.46f), 1);
+                    HeroPlacementSlot placementSlot = slotPoint.AddComponent<HeroPlacementSlot>();
+                    EditComponent(placementSlot, serializedObject =>
+                    {
+                        SetInt(serializedObject, "laneIndex", laneIndex);
+                        SetEnum(serializedObject, "positionType", SlotIndexToPositionType(slotIndex));
+                    });
                     heroSlotPoints[flatIndex] = slotPoint.transform;
                 }
             }
 
             GameObject monsterRoot = new GameObject("Monsters");
             GameObject heroRoot = new GameObject("Heroes");
-            HeroController knightController = CreateHero("Knight", knight, heroSlotPoints[3].position, heroRoot.transform, 1, 0);
-            HeroController archerController = CreateHero("Archer", archer, heroSlotPoints[4].position, heroRoot.transform, 1, 1);
 
             GameObject uiRoot = new GameObject("Runtime Prototype UI");
             BattleHUD battleHud = uiRoot.AddComponent<BattleHUD>();
             RuneSelectionUI runeSelectionUI = uiRoot.AddComponent<RuneSelectionUI>();
             StageResultUI stageResultUI = uiRoot.AddComponent<StageResultUI>();
-            HeroSkillButton knightSkillButton = uiRoot.AddComponent<HeroSkillButton>();
-            HeroSkillButton archerSkillButton = uiRoot.AddComponent<HeroSkillButton>();
+            FormationSkillPanelUI formationSkillPanelUI = uiRoot.AddComponent<FormationSkillPanelUI>();
 
             EditComponent(laneManager, serializedObject =>
             {
@@ -535,6 +545,16 @@ namespace RuneGate.Editor
                 SetInt(serializedObject, "optionsPerSelection", 3);
             });
 
+            EditComponent(heroPlacementManager, serializedObject =>
+            {
+                SetObject(serializedObject, "heroRoster", heroRoster);
+                SetObject(serializedObject, "defaultFormation", defaultFormation);
+                SetObject(serializedObject, "heroRoot", heroRoot.transform);
+                SetBool(serializedObject, "useSavedFormation", true);
+                SetBool(serializedObject, "writeDefaultFormationToSave", true);
+                SetVector2(serializedObject, "heroPlaceholderSize", new Vector2(0.72f, 0.72f));
+            });
+
             EditComponent(battleManager, serializedObject =>
             {
                 SetObject(serializedObject, "initialStageData", stageData);
@@ -543,8 +563,10 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "waveManager", waveManager);
                 SetObject(serializedObject, "runeManager", runeManager);
                 SetObject(serializedObject, "runeEffectApplier", runeEffectApplier);
-                SetObjectList(serializedObject, "heroes", new UnityEngine.Object[] { knightController, archerController });
+                SetObject(serializedObject, "heroPlacementManager", heroPlacementManager);
+                SetObjectList(serializedObject, "heroes", Array.Empty<UnityEngine.Object>());
                 SetObjectList(serializedObject, "permanentUpgrades", ToObjectArray(upgrades));
+                SetBool(serializedObject, "rebuildHeroesFromFormation", true);
                 SetBool(serializedObject, "autoStartOnStart", true);
             });
 
@@ -553,7 +575,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetObject(serializedObject, "crystalController", crystalController);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(16f, 16f, 300f, 190f));
+                SetRect(serializedObject, "panelRect", new Rect(16f, 16f, 300f, 230f));
             });
 
             EditComponent(runeSelectionUI, serializedObject =>
@@ -575,20 +597,11 @@ namespace RuneGate.Editor
                 SetString(serializedObject, "stageSelectSceneName", "StageSelectScene");
             });
 
-            EditComponent(knightSkillButton, serializedObject =>
+            EditComponent(formationSkillPanelUI, serializedObject =>
             {
                 SetObject(serializedObject, "battleManager", battleManager);
-                SetObject(serializedObject, "heroController", knightController);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "buttonRect", new Rect(16f, 216f, 210f, 54f));
-            });
-
-            EditComponent(archerSkillButton, serializedObject =>
-            {
-                SetObject(serializedObject, "battleManager", battleManager);
-                SetObject(serializedObject, "heroController", archerController);
-                SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "buttonRect", new Rect(16f, 276f, 210f, 54f));
+                SetRect(serializedObject, "panelRect", new Rect(16f, 255f, 240f, 250f));
             });
 
             EditorSceneManager.SaveScene(scene, BattleScenePath);
@@ -622,7 +635,7 @@ namespace RuneGate.Editor
             {
                 SetObjectList(serializedObject, "stages", ToObjectArray(stages));
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(260f, 80f, 460f, 360f));
+                SetRect(serializedObject, "panelRect", new Rect(240f, 40f, 500f, 500f));
                 SetString(serializedObject, "titleSceneName", "TitleScene");
                 SetString(serializedObject, "battleSceneName", "BattleScene");
                 SetString(serializedObject, "upgradeSceneName", "UpgradeScene");
@@ -688,41 +701,6 @@ namespace RuneGate.Editor
             return camera;
         }
 
-        private static HeroController CreateHero(string displayName, HeroData heroData, Vector3 position, Transform parent, int laneIndex, int slotIndex)
-        {
-            GameObject heroObject = CreatePlaceholderObject($"Hero_{displayName}", parent, position, GetHeroColor(heroData), new Vector2(0.72f, 0.72f), 4);
-            SkillController skillController = heroObject.AddComponent<SkillController>();
-            HeroController heroController = heroObject.AddComponent<HeroController>();
-
-            EditComponent(skillController, serializedObject =>
-            {
-                SetObject(serializedObject, "skillData", heroData.SkillData);
-            });
-
-            EditComponent(heroController, serializedObject =>
-            {
-                SetObject(serializedObject, "heroData", heroData);
-                SetObject(serializedObject, "skillController", skillController);
-                SetObject(serializedObject, "projectilePrefab", null);
-                SetObject(serializedObject, "projectileSpawnPoint", heroObject.transform);
-                SetBool(serializedObject, "initializeOnAwake", true);
-                SetInt(serializedObject, "laneIndex", laneIndex);
-                SetInt(serializedObject, "heroSlotIndex", slotIndex);
-            });
-
-            return heroController;
-        }
-
-        private static Color GetHeroColor(HeroData heroData)
-        {
-            if (heroData == null)
-            {
-                return Color.white;
-            }
-
-            return heroData.Role == HeroRole.Tank ? new Color(0.45f, 0.62f, 1f) : new Color(0.95f, 0.78f, 0.28f);
-        }
-
         private static GameObject CreatePlaceholderObject(string objectName, Transform parent, Vector3 position, Color color, Vector2 size, int sortingOrder)
         {
             GameObject placeholderObject = new GameObject(objectName);
@@ -736,8 +714,32 @@ namespace RuneGate.Editor
             return placeholderObject;
         }
 
+        private static SpawnPlan Spawn(MonsterData monsterData, int laneIndex, int count, float startDelay, float spawnInterval)
+        {
+            return new SpawnPlan(monsterData, laneIndex, count, startDelay, spawnInterval);
+        }
+
+        private static HeroPositionType SlotIndexToPositionType(int slotIndex)
+        {
+            switch (slotIndex)
+            {
+                case 0:
+                    return HeroPositionType.Front;
+                case 2:
+                    return HeroPositionType.Back;
+                case 1:
+                default:
+                    return HeroPositionType.Middle;
+            }
+        }
+
         private static UnityEngine.Object[] ToObjectArray<T>(IReadOnlyList<T> values) where T : UnityEngine.Object
         {
+            if (values == null)
+            {
+                return Array.Empty<UnityEngine.Object>();
+            }
+
             UnityEngine.Object[] objects = new UnityEngine.Object[values.Count];
             for (int i = 0; i < values.Count; i++)
             {
@@ -798,11 +800,6 @@ namespace RuneGate.Editor
             FindProperty(serializedObject, propertyName).boolValue = value;
         }
 
-        private static void SetColor(SerializedObject serializedObject, string propertyName, Color value)
-        {
-            FindProperty(serializedObject, propertyName).colorValue = value;
-        }
-
         private static void SetVector2(SerializedObject serializedObject, string propertyName, Vector2 value)
         {
             FindProperty(serializedObject, propertyName).vector2Value = value;
@@ -834,6 +831,31 @@ namespace RuneGate.Editor
             }
         }
 
+        private static void SetFormationSlotList(SerializedObject serializedObject, string propertyName, IReadOnlyList<FormationSlot> values)
+        {
+            SerializedProperty property = FindProperty(serializedObject, propertyName);
+            property.ClearArray();
+            if (values == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                FormationSlot value = values[i];
+                if (value == null)
+                {
+                    continue;
+                }
+
+                property.InsertArrayElementAtIndex(property.arraySize);
+                SerializedProperty element = property.GetArrayElementAtIndex(property.arraySize - 1);
+                element.FindPropertyRelative("laneIndex").intValue = Mathf.Clamp(value.LaneIndex, 0, 2);
+                element.FindPropertyRelative("positionType").enumValueIndex = Convert.ToInt32(value.PositionType);
+                element.FindPropertyRelative("heroId").stringValue = value.HeroId;
+            }
+        }
+
         private static SerializedProperty FindProperty(SerializedObject serializedObject, string propertyName)
         {
             SerializedProperty property = serializedObject.FindProperty(propertyName);
@@ -843,6 +865,48 @@ namespace RuneGate.Editor
             }
 
             return property;
+        }
+
+        private sealed class ContentBundle
+        {
+            public SkillData[] Skills;
+            public HeroData[] Heroes;
+            public MonsterData[] Monsters;
+            public MonsterData Boss;
+            public RuneData[] Runes;
+            public StageData[] Stages;
+            public HeroRosterData HeroRoster;
+            public FormationData DefaultFormation;
+        }
+
+        private readonly struct SpawnPlan
+        {
+            public SpawnPlan(MonsterData monsterData, int laneIndex, int count, float startDelay, float spawnInterval)
+            {
+                MonsterData = monsterData;
+                LaneIndex = laneIndex;
+                Count = count;
+                StartDelay = startDelay;
+                SpawnInterval = spawnInterval;
+            }
+
+            public MonsterData MonsterData { get; }
+            public int LaneIndex { get; }
+            public int Count { get; }
+            public float StartDelay { get; }
+            public float SpawnInterval { get; }
+        }
+
+        private readonly struct WavePlan
+        {
+            public WavePlan(bool isBossWave, params SpawnPlan[] spawns)
+            {
+                IsBossWave = isBossWave;
+                Spawns = spawns ?? Array.Empty<SpawnPlan>();
+            }
+
+            public bool IsBossWave { get; }
+            public SpawnPlan[] Spawns { get; }
         }
     }
 }

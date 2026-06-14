@@ -15,6 +15,7 @@ namespace RuneGate
         private string crystalFeedbackText = string.Empty;
         private float crystalFeedbackTimer;
         private int gold;
+        private Vector2 heroScrollPosition;
 
         public string CrystalHpText => crystalHpText;
         public string WaveText => waveText;
@@ -78,7 +79,7 @@ namespace RuneGate
 
             AutoAssignReferences();
             Rect drawRect = panelRect;
-            drawRect.height = Mathf.Max(drawRect.height, 190f);
+            drawRect.height = Mathf.Max(drawRect.height, 230f);
             GUILayout.BeginArea(drawRect, GUI.skin.box);
             GUILayout.Label("RuneGate Defense");
             GUILayout.Label(crystalHpText);
@@ -92,6 +93,7 @@ namespace RuneGate
 
             if (battleManager != null)
             {
+                heroScrollPosition = GUILayout.BeginScrollView(heroScrollPosition, GUILayout.Height(96f));
                 for (int i = 0; i < battleManager.Heroes.Count; i++)
                 {
                     HeroController hero = battleManager.Heroes[i];
@@ -102,6 +104,8 @@ namespace RuneGate
 
                     GUILayout.Label($"{hero.Data.DisplayName} ATK {hero.EffectiveAttack} SPD {hero.EffectiveAttackSpeed:0.00}");
                 }
+
+                GUILayout.EndScrollView();
             }
 
             GUILayout.EndArea();

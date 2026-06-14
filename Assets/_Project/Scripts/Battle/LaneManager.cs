@@ -71,6 +71,11 @@ namespace RuneGate
             return new Vector3(x, GetLaneY(safeLaneIndex), 0f);
         }
 
+        public Vector3 GetHeroSlotPosition(int laneIndex, HeroPositionType positionType)
+        {
+            return GetHeroSlotPosition(laneIndex, FormationSlot.ToSlotIndex(positionType));
+        }
+
         private int ClampLaneIndex(int laneIndex, string context)
         {
             if (IsValidLaneIndex(laneIndex))

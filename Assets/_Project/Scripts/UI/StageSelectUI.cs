@@ -13,6 +13,8 @@ namespace RuneGate
         [SerializeField] private string battleSceneName = "BattleScene";
         [SerializeField] private string upgradeSceneName = "UpgradeScene";
 
+        private Vector2 stageScrollPosition;
+
         public IReadOnlyList<StageData> Stages => stages;
 
         private void OnEnable()
@@ -30,6 +32,7 @@ namespace RuneGate
             GUILayout.BeginArea(panelRect, GUI.skin.box);
             GUILayout.Label("Stage Select");
             GUILayout.Label($"Gold: {SaveManager.Current.totalGold}");
+            GUILayout.Label($"Formation Slots: {SaveManager.Current.formationSlots.Count}/9");
             GUILayout.Space(8f);
 
             if (stages.Count == 0)
@@ -37,10 +40,13 @@ namespace RuneGate
                 GUILayout.Label("No stages assigned. Run Tools/RuneGate/Bootstrap Progression Prototype.");
             }
 
+            stageScrollPosition = GUILayout.BeginScrollView(stageScrollPosition);
             for (int i = 0; i < stages.Count; i++)
             {
                 DrawStageButton(i);
             }
+
+            GUILayout.EndScrollView();
 
             GUILayout.Space(10f);
             if (GUILayout.Button("Go to Upgrade", GUILayout.Height(34f)))

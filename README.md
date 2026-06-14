@@ -46,6 +46,29 @@ This creates or updates:
 
 Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Play.
 
+## Bootstrap v0.4 Content Prototype
+
+In Unity, run:
+
+`Tools/RuneGate/Bootstrap v0.4 Content Prototype`
+
+Aliases are also available:
+
+- `Tools/RuneGate/Bootstrap Content Prototype v0.4`
+- `Tools/RuneGate/Bootstrap Content v0.4`
+
+This creates or updates:
+
+- 6 MVP heroes, 6 MVP monsters, and 1 Orc Warlord boss
+- 6 MVP hero skills
+- 20 rune cards
+- Goblin Forest stages 1-10
+- Default 3 lane x 3 slot formation data
+- Title, Stage Select, Battle, and Upgrade scenes
+- v0.4 art folder structure
+
+Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Play.
+
 ## Project Docs
 
 - `RUNEGATE_MASTER_PLAN.md`
@@ -58,6 +81,9 @@ Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Pla
 - `docs/10_NEXT_CODEX_PROMPTS.md`
 - `RUNEGATE_NEXT_TASKS_INDEX.md`
 - `docs/11_TASK_V03_PROGRESSION_LOOP.md`
+- `docs/12_TASK_V04_CONTENT_EXPANSION_AND_PLACEMENT.md`
+- `docs/art-guide.md`
+- `docs/asset-list.md`
 
 ## How To Play
 
@@ -93,7 +119,7 @@ Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Pla
 - Rune selection after non-final waves
 - Result panel with Retry, Upgrade, and Stage Select buttons
 - v0.3 title, stage select, result flow, upgrade screen, and local JSON save loop
-- Stage progression unlocks for Goblin Forest 1-3
+- Stage progression unlocks for Goblin Forest 1-10
 - Gold persistence policy:
   - Victory awards 100% of battle gold
   - Defeat awards 50% of battle gold
@@ -103,10 +129,15 @@ Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Pla
   - `hero_attack_speed_percent`
   - `skill_cooldown_percent`
 - 3 lanes x 3 logical hero slot foundation
+- v0.4 formation data and runtime hero placement from local save
 - Runtime rune effects:
   - `hero_attack_percent`
   - `hero_attack_speed_percent`
   - `crystal_heal_flat`
+  - `skill_cooldown_percent`
+  - `hero_hp_percent`
+  - `boss_damage_percent`
+  - `monster_slow_percent`
 - Package-free placeholder visuals
 - Package-free Play Mode GUI
 - Unity Editor bootstrapper and project validator
@@ -152,6 +183,8 @@ Assets/_Project/
     Runes/
     Stages/
     Upgrades/
+    Formations/
+    Rosters/
   Prefabs/
     Heroes/
     Monsters/
@@ -159,9 +192,9 @@ Assets/_Project/
   Scenes/
   Art/
     Characters/
-    Monsters/
     Effects/
     UI/
+    Backgrounds/
   Audio/
   Resources/
 ```

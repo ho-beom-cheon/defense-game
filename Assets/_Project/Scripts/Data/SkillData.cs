@@ -12,6 +12,8 @@ namespace RuneGate
         [SerializeField] private int power = 20;
         [SerializeField] private int damageHitCount = 1;
         [SerializeField] private float range = 4f;
+        [SerializeField] private string effectKey = "damage";
+        [SerializeField] private float radius = 1.2f;
         [SerializeField] private TargetingType targetingType = TargetingType.First;
         [SerializeField] private ElementType element = ElementType.None;
 
@@ -22,6 +24,8 @@ namespace RuneGate
         public int Power => power;
         public int DamageHitCount => Mathf.Max(1, damageHitCount);
         public float Range => range;
+        public string EffectKey => effectKey;
+        public float Radius => radius;
         public TargetingType TargetingType => targetingType;
         public ElementType Element => element;
     }

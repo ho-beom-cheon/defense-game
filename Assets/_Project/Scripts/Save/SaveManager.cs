@@ -68,6 +68,7 @@ namespace RuneGate
         {
             SaveData saveData = new SaveData();
             AddUnique(saveData.unlockedStageIds, DefaultUnlockedStageId);
+            saveData.formationSlots = CreateDefaultFormationSlots();
             return saveData;
         }
 
@@ -211,6 +212,46 @@ namespace RuneGate
             Save();
         }
 
+        public static List<FormationSlot> CreateDefaultFormationSlots()
+        {
+            return new List<FormationSlot>
+            {
+                new FormationSlot(0, HeroPositionType.Front, "hero_knight_001"),
+                new FormationSlot(0, HeroPositionType.Back, "hero_archer_001"),
+                new FormationSlot(1, HeroPositionType.Middle, "hero_cleric_001"),
+                new FormationSlot(1, HeroPositionType.Back, "hero_mage_fire_001"),
+                new FormationSlot(2, HeroPositionType.Middle, "hero_engineer_dwarf_001"),
+                new FormationSlot(2, HeroPositionType.Front, "hero_assassin_001")
+            };
+        }
+
+        public static List<FormationSlot> GetFormationSlots()
+        {
+            List<FormationSlot> copy = new List<FormationSlot>();
+            List<FormationSlot> slots = Current.formationSlots;
+            if (slots == null)
+            {
+                return copy;
+            }
+
+            for (int i = 0; i < slots.Count; i++)
+            {
+                FormationSlot slot = slots[i];
+                if (slot != null)
+                {
+                    copy.Add(new FormationSlot(slot.LaneIndex, slot.PositionType, slot.HeroId));
+                }
+            }
+
+            return copy;
+        }
+
+        public static void SetFormationSlots(IReadOnlyList<FormationSlot> slots)
+        {
+            Current.formationSlots = CopyFormationSlots(slots);
+            Save();
+        }
+
         private static SaveData TryLoadFromDisk()
         {
             if (!HasSaveFile())
@@ -252,6 +293,11 @@ namespace RuneGate
                 saveData.upgradeLevels = new List<SerializableUpgradeLevel>();
             }
 
+            if (saveData.formationSlots == null)
+            {
+                saveData.formationSlots = new List<FormationSlot>();
+            }
+
             saveData.totalGold = Mathf.Max(0, saveData.totalGold);
             AddUnique(saveData.unlockedStageIds, DefaultUnlockedStageId);
 
@@ -265,6 +311,24 @@ namespace RuneGate
                 }
 
                 entry.level = Mathf.Max(0, entry.level);
+            }
+
+            for (int i = saveData.formationSlots.Count - 1; i >= 0; i--)
+            {
+                FormationSlot slot = saveData.formationSlots[i];
+                if (slot == null || string.IsNullOrWhiteSpace(slot.HeroId))
+                {
+                    saveData.formationSlots.RemoveAt(i);
+                    continue;
+                }
+
+                int laneIndex = Mathf.Clamp(slot.LaneIndex, 0, 2);
+                saveData.formationSlots[i] = new FormationSlot(laneIndex, slot.PositionType, slot.HeroId);
+            }
+
+            if (saveData.formationSlots.Count == 0)
+            {
+                saveData.formationSlots = CreateDefaultFormationSlots();
             }
         }
 
@@ -286,6 +350,7 @@ namespace RuneGate
             AppendStringList(builder, "clearedStageIds", saveData.clearedStageIds, true);
             AppendStringList(builder, "unlockedStageIds", saveData.unlockedStageIds, true);
             AppendUpgradeLevels(builder, saveData.upgradeLevels, true);
+            AppendFormationSlots(builder, saveData.formationSlots, true);
             builder.Append("  \"lastSelectedStageId\": \"").Append(EscapeJson(saveData.lastSelectedStageId)).AppendLine("\",");
             builder.Append("  \"hasSeenIntro\": ").Append(saveData.hasSeenIntro ? "true" : "false").AppendLine();
             builder.AppendLine("}");
@@ -300,6 +365,7 @@ namespace RuneGate
                 clearedStageIds = ExtractStringList(json, "clearedStageIds"),
                 unlockedStageIds = ExtractStringList(json, "unlockedStageIds"),
                 upgradeLevels = ExtractUpgradeLevels(json),
+                formationSlots = ExtractFormationSlots(json),
                 lastSelectedStageId = ExtractString(json, "lastSelectedStageId", string.Empty),
                 hasSeenIntro = ExtractBool(json, "hasSeenIntro", false)
             };
@@ -317,6 +383,46 @@ namespace RuneGate
                 {
                     builder.Append("    \"").Append(EscapeJson(values[i])).Append("\"");
                     if (i < values.Count - 1)
+                    {
+                        builder.Append(",");
+                    }
+
+                    builder.AppendLine();
+                }
+            }
+
+            builder.Append("  ]");
+            if (appendComma)
+            {
+                builder.Append(",");
+            }
+
+            builder.AppendLine();
+        }
+
+        private static void AppendFormationSlots(StringBuilder builder, List<FormationSlot> slots, bool appendComma)
+        {
+            builder.AppendLine("  \"formationSlots\": [");
+
+            if (slots != null)
+            {
+                for (int i = 0; i < slots.Count; i++)
+                {
+                    FormationSlot slot = slots[i];
+                    if (slot == null)
+                    {
+                        continue;
+                    }
+
+                    builder.Append("    { \"laneIndex\": ")
+                        .Append(Mathf.Clamp(slot.LaneIndex, 0, 2))
+                        .Append(", \"positionType\": \"")
+                        .Append(slot.PositionType)
+                        .Append("\", \"heroId\": \"")
+                        .Append(EscapeJson(slot.HeroId))
+                        .Append("\" }");
+
+                    if (i < slots.Count - 1)
                     {
                         builder.Append(",");
                     }
@@ -430,6 +536,57 @@ namespace RuneGate
             }
 
             return levels;
+        }
+
+        private static List<FormationSlot> ExtractFormationSlots(string json)
+        {
+            List<FormationSlot> slots = new List<FormationSlot>();
+            Match arrayMatch = Regex.Match(json, "\"formationSlots\"\\s*:\\s*\\[(.*?)\\]", RegexOptions.Singleline);
+            if (!arrayMatch.Success)
+            {
+                return slots;
+            }
+
+            MatchCollection objectMatches = Regex.Matches(arrayMatch.Groups[1].Value, "\\{(.*?)\\}", RegexOptions.Singleline);
+            for (int i = 0; i < objectMatches.Count; i++)
+            {
+                string objectJson = objectMatches[i].Groups[1].Value;
+                int laneIndex = ExtractInt(objectJson, "laneIndex", 0);
+                string positionText = ExtractString(objectJson, "positionType", HeroPositionType.Middle.ToString());
+                string heroId = ExtractString(objectJson, "heroId", string.Empty);
+
+                if (!Enum.TryParse(positionText, out HeroPositionType positionType))
+                {
+                    positionType = HeroPositionType.Middle;
+                }
+
+                if (!string.IsNullOrWhiteSpace(heroId))
+                {
+                    slots.Add(new FormationSlot(laneIndex, positionType, heroId));
+                }
+            }
+
+            return slots;
+        }
+
+        private static List<FormationSlot> CopyFormationSlots(IReadOnlyList<FormationSlot> sourceSlots)
+        {
+            List<FormationSlot> copy = new List<FormationSlot>();
+            if (sourceSlots == null)
+            {
+                return copy;
+            }
+
+            for (int i = 0; i < sourceSlots.Count; i++)
+            {
+                FormationSlot slot = sourceSlots[i];
+                if (slot != null && !string.IsNullOrWhiteSpace(slot.HeroId))
+                {
+                    copy.Add(new FormationSlot(Mathf.Clamp(slot.LaneIndex, 0, 2), slot.PositionType, slot.HeroId));
+                }
+            }
+
+            return copy;
         }
 
         private static string EscapeJson(string value)
