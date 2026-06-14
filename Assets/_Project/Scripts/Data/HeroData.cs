@@ -16,7 +16,9 @@ namespace RuneGate
         [SerializeField] private float attackRange = 4f;
         [SerializeField] private SkillData skillData;
         [SerializeField] private Sprite portrait;
+        [SerializeField] private Sprite battleSprite;
         [SerializeField] private RuntimeAnimatorController animatorController;
+        [SerializeField] private GameObject prefab;
 
         public string HeroId => heroId;
         public string DisplayName => displayName;
@@ -29,6 +31,8 @@ namespace RuneGate
         public float AttackRange => attackRange;
         public SkillData SkillData => skillData;
         public Sprite Portrait => portrait;
+        public Sprite BattleSprite => battleSprite != null ? battleSprite : portrait;
         public RuntimeAnimatorController AnimatorController => animatorController;
+        public GameObject Prefab => prefab;
     }
 }

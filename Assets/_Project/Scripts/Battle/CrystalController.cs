@@ -8,6 +8,7 @@ namespace RuneGate
     {
         [SerializeField] private int defaultMaxHp = 100;
         [SerializeField] private SpriteRenderer spriteRenderer;
+        [SerializeField] private HitFlashController hitFlashController;
         [SerializeField] private float hitFlashDuration = 0.12f;
 
         private int maxHp;
@@ -29,6 +30,11 @@ namespace RuneGate
             if (spriteRenderer == null)
             {
                 spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            }
+
+            if (hitFlashController == null)
+            {
+                hitFlashController = GetComponentInChildren<HitFlashController>();
             }
 
             CaptureOriginalSpriteColor();
@@ -63,7 +69,16 @@ namespace RuneGate
             currentHp = Mathf.Max(0, currentHp - damage);
             HpChanged?.Invoke(currentHp, maxHp);
             Damaged?.Invoke(damage, currentHp, maxHp);
-            PlayHitFlash();
+            if (hitFlashController != null)
+            {
+                hitFlashController.Flash(new Color(1f, 0.35f, 0.35f, 1f), hitFlashDuration);
+            }
+            else
+            {
+                PlayHitFlash();
+            }
+
+            AudioManager.Play(SfxKey.CrystalHit);
 
             if (currentHp <= 0)
             {

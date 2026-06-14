@@ -7,6 +7,8 @@ namespace RuneGate
     {
         [SerializeField] private HeroData heroData;
         [SerializeField] private SkillController skillController;
+        [SerializeField] private CharacterVisualController visualController;
+        [SerializeField] private HitFlashController hitFlashController;
         [SerializeField] private ProjectileController projectilePrefab;
         [SerializeField] private Transform projectileSpawnPoint;
         [SerializeField] private LayerMask monsterLayer = ~0;
@@ -46,6 +48,8 @@ namespace RuneGate
             {
                 skillController = GetComponent<SkillController>();
             }
+
+            AutoAssignFeedbackReferences();
 
             if (initializeOnAwake && heroData != null)
             {
@@ -108,6 +112,8 @@ namespace RuneGate
                 skillController = GetComponent<SkillController>();
             }
 
+            AutoAssignFeedbackReferences();
+            visualController?.Initialize(data.BattleSprite, data.AnimatorController);
             skillController?.Initialize(data.SkillData);
             HpChanged?.Invoke(currentHp, maxHp);
         }
@@ -126,7 +132,12 @@ namespace RuneGate
             }
 
             MonsterController target = FindTarget(skillController.Range, skillController.TargetingType);
-            skillController.UseSkill(this, target);
+            if (skillController.UseSkill(this, target))
+            {
+                visualController?.FlipToward(target != null ? target.transform.position : transform.position + Vector3.right);
+                visualController?.PlaySkill();
+                AudioManager.Play(SfxKey.HeroAttack);
+            }
         }
 
         public void TakeDamage(int damage)
@@ -137,7 +148,13 @@ namespace RuneGate
             }
 
             currentHp = Mathf.Max(0, currentHp - damage);
+            hitFlashController?.Flash();
+            visualController?.PlayHit();
             HpChanged?.Invoke(currentHp, maxHp);
+            if (currentHp <= 0)
+            {
+                visualController?.PlayDeath();
+            }
         }
 
         public void Heal(int amount)
@@ -205,9 +222,20 @@ namespace RuneGate
             }
 
             Vector3 spawnPosition = projectileSpawnPoint != null ? projectileSpawnPoint.position : transform.position;
+            visualController?.FlipToward(target.transform.position);
+            visualController?.PlayAttack();
+            AudioManager.Play(SfxKey.HeroAttack);
+
             if (projectilePrefab != null)
             {
                 ProjectileController projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+                projectile.Initialize(target, CalculateDamageAgainst(EffectiveAttack, target));
+                return;
+            }
+
+            if (ShouldUseFallbackProjectile())
+            {
+                ProjectileController projectile = CreateFallbackProjectile(spawnPosition);
                 projectile.Initialize(target, CalculateDamageAgainst(EffectiveAttack, target));
                 return;
             }
@@ -270,6 +298,34 @@ namespace RuneGate
             }
 
             return selected;
+        }
+
+        private void AutoAssignFeedbackReferences()
+        {
+            if (visualController == null)
+            {
+                visualController = GetComponentInChildren<CharacterVisualController>();
+            }
+
+            if (hitFlashController == null)
+            {
+                hitFlashController = GetComponentInChildren<HitFlashController>();
+            }
+        }
+
+        private bool ShouldUseFallbackProjectile()
+        {
+            return attackRange > 2.25f;
+        }
+
+        private ProjectileController CreateFallbackProjectile(Vector3 spawnPosition)
+        {
+            GameObject projectileObject = new GameObject("Projectile_Runtime");
+            projectileObject.transform.position = spawnPosition;
+            projectileObject.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholderSprite = projectileObject.AddComponent<PlaceholderSprite>();
+            placeholderSprite.Configure(new Color(1f, 0.85f, 0.25f, 1f), new Vector2(0.18f, 0.08f), 8);
+            return projectileObject.AddComponent<ProjectileController>();
         }
 
         private MonsterController PickBetterTarget(MonsterController current, MonsterController candidate, TargetingType targetingType)

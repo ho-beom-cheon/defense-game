@@ -72,6 +72,7 @@ namespace RuneGate
             }
 
             RuneSelected?.Invoke(runeData);
+            AudioManager.Play(SfxKey.RuneSelect);
             currentOptions.Clear();
         }
     }

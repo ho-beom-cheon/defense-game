@@ -13,6 +13,7 @@ namespace RuneGate
         [SerializeField] private int maxLevel = 10;
         [SerializeField] private string effectKey = "effect_key";
         [SerializeField] private float valuePerLevel = 1f;
+        [SerializeField] private Sprite icon;
 
         public string UpgradeId => upgradeId;
         public string DisplayName => displayName;
@@ -22,5 +23,6 @@ namespace RuneGate
         public int MaxLevel => maxLevel;
         public string EffectKey => effectKey;
         public float ValuePerLevel => valuePerLevel;
+        public Sprite Icon => icon;
     }
 }

@@ -1,4 +1,4 @@
-# RuneGate Defense v0.4 Asset List
+# RuneGate Defense v0.5 Asset List
 
 ## Heroes
 
@@ -74,3 +74,55 @@ Default v0.4 formation:
 - Lane 1 Back: `hero_mage_fire_001`
 - Lane 2 Middle: `hero_engineer_dwarf_001`
 - Lane 2 Front: `hero_assassin_001`
+
+## v0.5 Art Prototype Prefabs
+
+- `Assets/_Project/Prefabs/Heroes/Hero_Knight.prefab` - data-linked Knight placeholder combat prefab
+- `Assets/_Project/Prefabs/Monsters/Monster_Goblin.prefab` - data-linked Goblin placeholder combat prefab
+- `Assets/_Project/Prefabs/Projectiles/Projectile_Arrow.prefab` - package-free ranged attack placeholder
+- `Assets/_Project/Prefabs/Effects/Effect_Hit_Small.prefab` - short-lived hit flash effect placeholder
+- `Assets/_Project/Prefabs/Effects/Effect_Death_Small.prefab` - short-lived death effect placeholder
+
+## v0.5 Animator Controllers
+
+- `Assets/_Project/Art/Characters/Heroes/Knight/Animations/Knight_Prototype.controller`
+- `Assets/_Project/Art/Characters/Monsters/Goblin/Animations/Goblin_Prototype.controller`
+
+Required placeholder states:
+
+- `Idle`
+- `Move`
+- `Attack`
+- `Hit`
+- `Death`
+- `Skill`
+
+Required parameters:
+
+- `IsMoving` bool
+- `IsDead` bool
+- `Attack` trigger
+- `Hit` trigger
+- `Death` trigger
+- `Skill` trigger
+
+## v0.5 Audio Keys
+
+The v0.5 runtime adds an `AudioManager` and `SfxKey` enum. Clips are optional during prototype work; missing clips are ignored safely.
+
+- `HeroAttack`
+- `MonsterHit`
+- `MonsterDeath`
+- `CrystalHit`
+- `RuneSelect`
+- `UpgradePurchase`
+- `Victory`
+- `Defeat`
+
+## v0.5 Icon Hooks
+
+These remain placeholder-ready data hooks. Real image files are not included yet.
+
+- Shield Bash skill icon
+- Sword Rune icon
+- Crystal Reinforcement upgrade icon

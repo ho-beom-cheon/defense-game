@@ -159,6 +159,19 @@ namespace RuneGate
 
         private MonsterController CreateMonsterInstance(MonsterData data, Vector3 spawnPosition)
         {
+            if (data.Prefab != null)
+            {
+                GameObject prefabInstance = Instantiate(data.Prefab, spawnPosition, Quaternion.identity, monsterRoot);
+                MonsterController controller = prefabInstance.GetComponent<MonsterController>();
+                if (controller == null)
+                {
+                    controller = prefabInstance.AddComponent<MonsterController>();
+                }
+
+                EnsureGeneratedMonsterSupport(prefabInstance, data);
+                return controller;
+            }
+
             if (monsterPrefab != null)
             {
                 return Instantiate(monsterPrefab, spawnPosition, Quaternion.identity, monsterRoot);
@@ -170,6 +183,8 @@ namespace RuneGate
             monsterObject.AddComponent<SpriteRenderer>();
             PlaceholderSprite placeholder = monsterObject.AddComponent<PlaceholderSprite>();
             placeholder.Configure(GetPlaceholderColor(data), new Vector2(0.62f, 0.62f), 5);
+            monsterObject.AddComponent<CharacterVisualController>();
+            monsterObject.AddComponent<HitFlashController>();
 
             if (addDefaultColliderToGeneratedMonsters)
             {
@@ -178,6 +193,35 @@ namespace RuneGate
             }
 
             return monsterObject.AddComponent<MonsterController>();
+        }
+
+        private void EnsureGeneratedMonsterSupport(GameObject monsterObject, MonsterData data)
+        {
+            if (monsterObject.GetComponentInChildren<SpriteRenderer>() == null)
+            {
+                GameObject visualObject = new GameObject("Visual");
+                visualObject.transform.SetParent(monsterObject.transform);
+                visualObject.transform.localPosition = Vector3.zero;
+                visualObject.AddComponent<SpriteRenderer>();
+                PlaceholderSprite placeholder = visualObject.AddComponent<PlaceholderSprite>();
+                placeholder.Configure(GetPlaceholderColor(data), new Vector2(0.62f, 0.62f), 5);
+            }
+
+            if (monsterObject.GetComponentInChildren<CharacterVisualController>() == null)
+            {
+                monsterObject.AddComponent<CharacterVisualController>();
+            }
+
+            if (monsterObject.GetComponentInChildren<HitFlashController>() == null)
+            {
+                monsterObject.AddComponent<HitFlashController>();
+            }
+
+            if (addDefaultColliderToGeneratedMonsters && monsterObject.GetComponentInChildren<Collider2D>() == null)
+            {
+                CircleCollider2D collider = monsterObject.AddComponent<CircleCollider2D>();
+                collider.isTrigger = false;
+            }
         }
 
         private Color GetPlaceholderColor(MonsterData data)

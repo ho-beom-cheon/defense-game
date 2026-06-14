@@ -82,6 +82,11 @@ namespace RuneGate
             drawRect.height = Mathf.Max(drawRect.height, 230f);
             GUILayout.BeginArea(drawRect, GUI.skin.box);
             GUILayout.Label("RuneGate Defense");
+            if (battleManager != null && battleManager.ActiveStageData != null)
+            {
+                GUILayout.Label($"Stage {battleManager.ActiveStageData.DisplayName}");
+            }
+
             GUILayout.Label(crystalHpText);
             GUILayout.Label(waveText);
             GUILayout.Label($"State {battleStateText}");
@@ -115,12 +120,12 @@ namespace RuneGate
         {
             if (battleManager == null)
             {
-                battleManager = FindFirstObjectByType<BattleManager>();
+                battleManager = FindAnyObjectByType<BattleManager>();
             }
 
             if (crystalController == null)
             {
-                crystalController = FindFirstObjectByType<CrystalController>();
+                crystalController = FindAnyObjectByType<CrystalController>();
             }
         }
 

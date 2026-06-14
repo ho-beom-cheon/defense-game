@@ -22,6 +22,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Save",
             "Assets/_Project/Scripts/UI",
             "Assets/_Project/Scripts/Editor",
+            "Assets/_Project/Scripts/Audio",
             "Assets/_Project/Data/Heroes",
             "Assets/_Project/Data/Monsters",
             "Assets/_Project/Data/Skills",
@@ -32,29 +33,82 @@ namespace RuneGate.Editor
             "Assets/_Project/Data/Rosters",
             "Assets/_Project/Prefabs/Heroes",
             "Assets/_Project/Prefabs/Monsters",
+            "Assets/_Project/Prefabs/Projectiles",
+            "Assets/_Project/Prefabs/Effects",
             "Assets/_Project/Prefabs/UI",
             "Assets/_Project/Scenes",
             "Assets/_Project/Art/Characters/Heroes/Knight",
+            "Assets/_Project/Art/Characters/Heroes/Knight/Sprites",
+            "Assets/_Project/Art/Characters/Heroes/Knight/Animations",
+            "Assets/_Project/Art/Characters/Heroes/Knight/Materials",
             "Assets/_Project/Art/Characters/Heroes/Archer",
+            "Assets/_Project/Art/Characters/Heroes/Archer/Sprites",
+            "Assets/_Project/Art/Characters/Heroes/Archer/Animations",
+            "Assets/_Project/Art/Characters/Heroes/Archer/Materials",
             "Assets/_Project/Art/Characters/Heroes/FireMage",
+            "Assets/_Project/Art/Characters/Heroes/FireMage/Sprites",
+            "Assets/_Project/Art/Characters/Heroes/FireMage/Animations",
+            "Assets/_Project/Art/Characters/Heroes/FireMage/Materials",
             "Assets/_Project/Art/Characters/Heroes/Cleric",
+            "Assets/_Project/Art/Characters/Heroes/Cleric/Sprites",
+            "Assets/_Project/Art/Characters/Heroes/Cleric/Animations",
+            "Assets/_Project/Art/Characters/Heroes/Cleric/Materials",
             "Assets/_Project/Art/Characters/Heroes/DwarfEngineer",
+            "Assets/_Project/Art/Characters/Heroes/DwarfEngineer/Sprites",
+            "Assets/_Project/Art/Characters/Heroes/DwarfEngineer/Animations",
+            "Assets/_Project/Art/Characters/Heroes/DwarfEngineer/Materials",
             "Assets/_Project/Art/Characters/Heroes/Assassin",
+            "Assets/_Project/Art/Characters/Heroes/Assassin/Sprites",
+            "Assets/_Project/Art/Characters/Heroes/Assassin/Animations",
+            "Assets/_Project/Art/Characters/Heroes/Assassin/Materials",
             "Assets/_Project/Art/Characters/Monsters/Goblin",
+            "Assets/_Project/Art/Characters/Monsters/Goblin/Sprites",
+            "Assets/_Project/Art/Characters/Monsters/Goblin/Animations",
+            "Assets/_Project/Art/Characters/Monsters/Goblin/Materials",
             "Assets/_Project/Art/Characters/Monsters/Wolf",
+            "Assets/_Project/Art/Characters/Monsters/Wolf/Sprites",
+            "Assets/_Project/Art/Characters/Monsters/Wolf/Animations",
+            "Assets/_Project/Art/Characters/Monsters/Wolf/Materials",
             "Assets/_Project/Art/Characters/Monsters/Orc",
+            "Assets/_Project/Art/Characters/Monsters/Orc/Sprites",
+            "Assets/_Project/Art/Characters/Monsters/Orc/Animations",
+            "Assets/_Project/Art/Characters/Monsters/Orc/Materials",
             "Assets/_Project/Art/Characters/Monsters/Bat",
+            "Assets/_Project/Art/Characters/Monsters/Bat/Sprites",
+            "Assets/_Project/Art/Characters/Monsters/Bat/Animations",
+            "Assets/_Project/Art/Characters/Monsters/Bat/Materials",
             "Assets/_Project/Art/Characters/Monsters/Slime",
+            "Assets/_Project/Art/Characters/Monsters/Slime/Sprites",
+            "Assets/_Project/Art/Characters/Monsters/Slime/Animations",
+            "Assets/_Project/Art/Characters/Monsters/Slime/Materials",
             "Assets/_Project/Art/Characters/Monsters/Skeleton",
+            "Assets/_Project/Art/Characters/Monsters/Skeleton/Sprites",
+            "Assets/_Project/Art/Characters/Monsters/Skeleton/Animations",
+            "Assets/_Project/Art/Characters/Monsters/Skeleton/Materials",
             "Assets/_Project/Art/Characters/Bosses/OrcWarlord",
+            "Assets/_Project/Art/Characters/Bosses/OrcWarlord/Sprites",
+            "Assets/_Project/Art/Characters/Bosses/OrcWarlord/Animations",
+            "Assets/_Project/Art/Characters/Bosses/OrcWarlord/Materials",
             "Assets/_Project/Art/Effects/Skills",
             "Assets/_Project/Art/Effects/Hit",
+            "Assets/_Project/Art/Effects/Projectiles",
+            "Assets/_Project/Art/Effects/Death",
             "Assets/_Project/Art/UI/Icons",
+            "Assets/_Project/Art/UI/Icons/Heroes",
+            "Assets/_Project/Art/UI/Icons/Skills",
+            "Assets/_Project/Art/UI/Icons/Runes",
+            "Assets/_Project/Art/UI/Icons/Upgrades",
             "Assets/_Project/Art/UI/Buttons",
             "Assets/_Project/Art/UI/Panels",
             "Assets/_Project/Art/UI/Runes",
+            "Assets/_Project/Art/UI/Bars",
             "Assets/_Project/Art/Backgrounds",
+            "Assets/_Project/Art/Placeholders",
+            "Assets/_Project/Art/Audio/SFX",
+            "Assets/_Project/Art/Audio/BGM",
             "Assets/_Project/Audio",
+            "Assets/_Project/Audio/SFX",
+            "Assets/_Project/Audio/BGM",
             "Assets/_Project/Resources"
         };
 
@@ -86,6 +140,9 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/BattleManager.cs",
             "Assets/_Project/Scripts/Battle/LaneManager.cs",
             "Assets/_Project/Scripts/Battle/CrystalController.cs",
+            "Assets/_Project/Scripts/Battle/CharacterVisualController.cs",
+            "Assets/_Project/Scripts/Battle/HitFlashController.cs",
+            "Assets/_Project/Scripts/Battle/AutoDestroyEffect.cs",
             "Assets/_Project/Scripts/Hero/HeroController.cs",
             "Assets/_Project/Scripts/Hero/HeroPlacementManager.cs",
             "Assets/_Project/Scripts/Hero/HeroPlacementSlot.cs",
@@ -104,6 +161,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/TitleUI.cs",
             "Assets/_Project/Scripts/UI/StageSelectUI.cs",
             "Assets/_Project/Scripts/UI/UpgradeSceneUI.cs",
+            "Assets/_Project/Scripts/Audio/AudioManager.cs",
+            "Assets/_Project/Scripts/Audio/SfxKey.cs",
             "Assets/_Project/Scripts/Editor/RuneGateBootstrapper.cs"
         };
 
@@ -198,10 +257,22 @@ namespace RuneGate.Editor
             "Assets/_Project/Data/Upgrades/Skill Practice.asset"
         };
 
+        private static readonly string[] RequiredV05Assets =
+        {
+            "Assets/_Project/Prefabs/Heroes/Hero_Knight.prefab",
+            "Assets/_Project/Prefabs/Monsters/Monster_Goblin.prefab",
+            "Assets/_Project/Prefabs/Projectiles/Projectile_Arrow.prefab",
+            "Assets/_Project/Prefabs/Effects/Effect_Hit_Small.prefab",
+            "Assets/_Project/Prefabs/Effects/Effect_Death_Small.prefab",
+            "Assets/_Project/Art/Characters/Heroes/Knight/Animations/Knight_Prototype.controller",
+            "Assets/_Project/Art/Characters/Monsters/Goblin/Animations/Goblin_Prototype.controller"
+        };
+
         private static readonly string[] RequiredDocs =
         {
             "docs/art-guide.md",
-            "docs/asset-list.md"
+            "docs/asset-list.md",
+            "docs/v05-art-integration-plan.md"
         };
 
         [MenuItem("Tools/RuneGate/Validate Project")]
@@ -220,6 +291,12 @@ namespace RuneGate.Editor
 
         [MenuItem("Tools/RuneGate/Validate v0.4 Content Prototype")]
         public static void ValidateV04FromMenu()
+        {
+            ValidateFromMenu();
+        }
+
+        [MenuItem("Tools/RuneGate/Validate v0.5 Art Prototype")]
+        public static void ValidateV05FromMenu()
         {
             ValidateFromMenu();
         }
@@ -316,6 +393,16 @@ namespace RuneGate.Editor
                 }
             }
 
+            for (int i = 0; i < RequiredV05Assets.Length; i++)
+            {
+                if (!File.Exists(ToProjectPath(RequiredV05Assets[i])))
+                {
+                    errors.Add($"Missing v0.5 art prototype asset: {RequiredV05Assets[i]}");
+                }
+            }
+
+            ValidateV05VisualLinks(errors);
+
             SaveData defaultSave = SaveManager.CreateDefaultSave();
             if (defaultSave == null || defaultSave.unlockedStageIds == null || !defaultSave.unlockedStageIds.Contains(SaveManager.DefaultUnlockedStageId))
             {
@@ -357,6 +444,41 @@ namespace RuneGate.Editor
             if (AssetDatabase.LoadAssetAtPath<T>(assetPath) == null)
             {
                 errors.Add($"Invalid {label}: {assetPath}");
+            }
+        }
+
+        private static void ValidateV05VisualLinks(List<string> errors)
+        {
+            HeroData knight = AssetDatabase.LoadAssetAtPath<HeroData>("Assets/_Project/Data/Heroes/Knight.asset");
+            if (knight == null)
+            {
+                return;
+            }
+
+            if (knight.Prefab == null)
+            {
+                errors.Add("Knight HeroData is missing the v0.5 hero prefab link. Run Tools/RuneGate/Bootstrap v0.5 Art Prototype.");
+            }
+
+            if (knight.AnimatorController == null)
+            {
+                errors.Add("Knight HeroData is missing the v0.5 animator controller link. Run Tools/RuneGate/Bootstrap v0.5 Art Prototype.");
+            }
+
+            MonsterData goblin = AssetDatabase.LoadAssetAtPath<MonsterData>("Assets/_Project/Data/Monsters/Goblin.asset");
+            if (goblin == null)
+            {
+                return;
+            }
+
+            if (goblin.Prefab == null)
+            {
+                errors.Add("Goblin MonsterData is missing the v0.5 monster prefab link. Run Tools/RuneGate/Bootstrap v0.5 Art Prototype.");
+            }
+
+            if (goblin.AnimatorController == null)
+            {
+                errors.Add("Goblin MonsterData is missing the v0.5 animator controller link. Run Tools/RuneGate/Bootstrap v0.5 Art Prototype.");
             }
         }
     }

@@ -16,6 +16,7 @@ namespace RuneGate
         [SerializeField] private float radius = 1.2f;
         [SerializeField] private TargetingType targetingType = TargetingType.First;
         [SerializeField] private ElementType element = ElementType.None;
+        [SerializeField] private Sprite icon;
 
         public string SkillId => skillId;
         public string DisplayName => displayName;
@@ -28,5 +29,6 @@ namespace RuneGate
         public float Radius => radius;
         public TargetingType TargetingType => targetingType;
         public ElementType Element => element;
+        public Sprite Icon => icon;
     }
 }

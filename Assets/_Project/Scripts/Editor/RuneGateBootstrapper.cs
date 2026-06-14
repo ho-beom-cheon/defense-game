@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -40,29 +41,82 @@ namespace RuneGate.Editor
             RootPath + "/Data/Rosters",
             RootPath + "/Prefabs/Heroes",
             RootPath + "/Prefabs/Monsters",
+            RootPath + "/Prefabs/Projectiles",
+            RootPath + "/Prefabs/Effects",
             RootPath + "/Prefabs/UI",
             RootPath + "/Scenes",
             RootPath + "/Art/Characters/Heroes/Knight",
+            RootPath + "/Art/Characters/Heroes/Knight/Sprites",
+            RootPath + "/Art/Characters/Heroes/Knight/Animations",
+            RootPath + "/Art/Characters/Heroes/Knight/Materials",
             RootPath + "/Art/Characters/Heroes/Archer",
+            RootPath + "/Art/Characters/Heroes/Archer/Sprites",
+            RootPath + "/Art/Characters/Heroes/Archer/Animations",
+            RootPath + "/Art/Characters/Heroes/Archer/Materials",
             RootPath + "/Art/Characters/Heroes/FireMage",
+            RootPath + "/Art/Characters/Heroes/FireMage/Sprites",
+            RootPath + "/Art/Characters/Heroes/FireMage/Animations",
+            RootPath + "/Art/Characters/Heroes/FireMage/Materials",
             RootPath + "/Art/Characters/Heroes/Cleric",
+            RootPath + "/Art/Characters/Heroes/Cleric/Sprites",
+            RootPath + "/Art/Characters/Heroes/Cleric/Animations",
+            RootPath + "/Art/Characters/Heroes/Cleric/Materials",
             RootPath + "/Art/Characters/Heroes/DwarfEngineer",
+            RootPath + "/Art/Characters/Heroes/DwarfEngineer/Sprites",
+            RootPath + "/Art/Characters/Heroes/DwarfEngineer/Animations",
+            RootPath + "/Art/Characters/Heroes/DwarfEngineer/Materials",
             RootPath + "/Art/Characters/Heroes/Assassin",
+            RootPath + "/Art/Characters/Heroes/Assassin/Sprites",
+            RootPath + "/Art/Characters/Heroes/Assassin/Animations",
+            RootPath + "/Art/Characters/Heroes/Assassin/Materials",
             RootPath + "/Art/Characters/Monsters/Goblin",
+            RootPath + "/Art/Characters/Monsters/Goblin/Sprites",
+            RootPath + "/Art/Characters/Monsters/Goblin/Animations",
+            RootPath + "/Art/Characters/Monsters/Goblin/Materials",
             RootPath + "/Art/Characters/Monsters/Wolf",
+            RootPath + "/Art/Characters/Monsters/Wolf/Sprites",
+            RootPath + "/Art/Characters/Monsters/Wolf/Animations",
+            RootPath + "/Art/Characters/Monsters/Wolf/Materials",
             RootPath + "/Art/Characters/Monsters/Orc",
+            RootPath + "/Art/Characters/Monsters/Orc/Sprites",
+            RootPath + "/Art/Characters/Monsters/Orc/Animations",
+            RootPath + "/Art/Characters/Monsters/Orc/Materials",
             RootPath + "/Art/Characters/Monsters/Bat",
+            RootPath + "/Art/Characters/Monsters/Bat/Sprites",
+            RootPath + "/Art/Characters/Monsters/Bat/Animations",
+            RootPath + "/Art/Characters/Monsters/Bat/Materials",
             RootPath + "/Art/Characters/Monsters/Slime",
+            RootPath + "/Art/Characters/Monsters/Slime/Sprites",
+            RootPath + "/Art/Characters/Monsters/Slime/Animations",
+            RootPath + "/Art/Characters/Monsters/Slime/Materials",
             RootPath + "/Art/Characters/Monsters/Skeleton",
+            RootPath + "/Art/Characters/Monsters/Skeleton/Sprites",
+            RootPath + "/Art/Characters/Monsters/Skeleton/Animations",
+            RootPath + "/Art/Characters/Monsters/Skeleton/Materials",
             RootPath + "/Art/Characters/Bosses/OrcWarlord",
+            RootPath + "/Art/Characters/Bosses/OrcWarlord/Sprites",
+            RootPath + "/Art/Characters/Bosses/OrcWarlord/Animations",
+            RootPath + "/Art/Characters/Bosses/OrcWarlord/Materials",
             RootPath + "/Art/Effects/Skills",
             RootPath + "/Art/Effects/Hit",
+            RootPath + "/Art/Effects/Projectiles",
+            RootPath + "/Art/Effects/Death",
             RootPath + "/Art/UI/Icons",
+            RootPath + "/Art/UI/Icons/Heroes",
+            RootPath + "/Art/UI/Icons/Skills",
+            RootPath + "/Art/UI/Icons/Runes",
+            RootPath + "/Art/UI/Icons/Upgrades",
             RootPath + "/Art/UI/Buttons",
             RootPath + "/Art/UI/Panels",
+            RootPath + "/Art/UI/Bars",
             RootPath + "/Art/UI/Runes",
             RootPath + "/Art/Backgrounds",
+            RootPath + "/Art/Placeholders",
+            RootPath + "/Art/Audio/SFX",
+            RootPath + "/Art/Audio/BGM",
             RootPath + "/Audio",
+            RootPath + "/Audio/SFX",
+            RootPath + "/Audio/BGM",
             RootPath + "/Resources"
         };
 
@@ -88,6 +142,14 @@ namespace RuneGate.Editor
             ContentBundle content = BootstrapContentAndScenes();
             Debug.Log("RuneGate v0.4 content prototype bootstrap complete. Open Assets/_Project/Scenes/TitleScene.unity and press Play.");
             Selection.activeObject = content.DefaultFormation;
+        }
+
+        [MenuItem("Tools/RuneGate/Bootstrap v0.5 Art Prototype")]
+        public static void BootstrapV05ArtPrototype()
+        {
+            ContentBundle content = BootstrapContentAndScenes(true);
+            Debug.Log("RuneGate v0.5 art prototype bootstrap complete. Open Assets/_Project/Scenes/TitleScene.unity and press Play.");
+            Selection.activeObject = content.Heroes != null && content.Heroes.Length > 0 ? content.Heroes[0] : content.DefaultFormation;
         }
 
         [MenuItem("Tools/RuneGate/Bootstrap Content Prototype v0.4")]
@@ -118,16 +180,17 @@ namespace RuneGate.Editor
             AssetDatabase.Refresh();
         }
 
-        private static ContentBundle BootstrapContentAndScenes()
+        private static ContentBundle BootstrapContentAndScenes(bool includeArtPrototype = false)
         {
             EnsureRequiredFolders();
 
             ContentBundle content = CreateV04Content();
+            ArtPrototypeBundle artPrototype = includeArtPrototype ? CreateV05ArtPrototypeAssets(content) : null;
             UpgradeData[] upgrades = CreateSampleUpgrades();
 
             CreateOrUpdateTitleScene();
             CreateOrUpdateStageSelectScene(content.Stages);
-            CreateOrUpdateBattleScene(content.Stages[0], content.Runes, upgrades, content.Stages, content.HeroRoster, content.DefaultFormation);
+            CreateOrUpdateBattleScene(content.Stages[0], content.Runes, upgrades, content.Stages, content.HeroRoster, content.DefaultFormation, artPrototype);
             CreateOrUpdateUpgradeScene(upgrades);
             UpdateBuildSettings();
 
@@ -176,6 +239,66 @@ namespace RuneGate.Editor
                 Stages = stages,
                 HeroRoster = roster,
                 DefaultFormation = formation
+            };
+        }
+
+        private static ArtPrototypeBundle CreateV05ArtPrototypeAssets(ContentBundle content)
+        {
+            AnimatorController knightAnimator = CreateCharacterAnimatorController($"{RootPath}/Art/Characters/Heroes/Knight/Animations/Knight_Prototype.controller");
+            AnimatorController goblinAnimator = CreateCharacterAnimatorController($"{RootPath}/Art/Characters/Monsters/Goblin/Animations/Goblin_Prototype.controller");
+
+            GameObject hitEffectPrefab = CreateEffectPrefab(
+                $"{RootPath}/Prefabs/Effects/Effect_Hit_Small.prefab",
+                "Effect_Hit_Small",
+                new Color(1f, 0.92f, 0.35f, 0.9f),
+                new Vector2(0.42f, 0.42f),
+                10,
+                0.28f);
+
+            GameObject deathEffectPrefab = CreateEffectPrefab(
+                $"{RootPath}/Prefabs/Effects/Effect_Death_Small.prefab",
+                "Effect_Death_Small",
+                new Color(0.68f, 0.68f, 0.68f, 0.85f),
+                new Vector2(0.82f, 0.82f),
+                9,
+                0.42f);
+
+            GameObject projectilePrefab = CreateProjectilePrefab($"{RootPath}/Prefabs/Projectiles/Projectile_Arrow.prefab");
+            GameObject knightPrefab = CreateHeroVisualPrefab($"{RootPath}/Prefabs/Heroes/Hero_Knight.prefab", knightAnimator);
+            GameObject goblinPrefab = CreateMonsterVisualPrefab(
+                $"{RootPath}/Prefabs/Monsters/Monster_Goblin.prefab",
+                goblinAnimator,
+                hitEffectPrefab.GetComponent<AutoDestroyEffect>(),
+                deathEffectPrefab.GetComponent<AutoDestroyEffect>());
+
+            HeroData knight = FindHero(content, "hero_knight_001");
+            if (knight != null)
+            {
+                EditAsset(knight, serializedObject =>
+                {
+                    SetObject(serializedObject, "animatorController", knightAnimator);
+                    SetObject(serializedObject, "prefab", knightPrefab);
+                });
+            }
+
+            MonsterData goblin = FindMonster(content, "monster_goblin_001");
+            if (goblin != null)
+            {
+                EditAsset(goblin, serializedObject =>
+                {
+                    SetObject(serializedObject, "animatorController", goblinAnimator);
+                    SetObject(serializedObject, "prefab", goblinPrefab);
+                    SetBool(serializedObject, "isBoss", false);
+                });
+            }
+
+            return new ArtPrototypeBundle
+            {
+                KnightPrefab = knightPrefab,
+                GoblinPrefab = goblinPrefab,
+                ProjectilePrefab = projectilePrefab,
+                HitEffectPrefab = hitEffectPrefab,
+                DeathEffectPrefab = deathEffectPrefab
             };
         }
 
@@ -316,6 +439,7 @@ namespace RuneGate.Editor
                 SetInt(serializedObject, "rewardGold", rewardGold);
                 SetObject(serializedObject, "sprite", null);
                 SetObject(serializedObject, "animatorController", null);
+                SetBool(serializedObject, "isBoss", monsterType == MonsterType.Boss);
             });
             return asset;
         }
@@ -448,7 +572,197 @@ namespace RuneGate.Editor
             return asset;
         }
 
-        private static void CreateOrUpdateBattleScene(StageData stageData, IReadOnlyList<RuneData> runes, IReadOnlyList<UpgradeData> upgrades, IReadOnlyList<StageData> stages, HeroRosterData heroRoster, FormationData defaultFormation)
+        private static AnimatorController CreateCharacterAnimatorController(string assetPath)
+        {
+            AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(assetPath);
+            if (controller == null)
+            {
+                controller = AnimatorController.CreateAnimatorControllerAtPath(assetPath);
+            }
+
+            EnsureAnimatorParameter(controller, "IsMoving", AnimatorControllerParameterType.Bool);
+            EnsureAnimatorParameter(controller, "IsDead", AnimatorControllerParameterType.Bool);
+            EnsureAnimatorParameter(controller, "Attack", AnimatorControllerParameterType.Trigger);
+            EnsureAnimatorParameter(controller, "Hit", AnimatorControllerParameterType.Trigger);
+            EnsureAnimatorParameter(controller, "Skill", AnimatorControllerParameterType.Trigger);
+            EnsureAnimatorParameter(controller, "Death", AnimatorControllerParameterType.Trigger);
+            EnsureAnimatorState(controller, "Idle");
+            EnsureAnimatorState(controller, "Walk");
+            EnsureAnimatorState(controller, "Attack");
+            EnsureAnimatorState(controller, "Hit");
+            EnsureAnimatorState(controller, "Death");
+            EnsureAnimatorState(controller, "Skill");
+            EditorUtility.SetDirty(controller);
+            return controller;
+        }
+
+        private static void EnsureAnimatorParameter(AnimatorController controller, string parameterName, AnimatorControllerParameterType type)
+        {
+            AnimatorControllerParameter[] parameters = controller.parameters;
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i].name == parameterName)
+                {
+                    return;
+                }
+            }
+
+            controller.AddParameter(parameterName, type);
+        }
+
+        private static void EnsureAnimatorState(AnimatorController controller, string stateName)
+        {
+            AnimatorStateMachine stateMachine = controller.layers[0].stateMachine;
+            ChildAnimatorState[] states = stateMachine.states;
+            for (int i = 0; i < states.Length; i++)
+            {
+                if (states[i].state != null && states[i].state.name == stateName)
+                {
+                    return;
+                }
+            }
+
+            AnimatorState state = stateMachine.AddState(stateName);
+            if (stateName == "Idle")
+            {
+                stateMachine.defaultState = state;
+            }
+        }
+
+        private static GameObject CreateHeroVisualPrefab(string prefabPath, RuntimeAnimatorController animatorController)
+        {
+            GameObject root = new GameObject("Hero_Knight");
+            GameObject visual = CreatePrefabVisual("Visual", root.transform, new Color(0.45f, 0.62f, 1f), new Vector2(0.72f, 0.72f), 4);
+            Animator animator = visual.AddComponent<Animator>();
+            animator.runtimeAnimatorController = animatorController;
+
+            root.AddComponent<CharacterVisualController>();
+            root.AddComponent<HitFlashController>();
+            root.AddComponent<SkillController>();
+            root.AddComponent<HeroController>();
+            AddAnchor(root.transform, "HealthBarAnchor", new Vector3(0f, 0.58f, 0f));
+            AddAnchor(root.transform, "SkillEffectAnchor", new Vector3(0.22f, 0.2f, 0f));
+            CreatePrefabVisual("SelectionIndicator", root.transform, new Color(1f, 1f, 1f, 0.22f), new Vector2(0.9f, 0.12f), 2).transform.localPosition = new Vector3(0f, -0.44f, 0f);
+            return SavePrefab(root, prefabPath);
+        }
+
+        private static GameObject CreateMonsterVisualPrefab(string prefabPath, RuntimeAnimatorController animatorController, AutoDestroyEffect hitEffectPrefab, AutoDestroyEffect deathEffectPrefab)
+        {
+            GameObject root = new GameObject("Monster_Goblin");
+            GameObject visual = CreatePrefabVisual("Visual", root.transform, new Color(0.34f, 0.78f, 0.32f), new Vector2(0.62f, 0.62f), 5);
+            Animator animator = visual.AddComponent<Animator>();
+            animator.runtimeAnimatorController = animatorController;
+
+            root.AddComponent<CharacterVisualController>();
+            root.AddComponent<HitFlashController>();
+            MonsterController monsterController = root.AddComponent<MonsterController>();
+            CircleCollider2D collider = root.AddComponent<CircleCollider2D>();
+            collider.radius = 0.32f;
+            AddAnchor(root.transform, "HealthBarAnchor", new Vector3(0f, 0.52f, 0f));
+            Transform hitEffectAnchor = AddAnchor(root.transform, "HitEffectAnchor", new Vector3(0f, 0.16f, 0f));
+
+            EditComponent(monsterController, serializedObject =>
+            {
+                SetObject(serializedObject, "hitEffectPrefab", hitEffectPrefab);
+                SetObject(serializedObject, "deathEffectPrefab", deathEffectPrefab);
+                SetObject(serializedObject, "hitEffectAnchor", hitEffectAnchor);
+                SetFloat(serializedObject, "deathDestroyDelay", 0.35f);
+            });
+
+            return SavePrefab(root, prefabPath);
+        }
+
+        private static GameObject CreateProjectilePrefab(string prefabPath)
+        {
+            GameObject root = new GameObject("Projectile_Arrow");
+            root.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholderSprite = root.AddComponent<PlaceholderSprite>();
+            placeholderSprite.Configure(new Color(1f, 0.85f, 0.25f, 1f), new Vector2(0.22f, 0.08f), 8);
+            root.AddComponent<ProjectileController>();
+            return SavePrefab(root, prefabPath);
+        }
+
+        private static GameObject CreateEffectPrefab(string prefabPath, string prefabName, Color color, Vector2 size, int sortingOrder, float lifetime)
+        {
+            GameObject root = new GameObject(prefabName);
+            root.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholderSprite = root.AddComponent<PlaceholderSprite>();
+            placeholderSprite.Configure(color, size, sortingOrder);
+            AutoDestroyEffect autoDestroyEffect = root.AddComponent<AutoDestroyEffect>();
+            EditComponent(autoDestroyEffect, serializedObject =>
+            {
+                SetFloat(serializedObject, "lifetime", lifetime);
+                SetBool(serializedObject, "fadeOut", true);
+                SetBool(serializedObject, "scaleOut", true);
+            });
+            return SavePrefab(root, prefabPath);
+        }
+
+        private static GameObject CreatePrefabVisual(string objectName, Transform parent, Color color, Vector2 size, int sortingOrder)
+        {
+            GameObject visualObject = new GameObject(objectName);
+            visualObject.transform.SetParent(parent);
+            visualObject.transform.localPosition = Vector3.zero;
+            visualObject.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholderSprite = visualObject.AddComponent<PlaceholderSprite>();
+            placeholderSprite.Configure(color, size, sortingOrder);
+            return visualObject;
+        }
+
+        private static Transform AddAnchor(Transform parent, string anchorName, Vector3 localPosition)
+        {
+            GameObject anchor = new GameObject(anchorName);
+            anchor.transform.SetParent(parent);
+            anchor.transform.localPosition = localPosition;
+            return anchor.transform;
+        }
+
+        private static GameObject SavePrefab(GameObject root, string prefabPath)
+        {
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+            UnityEngine.Object.DestroyImmediate(root);
+            return prefab;
+        }
+
+        private static HeroData FindHero(ContentBundle content, string heroId)
+        {
+            if (content == null || content.Heroes == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < content.Heroes.Length; i++)
+            {
+                HeroData hero = content.Heroes[i];
+                if (hero != null && hero.HeroId == heroId)
+                {
+                    return hero;
+                }
+            }
+
+            return null;
+        }
+
+        private static MonsterData FindMonster(ContentBundle content, string monsterId)
+        {
+            if (content == null || content.Monsters == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < content.Monsters.Length; i++)
+            {
+                MonsterData monster = content.Monsters[i];
+                if (monster != null && monster.MonsterId == monsterId)
+                {
+                    return monster;
+                }
+            }
+
+            return null;
+        }
+
+        private static void CreateOrUpdateBattleScene(StageData stageData, IReadOnlyList<RuneData> runes, IReadOnlyList<UpgradeData> upgrades, IReadOnlyList<StageData> stages, HeroRosterData heroRoster, FormationData defaultFormation, ArtPrototypeBundle artPrototype = null)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -456,7 +770,7 @@ namespace RuneGate.Editor
             cameraObject.tag = "MainCamera";
             Camera camera = cameraObject.AddComponent<Camera>();
             camera.orthographic = true;
-            camera.orthographicSize = 5f;
+            camera.orthographicSize = 5.8f;
             camera.backgroundColor = new Color(0.06f, 0.08f, 0.1f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             cameraObject.transform.position = new Vector3(0f, 0f, -10f);
@@ -468,9 +782,15 @@ namespace RuneGate.Editor
             RuneManager runeManager = root.AddComponent<RuneManager>();
             RuneEffectApplier runeEffectApplier = root.AddComponent<RuneEffectApplier>();
             HeroPlacementManager heroPlacementManager = root.AddComponent<HeroPlacementManager>();
+            root.AddComponent<AudioManager>();
 
             GameObject crystalObject = CreatePlaceholderObject("Kingdom Crystal", null, new Vector3(-5.5f, 0f, 0f), new Color(0.25f, 0.92f, 1f), new Vector2(0.7f, 3.2f), 3);
+            HitFlashController crystalHitFlash = crystalObject.AddComponent<HitFlashController>();
             CrystalController crystalController = crystalObject.AddComponent<CrystalController>();
+            EditComponent(crystalController, serializedObject =>
+            {
+                SetObject(serializedObject, "hitFlashController", crystalHitFlash);
+            });
 
             GameObject laneRoot = new GameObject("Lane Points");
             Transform[] spawnPoints = new Transform[3];
@@ -877,6 +1197,15 @@ namespace RuneGate.Editor
             public StageData[] Stages;
             public HeroRosterData HeroRoster;
             public FormationData DefaultFormation;
+        }
+
+        private sealed class ArtPrototypeBundle
+        {
+            public GameObject KnightPrefab;
+            public GameObject GoblinPrefab;
+            public GameObject ProjectilePrefab;
+            public GameObject HitEffectPrefab;
+            public GameObject DeathEffectPrefab;
         }
 
         private readonly struct SpawnPlan

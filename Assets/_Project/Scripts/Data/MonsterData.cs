@@ -15,6 +15,8 @@ namespace RuneGate
         [SerializeField] private int rewardGold = 1;
         [SerializeField] private Sprite sprite;
         [SerializeField] private RuntimeAnimatorController animatorController;
+        [SerializeField] private GameObject prefab;
+        [SerializeField] private bool isBoss;
 
         public string MonsterId => monsterId;
         public string DisplayName => displayName;
@@ -26,5 +28,7 @@ namespace RuneGate
         public int RewardGold => rewardGold;
         public Sprite Sprite => sprite;
         public RuntimeAnimatorController AnimatorController => animatorController;
+        public GameObject Prefab => prefab;
+        public bool IsBoss => isBoss || monsterType == MonsterType.Boss;
     }
 }

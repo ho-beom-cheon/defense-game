@@ -55,6 +55,8 @@ namespace RuneGate
             string status = GetStatusText(skillController);
             bool canUse = battleManager.CurrentState == BattleState.WaveRunning && skillController != null && skillController.CanUseSkill;
 
+            Color previousColor = GUI.backgroundColor;
+            GUI.backgroundColor = canUse ? new Color(0.75f, 1f, 0.75f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
             GUI.enabled = canUse;
             if (GUILayout.Button($"{hero.Data.DisplayName}: {skillName}\n{status}", GUILayout.Height(48f)))
             {
@@ -62,6 +64,7 @@ namespace RuneGate
             }
 
             GUI.enabled = true;
+            GUI.backgroundColor = previousColor;
         }
 
         private string GetStatusText(SkillController skillController)
