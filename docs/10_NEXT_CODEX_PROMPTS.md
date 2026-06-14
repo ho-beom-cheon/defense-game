@@ -174,3 +174,70 @@ Rules:
 - Prefer simple reliable gameplay over complex effects.
 - After changes, explain exactly how to test in Unity.
 ```
+
+## 5. v0.4 콘텐츠/배치 준비 프롬프트
+
+```text
+You are working on the Unity 6 project RuneGate Defense.
+
+Do not rely on prior chat context.
+Use repository files and markdown docs as the source of truth.
+
+Read first:
+- RUNEGATE_MASTER_PLAN.md
+- docs/00_PROJECT_CONTEXT.md
+- docs/01_GAME_DESIGN_DOCUMENT.md
+- docs/02_DEVELOPMENT_ROADMAP.md
+- docs/03_CODEX_IMPLEMENTATION_GUIDE.md
+- docs/04_SYSTEM_ARCHITECTURE.md
+- docs/05_CONTENT_AND_BALANCE_SPEC.md
+- docs/06_UI_UX_SPEC.md
+- docs/08_TEST_AND_QA_PLAN.md
+- README.md
+
+Current expected state:
+- v0.3 progression loop exists:
+  Title -> Stage Select -> Battle -> Result -> Upgrade -> Save -> Stage Select.
+- Local JSON save exists.
+- Stage 1/2/3 progression exists.
+- Permanent upgrades exist for crystal max HP, hero attack, hero attack speed, and skill cooldown.
+
+Next goal:
+Implement RuneGate Defense v0.4 content and placement preparation.
+
+Scope:
+- Prepare hero placement structure without drag-and-drop polish.
+- Add placeholder data for 6 MVP heroes:
+  Knight, Archer, Mage, Priest, Engineer, Assassin.
+- Add placeholder data for 6 MVP monsters:
+  Goblin, Orc, Wolf, Bat, Slime, Skeleton.
+- Add Orc Warlord boss data and one boss wave.
+- Keep ScriptableObject-driven balance data.
+- Keep placeholder sprites or primitive visuals only.
+- Add one first art integration sample hook if safe, but do not import paid assets.
+- Add audio placeholder hooks for hit, skill, victory, and defeat.
+- Update Bootstrap Progression Prototype and Validate Project.
+- Update README and relevant docs.
+
+Restrictions:
+- No ads.
+- No IAP.
+- No login.
+- No server code.
+- No analytics.
+- No Firebase.
+- No Addressables.
+- No external packages.
+- No paid assets.
+- No gacha.
+- No multiplayer.
+- No ranking.
+- No cloud save.
+- Do not replace the current battle/progression architecture.
+
+After implementation:
+- Run Unity validation if possible.
+- List created/modified files.
+- Explain manual Unity test steps.
+- Report compile or validation limitations honestly.
+```

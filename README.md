@@ -31,6 +31,44 @@ This creates or updates:
 
 The older menu alias `Tools/RuneGate/Bootstrap MVP` is also available.
 
+## Bootstrap Progression Prototype
+
+For the v0.3 game shell, run:
+
+`Tools/RuneGate/Bootstrap Progression Prototype`
+
+This creates or updates:
+
+- Scenes: `TitleScene`, `StageSelectScene`, `BattleScene`, `UpgradeScene`
+- Sample stages: Goblin Forest 1, 2, 3
+- Sample upgrades: Crystal Reinforcement, Hero Training, Battle Rhythm, Skill Practice
+- Build Settings scene order for Title -> Stage Select -> Battle -> Upgrade
+
+Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Play.
+
+## Bootstrap v0.4 Content Prototype
+
+In Unity, run:
+
+`Tools/RuneGate/Bootstrap v0.4 Content Prototype`
+
+Aliases are also available:
+
+- `Tools/RuneGate/Bootstrap Content Prototype v0.4`
+- `Tools/RuneGate/Bootstrap Content v0.4`
+
+This creates or updates:
+
+- 6 MVP heroes, 6 MVP monsters, and 1 Orc Warlord boss
+- 6 MVP hero skills
+- 20 rune cards
+- Goblin Forest stages 1-10
+- Default 3 lane x 3 slot formation data
+- Title, Stage Select, Battle, and Upgrade scenes
+- v0.4 art folder structure
+
+Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Play.
+
 ## Project Docs
 
 - `RUNEGATE_MASTER_PLAN.md`
@@ -41,20 +79,26 @@ The older menu alias `Tools/RuneGate/Bootstrap MVP` is also available.
 - `docs/04_SYSTEM_ARCHITECTURE.md`
 - `docs/08_TEST_AND_QA_PLAN.md`
 - `docs/10_NEXT_CODEX_PROMPTS.md`
+- `RUNEGATE_NEXT_TASKS_INDEX.md`
+- `docs/11_TASK_V03_PROGRESSION_LOOP.md`
+- `docs/12_TASK_V04_CONTENT_EXPANSION_AND_PLACEMENT.md`
+- `docs/art-guide.md`
+- `docs/asset-list.md`
 
 ## How To Play
 
-1. Run `Tools/RuneGate/Bootstrap Playable Prototype`.
-2. Open `Assets/_Project/Scenes/BattleScene.unity`.
+1. Run `Tools/RuneGate/Bootstrap Progression Prototype`.
+2. Open `Assets/_Project/Scenes/TitleScene.unity`.
 3. Press Play.
-4. Watch Goblins and Orcs spawn from the right side and move through 3 lanes.
-5. Knight and Archer attack automatically when monsters enter range.
-6. Confirm monsters show HP bars and flash when hit.
-7. Click skill buttons and confirm cooldown text disables them until ready.
-8. After the first non-final wave clears, choose 1 of 3 rune cards.
-9. Confirm the selected rune changes hero ATK/SPD or heals the crystal.
-10. Clear all waves for Victory, or let the crystal reach 0 HP for Defeat.
-11. Click Restart on the result panel to start the battle again.
+4. Start or Continue to Stage Select.
+5. Confirm Stage 1 is unlocked and Stage 2/3 are locked on a fresh save.
+6. Select Stage 1 and clear the battle.
+7. Confirm Victory shows earned gold and unlocks Stage 2.
+8. Open Upgrade, buy an upgrade if enough gold is available, then return to Stage Select.
+9. Stop and restart Play Mode to confirm local save persistence.
+10. Use Reset Save on the Title scene to clear test progress.
+
+`Tools/RuneGate/Bootstrap Playable Prototype` still creates the standalone BattleScene-only prototype.
 
 ## Implemented
 
@@ -73,12 +117,27 @@ The older menu alias `Tools/RuneGate/Bootstrap MVP` is also available.
 - Monster death and gold reward tracking
 - Victory when all waves are cleared
 - Rune selection after non-final waves
-- Result panel with Restart button
+- Result panel with Retry, Upgrade, and Stage Select buttons
+- v0.3 title, stage select, result flow, upgrade screen, and local JSON save loop
+- Stage progression unlocks for Goblin Forest 1-10
+- Gold persistence policy:
+  - Victory awards 100% of battle gold
+  - Defeat awards 50% of battle gold
+- Permanent upgrade effects:
+  - `crystal_max_hp_flat`
+  - `hero_attack_percent`
+  - `hero_attack_speed_percent`
+  - `skill_cooldown_percent`
 - 3 lanes x 3 logical hero slot foundation
+- v0.4 formation data and runtime hero placement from local save
 - Runtime rune effects:
   - `hero_attack_percent`
   - `hero_attack_speed_percent`
   - `crystal_heal_flat`
+  - `skill_cooldown_percent`
+  - `hero_hp_percent`
+  - `boss_damage_percent`
+  - `monster_slow_percent`
 - Package-free placeholder visuals
 - Package-free Play Mode GUI
 - Unity Editor bootstrapper and project validator
@@ -113,6 +172,7 @@ Assets/_Project/
     Rune/
     Wave/
     Data/
+    Progression/
     Save/
     UI/
     Editor/
@@ -122,6 +182,9 @@ Assets/_Project/
     Skills/
     Runes/
     Stages/
+    Upgrades/
+    Formations/
+    Rosters/
   Prefabs/
     Heroes/
     Monsters/
@@ -129,9 +192,9 @@ Assets/_Project/
   Scenes/
   Art/
     Characters/
-    Monsters/
     Effects/
     UI/
+    Backgrounds/
   Audio/
   Resources/
 ```
@@ -160,13 +223,27 @@ For command-line validation when `Unity.exe` is available:
 & "C:\Path\To\Unity.exe" -batchmode -quit -projectPath "C:\workspace\defense-game" -executeMethod RuneGate.Editor.RuneGateProjectValidator.ValidateFromCommandLine -logFile "C:\workspace\defense-game\Logs\unity-validation.log"
 ```
 
+## Save Data
+
+Save data is stored locally as JSON:
+
+`Application.persistentDataPath/runegate_save.json`
+
+In the Unity Editor on Windows this is usually under:
+
+`%USERPROFILE%\AppData\LocalLow\<CompanyName>\<ProductName>\runegate_save.json`
+
+Use the Title scene `Reset Save` button during development testing.
+
 ## Next Development Checklist
 
-- Replace placeholder visuals with real 2D art.
+- Prepare hero placement without drag-and-drop polish.
+- Expand to 6 MVP heroes and 6 MVP monsters.
+- Add a boss wave for the Goblin Forest arc.
+- Integrate one representative art sample to validate the art pipeline.
+- Add audio placeholders for hit, skill, victory, and defeat feedback.
+- Replace placeholder visuals with real 2D art after core loops settle.
 - Build real UGUI or TextMeshPro HUD after UI package decisions are made.
-- Add hero placement and upgrade flow.
 - Add explicit skill behavior types instead of placeholder direct/heal behavior.
 - Expand rune effects and stacking rules.
-- Add boss wave data and boss-specific behavior.
-- Add local save data for stage progress and settings.
 - Add Android build configuration once Unity Android modules are installed.

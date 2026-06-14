@@ -76,6 +76,9 @@ Assets/_Project/
 - RuneManager
 - RuneEffectApplier
 - LaneManager
+- GameSession
+- SaveManager
+- UpgradeManager
 
 ### 3.4 UI Layer
 
@@ -248,6 +251,51 @@ MVP 스킬:
 - Shield Bash: 근접 적에게 피해
 - Rapid Shot: 타겟에게 연속 피해 또는 높은 단일 피해
 
+### 4.11 GameSession
+
+역할:
+
+- StageSelectScene에서 선택한 StageData 전달
+- 마지막 BattleResult와 획득 골드 보관
+- Result/Upgrade/StageSelect 흐름 사이의 런타임 전환 데이터 유지
+
+주의:
+
+- MVP에서는 static session으로 충분하다.
+- 영구 저장 책임은 SaveManager가 담당한다.
+
+### 4.12 SaveManager
+
+역할:
+
+- `Application.persistentDataPath`에 JSON 로컬 저장
+- 기본 세이브 생성
+- totalGold, clearedStageIds, unlockedStageIds, upgradeLevels 저장
+- stage clear, gold change, upgrade purchase, reset save 후 저장
+
+주의:
+
+- MVP에서는 서버, 클라우드 저장, PlayerPrefs main save를 사용하지 않는다.
+
+### 4.13 UpgradeManager
+
+역할:
+
+- UpgradeData 목록 관리
+- 저장된 upgrade level 조회
+- 구매 비용 계산
+- 구매 시 골드 차감과 레벨 저장
+- 전투 시작 시 영구 업그레이드 효과 계산
+
+MVP effectKey:
+
+| effectKey | 효과 |
+|---|---|
+| `crystal_max_hp_flat` | 수정 최대 HP 증가 |
+| `hero_attack_percent` | 전체 영웅 공격력 증가 |
+| `hero_attack_speed_percent` | 전체 영웅 공격속도 증가 |
+| `skill_cooldown_percent` | 전체 스킬 쿨타임 감소 |
+
 ## 5. 데이터 클래스 설계
 
 ### 5.1 HeroData
@@ -370,6 +418,21 @@ BattleScene
     Lane2
   Heroes
   Monsters
+```
+
+v0.3 진행 루프 씬:
+
+```text
+TitleScene
+  TitleUI
+StageSelectScene
+  StageSelectUI
+BattleScene
+  BattleManager
+  StageResultUI
+UpgradeScene
+  UpgradeManager
+  UpgradeSceneUI
 ```
 
 ## 8. 성능 고려

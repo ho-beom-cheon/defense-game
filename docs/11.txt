@@ -1,0 +1,372 @@
+You are working on the Unity 6 project RuneGate Defense.
+
+Important:
+Do not rely on prior chat context.
+Use the repository files and markdown documents as the source of truth.
+
+First, inspect the repository.
+
+Read these files if they exist:
+- RUNEGATE_MASTER_PLAN.md
+- docs/00_PROJECT_CONTEXT.md
+- docs/01_GAME_DESIGN_DOCUMENT.md
+- docs/02_DEVELOPMENT_ROADMAP.md
+- docs/03_CODEX_IMPLEMENTATION_GUIDE.md
+- docs/04_SYSTEM_ARCHITECTURE.md
+- docs/05_CONTENT_AND_BALANCE_SPEC.md
+- docs/06_UI_UX_SPEC.md
+- docs/08_TEST_AND_QA_PLAN.md
+- README.md
+
+Current project state:
+The project already has a playable BattleScene prototype with:
+- 3 lanes
+- Kingdom Crystal HP
+- Knight and Archer heroes
+- Goblin and Orc monsters
+- Wave spawning
+- Hero auto attack
+- Manual skill buttons
+- Rune selection after non-final waves
+- Runtime rune effects:
+  - hero_attack_percent
+  - hero_attack_speed_percent
+  - crystal_heal_flat
+- Victory and Defeat states
+- Placeholder visuals
+- No server
+- No login
+- No gacha
+- No ads
+- No IAP
+- No analytics
+- No external paid APIs
+
+Next goal:
+Implement RuneGate Defense v0.3 Progression Loop.
+
+The goal is to connect the game flow outside battle:
+
+Title
+→ Stage Select
+→ Battle
+→ Result
+→ Upgrade
+→ Save
+→ Stage Select
+
+This version should make the prototype feel like an actual game shell, not just a standalone battle scene.
+
+Scope:
+
+1. Scene flow
+
+Create or update these scenes:
+- Assets/_Project/Scenes/TitleScene.unity
+- Assets/_Project/Scenes/StageSelectScene.unity
+- Assets/_Project/Scenes/BattleScene.unity
+- Assets/_Project/Scenes/UpgradeScene.unity
+
+If scene generation is risky in code, create Editor bootstrap tools that generate them safely.
+
+Scene requirements:
+
+TitleScene:
+- Shows game title: RuneGate Defense
+- Has Start button
+- Has Continue button if save data exists
+- Has Reset Save button for development testing
+- Start/Continue should move to StageSelectScene
+
+StageSelectScene:
+- Shows available stages
+- At minimum, show Stage 1, Stage 2, Stage 3 placeholders
+- Stage 1 should be playable by default
+- Stage 2 unlocks after Stage 1 clear
+- Stage 3 unlocks after Stage 2 clear
+- Locked stages should be visible but not selectable
+- Selecting a stage should start BattleScene with the selected StageData
+
+BattleScene:
+- Should no longer rely only on hardcoded sample stage loading if avoidable
+- It should accept selected StageData from a central session/context object
+- If no selected stage exists, fall back to Goblin Forest 1 sample stage
+- On Victory or Defeat, go to Result flow instead of only showing a local placeholder panel
+- Keep the existing battle behavior working
+
+Result flow:
+- Show Victory or Defeat
+- Show earned gold
+- Show stage clear status
+- Buttons:
+  - Retry
+  - Upgrade
+  - Stage Select
+- Victory should mark the selected stage as cleared
+- Victory should unlock the next stage
+- Gold should be saved
+
+UpgradeScene:
+- Show player total gold
+- Show upgrade list
+- Allow buying upgrades if enough gold
+- Save purchased upgrade levels
+- Return to Stage Select
+
+2. Save system
+
+Implement local save only.
+
+Create:
+- SaveData.cs
+- SaveManager.cs
+- PlayerProgress.cs or equivalent if useful
+
+Save location:
+- Use Application.persistentDataPath
+- Store JSON save file locally
+- Do not use cloud save
+- Do not use server
+- Do not use PlayerPrefs for the main save if a JSON save manager exists
+
+SaveData should include:
+- int totalGold
+- List<string> clearedStageIds
+- List<string> unlockedStageIds
+- Dictionary<string, int> upgradeLevels or serializable equivalent
+- string lastSelectedStageId
+- bool hasSeenIntro optional
+
+Because Unity JsonUtility does not serialize Dictionary directly, use a serializable list structure if needed.
+
+Required SaveManager behavior:
+- Load save on startup
+- Create default save if no save exists
+- Save after:
+  - stage clear
+  - gold change
+  - upgrade purchase
+  - reset save
+- Reset save for development testing
+- Add null guards and warnings
+
+3. Game session/context
+
+Create a simple runtime session object.
+
+Suggested:
+- GameSession.cs
+
+Responsibilities:
+- Hold selected StageData or selected stageId
+- Hold last battle result
+- Hold earned gold from the last run
+- Provide transition data between StageSelect, Battle, Result, and Upgrade
+
+Avoid overengineering.
+Do not add dependency injection frameworks.
+Do not add networking.
+A simple static runtime session is acceptable for prototype if documented.
+
+4. Stage data expansion
+
+Create or update StageData assets:
+
+- stage_goblin_forest_01
+- stage_goblin_forest_02
+- stage_goblin_forest_03
+
+Stage 1:
+- Easy Goblin/Orc mix
+- 2 waves
+
+Stage 2:
+- More Goblins
+- Faster pacing
+- 3 waves
+
+Stage 3:
+- More Orcs
+- Higher crystal pressure
+- 3 waves
+
+Do not implement all 10 stages yet.
+Only create enough to test progression.
+
+5. Upgrade system
+
+Create ScriptableObject:
+- UpgradeData.cs
+
+Fields:
+- string upgradeId
+- string displayName
+- string description
+- int baseCost
+- float costMultiplier
+- int maxLevel
+- string effectKey
+- float valuePerLevel
+
+Create:
+- UpgradeManager.cs
+- UpgradeEntryUI.cs or simple OnGUI-based equivalent
+
+Implement at least 4 upgrades:
+- crystal_max_hp_flat
+- hero_attack_percent
+- hero_attack_speed_percent
+- skill_cooldown_percent
+
+Upgrade effects should be applied when battle starts.
+
+Example upgrades:
+- Crystal Reinforcement
+  - crystal_max_hp_flat
+  - +20 max crystal HP per level
+- Hero Training
+  - hero_attack_percent
+  - +5% hero attack per level
+- Battle Rhythm
+  - hero_attack_speed_percent
+  - +3% attack speed per level
+- Skill Practice
+  - skill_cooldown_percent
+  - -3% skill cooldown per level
+
+6. Battle integration
+
+Update battle initialization so it applies:
+- selected StageData
+- permanent upgrade effects
+- then battle runtime rune effects
+
+Order:
+1. Base data from ScriptableObjects
+2. Permanent upgrades from SaveData
+3. Temporary runes selected during the current battle
+
+Do not mutate ScriptableObject base values at runtime.
+Use runtime stat copies.
+
+7. UI restrictions
+
+Keep UI simple.
+Use existing placeholder GUI style if the project currently avoids TextMeshPro and UGUI complexity.
+
+Allowed:
+- UnityEngine.UI if already used safely
+- OnGUI placeholder UI if that is how the current prototype works
+
+Do not add TextMeshPro package manually unless already present.
+Do not add external UI packages.
+
+8. Bootstrapper update
+
+Update the existing RuneGateBootstrapper.
+
+Add or update menu item:
+Tools/RuneGate/Bootstrap Progression Prototype
+
+It should:
+- Ensure required folders exist
+- Create sample stage assets
+- Create sample upgrade assets
+- Create or update TitleScene
+- Create or update StageSelectScene
+- Create or update BattleScene
+- Create or update UpgradeScene
+- Preserve existing data if possible
+- Avoid destroying custom user edits unnecessarily
+- Log clearly what it created or skipped
+
+Keep existing menu:
+Tools/RuneGate/Bootstrap Playable Prototype
+
+Do not remove existing functionality.
+
+9. Validation
+
+Add or update project validator:
+Tools/RuneGate/Validate Project
+
+Validator should check:
+- Required folders exist
+- Required scenes exist
+- Required sample stage assets exist
+- Required upgrade assets exist
+- SaveManager can create default save
+- BattleScene exists
+- No obvious null references in required bootstrap-created objects where feasible
+
+10. README update
+
+Update README.md with:
+- v0.3 Progression Loop summary
+- How to run Bootstrap Progression Prototype
+- How to test Title → Stage Select → Battle → Result → Upgrade → Save loop
+- Save file location
+- Reset save instructions
+- Current MVP exclusions
+- Next v0.4 plan
+
+11. Documentation update
+
+If docs exist, update:
+- docs/02_DEVELOPMENT_ROADMAP.md
+- docs/09_BACKLOG.md
+- docs/10_NEXT_CODEX_PROMPTS.md
+
+Add v0.4 plan:
+- hero placement preparation
+- 6 MVP heroes
+- 6 MVP monsters
+- boss wave
+- first art integration sample
+- audio placeholders
+
+Restrictions:
+- Do not add ads
+- Do not add IAP
+- Do not add login
+- Do not add server code
+- Do not add analytics
+- Do not add Firebase
+- Do not add Addressables yet
+- Do not add external packages
+- Do not import paid assets
+- Do not implement gacha
+- Do not implement multiplayer
+- Do not implement ranking
+- Do not implement cloud save
+- Do not focus on final art yet
+- Do not replace the current battle system with an unrelated architecture
+
+Manual test criteria:
+1. Open Unity.
+2. Run Tools/RuneGate/Bootstrap Progression Prototype.
+3. Open TitleScene.
+4. Press Play.
+5. Start or Continue leads to StageSelectScene.
+6. Stage 1 is unlocked.
+7. Stage 2 and Stage 3 are locked initially.
+8. Select Stage 1.
+9. BattleScene starts with Stage 1 data.
+10. Clear Stage 1.
+11. Result shows Victory and earned gold.
+12. Stage 2 unlocks.
+13. Go to UpgradeScene.
+14. Buy an upgrade.
+15. Return to StageSelectScene.
+16. Stop Play mode.
+17. Start Play mode again.
+18. Save data persists.
+19. Reset Save clears progress.
+
+After implementation:
+- Run Unity validation if possible.
+- If command-line Unity is available, run batchmode validation.
+- If not, explain manual Unity validation steps.
+- List created/modified files.
+- Report any compile or validation limitations.
+- Do not claim Unity tests passed unless they actually ran successfully.

@@ -12,7 +12,10 @@ namespace RuneGate
         [SerializeField] private WaveManager waveManager;
         [SerializeField] private RuneManager runeManager;
         [SerializeField] private RuneEffectApplier runeEffectApplier;
+        [SerializeField] private HeroPlacementManager heroPlacementManager;
         [SerializeField] private List<HeroController> heroes = new List<HeroController>();
+        [SerializeField] private List<UpgradeData> permanentUpgrades = new List<UpgradeData>();
+        [SerializeField] private bool rebuildHeroesFromFormation = true;
         [SerializeField] private bool autoStartOnStart = true;
 
         private StageData activeStageData;
@@ -33,6 +36,7 @@ namespace RuneGate
         public int GoldEarned => goldEarned;
         public StageData ActiveStageData => activeStageData;
         public IReadOnlyList<HeroController> Heroes => heroes;
+        public IReadOnlyList<UpgradeData> PermanentUpgrades => permanentUpgrades;
 
         private void Awake()
         {
@@ -42,9 +46,10 @@ namespace RuneGate
 
         private void Start()
         {
-            if (autoStartOnStart && initialStageData != null)
+            StageData selectedStageData = GameSession.SelectedStageData != null ? GameSession.SelectedStageData : initialStageData;
+            if (autoStartOnStart && selectedStageData != null)
             {
-                InitializeStage(initialStageData);
+                InitializeStage(selectedStageData);
                 StartNextWave();
             }
         }
@@ -85,7 +90,8 @@ namespace RuneGate
             goldEarned = 0;
             initialized = true;
 
-            crystalController?.Initialize(stageData.CrystalHp);
+            int crystalMaxHp = stageData.CrystalHp + UpgradeManager.GetCrystalMaxHpBonus(permanentUpgrades);
+            crystalController?.Initialize(crystalMaxHp);
             if (crystalController == null)
             {
                 Debug.LogWarning("BattleManager is missing CrystalController.");
@@ -100,10 +106,9 @@ namespace RuneGate
                 Debug.LogWarning("BattleManager is missing WaveManager.");
             }
 
-            for (int i = 0; i < heroes.Count; i++)
-            {
-                heroes[i]?.InitializeFromSerializedData();
-            }
+            BuildAndInitializeHeroes();
+
+            UpgradeManager.ApplyHeroUpgradeEffects(permanentUpgrades, heroes);
 
             SetState(BattleState.Preparing);
             WaveChanged?.Invoke(0, stageData.Waves.Count);
@@ -163,7 +168,7 @@ namespace RuneGate
 
         public void RestartBattle()
         {
-            StageData stageToRestart = activeStageData != null ? activeStageData : initialStageData;
+            StageData stageToRestart = activeStageData != null ? activeStageData : GameSession.SelectedStageData != null ? GameSession.SelectedStageData : initialStageData;
             if (stageToRestart == null)
             {
                 Debug.LogWarning("BattleManager cannot restart because StageData is missing.");
@@ -179,27 +184,53 @@ namespace RuneGate
         {
             if (laneManager == null)
             {
-                laneManager = FindFirstObjectByType<LaneManager>();
+                laneManager = FindAnyObjectByType<LaneManager>();
             }
 
             if (crystalController == null)
             {
-                crystalController = FindFirstObjectByType<CrystalController>();
+                crystalController = FindAnyObjectByType<CrystalController>();
             }
 
             if (waveManager == null)
             {
-                waveManager = FindFirstObjectByType<WaveManager>();
+                waveManager = FindAnyObjectByType<WaveManager>();
             }
 
             if (runeManager == null)
             {
-                runeManager = FindFirstObjectByType<RuneManager>();
+                runeManager = FindAnyObjectByType<RuneManager>();
             }
 
             if (runeEffectApplier == null)
             {
-                runeEffectApplier = FindFirstObjectByType<RuneEffectApplier>();
+                runeEffectApplier = FindAnyObjectByType<RuneEffectApplier>();
+            }
+
+            if (heroPlacementManager == null)
+            {
+                heroPlacementManager = FindAnyObjectByType<HeroPlacementManager>();
+            }
+        }
+
+        private void BuildAndInitializeHeroes()
+        {
+            if (rebuildHeroesFromFormation && heroPlacementManager != null)
+            {
+                IReadOnlyList<HeroController> runtimeHeroes = heroPlacementManager.BuildRuntimeFormation(laneManager);
+                heroes.Clear();
+                for (int i = 0; i < runtimeHeroes.Count; i++)
+                {
+                    if (runtimeHeroes[i] != null)
+                    {
+                        heroes.Add(runtimeHeroes[i]);
+                    }
+                }
+            }
+
+            for (int i = 0; i < heroes.Count; i++)
+            {
+                heroes[i]?.InitializeFromSerializedData();
             }
         }
 

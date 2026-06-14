@@ -14,30 +14,30 @@
 
 ## 2. 현재 상태
 
-현재 구현은 Battle Prototype v0.1이다.
+현재 구현 기준은 Battle Prototype v0.2 이후, v0.3 Progression Loop 단계다.
 
 - BattleScene 실행 가능
-- 3라인 표시
-- Crystal HP 표시
-- Wave/State/Gold 표시
-- Knight/Archer 스킬 버튼 표시
-- Placeholder 영웅/몬스터 표시
-- 몬스터 스폰 및 이동
+- 3라인 전투
+- Crystal HP / Wave / State / Gold 표시
+- Knight/Archer 자동 공격과 수동 스킬
+- Goblin/Orc 웨이브 스폰
+- 웨이브 사이 룬 3택1
+- Victory/Defeat 결과 흐름
+- Title / Stage Select / Upgrade / Save 루프 준비
 
 ## 3. 다음 목표
 
-다음 목표는 Battle Prototype v0.2다.
+다음 목표는 v0.4 콘텐츠/배치 준비다.
 
 핵심 목표:
 
 ```text
-Wave 1 진행
-→ Wave Clear
-→ Rune Selection
-→ Rune Apply
-→ Wave 2 진행
-→ Victory 또는 Defeat
-→ Restart
+Hero placement preparation
+→ 6 MVP heroes
+→ 6 MVP monsters
+→ Boss wave
+→ First art sample
+→ Audio placeholders
 ```
 
 ## 4. MVP 제한사항
@@ -86,4 +86,4 @@ MVP에는 다음을 넣지 않는다.
 
 Codex는 구현 전 반드시 관련 md 문서를 읽고 작업한다. 대화 맥락에 의존하지 않는다.
 
-다음 작업은 `docs/10_NEXT_CODEX_PROMPTS.md`의 `v0.2 구현 프롬프트`를 사용한다.
+다음 작업은 `docs/10_NEXT_CODEX_PROMPTS.md`의 `v0.4 콘텐츠/배치 준비 프롬프트`를 사용한다.

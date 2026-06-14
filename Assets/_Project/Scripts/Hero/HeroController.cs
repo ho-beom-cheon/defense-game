@@ -22,6 +22,9 @@ namespace RuneGate
         private float attackCooldown;
         private float attackMultiplier = 1f;
         private float attackSpeedMultiplier = 1f;
+        private float hpMultiplier = 1f;
+        private float bossDamageMultiplier = 1f;
+        private float healingMultiplier = 1f;
         private bool initialized;
 
         public event Action<int, int> HpChanged;
@@ -32,6 +35,7 @@ namespace RuneGate
         public int MaxHp => maxHp;
         public int EffectiveAttack => Mathf.Max(1, Mathf.RoundToInt(baseAttack * attackMultiplier));
         public float EffectiveAttackSpeed => Mathf.Max(0.01f, baseAttackSpeed * attackSpeedMultiplier);
+        public float HealingMultiplier => healingMultiplier;
         public int LaneIndex => laneIndex;
         public int HeroSlotIndex => heroSlotIndex;
         public bool IsAlive => initialized && currentHp > 0;
@@ -94,6 +98,9 @@ namespace RuneGate
             attackCooldown = 0f;
             attackMultiplier = 1f;
             attackSpeedMultiplier = 1f;
+            hpMultiplier = 1f;
+            bossDamageMultiplier = 1f;
+            healingMultiplier = 1f;
             initialized = true;
 
             if (skillController == null)
@@ -154,6 +161,31 @@ namespace RuneGate
             attackSpeedMultiplier = Mathf.Max(0.1f, attackSpeedMultiplier + percent);
         }
 
+        public void ApplyHeroHpPercent(float percent)
+        {
+            if (heroData == null)
+            {
+                return;
+            }
+
+            float nextMultiplier = Mathf.Max(0.1f, hpMultiplier + percent);
+            int previousMaxHp = maxHp;
+            hpMultiplier = nextMultiplier;
+            maxHp = Mathf.Max(1, Mathf.RoundToInt(heroData.MaxHp * hpMultiplier));
+            currentHp = Mathf.Clamp(currentHp + Mathf.Max(0, maxHp - previousMaxHp), 0, maxHp);
+            HpChanged?.Invoke(currentHp, maxHp);
+        }
+
+        public void ApplyBossDamagePercent(float percent)
+        {
+            bossDamageMultiplier = Mathf.Max(0.1f, bossDamageMultiplier + percent);
+        }
+
+        public void ApplyHealingPercent(float percent)
+        {
+            healingMultiplier = Mathf.Max(0.1f, healingMultiplier + percent);
+        }
+
         public void ApplySkillCooldownPercent(float percent)
         {
             skillController?.ApplyCooldownPercent(percent);
@@ -176,11 +208,22 @@ namespace RuneGate
             if (projectilePrefab != null)
             {
                 ProjectileController projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-                projectile.Initialize(target, EffectiveAttack);
+                projectile.Initialize(target, CalculateDamageAgainst(EffectiveAttack, target));
                 return;
             }
 
-            target.TakeDamage(EffectiveAttack);
+            target.TakeDamage(CalculateDamageAgainst(EffectiveAttack, target));
+        }
+
+        public int CalculateDamageAgainst(int baseDamage, MonsterController target)
+        {
+            float damage = Mathf.Max(0, baseDamage);
+            if (target != null && target.Data != null && target.Data.MonsterType == MonsterType.Boss)
+            {
+                damage *= bossDamageMultiplier;
+            }
+
+            return Mathf.Max(0, Mathf.RoundToInt(damage));
         }
 
         private MonsterController FindTarget(float range, TargetingType targetingType)

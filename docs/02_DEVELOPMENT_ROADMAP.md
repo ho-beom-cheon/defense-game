@@ -6,9 +6,9 @@
 |---|---|---|
 | v0.1 | 최초 전투 프로토타입 | 3라인, 몬스터 이동, HUD, 기본 영웅/몬스터 |
 | v0.2 | 전투 루프 완성 | 웨이브 → 룬 선택 → 다음 웨이브 → 승패 → 재시작 |
-| v0.3 | 콘텐츠 확장 | 영웅 6종, 몬스터 6종, 보스 1종 |
-| v0.4 | 영구 성장 | 골드, 업그레이드, 로컬 저장 |
-| v0.5 | 스테이지 구조 | 월드1 스테이지 10개, 스테이지 선택 |
+| v0.3 | 진행 루프 | Title, Stage Select, Battle Result, Upgrade, 로컬 저장 |
+| v0.4 | 콘텐츠/배치 준비 | 영웅 6종 준비, 몬스터 6종 준비, 보스 웨이브, 첫 아트/오디오 샘플 |
+| v0.5 | 스테이지 구조 확장 | 월드1 스테이지 10개, 스테이지 선택 개선 |
 | v0.6 | UX/튜토리얼 | 안내, 버튼, 결과 화면 개선 |
 | v0.7 | 아트 파이프라인 | Knight/Goblin 샘플 일러스트 적용 |
 | v0.8 | 폴리싱 | 사운드, 이펙트, 밸런스, 성능 |
@@ -69,59 +69,56 @@
 | Defeat | Crystal HP 0 시 패배 화면 |
 | Restart | 버튼 클릭 시 전투 초기화 |
 
-## 3. v0.3 상세 계획: 콘텐츠 확장
+## 3. v0.3 상세 계획: 진행 루프
 
 ### 3.1 목표
 
-플레이 양상을 다양화하기 위해 영웅과 몬스터를 늘린다.
+단독 전투 장면을 실제 게임 셸로 연결한다.
 
-### 3.2 추가 영웅
+```text
+Title
+→ Stage Select
+→ Battle
+→ Result
+→ Upgrade
+→ Save
+→ Stage Select
+```
 
-| 영웅 | 기능 |
+### 3.2 구현 기능
+
+| 기능 | 설명 |
 |---|---|
-| Mage | 범위 마법 피해 |
-| Priest | 수정 또는 영웅 회복 |
-| Engineer | 임시 포탑 설치 |
-| Assassin | 고HP 또는 보스 우선 피해 |
+| TitleScene | Start, Continue, Reset Save |
+| StageSelectScene | Stage 1~3 표시, 해금/잠금 처리 |
+| BattleScene 연동 | GameSession의 선택 StageData 사용, 없으면 Stage 1 fallback |
+| Result flow | Victory/Defeat, 획득 골드, Retry/Upgrade/Stage Select |
+| UpgradeScene | 골드로 영구 업그레이드 구매 |
+| SaveManager | `Application.persistentDataPath` JSON 저장 |
 
-### 3.3 추가 몬스터
-
-| 몬스터 | 기능 |
-|---|---|
-| Wolf | 빠른 이동 |
-| Bat | 특수 이동 또는 낮은 HP 빠른 침투 |
-| Slime | 사망 시 분열 |
-| Skeleton | 부활 확률 |
-
-### 3.4 보스
-
-- Orc Warlord
-- 고HP
-- 주기적으로 Goblin 소환
-- MVP에서는 단순 고HP 보스로 시작하고 소환은 후속 구현 가능
-
-## 4. v0.4 상세 계획: 영구 성장
-
-### 4.1 목표
-
-실패해도 성장하는 구조를 만든다.
-
-### 4.2 구현 기능
-
-- 전투 종료 보상 골드
-- 로컬 저장
-- 업그레이드 화면
-- 업그레이드 적용 후 다음 전투 반영
-
-### 4.3 업그레이드 목록
+### 3.3 업그레이드
 
 | 업그레이드 | 효과 |
 |---|---|
-| Crystal Max HP | 수정 최대 HP 증가 |
-| Hero Attack | 전체 영웅 공격력 증가 |
-| Hero HP | 전체 영웅 HP 증가 |
-| Skill Cooldown | 스킬 쿨타임 감소 |
-| Reward Gold | 보상 골드 증가 |
+| Crystal Reinforcement | `crystal_max_hp_flat` |
+| Hero Training | `hero_attack_percent` |
+| Battle Rhythm | `hero_attack_speed_percent` |
+| Skill Practice | `skill_cooldown_percent` |
+
+## 4. v0.4 상세 계획: 콘텐츠/배치 준비
+
+### 4.1 목표
+
+진행 루프 위에 콘텐츠 확장과 배치 시스템의 기반을 준비한다.
+
+### 4.2 구현 기능
+
+- Hero placement preparation
+- MVP 영웅 6종 준비: Knight, Archer, Mage, Priest, Engineer, Assassin
+- MVP 몬스터 6종 준비: Goblin, Orc, Wolf, Bat, Slime, Skeleton
+- Orc Warlord 보스 웨이브
+- 첫 아트 통합 샘플: Knight 또는 Goblin
+- 오디오 placeholder: hit, skill, victory, defeat
 
 ## 5. v0.5 상세 계획: 스테이지 구조
 
@@ -239,8 +236,8 @@
 | 단계 | 브랜치 |
 |---|---|
 | v0.2 | `codex/battle-loop-v02` |
-| v0.3 | `codex/content-expansion-v03` |
-| v0.4 | `codex/meta-progression-v04` |
+| v0.3 | `codex/progression-v03` |
+| v0.4 | `codex/content-placement-v04` |
 | v0.5 | `codex/stage-select-v05` |
 | v0.7 | `codex/art-pipeline-v07` |
 | v0.9 | `codex/android-build-v09` |

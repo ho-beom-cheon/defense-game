@@ -24,6 +24,7 @@ namespace RuneGate
         private float speedMultiplier = 1f;
         private bool initialized;
         private bool removedFromWave;
+        private bool revivedOnce;
         private Color originalSpriteColor = Color.white;
         private Transform hpBarRoot;
         private PlaceholderSprite hpBarFill;
@@ -37,6 +38,7 @@ namespace RuneGate
         public int MaxHp => maxHp;
         public int CurrentHp => currentHp;
         public int LaneIndex => laneIndex;
+        public bool IsBoss => monsterData != null && monsterData.MonsterType == MonsterType.Boss;
         public bool IsAlive => initialized && currentHp > 0 && !removedFromWave;
 
         private void Awake()
@@ -87,7 +89,14 @@ namespace RuneGate
             currentHp = maxHp;
             speedMultiplier = 1f;
             removedFromWave = false;
+            revivedOnce = false;
             initialized = true;
+
+            if (data.MonsterType == MonsterType.Boss)
+            {
+                hpBarSize = new Vector2(1.2f, 0.12f);
+                hpBarYOffset = 0.68f;
+            }
 
             if (spriteRenderer != null && data.Sprite != null)
             {
@@ -134,6 +143,11 @@ namespace RuneGate
                 return;
             }
 
+            if (TryHandlePrototypeDeathHook())
+            {
+                return;
+            }
+
             removedFromWave = true;
             Died?.Invoke(this);
             ownerWaveManager?.NotifyMonsterKilled(this);
@@ -164,6 +178,35 @@ namespace RuneGate
             {
                 originalSpriteColor = spriteRenderer.color;
             }
+        }
+
+        private bool TryHandlePrototypeDeathHook()
+        {
+            if (monsterData == null)
+            {
+                return false;
+            }
+
+            switch (monsterData.MonsterType)
+            {
+                case MonsterType.Undead:
+                    if (!revivedOnce)
+                    {
+                        revivedOnce = true;
+                        currentHp = Mathf.Max(1, maxHp / 2);
+                        HpChanged?.Invoke(currentHp, maxHp);
+                        UpdateHpBar();
+                        Debug.Log($"{monsterData.DisplayName} revived once as an Undead prototype hook.");
+                        return true;
+                    }
+
+                    break;
+                case MonsterType.Splitter:
+                    Debug.Log($"{monsterData.DisplayName} reached a Splitter death hook. Split spawn is reserved for a later prototype.");
+                    break;
+            }
+
+            return false;
         }
 
         private void EnsureRuntimeHpBar()

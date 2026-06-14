@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RuneGate
@@ -51,14 +52,12 @@ namespace RuneGate
                 return false;
             }
 
-            if (target == null || !target.IsAlive)
+            bool applied = ApplySkillEffect(caster, target);
+            if (!applied)
             {
-                Debug.Log($"Skill {skillData.DisplayName} had no valid monster target.");
                 return false;
             }
 
-            int totalDamage = Mathf.Max(0, skillData.Power) * Mathf.Max(1, skillData.DamageHitCount);
-            target.TakeDamage(totalDamage);
             StartCooldown();
             return true;
         }
@@ -73,6 +72,96 @@ namespace RuneGate
         {
             cooldownRemaining = CooldownDuration;
             CooldownChanged?.Invoke(cooldownRemaining, CooldownDuration);
+        }
+
+        private bool ApplySkillEffect(HeroController caster, MonsterController target)
+        {
+            string effectKey = string.IsNullOrWhiteSpace(skillData.EffectKey) ? "damage" : skillData.EffectKey;
+            switch (effectKey)
+            {
+                case "damage":
+                case "direct_damage":
+                case "multi_hit_damage":
+                    return ApplyDirectDamage(caster, target);
+                case "area_damage":
+                    return ApplyAreaDamage(caster, target);
+                case "crystal_heal_flat":
+                    return ApplyCrystalHeal(caster);
+                case "turret_placeholder":
+                    Debug.Log("Deploy Turret is reserved as a placement-system hook. Applying prototype damage if a target exists.");
+                    return target != null && target.IsAlive ? ApplyDirectDamage(caster, target) : ApplyCrystalHeal(caster);
+                default:
+                    Debug.Log($"Skill effect '{effectKey}' is reserved as a prototype hook. Falling back to direct damage.");
+                    return ApplyDirectDamage(caster, target);
+            }
+        }
+
+        private bool ApplyDirectDamage(HeroController caster, MonsterController target)
+        {
+            if (target == null || !target.IsAlive)
+            {
+                Debug.Log($"Skill {skillData.DisplayName} had no valid monster target.");
+                return false;
+            }
+
+            int totalDamage = Mathf.Max(0, skillData.Power) * Mathf.Max(1, skillData.DamageHitCount);
+            if (caster != null)
+            {
+                totalDamage = caster.CalculateDamageAgainst(totalDamage, target);
+            }
+
+            target.TakeDamage(totalDamage);
+            return true;
+        }
+
+        private bool ApplyAreaDamage(HeroController caster, MonsterController target)
+        {
+            if (target == null || !target.IsAlive)
+            {
+                Debug.Log($"Skill {skillData.DisplayName} had no valid area target.");
+                return false;
+            }
+
+            int baseDamage = Mathf.Max(0, skillData.Power) * Mathf.Max(1, skillData.DamageHitCount);
+            float radius = Mathf.Max(0.1f, skillData.Radius);
+            Collider2D[] hits = Physics2D.OverlapCircleAll(target.transform.position, radius);
+            HashSet<MonsterController> damagedMonsters = new HashSet<MonsterController>();
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                MonsterController monster = hits[i].GetComponentInParent<MonsterController>();
+                if (monster == null || !monster.IsAlive || damagedMonsters.Contains(monster))
+                {
+                    continue;
+                }
+
+                int damage = caster != null ? caster.CalculateDamageAgainst(baseDamage, monster) : baseDamage;
+                monster.TakeDamage(damage);
+                damagedMonsters.Add(monster);
+            }
+
+            if (damagedMonsters.Count == 0)
+            {
+                int damage = caster != null ? caster.CalculateDamageAgainst(baseDamage, target) : baseDamage;
+                target.TakeDamage(damage);
+            }
+
+            return true;
+        }
+
+        private bool ApplyCrystalHeal(HeroController caster)
+        {
+            CrystalController crystalController = FindAnyObjectByType<CrystalController>();
+            if (crystalController == null)
+            {
+                Debug.LogWarning($"Skill {skillData.DisplayName} could not find a CrystalController to heal.");
+                return false;
+            }
+
+            float healingMultiplier = caster != null ? caster.HealingMultiplier : 1f;
+            int healAmount = Mathf.Max(1, Mathf.RoundToInt(Mathf.Max(1, skillData.Power) * healingMultiplier));
+            crystalController.Heal(healAmount);
+            return true;
         }
     }
 }
