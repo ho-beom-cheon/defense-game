@@ -11,7 +11,10 @@ namespace RuneGate.Editor
     public static class RuneGateBootstrapper
     {
         private const string RootPath = "Assets/_Project";
+        private const string TitleScenePath = RootPath + "/Scenes/TitleScene.unity";
+        private const string StageSelectScenePath = RootPath + "/Scenes/StageSelectScene.unity";
         private const string BattleScenePath = RootPath + "/Scenes/BattleScene.unity";
+        private const string UpgradeScenePath = RootPath + "/Scenes/UpgradeScene.unity";
 
         private static readonly string[] RequiredFolders =
         {
@@ -23,6 +26,7 @@ namespace RuneGate.Editor
             RootPath + "/Scripts/Rune",
             RootPath + "/Scripts/Wave",
             RootPath + "/Scripts/Data",
+            RootPath + "/Scripts/Progression",
             RootPath + "/Scripts/Save",
             RootPath + "/Scripts/UI",
             RootPath + "/Scripts/Editor",
@@ -31,6 +35,7 @@ namespace RuneGate.Editor
             RootPath + "/Data/Skills",
             RootPath + "/Data/Runes",
             RootPath + "/Data/Stages",
+            RootPath + "/Data/Upgrades",
             RootPath + "/Prefabs/Heroes",
             RootPath + "/Prefabs/Monsters",
             RootPath + "/Prefabs/UI",
@@ -57,14 +62,44 @@ namespace RuneGate.Editor
             RuneData swordRune = CreateSwordRune();
             RuneData bowRune = CreateBowRune();
             RuneData healingRune = CreateHealingRune();
+            UpgradeData[] upgrades = CreateSampleUpgrades();
             StageData stage = CreateSampleStage(goblin, orc);
 
-            CreateOrUpdateBattleScene(stage, knight, archer, new[] { swordRune, bowRune, healingRune });
+            CreateOrUpdateBattleScene(stage, knight, archer, new[] { swordRune, bowRune, healingRune }, upgrades, new[] { stage });
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             Debug.Log("RuneGate playable prototype bootstrap complete. Open Assets/_Project/Scenes/BattleScene.unity and press Play.");
+        }
+
+        [MenuItem("Tools/RuneGate/Bootstrap Progression Prototype")]
+        public static void BootstrapProgressionPrototype()
+        {
+            EnsureRequiredFolders();
+
+            SkillData shieldBash = CreateShieldBash();
+            SkillData rapidShot = CreateRapidShot();
+            HeroData knight = CreateKnight(shieldBash);
+            HeroData archer = CreateArcher(rapidShot);
+            MonsterData goblin = CreateGoblin();
+            MonsterData orc = CreateOrc();
+            RuneData swordRune = CreateSwordRune();
+            RuneData bowRune = CreateBowRune();
+            RuneData healingRune = CreateHealingRune();
+            UpgradeData[] upgrades = CreateSampleUpgrades();
+            StageData[] stages = CreateSampleStages(goblin, orc);
+
+            CreateOrUpdateTitleScene();
+            CreateOrUpdateStageSelectScene(stages);
+            CreateOrUpdateBattleScene(stages[0], knight, archer, new[] { swordRune, bowRune, healingRune }, upgrades, stages);
+            CreateOrUpdateUpgradeScene(upgrades);
+            UpdateBuildSettings();
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log("RuneGate progression prototype bootstrap complete. Open Assets/_Project/Scenes/TitleScene.unity and press Play.");
         }
 
         [MenuItem("Tools/RuneGate/Bootstrap MVP")]
@@ -252,25 +287,131 @@ namespace RuneGate.Editor
 
         private static StageData CreateSampleStage(MonsterData goblin, MonsterData orc)
         {
-            WaveSpawnData wave1Lane0 = CreateSpawn("Wave 1 Goblin Lane 0", goblin, 0, 2, 0.5f, 1f);
+            return CreateSampleStages(goblin, orc)[0];
+        }
+
+        private static StageData[] CreateSampleStages(MonsterData goblin, MonsterData orc)
+        {
+            WaveSpawnData wave1Lane0 = CreateSpawn("Wave 1 Goblin Lane 0", goblin, 0, 3, 0.5f, 1f);
             WaveSpawnData wave1Lane1 = CreateSpawn("Wave 1 Goblin Lane 1", goblin, 1, 3, 1f, 1f);
-            WaveSpawnData wave1Lane2 = CreateSpawn("Wave 1 Goblin Lane 2", goblin, 2, 1, 2f, 1f);
-            WaveData wave1 = CreateWave("Wave 1", 1, false, new[] { wave1Lane0, wave1Lane1, wave1Lane2 });
+            WaveData wave1 = CreateWave("Wave 1", 1, false, new[] { wave1Lane0, wave1Lane1 });
 
-            WaveSpawnData wave2GoblinLane0 = CreateSpawn("Wave 2 Goblin Lane 0", goblin, 0, 2, 0.5f, 0.8f);
+            WaveSpawnData wave2GoblinLane0 = CreateSpawn("Wave 2 Goblin Lane 0", goblin, 0, 3, 0.5f, 0.8f);
             WaveSpawnData wave2OrcLane1 = CreateSpawn("Wave 2 Orc Lane 1", orc, 1, 1, 1f, 1f);
-            WaveSpawnData wave2GoblinLane2 = CreateSpawn("Wave 2 Goblin Lane 2", goblin, 2, 2, 1.5f, 0.8f);
-            WaveSpawnData wave2OrcLane0 = CreateSpawn("Wave 2 Orc Lane 0", orc, 0, 1, 3f, 1f);
-            WaveData wave2 = CreateWave("Wave 2", 2, false, new[] { wave2GoblinLane0, wave2OrcLane1, wave2GoblinLane2, wave2OrcLane0 });
+            WaveSpawnData wave2GoblinLane2 = CreateSpawn("Wave 2 Goblin Lane 2", goblin, 2, 3, 1.5f, 0.8f);
+            WaveData wave2 = CreateWave("Wave 2", 2, false, new[] { wave2GoblinLane0, wave2OrcLane1, wave2GoblinLane2 });
+            StageData stage1 = CreateStage("Goblin Forest 1", "stage_goblin_forest_01", "Goblin Forest 1", 180, orc, new[] { wave1, wave2 });
 
-            StageData asset = CreateOrLoadAsset<StageData>(RootPath + "/Data/Stages/Goblin Forest 1.asset");
+            WaveSpawnData stage2Wave1Lane0 = CreateSpawn("Stage 2 Wave 1 Goblin Lane 0", goblin, 0, 4, 0.35f, 0.7f);
+            WaveSpawnData stage2Wave1Lane1 = CreateSpawn("Stage 2 Wave 1 Goblin Lane 1", goblin, 1, 4, 0.8f, 0.7f);
+            WaveData stage2Wave1 = CreateWave("Stage 2 Wave 1", 1, false, new[] { stage2Wave1Lane0, stage2Wave1Lane1 });
+
+            WaveSpawnData stage2Wave2OrcLane0 = CreateSpawn("Stage 2 Wave 2 Orc Lane 0", orc, 0, 1, 0.5f, 1f);
+            WaveSpawnData stage2Wave2GoblinLane1 = CreateSpawn("Stage 2 Wave 2 Goblin Lane 1", goblin, 1, 5, 0.7f, 0.6f);
+            WaveSpawnData stage2Wave2GoblinLane2 = CreateSpawn("Stage 2 Wave 2 Goblin Lane 2", goblin, 2, 4, 1f, 0.6f);
+            WaveData stage2Wave2 = CreateWave("Stage 2 Wave 2", 2, false, new[] { stage2Wave2OrcLane0, stage2Wave2GoblinLane1, stage2Wave2GoblinLane2 });
+
+            WaveSpawnData stage2Wave3OrcLane1 = CreateSpawn("Stage 2 Wave 3 Orc Lane 1", orc, 1, 2, 0.4f, 1.1f);
+            WaveSpawnData stage2Wave3GoblinLane0 = CreateSpawn("Stage 2 Wave 3 Goblin Lane 0", goblin, 0, 5, 0.7f, 0.55f);
+            WaveSpawnData stage2Wave3GoblinLane2 = CreateSpawn("Stage 2 Wave 3 Goblin Lane 2", goblin, 2, 5, 0.8f, 0.55f);
+            WaveData stage2Wave3 = CreateWave("Stage 2 Wave 3", 3, false, new[] { stage2Wave3OrcLane1, stage2Wave3GoblinLane0, stage2Wave3GoblinLane2 });
+            StageData stage2 = CreateStage("Goblin Forest 2", "stage_goblin_forest_02", "Goblin Forest 2", 175, orc, new[] { stage2Wave1, stage2Wave2, stage2Wave3 });
+
+            WaveSpawnData stage3Wave1GoblinLane0 = CreateSpawn("Stage 3 Wave 1 Goblin Lane 0", goblin, 0, 5, 0.5f, 0.6f);
+            WaveSpawnData stage3Wave1GoblinLane2 = CreateSpawn("Stage 3 Wave 1 Goblin Lane 2", goblin, 2, 5, 0.7f, 0.6f);
+            WaveData stage3Wave1 = CreateWave("Stage 3 Wave 1", 1, false, new[] { stage3Wave1GoblinLane0, stage3Wave1GoblinLane2 });
+
+            WaveSpawnData stage3Wave2OrcLane0 = CreateSpawn("Stage 3 Wave 2 Orc Lane 0", orc, 0, 2, 0.5f, 1.2f);
+            WaveSpawnData stage3Wave2GoblinLane1 = CreateSpawn("Stage 3 Wave 2 Goblin Lane 1", goblin, 1, 6, 0.7f, 0.55f);
+            WaveSpawnData stage3Wave2OrcLane2 = CreateSpawn("Stage 3 Wave 2 Orc Lane 2", orc, 2, 1, 0.9f, 1.2f);
+            WaveData stage3Wave2 = CreateWave("Stage 3 Wave 2", 2, false, new[] { stage3Wave2OrcLane0, stage3Wave2GoblinLane1, stage3Wave2OrcLane2 });
+
+            WaveSpawnData stage3Wave3OrcLane0 = CreateSpawn("Stage 3 Wave 3 Orc Lane 0", orc, 0, 2, 0.4f, 1f);
+            WaveSpawnData stage3Wave3OrcLane1 = CreateSpawn("Stage 3 Wave 3 Orc Lane 1", orc, 1, 2, 0.8f, 1f);
+            WaveSpawnData stage3Wave3OrcLane2 = CreateSpawn("Stage 3 Wave 3 Orc Lane 2", orc, 2, 2, 1.2f, 1f);
+            WaveSpawnData stage3Wave3GoblinLane1 = CreateSpawn("Stage 3 Wave 3 Goblin Lane 1", goblin, 1, 6, 0.6f, 0.5f);
+            WaveData stage3Wave3 = CreateWave("Stage 3 Wave 3", 3, false, new[] { stage3Wave3OrcLane0, stage3Wave3OrcLane1, stage3Wave3OrcLane2, stage3Wave3GoblinLane1 });
+            StageData stage3 = CreateStage("Goblin Forest 3", "stage_goblin_forest_03", "Goblin Forest 3", 170, orc, new[] { stage3Wave1, stage3Wave2, stage3Wave3 });
+
+            return new[] { stage1, stage2, stage3 };
+        }
+
+        private static StageData CreateStage(string assetName, string stageId, string displayName, int crystalHp, MonsterData bossMonster, WaveData[] waves)
+        {
+            StageData asset = CreateOrLoadAsset<StageData>($"{RootPath}/Data/Stages/{assetName}.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "stageId", "stage_goblin_forest_001");
-                SetString(serializedObject, "displayName", "Goblin Forest 1");
-                SetInt(serializedObject, "crystalHp", 180);
-                SetObjectList(serializedObject, "waves", new UnityEngine.Object[] { wave1, wave2 });
-                SetObject(serializedObject, "bossMonster", orc);
+                SetString(serializedObject, "stageId", stageId);
+                SetString(serializedObject, "displayName", displayName);
+                SetInt(serializedObject, "crystalHp", crystalHp);
+                SetObjectList(serializedObject, "waves", ToObjectArray(waves));
+                SetObject(serializedObject, "bossMonster", bossMonster);
+            });
+            return asset;
+        }
+
+        private static UpgradeData[] CreateSampleUpgrades()
+        {
+            UpgradeData crystal = CreateUpgrade(
+                "Crystal Reinforcement",
+                "crystal_reinforcement",
+                "Crystal Reinforcement",
+                "Crystal max HP +20 per level.",
+                50,
+                1.35f,
+                10,
+                UpgradeManager.CrystalMaxHpFlat,
+                20f);
+
+            UpgradeData attack = CreateUpgrade(
+                "Hero Training",
+                "hero_training",
+                "Hero Training",
+                "All hero attack +5% per level.",
+                50,
+                1.35f,
+                10,
+                UpgradeManager.HeroAttackPercent,
+                0.05f);
+
+            UpgradeData rhythm = CreateUpgrade(
+                "Battle Rhythm",
+                "battle_rhythm",
+                "Battle Rhythm",
+                "All hero attack speed +3% per level.",
+                50,
+                1.35f,
+                10,
+                UpgradeManager.HeroAttackSpeedPercent,
+                0.03f);
+
+            UpgradeData practice = CreateUpgrade(
+                "Skill Practice",
+                "skill_practice",
+                "Skill Practice",
+                "All hero skill cooldown -3% per level.",
+                50,
+                1.35f,
+                10,
+                UpgradeManager.SkillCooldownPercent,
+                0.03f);
+
+            return new[] { crystal, attack, rhythm, practice };
+        }
+
+        private static UpgradeData CreateUpgrade(string assetName, string upgradeId, string displayName, string description, int baseCost, float costMultiplier, int maxLevel, string effectKey, float valuePerLevel)
+        {
+            UpgradeData asset = CreateOrLoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/{assetName}.asset");
+            EditAsset(asset, serializedObject =>
+            {
+                SetString(serializedObject, "upgradeId", upgradeId);
+                SetString(serializedObject, "displayName", displayName);
+                SetString(serializedObject, "description", description);
+                SetInt(serializedObject, "baseCost", baseCost);
+                SetFloat(serializedObject, "costMultiplier", costMultiplier);
+                SetInt(serializedObject, "maxLevel", maxLevel);
+                SetString(serializedObject, "effectKey", effectKey);
+                SetFloat(serializedObject, "valuePerLevel", valuePerLevel);
             });
             return asset;
         }
@@ -301,7 +442,7 @@ namespace RuneGate.Editor
             return asset;
         }
 
-        private static void CreateOrUpdateBattleScene(StageData stageData, HeroData knight, HeroData archer, IReadOnlyList<RuneData> runes)
+        private static void CreateOrUpdateBattleScene(StageData stageData, HeroData knight, HeroData archer, IReadOnlyList<RuneData> runes, IReadOnlyList<UpgradeData> upgrades, IReadOnlyList<StageData> stages)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -403,6 +544,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "runeManager", runeManager);
                 SetObject(serializedObject, "runeEffectApplier", runeEffectApplier);
                 SetObjectList(serializedObject, "heroes", new UnityEngine.Object[] { knightController, archerController });
+                SetObjectList(serializedObject, "permanentUpgrades", ToObjectArray(upgrades));
                 SetBool(serializedObject, "autoStartOnStart", true);
             });
 
@@ -425,8 +567,12 @@ namespace RuneGate.Editor
             EditComponent(stageResultUI, serializedObject =>
             {
                 SetObject(serializedObject, "battleManager", battleManager);
+                SetObjectList(serializedObject, "stageSequence", ToObjectArray(stages));
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(300f, 170f, 410f, 190f));
+                SetRect(serializedObject, "panelRect", new Rect(300f, 170f, 410f, 230f));
+                SetString(serializedObject, "battleSceneName", "BattleScene");
+                SetString(serializedObject, "upgradeSceneName", "UpgradeScene");
+                SetString(serializedObject, "stageSelectSceneName", "StageSelectScene");
             });
 
             EditComponent(knightSkillButton, serializedObject =>
@@ -446,6 +592,100 @@ namespace RuneGate.Editor
             });
 
             EditorSceneManager.SaveScene(scene, BattleScenePath);
+        }
+
+        private static void CreateOrUpdateTitleScene()
+        {
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            CreateDefaultCamera(new Color(0.05f, 0.07f, 0.09f));
+
+            GameObject uiRoot = new GameObject("Title UI");
+            TitleUI titleUI = uiRoot.AddComponent<TitleUI>();
+            EditComponent(titleUI, serializedObject =>
+            {
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "panelRect", new Rect(320f, 120f, 360f, 260f));
+                SetString(serializedObject, "stageSelectSceneName", "StageSelectScene");
+            });
+
+            EditorSceneManager.SaveScene(scene, TitleScenePath);
+        }
+
+        private static void CreateOrUpdateStageSelectScene(IReadOnlyList<StageData> stages)
+        {
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            CreateDefaultCamera(new Color(0.06f, 0.08f, 0.1f));
+
+            GameObject uiRoot = new GameObject("Stage Select UI");
+            StageSelectUI stageSelectUI = uiRoot.AddComponent<StageSelectUI>();
+            EditComponent(stageSelectUI, serializedObject =>
+            {
+                SetObjectList(serializedObject, "stages", ToObjectArray(stages));
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "panelRect", new Rect(260f, 80f, 460f, 360f));
+                SetString(serializedObject, "titleSceneName", "TitleScene");
+                SetString(serializedObject, "battleSceneName", "BattleScene");
+                SetString(serializedObject, "upgradeSceneName", "UpgradeScene");
+            });
+
+            EditorSceneManager.SaveScene(scene, StageSelectScenePath);
+        }
+
+        private static void CreateOrUpdateUpgradeScene(IReadOnlyList<UpgradeData> upgrades)
+        {
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            CreateDefaultCamera(new Color(0.06f, 0.08f, 0.1f));
+
+            GameObject root = new GameObject("Upgrade Root");
+            UpgradeManager upgradeManager = root.AddComponent<UpgradeManager>();
+            UpgradeSceneUI upgradeSceneUI = root.AddComponent<UpgradeSceneUI>();
+
+            EditComponent(upgradeManager, serializedObject =>
+            {
+                SetObjectList(serializedObject, "availableUpgrades", ToObjectArray(upgrades));
+            });
+
+            EditComponent(upgradeSceneUI, serializedObject =>
+            {
+                SetObject(serializedObject, "upgradeManager", upgradeManager);
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "panelRect", new Rect(220f, 70f, 560f, 440f));
+                SetString(serializedObject, "stageSelectSceneName", "StageSelectScene");
+            });
+
+            EditorSceneManager.SaveScene(scene, UpgradeScenePath);
+        }
+
+        private static void UpdateBuildSettings()
+        {
+            string[] scenePaths =
+            {
+                TitleScenePath,
+                StageSelectScenePath,
+                BattleScenePath,
+                UpgradeScenePath
+            };
+
+            EditorBuildSettingsScene[] buildScenes = new EditorBuildSettingsScene[scenePaths.Length];
+            for (int i = 0; i < scenePaths.Length; i++)
+            {
+                buildScenes[i] = new EditorBuildSettingsScene(scenePaths[i], true);
+            }
+
+            EditorBuildSettings.scenes = buildScenes;
+        }
+
+        private static Camera CreateDefaultCamera(Color backgroundColor)
+        {
+            GameObject cameraObject = new GameObject("Main Camera");
+            cameraObject.tag = "MainCamera";
+            Camera camera = cameraObject.AddComponent<Camera>();
+            camera.orthographic = true;
+            camera.orthographicSize = 5f;
+            camera.backgroundColor = backgroundColor;
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            cameraObject.transform.position = new Vector3(0f, 0f, -10f);
+            return camera;
         }
 
         private static HeroController CreateHero(string displayName, HeroData heroData, Vector3 position, Transform parent, int laneIndex, int slotIndex)
