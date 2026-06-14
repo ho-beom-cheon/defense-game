@@ -161,6 +161,20 @@ namespace RuneGate
             runeManager.SelectRune(runeData);
         }
 
+        public void RestartBattle()
+        {
+            StageData stageToRestart = activeStageData != null ? activeStageData : initialStageData;
+            if (stageToRestart == null)
+            {
+                Debug.LogWarning("BattleManager cannot restart because StageData is missing.");
+                return;
+            }
+
+            waveManager?.StopCurrentWave(true);
+            InitializeStage(stageToRestart);
+            StartNextWave();
+        }
+
         private void AutoAssignReferences()
         {
             if (laneManager == null)
@@ -305,6 +319,7 @@ namespace RuneGate
                 return;
             }
 
+            waveManager?.StopCurrentWave(!victory);
             SetState(victory ? BattleState.Victory : BattleState.Defeat);
             int wavesCleared = victory ? currentWaveIndex + 1 : Mathf.Max(0, currentWaveIndex);
             BattleEnded?.Invoke(new BattleResult(victory, activeStageData, wavesCleared, goldEarned, message));

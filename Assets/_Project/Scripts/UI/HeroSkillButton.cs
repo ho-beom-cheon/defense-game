@@ -4,6 +4,7 @@ namespace RuneGate
 {
     public sealed class HeroSkillButton : MonoBehaviour
     {
+        [SerializeField] private BattleManager battleManager;
         [SerializeField] private HeroController heroController;
         [SerializeField] private bool drawRuntimeGui;
         [SerializeField] private Rect buttonRect = new Rect(16f, 190f, 190f, 44f);
@@ -11,18 +12,35 @@ namespace RuneGate
         private float cooldownRemaining;
         private float cooldownDuration;
         private bool isInteractable;
+        private BattleState battleState = BattleState.None;
 
         public float CooldownRemaining => cooldownRemaining;
         public float CooldownDuration => cooldownDuration;
-        public bool IsInteractable => isInteractable;
+        public bool IsInteractable => CanPressSkill();
 
         private void OnEnable()
         {
+            if (battleManager == null)
+            {
+                battleManager = FindFirstObjectByType<BattleManager>();
+            }
+
+            if (battleManager != null)
+            {
+                battleManager.BattleStateChanged += HandleBattleStateChanged;
+                battleState = battleManager.CurrentState;
+            }
+
             Bind(heroController);
         }
 
         private void OnDisable()
         {
+            if (battleManager != null)
+            {
+                battleManager.BattleStateChanged -= HandleBattleStateChanged;
+            }
+
             if (heroController != null && heroController.SkillController != null)
             {
                 heroController.SkillController.CooldownChanged -= HandleCooldownChanged;
@@ -40,10 +58,14 @@ namespace RuneGate
             string skillName = heroController.SkillController != null && heroController.SkillController.Data != null
                 ? heroController.SkillController.Data.DisplayName
                 : "Skill";
-            string label = isInteractable ? $"{heroName}: {skillName}" : $"{heroName}: {cooldownRemaining:0.0}s";
+            string status = GetStatusText();
+            string label = $"{heroName}: {skillName}\n{status}";
 
-            GUI.enabled = isInteractable;
-            if (GUI.Button(buttonRect, label))
+            Rect drawRect = buttonRect;
+            drawRect.height = Mathf.Max(drawRect.height, 54f);
+
+            GUI.enabled = CanPressSkill();
+            if (GUI.Button(drawRect, label))
             {
                 Press();
             }
@@ -71,6 +93,11 @@ namespace RuneGate
 
         public void Press()
         {
+            if (!CanPressSkill())
+            {
+                return;
+            }
+
             if (heroController == null)
             {
                 Debug.LogWarning("HeroSkillButton cannot trigger skill because no hero is bound.");
@@ -85,6 +112,36 @@ namespace RuneGate
             cooldownRemaining = remaining;
             cooldownDuration = duration;
             isInteractable = remaining <= 0f;
+        }
+
+        private void HandleBattleStateChanged(BattleState state)
+        {
+            battleState = state;
+        }
+
+        private bool CanPressSkill()
+        {
+            return isInteractable && battleState == BattleState.WaveRunning;
+        }
+
+        private string GetStatusText()
+        {
+            if (battleState == BattleState.Victory || battleState == BattleState.Defeat)
+            {
+                return "Battle Ended";
+            }
+
+            if (battleState == BattleState.RuneSelection)
+            {
+                return "Rune Selection";
+            }
+
+            if (cooldownRemaining > 0f)
+            {
+                return $"{cooldownRemaining:0.0}s";
+            }
+
+            return "Ready";
         }
     }
 }

@@ -88,14 +88,15 @@ namespace RuneGate.Editor
             SkillData asset = CreateOrLoadAsset<SkillData>(RootPath + "/Data/Skills/Shield Bash.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "skillId", "skill_shield_bash");
+                SetString(serializedObject, "skillId", "skill_shield_bash_001");
                 SetString(serializedObject, "displayName", "Shield Bash");
-                SetString(serializedObject, "description", "Deals direct earth damage to the first monster in range.");
-                SetFloat(serializedObject, "cooldown", 7f);
-                SetInt(serializedObject, "power", 36);
-                SetFloat(serializedObject, "range", 2.4f);
-                SetEnum(serializedObject, "targetingType", TargetingType.First);
-                SetEnum(serializedObject, "element", ElementType.Earth);
+                SetString(serializedObject, "description", "Deals direct light damage to the nearest monster in range.");
+                SetFloat(serializedObject, "cooldown", 8f);
+                SetInt(serializedObject, "power", 60);
+                SetInt(serializedObject, "damageHitCount", 1);
+                SetFloat(serializedObject, "range", 2f);
+                SetEnum(serializedObject, "targetingType", TargetingType.Nearest);
+                SetEnum(serializedObject, "element", ElementType.Light);
             });
             return asset;
         }
@@ -105,12 +106,13 @@ namespace RuneGate.Editor
             SkillData asset = CreateOrLoadAsset<SkillData>(RootPath + "/Data/Skills/Rapid Shot.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "skillId", "skill_rapid_shot");
+                SetString(serializedObject, "skillId", "skill_rapid_shot_001");
                 SetString(serializedObject, "displayName", "Rapid Shot");
-                SetString(serializedObject, "description", "Deals direct wind damage to the nearest monster in range.");
+                SetString(serializedObject, "description", "Rapidly hits the nearest monster 3 times.");
                 SetFloat(serializedObject, "cooldown", 6f);
-                SetInt(serializedObject, "power", 34);
-                SetFloat(serializedObject, "range", 7f);
+                SetInt(serializedObject, "power", 25);
+                SetInt(serializedObject, "damageHitCount", 3);
+                SetFloat(serializedObject, "range", 5f);
                 SetEnum(serializedObject, "targetingType", TargetingType.Nearest);
                 SetEnum(serializedObject, "element", ElementType.Wind);
             });
@@ -122,15 +124,15 @@ namespace RuneGate.Editor
             HeroData asset = CreateOrLoadAsset<HeroData>(RootPath + "/Data/Heroes/Knight.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "heroId", "hero_knight");
+                SetString(serializedObject, "heroId", "hero_knight_001");
                 SetString(serializedObject, "displayName", "Knight");
                 SetEnum(serializedObject, "role", HeroRole.Tank);
                 SetEnum(serializedObject, "positionType", HeroPositionType.Front);
-                SetEnum(serializedObject, "element", ElementType.Earth);
-                SetInt(serializedObject, "maxHp", 220);
+                SetEnum(serializedObject, "element", ElementType.Light);
+                SetInt(serializedObject, "maxHp", 400);
                 SetInt(serializedObject, "attack", 20);
                 SetFloat(serializedObject, "attackSpeed", 1f);
-                SetFloat(serializedObject, "attackRange", 2.4f);
+                SetFloat(serializedObject, "attackRange", 1.5f);
                 SetObject(serializedObject, "skillData", shieldBash);
                 SetObject(serializedObject, "portrait", null);
                 SetObject(serializedObject, "animatorController", null);
@@ -143,15 +145,15 @@ namespace RuneGate.Editor
             HeroData asset = CreateOrLoadAsset<HeroData>(RootPath + "/Data/Heroes/Archer.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "heroId", "hero_archer");
+                SetString(serializedObject, "heroId", "hero_archer_001");
                 SetString(serializedObject, "displayName", "Archer");
                 SetEnum(serializedObject, "role", HeroRole.RangedDps);
                 SetEnum(serializedObject, "positionType", HeroPositionType.Back);
                 SetEnum(serializedObject, "element", ElementType.Wind);
-                SetInt(serializedObject, "maxHp", 120);
+                SetInt(serializedObject, "maxHp", 180);
                 SetInt(serializedObject, "attack", 28);
                 SetFloat(serializedObject, "attackSpeed", 1.4f);
-                SetFloat(serializedObject, "attackRange", 7f);
+                SetFloat(serializedObject, "attackRange", 5f);
                 SetObject(serializedObject, "skillData", rapidShot);
                 SetObject(serializedObject, "portrait", null);
                 SetObject(serializedObject, "animatorController", null);
@@ -164,12 +166,12 @@ namespace RuneGate.Editor
             MonsterData asset = CreateOrLoadAsset<MonsterData>(RootPath + "/Data/Monsters/Goblin.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "monsterId", "monster_goblin");
+                SetString(serializedObject, "monsterId", "monster_goblin_001");
                 SetString(serializedObject, "displayName", "Goblin");
                 SetEnum(serializedObject, "monsterType", MonsterType.Normal);
                 SetEnum(serializedObject, "element", ElementType.None);
-                SetInt(serializedObject, "maxHp", 35);
-                SetFloat(serializedObject, "moveSpeed", 0.9f);
+                SetInt(serializedObject, "maxHp", 60);
+                SetFloat(serializedObject, "moveSpeed", 1.2f);
                 SetInt(serializedObject, "damageToCrystal", 5);
                 SetInt(serializedObject, "rewardGold", 2);
                 SetObject(serializedObject, "sprite", null);
@@ -183,14 +185,14 @@ namespace RuneGate.Editor
             MonsterData asset = CreateOrLoadAsset<MonsterData>(RootPath + "/Data/Monsters/Orc.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "monsterId", "monster_orc");
+                SetString(serializedObject, "monsterId", "monster_orc_001");
                 SetString(serializedObject, "displayName", "Orc");
                 SetEnum(serializedObject, "monsterType", MonsterType.Tank);
-                SetEnum(serializedObject, "element", ElementType.Earth);
-                SetInt(serializedObject, "maxHp", 80);
-                SetFloat(serializedObject, "moveSpeed", 0.6f);
-                SetInt(serializedObject, "damageToCrystal", 10);
-                SetInt(serializedObject, "rewardGold", 5);
+                SetEnum(serializedObject, "element", ElementType.None);
+                SetInt(serializedObject, "maxHp", 180);
+                SetFloat(serializedObject, "moveSpeed", 0.7f);
+                SetInt(serializedObject, "damageToCrystal", 15);
+                SetInt(serializedObject, "rewardGold", 8);
                 SetObject(serializedObject, "sprite", null);
                 SetObject(serializedObject, "animatorController", null);
             });
@@ -202,7 +204,7 @@ namespace RuneGate.Editor
             RuneData asset = CreateOrLoadAsset<RuneData>(RootPath + "/Data/Runes/Sword Rune.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "runeId", "rune_sword");
+                SetString(serializedObject, "runeId", "rune_sword_001");
                 SetString(serializedObject, "displayName", "Sword Rune");
                 SetString(serializedObject, "description", "Increases all hero attack.");
                 SetEnum(serializedObject, "rarity", RuneRarity.Common);
@@ -219,10 +221,10 @@ namespace RuneGate.Editor
             RuneData asset = CreateOrLoadAsset<RuneData>(RootPath + "/Data/Runes/Bow Rune.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "runeId", "rune_bow");
+                SetString(serializedObject, "runeId", "rune_bow_001");
                 SetString(serializedObject, "displayName", "Bow Rune");
                 SetString(serializedObject, "description", "Increases all hero attack speed.");
-                SetEnum(serializedObject, "rarity", RuneRarity.Rare);
+                SetEnum(serializedObject, "rarity", RuneRarity.Common);
                 SetEnum(serializedObject, "element", ElementType.Wind);
                 SetString(serializedObject, "effectKey", "hero_attack_speed_percent");
                 SetFloat(serializedObject, "value", 0.15f);
@@ -236,13 +238,13 @@ namespace RuneGate.Editor
             RuneData asset = CreateOrLoadAsset<RuneData>(RootPath + "/Data/Runes/Healing Rune.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "runeId", "rune_healing");
+                SetString(serializedObject, "runeId", "rune_healing_001");
                 SetString(serializedObject, "displayName", "Healing Rune");
                 SetString(serializedObject, "description", "Restores flat HP to the Kingdom Crystal.");
                 SetEnum(serializedObject, "rarity", RuneRarity.Common);
                 SetEnum(serializedObject, "element", ElementType.Light);
                 SetString(serializedObject, "effectKey", "crystal_heal_flat");
-                SetFloat(serializedObject, "value", 35f);
+                SetFloat(serializedObject, "value", 30f);
                 SetObject(serializedObject, "icon", null);
             });
             return asset;
@@ -250,20 +252,21 @@ namespace RuneGate.Editor
 
         private static StageData CreateSampleStage(MonsterData goblin, MonsterData orc)
         {
-            WaveSpawnData wave1Lane0 = CreateSpawn("Wave 1 Goblin Lane 0", goblin, 0, 2, 0.2f, 1.1f);
-            WaveSpawnData wave1Lane1 = CreateSpawn("Wave 1 Goblin Lane 1", goblin, 1, 3, 0.5f, 1.1f);
-            WaveSpawnData wave1Lane2 = CreateSpawn("Wave 1 Goblin Lane 2", goblin, 2, 2, 0.8f, 1.2f);
+            WaveSpawnData wave1Lane0 = CreateSpawn("Wave 1 Goblin Lane 0", goblin, 0, 2, 0.5f, 1f);
+            WaveSpawnData wave1Lane1 = CreateSpawn("Wave 1 Goblin Lane 1", goblin, 1, 3, 1f, 1f);
+            WaveSpawnData wave1Lane2 = CreateSpawn("Wave 1 Goblin Lane 2", goblin, 2, 1, 2f, 1f);
             WaveData wave1 = CreateWave("Wave 1", 1, false, new[] { wave1Lane0, wave1Lane1, wave1Lane2 });
 
-            WaveSpawnData wave2Goblin = CreateSpawn("Wave 2 Goblin Lane 1", goblin, 1, 3, 0.2f, 0.9f);
-            WaveSpawnData wave2OrcLane0 = CreateSpawn("Wave 2 Orc Lane 0", orc, 0, 2, 1.2f, 1.5f);
-            WaveSpawnData wave2OrcLane2 = CreateSpawn("Wave 2 Orc Lane 2", orc, 2, 1, 1.8f, 1.5f);
-            WaveData wave2 = CreateWave("Wave 2", 2, false, new[] { wave2Goblin, wave2OrcLane0, wave2OrcLane2 });
+            WaveSpawnData wave2GoblinLane0 = CreateSpawn("Wave 2 Goblin Lane 0", goblin, 0, 2, 0.5f, 0.8f);
+            WaveSpawnData wave2OrcLane1 = CreateSpawn("Wave 2 Orc Lane 1", orc, 1, 1, 1f, 1f);
+            WaveSpawnData wave2GoblinLane2 = CreateSpawn("Wave 2 Goblin Lane 2", goblin, 2, 2, 1.5f, 0.8f);
+            WaveSpawnData wave2OrcLane0 = CreateSpawn("Wave 2 Orc Lane 0", orc, 0, 1, 3f, 1f);
+            WaveData wave2 = CreateWave("Wave 2", 2, false, new[] { wave2GoblinLane0, wave2OrcLane1, wave2GoblinLane2, wave2OrcLane0 });
 
             StageData asset = CreateOrLoadAsset<StageData>(RootPath + "/Data/Stages/Goblin Forest 1.asset");
             EditAsset(asset, serializedObject =>
             {
-                SetString(serializedObject, "stageId", "stage_goblin_forest_1");
+                SetString(serializedObject, "stageId", "stage_goblin_forest_001");
                 SetString(serializedObject, "displayName", "Goblin Forest 1");
                 SetInt(serializedObject, "crystalHp", 180);
                 SetObjectList(serializedObject, "waves", new UnityEngine.Object[] { wave1, wave2 });
@@ -324,6 +327,7 @@ namespace RuneGate.Editor
             GameObject laneRoot = new GameObject("Lane Points");
             Transform[] spawnPoints = new Transform[3];
             Transform[] targetPoints = new Transform[3];
+            Transform[] heroSlotPoints = new Transform[9];
             for (int i = 0; i < 3; i++)
             {
                 float y = (i - 1) * 2.4f;
@@ -338,12 +342,20 @@ namespace RuneGate.Editor
                 targetPoint.transform.SetParent(laneRoot.transform);
                 targetPoint.transform.position = new Vector3(-5.2f, y, 0f);
                 targetPoints[i] = targetPoint.transform;
+
+                for (int slot = 0; slot < 3; slot++)
+                {
+                    int flatIndex = i * 3 + slot;
+                    float x = -2.4f - slot * 0.85f;
+                    GameObject slotPoint = CreatePlaceholderObject($"Lane {i} Hero Slot {slot}", laneRoot.transform, new Vector3(x, y, 0f), new Color(0.24f, 0.42f, 0.64f, 0.35f), new Vector2(0.46f, 0.46f), 1);
+                    heroSlotPoints[flatIndex] = slotPoint.transform;
+                }
             }
 
             GameObject monsterRoot = new GameObject("Monsters");
             GameObject heroRoot = new GameObject("Heroes");
-            HeroController knightController = CreateHero("Knight", knight, new Vector3(-2.7f, -1.2f, 0f), heroRoot.transform);
-            HeroController archerController = CreateHero("Archer", archer, new Vector3(-3.2f, 1.2f, 0f), heroRoot.transform);
+            HeroController knightController = CreateHero("Knight", knight, heroSlotPoints[3].position, heroRoot.transform, 1, 0);
+            HeroController archerController = CreateHero("Archer", archer, heroSlotPoints[4].position, heroRoot.transform, 1, 1);
 
             GameObject uiRoot = new GameObject("Runtime Prototype UI");
             BattleHUD battleHud = uiRoot.AddComponent<BattleHUD>();
@@ -360,6 +372,10 @@ namespace RuneGate.Editor
                 SetFloat(serializedObject, "crystalX", -5.2f);
                 SetObjectList(serializedObject, "laneSpawnPoints", ToObjectArray(spawnPoints));
                 SetObjectList(serializedObject, "crystalTargetPoints", ToObjectArray(targetPoints));
+                SetInt(serializedObject, "heroSlotsPerLane", 3);
+                SetFloat(serializedObject, "heroFrontSlotX", -2.4f);
+                SetFloat(serializedObject, "heroSlotSpacingX", 0.85f);
+                SetObjectList(serializedObject, "heroSlotPoints", ToObjectArray(heroSlotPoints));
             });
 
             EditComponent(waveManager, serializedObject =>
@@ -395,7 +411,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetObject(serializedObject, "crystalController", crystalController);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(16f, 16f, 300f, 170f));
+                SetRect(serializedObject, "panelRect", new Rect(16f, 16f, 300f, 190f));
             });
 
             EditComponent(runeSelectionUI, serializedObject =>
@@ -410,27 +426,29 @@ namespace RuneGate.Editor
             {
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(300f, 170f, 410f, 140f));
+                SetRect(serializedObject, "panelRect", new Rect(300f, 170f, 410f, 190f));
             });
 
             EditComponent(knightSkillButton, serializedObject =>
             {
+                SetObject(serializedObject, "battleManager", battleManager);
                 SetObject(serializedObject, "heroController", knightController);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "buttonRect", new Rect(16f, 196f, 190f, 44f));
+                SetRect(serializedObject, "buttonRect", new Rect(16f, 216f, 210f, 54f));
             });
 
             EditComponent(archerSkillButton, serializedObject =>
             {
+                SetObject(serializedObject, "battleManager", battleManager);
                 SetObject(serializedObject, "heroController", archerController);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "buttonRect", new Rect(16f, 246f, 190f, 44f));
+                SetRect(serializedObject, "buttonRect", new Rect(16f, 276f, 210f, 54f));
             });
 
             EditorSceneManager.SaveScene(scene, BattleScenePath);
         }
 
-        private static HeroController CreateHero(string displayName, HeroData heroData, Vector3 position, Transform parent)
+        private static HeroController CreateHero(string displayName, HeroData heroData, Vector3 position, Transform parent, int laneIndex, int slotIndex)
         {
             GameObject heroObject = CreatePlaceholderObject($"Hero_{displayName}", parent, position, GetHeroColor(heroData), new Vector2(0.72f, 0.72f), 4);
             SkillController skillController = heroObject.AddComponent<SkillController>();
@@ -448,6 +466,8 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "projectilePrefab", null);
                 SetObject(serializedObject, "projectileSpawnPoint", heroObject.transform);
                 SetBool(serializedObject, "initializeOnAwake", true);
+                SetInt(serializedObject, "laneIndex", laneIndex);
+                SetInt(serializedObject, "heroSlotIndex", slotIndex);
             });
 
             return heroController;

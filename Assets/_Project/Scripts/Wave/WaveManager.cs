@@ -90,6 +90,28 @@ namespace RuneGate
             CheckWaveComplete();
         }
 
+        public void StopCurrentWave(bool destroyAliveMonsters)
+        {
+            StopAllCoroutines();
+            activeWave = null;
+            pendingSpawns = 0;
+            activeSpawnRoutines = 0;
+
+            if (destroyAliveMonsters)
+            {
+                for (int i = 0; i < aliveMonsters.Count; i++)
+                {
+                    MonsterController monster = aliveMonsters[i];
+                    if (monster != null)
+                    {
+                        Destroy(monster.gameObject);
+                    }
+                }
+            }
+
+            aliveMonsters.Clear();
+        }
+
         private IEnumerator SpawnRoutine(WaveSpawnData spawnData)
         {
             if (spawnData.StartDelay > 0f)
