@@ -51,21 +51,14 @@ namespace RuneGate
                 return false;
             }
 
-            if (target != null && target.IsAlive)
+            if (target == null || !target.IsAlive)
             {
-                target.TakeDamage(Mathf.Max(0, skillData.Power));
-            }
-            else if (caster != null)
-            {
-                caster.Heal(Mathf.Max(0, skillData.Power));
-                Debug.Log($"Skill {skillData.DisplayName} used heal placeholder because no valid monster target was found.");
-            }
-            else
-            {
-                Debug.LogWarning($"Skill {skillData.DisplayName} had no caster or target.");
+                Debug.Log($"Skill {skillData.DisplayName} had no valid monster target.");
                 return false;
             }
 
+            int totalDamage = Mathf.Max(0, skillData.Power) * Mathf.Max(1, skillData.DamageHitCount);
+            target.TakeDamage(totalDamage);
             StartCooldown();
             return true;
         }

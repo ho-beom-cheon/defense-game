@@ -10,6 +10,7 @@ namespace RuneGate
         [SerializeField, TextArea] private string description = "Skill description";
         [SerializeField] private float cooldown = 8f;
         [SerializeField] private int power = 20;
+        [SerializeField] private int damageHitCount = 1;
         [SerializeField] private float range = 4f;
         [SerializeField] private TargetingType targetingType = TargetingType.First;
         [SerializeField] private ElementType element = ElementType.None;
@@ -19,6 +20,7 @@ namespace RuneGate
         public string Description => description;
         public float Cooldown => cooldown;
         public int Power => power;
+        public int DamageHitCount => Mathf.Max(1, damageHitCount);
         public float Range => range;
         public TargetingType TargetingType => targetingType;
         public ElementType Element => element;

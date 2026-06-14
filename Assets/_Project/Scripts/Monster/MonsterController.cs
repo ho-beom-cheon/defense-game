@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace RuneGate
@@ -9,7 +10,12 @@ namespace RuneGate
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private Animator animator;
         [SerializeField] private float reachDistance = 0.08f;
+        [SerializeField] private bool createRuntimeHpBar = true;
+        [SerializeField] private Vector2 hpBarSize = new Vector2(0.7f, 0.08f);
+        [SerializeField] private float hpBarYOffset = 0.48f;
+        [SerializeField] private float hitFlashDuration = 0.08f;
 
+        private int maxHp;
         private int currentHp;
         private int laneIndex;
         private Vector3 crystalTargetPosition;
@@ -18,11 +24,17 @@ namespace RuneGate
         private float speedMultiplier = 1f;
         private bool initialized;
         private bool removedFromWave;
+        private Color originalSpriteColor = Color.white;
+        private Transform hpBarRoot;
+        private PlaceholderSprite hpBarFill;
+        private Coroutine hitFlashRoutine;
 
         public event Action<MonsterController> Died;
         public event Action<MonsterController> ReachedCrystal;
+        public event Action<int, int> HpChanged;
 
         public MonsterData Data => monsterData;
+        public int MaxHp => maxHp;
         public int CurrentHp => currentHp;
         public int LaneIndex => laneIndex;
         public bool IsAlive => initialized && currentHp > 0 && !removedFromWave;
@@ -38,6 +50,8 @@ namespace RuneGate
             {
                 animator = GetComponentInChildren<Animator>();
             }
+
+            CaptureOriginalSpriteColor();
         }
 
         private void Update()
@@ -69,7 +83,8 @@ namespace RuneGate
             crystalTargetPosition = targetPosition;
             crystalController = targetCrystal;
             ownerWaveManager = waveManager;
-            currentHp = Mathf.Max(1, data.MaxHp);
+            maxHp = Mathf.Max(1, data.MaxHp);
+            currentHp = maxHp;
             speedMultiplier = 1f;
             removedFromWave = false;
             initialized = true;
@@ -83,6 +98,11 @@ namespace RuneGate
             {
                 animator.runtimeAnimatorController = data.AnimatorController;
             }
+
+            CaptureOriginalSpriteColor();
+            EnsureRuntimeHpBar();
+            UpdateHpBar();
+            HpChanged?.Invoke(currentHp, maxHp);
         }
 
         public void TakeDamage(int damage)
@@ -92,7 +112,10 @@ namespace RuneGate
                 return;
             }
 
+            PlayHitFlash();
             currentHp = Mathf.Max(0, currentHp - damage);
+            HpChanged?.Invoke(currentHp, maxHp);
+            UpdateHpBar();
             if (currentHp <= 0)
             {
                 Die();
@@ -133,6 +156,82 @@ namespace RuneGate
             ReachedCrystal?.Invoke(this);
             ownerWaveManager?.NotifyMonsterRemoved(this);
             Destroy(gameObject);
+        }
+
+        private void CaptureOriginalSpriteColor()
+        {
+            if (spriteRenderer != null)
+            {
+                originalSpriteColor = spriteRenderer.color;
+            }
+        }
+
+        private void EnsureRuntimeHpBar()
+        {
+            if (!createRuntimeHpBar || hpBarRoot != null)
+            {
+                return;
+            }
+
+            GameObject root = new GameObject("HP Bar");
+            root.transform.SetParent(transform);
+            root.transform.localPosition = new Vector3(0f, hpBarYOffset, 0f);
+            hpBarRoot = root.transform;
+
+            GameObject background = new GameObject("HP Bar Background");
+            background.transform.SetParent(hpBarRoot);
+            background.transform.localPosition = Vector3.zero;
+            background.AddComponent<SpriteRenderer>();
+            PlaceholderSprite backgroundSprite = background.AddComponent<PlaceholderSprite>();
+            backgroundSprite.Configure(new Color(0.08f, 0.08f, 0.08f, 0.9f), hpBarSize, 20);
+
+            GameObject fill = new GameObject("HP Bar Fill");
+            fill.transform.SetParent(hpBarRoot);
+            fill.transform.localPosition = Vector3.zero;
+            fill.AddComponent<SpriteRenderer>();
+            hpBarFill = fill.AddComponent<PlaceholderSprite>();
+            hpBarFill.Configure(new Color(0.35f, 0.95f, 0.35f, 1f), hpBarSize, 21);
+        }
+
+        private void UpdateHpBar()
+        {
+            if (hpBarFill == null)
+            {
+                return;
+            }
+
+            float percent = maxHp > 0 ? Mathf.Clamp01((float)currentHp / maxHp) : 0f;
+            Vector2 fillSize = new Vector2(Mathf.Max(0.01f, hpBarSize.x * percent), hpBarSize.y);
+            hpBarFill.Configure(new Color(0.35f, 0.95f, 0.35f, 1f), fillSize, 21);
+            hpBarFill.transform.localPosition = new Vector3(-hpBarSize.x * (1f - percent) * 0.5f, 0f, 0f);
+        }
+
+        private void PlayHitFlash()
+        {
+            if (spriteRenderer == null || hitFlashDuration <= 0f)
+            {
+                return;
+            }
+
+            if (hitFlashRoutine != null)
+            {
+                StopCoroutine(hitFlashRoutine);
+            }
+
+            hitFlashRoutine = StartCoroutine(HitFlashRoutine());
+        }
+
+        private IEnumerator HitFlashRoutine()
+        {
+            spriteRenderer.color = Color.white;
+            yield return new WaitForSeconds(hitFlashDuration);
+
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = originalSpriteColor;
+            }
+
+            hitFlashRoutine = null;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace RuneGate
         private string crystalHpText = "Crystal HP -";
         private string waveText = "Wave -";
         private string battleStateText = BattleState.None.ToString();
+        private string crystalFeedbackText = string.Empty;
+        private float crystalFeedbackTimer;
         private int gold;
 
         public string CrystalHpText => crystalHpText;
@@ -32,6 +34,7 @@ namespace RuneGate
             if (crystalController != null)
             {
                 crystalController.HpChanged += HandleCrystalHpChanged;
+                crystalController.Damaged += HandleCrystalDamaged;
                 HandleCrystalHpChanged(crystalController.CurrentHp, crystalController.MaxHp);
             }
         }
@@ -48,6 +51,21 @@ namespace RuneGate
             if (crystalController != null)
             {
                 crystalController.HpChanged -= HandleCrystalHpChanged;
+                crystalController.Damaged -= HandleCrystalDamaged;
+            }
+        }
+
+        private void Update()
+        {
+            if (crystalFeedbackTimer <= 0f)
+            {
+                return;
+            }
+
+            crystalFeedbackTimer = Mathf.Max(0f, crystalFeedbackTimer - Time.deltaTime);
+            if (crystalFeedbackTimer <= 0f)
+            {
+                crystalFeedbackText = string.Empty;
             }
         }
 
@@ -59,12 +77,18 @@ namespace RuneGate
             }
 
             AutoAssignReferences();
-            GUILayout.BeginArea(panelRect, GUI.skin.box);
+            Rect drawRect = panelRect;
+            drawRect.height = Mathf.Max(drawRect.height, 190f);
+            GUILayout.BeginArea(drawRect, GUI.skin.box);
             GUILayout.Label("RuneGate Defense");
             GUILayout.Label(crystalHpText);
             GUILayout.Label(waveText);
             GUILayout.Label($"State {battleStateText}");
             GUILayout.Label($"Gold {gold}");
+            if (!string.IsNullOrWhiteSpace(crystalFeedbackText))
+            {
+                GUILayout.Label(crystalFeedbackText);
+            }
 
             if (battleManager != null)
             {
@@ -115,6 +139,12 @@ namespace RuneGate
         private void HandleGoldChanged(int amount)
         {
             gold = amount;
+        }
+
+        private void HandleCrystalDamaged(int damage, int currentHp, int maxHp)
+        {
+            crystalFeedbackText = $"Crystal Hit -{damage}";
+            crystalFeedbackTimer = 1.2f;
         }
     }
 }

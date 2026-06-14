@@ -31,6 +31,17 @@ This creates or updates:
 
 The older menu alias `Tools/RuneGate/Bootstrap MVP` is also available.
 
+## Project Docs
+
+- `RUNEGATE_MASTER_PLAN.md`
+- `docs/00_PROJECT_CONTEXT.md`
+- `docs/01_GAME_DESIGN_DOCUMENT.md`
+- `docs/02_DEVELOPMENT_ROADMAP.md`
+- `docs/03_CODEX_IMPLEMENTATION_GUIDE.md`
+- `docs/04_SYSTEM_ARCHITECTURE.md`
+- `docs/08_TEST_AND_QA_PLAN.md`
+- `docs/10_NEXT_CODEX_PROMPTS.md`
+
 ## How To Play
 
 1. Run `Tools/RuneGate/Bootstrap Playable Prototype`.
@@ -38,9 +49,12 @@ The older menu alias `Tools/RuneGate/Bootstrap MVP` is also available.
 3. Press Play.
 4. Watch Goblins and Orcs spawn from the right side and move through 3 lanes.
 5. Knight and Archer attack automatically when monsters enter range.
-6. Click skill buttons to trigger hero skills manually.
-7. After the first non-final wave clears, choose 1 of 3 rune cards.
-8. Clear all waves for Victory, or let the crystal reach 0 HP for Defeat.
+6. Confirm monsters show HP bars and flash when hit.
+7. Click skill buttons and confirm cooldown text disables them until ready.
+8. After the first non-final wave clears, choose 1 of 3 rune cards.
+9. Confirm the selected rune changes hero ATK/SPD or heals the crystal.
+10. Clear all waves for Victory, or let the crystal reach 0 HP for Defeat.
+11. Click Restart on the result panel to start the battle again.
 
 ## Implemented
 
@@ -51,11 +65,16 @@ The older menu alias `Tools/RuneGate/Bootstrap MVP` is also available.
 - Knight and Archer sample hero data
 - Hero auto attack
 - Manual hero skill trigger buttons
+- Skill cooldown button state
 - Monster movement toward the crystal
+- Monster HP bar and hit flash feedback
+- Crystal hit flash feedback
 - Crystal damage when monsters arrive
 - Monster death and gold reward tracking
 - Victory when all waves are cleared
 - Rune selection after non-final waves
+- Result panel with Restart button
+- 3 lanes x 3 logical hero slot foundation
 - Runtime rune effects:
   - `hero_attack_percent`
   - `hero_attack_speed_percent`

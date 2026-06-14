@@ -11,6 +11,8 @@ namespace RuneGate
         [SerializeField] private Transform projectileSpawnPoint;
         [SerializeField] private LayerMask monsterLayer = ~0;
         [SerializeField] private bool initializeOnAwake = true;
+        [SerializeField] private int laneIndex = -1;
+        [SerializeField] private int heroSlotIndex = -1;
 
         private int currentHp;
         private int maxHp;
@@ -30,6 +32,8 @@ namespace RuneGate
         public int MaxHp => maxHp;
         public int EffectiveAttack => Mathf.Max(1, Mathf.RoundToInt(baseAttack * attackMultiplier));
         public float EffectiveAttackSpeed => Mathf.Max(0.01f, baseAttackSpeed * attackSpeedMultiplier);
+        public int LaneIndex => laneIndex;
+        public int HeroSlotIndex => heroSlotIndex;
         public bool IsAlive => initialized && currentHp > 0;
 
         private void Awake()
@@ -155,6 +159,12 @@ namespace RuneGate
             skillController?.ApplyCooldownPercent(percent);
         }
 
+        public void SetLogicalPlacement(int assignedLaneIndex, int assignedSlotIndex)
+        {
+            laneIndex = assignedLaneIndex;
+            heroSlotIndex = assignedSlotIndex;
+        }
+
         private void BasicAttack(MonsterController target)
         {
             if (target == null)
@@ -176,7 +186,23 @@ namespace RuneGate
         private MonsterController FindTarget(float range, TargetingType targetingType)
         {
             float safeRange = Mathf.Max(0.1f, range);
-            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, safeRange, monsterLayer);
+            MonsterController selected = FindTargetInRange(safeRange, targetingType, true);
+            if (selected == null)
+            {
+                selected = FindTargetInRange(safeRange, targetingType, false);
+            }
+
+            if (selected == null && targetingType == TargetingType.Boss)
+            {
+                return FindTarget(safeRange, TargetingType.Nearest);
+            }
+
+            return selected;
+        }
+
+        private MonsterController FindTargetInRange(float range, TargetingType targetingType, bool requireSameLane)
+        {
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, range, monsterLayer);
             MonsterController selected = null;
 
             for (int i = 0; i < hits.Length; i++)
@@ -187,17 +213,17 @@ namespace RuneGate
                     continue;
                 }
 
+                if (requireSameLane && laneIndex >= 0 && monster.LaneIndex != laneIndex)
+                {
+                    continue;
+                }
+
                 if (targetingType == TargetingType.Boss && monster.Data != null && monster.Data.MonsterType != MonsterType.Boss)
                 {
                     continue;
                 }
 
                 selected = PickBetterTarget(selected, monster, targetingType);
-            }
-
-            if (selected == null && targetingType == TargetingType.Boss)
-            {
-                return FindTarget(safeRange, TargetingType.Nearest);
             }
 
             return selected;
