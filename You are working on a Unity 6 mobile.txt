@@ -1,0 +1,439 @@
+You are working on a Unity 6 mobile 2D defense game project.
+
+Project name:
+RuneGate Defense
+
+Game concept:
+A vertical 2D roguelite fantasy defense game. Monsters invade through a Rune Gate, and the player defends a Kingdom Crystal by placing heroes in 3 lanes. Heroes auto-attack, the player can manually trigger skills, and after each wave the player chooses 1 of 3 rune cards. The MVP must run locally without server, login, ads, IAP, gacha, or external paid APIs.
+
+Primary goals:
+1. Set up a maintainable Unity project structure.
+2. Implement the initial battle prototype architecture.
+3. Prepare the project for future expansion with heroes, monsters, skills, runes, stages, and waves.
+4. Use clean C# code suitable for long-term maintenance.
+5. Use ScriptableObject-based data design where appropriate.
+6. Avoid hardcoding game balance values directly in MonoBehaviour logic.
+7. Do not add ads, billing, networking, login, analytics, Firebase, or Addressables yet.
+8. Do not import any paid assets or external packages.
+
+Technology assumptions:
+- Unity 6
+- C#
+- 2D mobile portrait game
+- Local save only
+- No server
+- No gacha
+- No paid API
+- No OCR
+- No AI API inside the game
+
+Target MVP prototype:
+- 3-lane battle field
+- Kingdom Crystal HP
+- Monster spawning by waves
+- Hero auto attack
+- Manual hero skill trigger hooks
+- Rune card selection after each wave
+- Victory/defeat handling
+- Local architecture ready for later content expansion
+
+Please inspect the current repository first.
+
+If this is already a Unity project:
+- Create or update files under Assets/_Project.
+- Do not modify unrelated existing assets unless necessary.
+- Preserve existing Unity meta files where possible.
+
+If this is not yet a Unity project:
+- Create a clean Unity-compatible Assets/_Project folder structure and C# scripts.
+- Add a README explaining that the user should create a Unity 6 2D project first and then copy/import these files.
+
+Required folder structure:
+
+Assets/
+  _Project/
+    Scripts/
+      Core/
+      Battle/
+      Hero/
+      Monster/
+      Skill/
+      Rune/
+      Wave/
+      Data/
+      Save/
+      UI/
+      Editor/
+    Data/
+      Heroes/
+      Monsters/
+      Skills/
+      Runes/
+      Stages/
+    Prefabs/
+      Heroes/
+      Monsters/
+      UI/
+    Scenes/
+    Art/
+      Characters/
+      Monsters/
+      Effects/
+      UI/
+    Audio/
+    Resources/
+
+Create the following C# architecture.
+
+1. Core enums and common types
+
+Create:
+- ElementType.cs
+- HeroRole.cs
+- HeroPositionType.cs
+- MonsterType.cs
+- BattleState.cs
+- RuneRarity.cs
+- TargetingType.cs
+
+Suggested enum values:
+
+ElementType:
+- None
+- Fire
+- Ice
+- Lightning
+- Earth
+- Light
+- Dark
+- Poison
+- Wind
+
+HeroRole:
+- Tank
+- MeleeDps
+- RangedDps
+- Mage
+- Healer
+- Support
+- Engineer
+- Assassin
+
+HeroPositionType:
+- Front
+- Middle
+- Back
+
+MonsterType:
+- Normal
+- Fast
+- Tank
+- Flying
+- Splitter
+- Undead
+- Boss
+
+BattleState:
+- None
+- Preparing
+- WaveRunning
+- RuneSelection
+- Victory
+- Defeat
+
+RuneRarity:
+- Common
+- Rare
+- Epic
+
+TargetingType:
+- First
+- Nearest
+- HighestHp
+- LowestHp
+- Boss
+
+2. ScriptableObject data classes
+
+Create:
+- HeroData.cs
+- MonsterData.cs
+- SkillData.cs
+- RuneData.cs
+- StageData.cs
+- WaveData.cs
+- WaveSpawnData.cs
+
+HeroData fields:
+- string heroId
+- string displayName
+- HeroRole role
+- HeroPositionType positionType
+- ElementType element
+- int maxHp
+- int attack
+- float attackSpeed
+- float attackRange
+- SkillData skillData
+- Sprite portrait
+- RuntimeAnimatorController animatorController
+
+MonsterData fields:
+- string monsterId
+- string displayName
+- MonsterType monsterType
+- ElementType element
+- int maxHp
+- float moveSpeed
+- int damageToCrystal
+- int rewardGold
+- Sprite sprite
+- RuntimeAnimatorController animatorController
+
+SkillData fields:
+- string skillId
+- string displayName
+- string description
+- float cooldown
+- int power
+- float range
+- TargetingType targetingType
+- ElementType element
+
+RuneData fields:
+- string runeId
+- string displayName
+- string description
+- RuneRarity rarity
+- ElementType element
+- string effectKey
+- float value
+- Sprite icon
+
+StageData fields:
+- string stageId
+- string displayName
+- int crystalHp
+- List<WaveData> waves
+- MonsterData bossMonster
+
+WaveData fields:
+- int waveNo
+- List<WaveSpawnData> spawns
+- bool isBossWave
+
+WaveSpawnData fields:
+- MonsterData monsterData
+- int laneIndex
+- int count
+- float startDelay
+- float spawnInterval
+
+Add CreateAssetMenu attributes so Unity assets can be created from the editor.
+
+3. Runtime battle components
+
+Create:
+- BattleManager.cs
+- LaneManager.cs
+- CrystalController.cs
+- HeroController.cs
+- MonsterController.cs
+- ProjectileController.cs
+- WaveManager.cs
+- RuneManager.cs
+- RuneEffectApplier.cs
+- SkillController.cs
+- DamageText.cs placeholder
+- BattleResult.cs
+
+BattleManager responsibilities:
+- Own battle state
+- Initialize stage
+- Start wave
+- Detect wave clear
+- Trigger rune selection
+- Handle victory and defeat
+- Communicate with UI through C# events
+- Avoid direct UI logic inside core battle logic
+
+LaneManager responsibilities:
+- Provide lane spawn positions and crystal target positions
+- Validate lane index
+- Support 3 lanes by default
+
+CrystalController responsibilities:
+- Store current HP and max HP
+- Take damage when monsters reach the crystal
+- Raise event when HP changes
+- Raise event when destroyed
+
+HeroController responsibilities:
+- Initialize from HeroData
+- Store runtime HP and stats
+- Find target within range
+- Auto attack based on attackSpeed
+- Trigger SkillController when manual skill is requested
+- Keep logic generic so new HeroData can be added without new scripts
+
+MonsterController responsibilities:
+- Initialize from MonsterData
+- Move along assigned lane toward crystal
+- Take damage
+- Die and notify WaveManager/BattleManager
+- Damage crystal when reaching destination
+- Support simple special type hooks but do not fully implement every monster ability yet
+
+ProjectileController responsibilities:
+- Move toward target
+- Apply damage on hit
+- Handle null target safely
+
+WaveManager responsibilities:
+- Spawn monsters according to StageData waves
+- Track alive monsters and remaining spawns
+- Notify BattleManager when wave is complete
+
+RuneManager responsibilities:
+- Select 3 rune cards from available RuneData list
+- Prevent duplicate choices in the same selection
+- Notify BattleManager when a rune is selected
+
+RuneEffectApplier responsibilities:
+- Apply rune effects to runtime battle context
+- Support at least these effect keys:
+  - hero_attack_percent
+  - hero_attack_speed_percent
+  - crystal_heal_flat
+  - crystal_shield_flat placeholder
+  - monster_slow_percent placeholder
+  - skill_cooldown_percent
+  - boss_damage_percent placeholder
+
+SkillController responsibilities:
+- Hold SkillData
+- Track cooldown
+- Expose CanUseSkill
+- Provide UseSkill method
+- Implement simple placeholder behavior:
+  - direct damage skill
+  - area damage placeholder
+  - heal placeholder
+
+4. UI placeholder scripts
+
+Create:
+- BattleHUD.cs
+- RuneSelectionUI.cs
+- HeroSkillButton.cs
+- StageResultUI.cs
+
+BattleHUD:
+- Show crystal HP
+- Show current wave
+- Show battle state
+
+RuneSelectionUI:
+- Display 3 rune options
+- Call RuneManager/BattleManager when selected
+- No complex animation required
+
+HeroSkillButton:
+- Bind to HeroController
+- Show cooldown state placeholder
+- Trigger hero skill
+
+StageResultUI:
+- Show victory/defeat placeholder
+
+Use UnityEngine.UI or TMPro only if already available. If TextMeshPro is not guaranteed, use comments or simple serialized fields and keep code compile-safe.
+
+5. Editor bootstrap tool
+
+Create an Editor script:
+Assets/_Project/Scripts/Editor/RuneGateBootstrapper.cs
+
+It should add a Unity menu item:
+Tools/RuneGate/Bootstrap MVP
+
+When executed in Unity Editor, it should:
+- Ensure required folders exist.
+- Create sample ScriptableObject assets:
+  - HeroData: Knight
+  - HeroData: Archer
+  - MonsterData: Goblin
+  - MonsterData: Orc
+  - SkillData: Shield Bash
+  - SkillData: Rapid Shot
+  - RuneData: Sword Rune
+  - RuneData: Bow Rune
+  - RuneData: Healing Rune
+  - StageData: Goblin Forest 1
+- Create or update a basic BattleScene under Assets/_Project/Scenes/BattleScene.unity if feasible.
+- If scene creation is too risky, create a clear TODO file and log instructions instead.
+- Do not generate binary art.
+- Use null sprites and placeholder data where needed.
+- Make the generated data compile-safe.
+
+6. README
+
+Create or update:
+README.md
+
+Include:
+- Project overview
+- Unity version target
+- How to run Bootstrap MVP
+- MVP scope
+- Folder structure
+- Coding rules
+- What not to add yet
+- Next implementation checklist
+
+README must state:
+
+MVP exclusions:
+- No server
+- No login
+- No gacha
+- No ads
+- No in-app purchase
+- No analytics
+- No external paid APIs
+- No multiplayer
+- No ranking
+- No cloud save
+
+7. Coding standards
+
+Follow these rules:
+- Use namespaces: RuneGate
+- Keep MonoBehaviours small and focused.
+- Use events where UI needs to observe battle state.
+- Use serialized private fields instead of public mutable fields where appropriate.
+- Add null guards and clear Debug.LogWarning messages.
+- Do not use singletons unless strongly justified.
+- Avoid deeply coupled references.
+- Avoid magic numbers in gameplay logic.
+- Use ScriptableObjects for balance data.
+- Keep prototype code simple but not messy.
+- Add comments only where they clarify non-obvious logic.
+- Make the project compile.
+
+8. Validation
+
+After editing:
+- List all files created/modified.
+- Explain how to run the bootstrapper in Unity.
+- Explain what the first playable prototype currently supports.
+- Explain what remains to be done manually in Unity Editor.
+- Point out any Unity-specific limitations you could not verify from the code environment.
+- Do not claim that the game was tested in Unity unless you actually ran Unity.
+
+Important:
+Prioritize maintainable architecture over visual polish.
+Do not add unnecessary packages.
+Do not add paid dependencies.
+Do not implement monetization yet.
+Do not implement networking.
+Do not over-engineer ECS, dependency injection containers, or complex state machines.
