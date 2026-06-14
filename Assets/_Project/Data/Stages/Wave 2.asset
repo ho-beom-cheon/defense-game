@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebed7be4f80f2cc459d826a09190d844, type: 3}
+  m_Name: Wave 2
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.WaveData
+  waveNo: 2
+  spawns:
+  - {fileID: 11400000, guid: d24d1f079e81b1344b3d53379a5f3365, type: 2}
+  - {fileID: 11400000, guid: 41bae20837e0da246947508cf7ae7183, type: 2}
+  - {fileID: 11400000, guid: cfeabe8327da7a543bb106219292ec51, type: 2}
+  isBossWave: 0
