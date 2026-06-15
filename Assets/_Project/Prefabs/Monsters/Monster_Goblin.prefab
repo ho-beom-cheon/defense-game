@@ -42,6 +42,7 @@ GameObject:
   - component: {fileID: 5428551509555684319}
   - component: {fileID: 2748663601341779379}
   - component: {fileID: 440935375410080676}
+  - component: {fileID: 8488375016890390657}
   - component: {fileID: 5414979552556284852}
   m_Layer: 0
   m_Name: Visual
@@ -134,11 +135,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0873fd90a03d22947913a321ada74ad9, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.PlaceholderSprite
   color: {r: 0.34, g: 0.78, b: 0.32, a: 1}
   size: {x: 0.62, y: 0.62}
   sortingOrder: 5
+--- !u!114 &8488375016890390657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3387636170943878296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dd8b29eb3ee4b4abee2ca3c97b46940, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuntimeSpriteFitter
+  spriteRenderer: {fileID: 0}
+  targetHeight: 0.9
 --- !u!95 &5414979552556284852
 Animator:
   serializedVersion: 7
@@ -156,7 +171,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: 
+  m_WarningMessage:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -209,7 +224,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd122bd1dda4490b815bc0b78ad01971, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.CharacterVisualController
   spriteRenderer: {fileID: 0}
   animator: {fileID: 0}
@@ -229,7 +244,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c075f27bf7914345a247e1c2465c56eb, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HitFlashController
   spriteRenderers: []
   flashColor: {r: 1, g: 1, b: 1, a: 1}
@@ -244,7 +259,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b608de1c097eb147904f4e344bfe4bb, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterController
   monsterData: {fileID: 0}
   spriteRenderer: {fileID: 0}

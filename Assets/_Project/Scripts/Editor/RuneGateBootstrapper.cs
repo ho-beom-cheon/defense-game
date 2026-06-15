@@ -115,7 +115,14 @@ namespace RuneGate.Editor
             RootPath + "/Art/RuntimePixel/Heroes/Brom",
             RootPath + "/Art/RuntimePixel/Heroes/Nyx",
             RootPath + "/Art/RuntimePixel/Monsters",
+            RootPath + "/Art/RuntimePixel/Monsters/GateImp",
+            RootPath + "/Art/RuntimePixel/Monsters/OrcBrute",
+            RootPath + "/Art/RuntimePixel/Monsters/DireWolf",
+            RootPath + "/Art/RuntimePixel/Monsters/CaveBat",
+            RootPath + "/Art/RuntimePixel/Monsters/CoreSlime",
+            RootPath + "/Art/RuntimePixel/Monsters/BoneSoldier",
             RootPath + "/Art/RuntimePixel/Bosses",
+            RootPath + "/Art/RuntimePixel/Bosses/Grumbar",
             RootPath + "/Art/RuntimePixel/UI",
             RootPath + "/Art/Effects/Skills",
             RootPath + "/Art/Effects/Hit",
@@ -406,13 +413,13 @@ namespace RuneGate.Editor
             Sprite mireaRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Mirea/mirea_idle.png");
             Sprite bromRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Brom/brom_idle.png");
             Sprite nyxRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Nyx/nyx_idle.png");
-            Sprite goblinRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "goblin", "gate_imp");
-            Sprite orcRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "orc", "brute");
-            Sprite wolfRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "wolf");
-            Sprite batRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "bat");
-            Sprite slimeRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "slime");
-            Sprite skeletonRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "bone", "skeleton");
-            Sprite bossRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Bosses", "grumbar");
+            Sprite goblinRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Monsters/GateImp/gate_imp_idle.png");
+            Sprite orcRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Monsters/OrcBrute/orc_brute_idle.png");
+            Sprite wolfRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Monsters/DireWolf/dire_wolf_idle.png");
+            Sprite batRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Monsters/CaveBat/cave_bat_idle.png");
+            Sprite slimeRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Monsters/CoreSlime/core_slime_idle.png");
+            Sprite skeletonRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Monsters/BoneSoldier/bone_soldier_idle.png");
+            Sprite bossRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Bosses/Grumbar/grumbar_idle.png");
             Sprite shieldBashIcon = LoadSpriteByKeyword($"{RootPath}/Art/UI/Icons/Skills", "\uBC29\uD328");
             Sprite rapidShotIcon = LoadSpriteByKeyword($"{RootPath}/Art/UI/Icons/Skills", "\uD654\uC0B4");
             Sprite swordRuneIcon = LoadFirstSprite($"{RootPath}/Art/UI/Icons/Runes");

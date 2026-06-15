@@ -24,8 +24,8 @@ MonoBehaviour:
   moveSpeed: 2
   damageToCrystal: 1
   rewardGold: 8
-  conceptImage: {fileID: 0}
-  runtimeSprite: {fileID: 0}
+  conceptImage: {fileID: 21300000, guid: ab6cfd825d1e9a6408c68f7308fa8101, type: 3}
+  runtimeSprite: {fileID: 21300000, guid: 2c29a31299744c84a9dd16eef2d489ee, type: 3}
   sprite: {fileID: 0}
   animatorController: {fileID: 0}
   prefab: {fileID: 0}

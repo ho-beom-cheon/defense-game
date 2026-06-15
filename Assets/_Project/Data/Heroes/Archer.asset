@@ -28,8 +28,8 @@ MonoBehaviour:
   attackSpeed: 1.5
   attackRange: 4
   skillData: {fileID: 11400000, guid: 685c898ed20a8ad43a50daf5395fd03f, type: 2}
-  portrait: {fileID: 21300000, guid: cadac768ef7c93a41a8202a97b818935, type: 3}
-  conceptImage: {fileID: 21300000, guid: cadac768ef7c93a41a8202a97b818935, type: 3}
+  portrait: {fileID: 21300000, guid: 7465ab560245dcc42810782e7f97076e, type: 3}
+  conceptImage: {fileID: 21300000, guid: 7465ab560245dcc42810782e7f97076e, type: 3}
   battleSprite: {fileID: 21300000, guid: a5a96d1ed571a4642ad260e4aafdadc2, type: 3}
   animatorController: {fileID: 0}
   prefab: {fileID: 0}

@@ -136,8 +136,13 @@ These ChatGPT-generated prototype images are imported as Unity Sprites when pres
 - `Assets/_Project/Art/ConceptSheets/Enemies/균열_적성_기록_괴물_수집가.png` -> Monster `conceptImage` reference
 - `Assets/_Project/Art/ConceptSheets/Enemies/문파괴자_그룸바르의_위협_기록.png` -> Orc Warlord/Grumbar `conceptImage` reference
 - `Assets/_Project/Art/RuntimePixel/Heroes/*/*_idle.png` -> Hero `battleSprite`
-- `Assets/_Project/Art/RuntimePixel/Monsters/*_idle.png` -> Monster `runtimeSprite`
-- `Assets/_Project/Art/RuntimePixel/Bosses/grumbar_idle.png` -> Boss `runtimeSprite`
+- `Assets/_Project/Art/RuntimePixel/Monsters/GateImp/gate_imp_idle.png` -> Goblin/GateImp `runtimeSprite`
+- `Assets/_Project/Art/RuntimePixel/Monsters/OrcBrute/orc_brute_idle.png` -> Orc/OrcBrute `runtimeSprite`
+- `Assets/_Project/Art/RuntimePixel/Monsters/DireWolf/dire_wolf_idle.png` -> Wolf/DireWolf `runtimeSprite`
+- `Assets/_Project/Art/RuntimePixel/Monsters/CaveBat/cave_bat_idle.png` -> Bat/CaveBat `runtimeSprite`
+- `Assets/_Project/Art/RuntimePixel/Monsters/CoreSlime/core_slime_idle.png` -> Slime/CoreSlime `runtimeSprite`
+- `Assets/_Project/Art/RuntimePixel/Monsters/BoneSoldier/bone_soldier_idle.png` -> Skeleton/BoneSoldier `runtimeSprite`
+- `Assets/_Project/Art/RuntimePixel/Bosses/Grumbar/grumbar_idle.png` -> Boss/Grumbar `runtimeSprite`
 - `Assets/_Project/Art/UI/Icons/Skills/영웅의_방패_충격.png` -> Shield Bash `icon`
 - `Assets/_Project/Art/UI/Icons/Skills/궁전의_화살_발사_아이콘.png` -> Rapid Shot `icon`
 - `Assets/_Project/Art/UI/Icons/Runes/마법의_검과_룬_에뮬럼.png` -> Sword Rune `icon`
