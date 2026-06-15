@@ -54,7 +54,7 @@ namespace RuneGate
                 return;
             }
 
-            string heroName = heroController.Data != null ? heroController.Data.DisplayName : "Hero";
+            string heroName = heroController.Data != null ? heroController.Data.DisplayNameKorean : "Hero";
             string skillName = heroController.SkillController != null && heroController.SkillController.Data != null
                 ? heroController.SkillController.Data.DisplayName
                 : "Skill";

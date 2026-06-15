@@ -84,7 +84,7 @@ namespace RuneGate
             GUILayout.Label("RuneGate Defense");
             if (battleManager != null && battleManager.ActiveStageData != null)
             {
-                GUILayout.Label($"Stage {battleManager.ActiveStageData.DisplayName}");
+                GUILayout.Label($"Stage {battleManager.ActiveStageData.DisplayNameKorean}");
             }
 
             GUILayout.Label(crystalHpText);
@@ -107,7 +107,7 @@ namespace RuneGate
                         continue;
                     }
 
-                    GUILayout.Label($"{hero.Data.DisplayName} ATK {hero.EffectiveAttack} SPD {hero.EffectiveAttackSpeed:0.00}");
+                    GUILayout.Label($"{hero.Data.DisplayNameKorean} ATK {hero.EffectiveAttack} SPD {hero.EffectiveAttackSpeed:0.00}");
                 }
 
                 GUILayout.EndScrollView();

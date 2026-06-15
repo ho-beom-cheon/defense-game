@@ -14,6 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_archer_001
   displayName: Archer
+  displayNameKorean: "\uC138\uB9AC\uC544"
+  subtitleKorean: "\uBC14\uB78C\uAE38\uC744 \uC77D\uB294 \uAD81\uC218"
+  descriptionKorean: "\uD6C4\uC5F4 / \uC6D0\uAC70\uB9AC / \uBC14\uB78C. \uADE0\uC5F4\uC5D0\uC11C
+    \uC0C8\uB294 \uBC14\uB78C\uC758 \uBC29\uD5A5\uC73C\uB85C \uC801\uC758 \uC9C4\uC785\uB85C\uB97C
+    \uC77D\uB294\uB2E4."
+  quoteKorean: "\uBC14\uB78C\uC740 \uC774\uBBF8 \uB2F5\uC744 \uC54C\uACE0 \uC788\uC5B4."
   role: 2
   positionType: 2
   element: 8
@@ -23,6 +29,7 @@ MonoBehaviour:
   attackRange: 4
   skillData: {fileID: 11400000, guid: 685c898ed20a8ad43a50daf5395fd03f, type: 2}
   portrait: {fileID: 21300000, guid: cadac768ef7c93a41a8202a97b818935, type: 3}
-  battleSprite: {fileID: 21300000, guid: cadac768ef7c93a41a8202a97b818935, type: 3}
+  conceptImage: {fileID: 21300000, guid: cadac768ef7c93a41a8202a97b818935, type: 3}
+  battleSprite: {fileID: 21300000, guid: a5a96d1ed571a4642ad260e4aafdadc2, type: 3}
   animatorController: {fileID: 0}
   prefab: {fileID: 0}

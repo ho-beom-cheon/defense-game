@@ -1,5 +1,13 @@
 # RuneGate Defense Art Guide
 
+## Current Art Identity Policy
+
+RuneGate Defense now targets a Korea-first mobile 2D pixel fantasy identity. Use `문지기`, `봉문`, `균열`, `재문`, and `기록` as the primary world-language pillars.
+
+Record-style concept images belong under `Assets/_Project/Art/ConceptSheets` and should be treated as `문지기 기록`, `봉문 위험 기록`, or `균열 적성 기록` references. They are not BattleScene unit sprites.
+
+Runtime battle sprites belong under `Assets/_Project/Art/RuntimePixel` and should be built separately as small, readable pixel sprites.
+
 ## Current v0.5 Policy
 
 v0.5 keeps placeholder sprites, primitive objects, and package-free generated prefabs only. Final illustrations, paid assets, Addressables, Firebase, and external art packages are intentionally excluded.
@@ -10,6 +18,14 @@ The purpose of the art pipeline in this version is to validate the first real in
 
 ```text
 Assets/_Project/Art/
+  ConceptSheets/
+    Heroes/
+    Enemies/
+  RuntimePixel/
+    Heroes/
+    Monsters/
+    Bosses/
+    UI/
   Characters/
     Heroes/
       Knight/
@@ -138,6 +154,27 @@ Currently linked:
 
 The Crystal/Gate background and concept sheet are imported as reference Sprites, but they are not used directly as battle sprites yet. Concept sheets must remain reference material only.
 
+## Korean Identity References
+
+Reference-only concept images currently include:
+
+- `Assets/_Project/Art/ConceptSheets/Heroes/문지기_레온의_기록_카드.png`
+- `Assets/_Project/Art/ConceptSheets/Heroes/문지기_기록_바람길을_읽는_궁수.png`
+- `Assets/_Project/Art/ConceptSheets/Heroes/카엘_잿불의_방랑_마법사.png`
+- `Assets/_Project/Art/ConceptSheets/Heroes/미레아_금빛_성서의_사제.png`
+- `Assets/_Project/Art/ConceptSheets/Heroes/브롬_룬포지_기술자_카드.png`
+- `Assets/_Project/Art/ConceptSheets/Heroes/그림자_균열의_암살자_카드.png`
+- `Assets/_Project/Art/ConceptSheets/Enemies/균열_적성_기록_괴물_수집가.png`
+- `Assets/_Project/Art/ConceptSheets/Enemies/문파괴자_그룸바르의_위협_기록.png`
+
+For the detailed terminology and runtime split, see:
+
+- `docs/korean-world-identity-guide.md`
+- `docs/hero-character-bible.md`
+- `docs/enemy-boss-bible.md`
+- `docs/pixel-art-pipeline.md`
+- `docs/art-integration-notes.md`
+
 ## Prefab Contract
 
 The v0.5 bootstrapper creates these package-free placeholder prefabs:
@@ -166,13 +203,13 @@ Animator controllers should support these state names and parameters:
 
 ## Runtime Hooks
 
-`HeroData` keeps `portrait`, `battleSprite`, `animatorController`, and `prefab` fields.
+`HeroData` keeps `portrait`, `conceptImage`, `battleSprite`, `animatorController`, and `prefab` fields. `portrait` and `conceptImage` are for codex/settings/detail screens. `battleSprite` is only for small RuntimePixel battle sprites.
 
-`MonsterData` keeps `sprite`, `animatorController`, `prefab`, and `isBoss` fields.
+`MonsterData` keeps `conceptImage`, `runtimeSprite`, legacy `sprite` compatibility, `animatorController`, `prefab`, and `isBoss` fields. Runtime code treats `Sprite` as the `runtimeSprite` getter; concept images must not be used by BattleScene SpriteRenderers.
 
 `SkillData`, `RuneData`, and `UpgradeData` have icon fields so UI can show sample icons later without changing the data model.
 
-`HeroPlacementManager` and `WaveManager` prefer data-linked prefabs when present and fall back to placeholder sprites when those fields are empty. Adding a Knight or Goblin sample later should only require importing sprites, assigning controller clips, and connecting the relevant ScriptableObject fields.
+`HeroPlacementManager` and `WaveManager` prefer RuntimePixel data-linked prefabs when present and fall back to small placeholder sprites when those fields are empty. Adding a RuntimePixel sample later should only require importing sprites, assigning controller clips, and connecting the relevant ScriptableObject runtime fields.
 
 ## Android Screen Baseline
 

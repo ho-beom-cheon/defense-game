@@ -8,12 +8,19 @@ namespace RuneGate
     {
         [SerializeField] private string stageId = "stage_id";
         [SerializeField] private string displayName = "Stage";
+        [SerializeField] private string displayNameKorean = "";
+        [SerializeField] private string subtitleKorean = "";
+        [TextArea]
+        [SerializeField] private string descriptionKorean = "";
         [SerializeField] private int crystalHp = 100;
         [SerializeField] private List<WaveData> waves = new List<WaveData>();
         [SerializeField] private MonsterData bossMonster;
 
         public string StageId => stageId;
         public string DisplayName => displayName;
+        public string DisplayNameKorean => string.IsNullOrWhiteSpace(displayNameKorean) ? displayName : displayNameKorean;
+        public string SubtitleKorean => subtitleKorean;
+        public string DescriptionKorean => descriptionKorean;
         public int CrystalHp => crystalHp;
         public IReadOnlyList<WaveData> Waves => waves;
         public MonsterData BossMonster => bossMonster;

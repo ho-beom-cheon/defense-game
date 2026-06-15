@@ -58,7 +58,7 @@ namespace RuneGate
             Color previousColor = GUI.backgroundColor;
             GUI.backgroundColor = canUse ? new Color(0.75f, 1f, 0.75f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
             GUI.enabled = canUse;
-            if (GUILayout.Button($"{hero.Data.DisplayName}: {skillName}\n{status}", GUILayout.Height(48f)))
+            if (GUILayout.Button($"{hero.Data.DisplayNameKorean}: {skillName}\n{status}", GUILayout.Height(48f)))
             {
                 hero.RequestManualSkill();
             }

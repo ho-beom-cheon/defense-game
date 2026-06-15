@@ -93,6 +93,20 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/Characters/Bosses/OrcWarlord/Sprites",
             "Assets/_Project/Art/Characters/Bosses/OrcWarlord/Animations",
             "Assets/_Project/Art/Characters/Bosses/OrcWarlord/Materials",
+            "Assets/_Project/Art/ConceptSheets",
+            "Assets/_Project/Art/ConceptSheets/Heroes",
+            "Assets/_Project/Art/ConceptSheets/Enemies",
+            "Assets/_Project/Art/RuntimePixel",
+            "Assets/_Project/Art/RuntimePixel/Heroes",
+            "Assets/_Project/Art/RuntimePixel/Heroes/Leon",
+            "Assets/_Project/Art/RuntimePixel/Heroes/Seria",
+            "Assets/_Project/Art/RuntimePixel/Heroes/Kael",
+            "Assets/_Project/Art/RuntimePixel/Heroes/Mirea",
+            "Assets/_Project/Art/RuntimePixel/Heroes/Brom",
+            "Assets/_Project/Art/RuntimePixel/Heroes/Nyx",
+            "Assets/_Project/Art/RuntimePixel/Monsters",
+            "Assets/_Project/Art/RuntimePixel/Bosses",
+            "Assets/_Project/Art/RuntimePixel/UI",
             "Assets/_Project/Art/Effects/Skills",
             "Assets/_Project/Art/Effects/Hit",
             "Assets/_Project/Art/Effects/Projectiles",
@@ -147,6 +161,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/CharacterVisualController.cs",
             "Assets/_Project/Scripts/Battle/HitFlashController.cs",
             "Assets/_Project/Scripts/Battle/AutoDestroyEffect.cs",
+            "Assets/_Project/Scripts/Battle/RuntimeSpriteFitter.cs",
+            "Assets/_Project/Scripts/Battle/RuntimeSpritePolicy.cs",
             "Assets/_Project/Scripts/Hero/HeroController.cs",
             "Assets/_Project/Scripts/Hero/HeroPlacementManager.cs",
             "Assets/_Project/Scripts/Hero/HeroPlacementSlot.cs",
@@ -287,6 +303,11 @@ namespace RuneGate.Editor
             "docs/store-listing-draft.md",
             "docs/privacy-checklist.md",
             "docs/release-notes-v1.0.md",
+            "docs/hero-character-bible.md",
+            "docs/enemy-boss-bible.md",
+            "docs/korean-world-identity-guide.md",
+            "docs/pixel-art-pipeline.md",
+            "docs/art-integration-notes.md",
             "CHANGELOG.md"
         };
 
@@ -423,7 +444,7 @@ namespace RuneGate.Editor
             }
 
             ValidateV05VisualLinks(errors);
-            ValidateInitialArtLinks(errors);
+            ValidateRuntimeArtPolicy(errors);
 
             SaveData defaultSave = SaveManager.CreateDefaultSave();
             if (defaultSave == null || defaultSave.unlockedStageIds == null || !defaultSave.unlockedStageIds.Contains(SaveManager.DefaultUnlockedStageId))
@@ -516,43 +537,83 @@ namespace RuneGate.Editor
             }
         }
 
-        private static void ValidateInitialArtLinks(List<string> errors)
+        private static void ValidateRuntimeArtPolicy(List<string> errors)
         {
-            ValidateHeroSpriteLink("Assets/_Project/Art/Characters/Heroes/Knight", "Assets/_Project/Data/Heroes/Knight.asset", "Knight", errors);
-            ValidateHeroSpriteLink("Assets/_Project/Art/Characters/Heroes/Archer", "Assets/_Project/Data/Heroes/Archer.asset", "Archer", errors);
-            ValidateMonsterSpriteLink("Assets/_Project/Art/Characters/Monsters/Goblin", "Assets/_Project/Data/Monsters/Goblin.asset", "Goblin", errors);
-            ValidateMonsterSpriteLink("Assets/_Project/Art/Characters/Monsters/Orc", "Assets/_Project/Data/Monsters/Orc.asset", "Orc", errors);
-            ValidateMonsterSpriteLink("Assets/_Project/Art/Characters/Bosses/OrcWarlord", "Assets/_Project/Data/Monsters/Orc Warlord.asset", "Orc Warlord", errors);
+            ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Leon", "Assets/_Project/Data/Heroes/Knight.asset", "Leon", errors);
+            ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Seria", "Assets/_Project/Data/Heroes/Archer.asset", "Seria", errors);
+            ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Kael", "Assets/_Project/Data/Heroes/Fire Mage.asset", "Kael", errors);
+            ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Mirea", "Assets/_Project/Data/Heroes/Priest.asset", "Mirea", errors);
+            ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Brom", "Assets/_Project/Data/Heroes/Dwarf Engineer.asset", "Brom", errors);
+            ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Nyx", "Assets/_Project/Data/Heroes/Shadow Assassin.asset", "Nyx", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters", "Assets/_Project/Data/Monsters/Goblin.asset", "Goblin", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters", "Assets/_Project/Data/Monsters/Orc.asset", "Orc", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Bosses", "Assets/_Project/Data/Monsters/Orc Warlord.asset", "Orc Warlord", errors);
             ValidateSkillIconLink("Assets/_Project/Art/UI/Icons/Skills", "Assets/_Project/Data/Skills/Shield Bash.asset", "Shield Bash", errors);
             ValidateSkillIconLink("Assets/_Project/Art/UI/Icons/Skills", "Assets/_Project/Data/Skills/Rapid Shot.asset", "Rapid Shot", errors);
             ValidateRuneIconLink("Assets/_Project/Art/UI/Icons/Runes", "Assets/_Project/Data/Runes/Sword Rune.asset", "Sword Rune", errors);
         }
 
-        private static void ValidateHeroSpriteLink(string artFolder, string dataPath, string label, List<string> errors)
+        private static void ValidateHeroRuntimeSprite(string runtimeFolder, string dataPath, string label, List<string> errors)
         {
-            if (!HasTextureInFolder(artFolder))
+            HeroData data = AssetDatabase.LoadAssetAtPath<HeroData>(dataPath);
+            if (data == null)
             {
                 return;
             }
 
-            HeroData data = AssetDatabase.LoadAssetAtPath<HeroData>(dataPath);
-            if (data == null || data.BattleSprite == null)
+            ValidateNoConceptSheetSprite(data.BattleSprite, $"{label} HeroData battleSprite", errors);
+            if (!HasTextureInFolder(runtimeFolder))
             {
-                errors.Add($"{label} image exists but HeroData sprite link is missing: {dataPath}");
+                return;
+            }
+
+            if (data.BattleSprite == null)
+            {
+                errors.Add($"{label} RuntimePixel image exists but HeroData battleSprite is missing: {dataPath}");
+                return;
+            }
+
+            ValidateRuntimePixelSprite(data.BattleSprite, $"{label} HeroData battleSprite", errors);
+        }
+
+        private static void ValidateMonsterRuntimeSprite(string runtimeFolder, string dataPath, string label, List<string> errors)
+        {
+            MonsterData data = AssetDatabase.LoadAssetAtPath<MonsterData>(dataPath);
+            if (data == null)
+            {
+                return;
+            }
+
+            ValidateNoConceptSheetSprite(data.Sprite, $"{label} MonsterData runtimeSprite", errors);
+            if (!HasTextureInFolder(runtimeFolder))
+            {
+                return;
+            }
+
+            if (data.Sprite == null)
+            {
+                errors.Add($"{label} RuntimePixel image exists but MonsterData runtimeSprite is missing: {dataPath}");
+                return;
+            }
+
+            ValidateRuntimePixelSprite(data.Sprite, $"{label} MonsterData runtimeSprite", errors);
+        }
+
+        private static void ValidateNoConceptSheetSprite(Sprite sprite, string label, List<string> errors)
+        {
+            string path = sprite != null ? AssetDatabase.GetAssetPath(sprite) : string.Empty;
+            if (!string.IsNullOrWhiteSpace(path) && path.StartsWith("Assets/_Project/Art/ConceptSheets", System.StringComparison.OrdinalIgnoreCase))
+            {
+                errors.Add($"{label} must not reference ConceptSheets art: {path}");
             }
         }
 
-        private static void ValidateMonsterSpriteLink(string artFolder, string dataPath, string label, List<string> errors)
+        private static void ValidateRuntimePixelSprite(Sprite sprite, string label, List<string> errors)
         {
-            if (!HasTextureInFolder(artFolder))
+            string path = sprite != null ? AssetDatabase.GetAssetPath(sprite) : string.Empty;
+            if (!string.IsNullOrWhiteSpace(path) && !path.StartsWith("Assets/_Project/Art/RuntimePixel", System.StringComparison.OrdinalIgnoreCase))
             {
-                return;
-            }
-
-            MonsterData data = AssetDatabase.LoadAssetAtPath<MonsterData>(dataPath);
-            if (data == null || data.Sprite == null)
-            {
-                errors.Add($"{label} image exists but MonsterData sprite link is missing: {dataPath}");
+                errors.Add($"{label} must reference RuntimePixel art, not {path}");
             }
         }
 

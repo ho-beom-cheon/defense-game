@@ -11,8 +11,8 @@ namespace RuneGate
         [SerializeField] private Transform[] laneSpawnPoints;
         [SerializeField] private Transform[] crystalTargetPoints;
         [SerializeField] private int heroSlotsPerLane = 3;
-        [SerializeField] private float heroFrontSlotX = -2.4f;
-        [SerializeField] private float heroSlotSpacingX = 0.85f;
+        [SerializeField] private float heroFrontSlotX = -1.25f;
+        [SerializeField] private float heroSlotSpacingX = 0.75f;
         [SerializeField] private Transform[] heroSlotPoints;
 
         public int LaneCount => Mathf.Max(1, laneCount);

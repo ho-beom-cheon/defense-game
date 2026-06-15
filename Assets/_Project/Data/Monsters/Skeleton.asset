@@ -14,12 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_skeleton_001
   displayName: Skeleton
+  displayNameKorean: "\uADE0\uC5F4 \uC794\uD574\uBCD1"
+  subtitleKorean: "\uAE30\uB85D \uC624\uC5FC \uC794\uC7AC"
+  descriptionKorean: "\uC624\uB798\uB41C \uC804\uC7A5\uC758 \uAE30\uB85D\uC774 \uADE0\uC5F4\uC5D0
+    \uC624\uC5FC\uB418\uC5B4 \uAC78\uC5B4 \uB098\uC628 \uC794\uD574 \uBCD1\uC0AC."
   monsterType: 5
   element: 6
   maxHp: 110
   moveSpeed: 1
   damageToCrystal: 1
   rewardGold: 9
+  conceptImage: {fileID: 0}
+  runtimeSprite: {fileID: 0}
   sprite: {fileID: 0}
   animatorController: {fileID: 0}
   prefab: {fileID: 0}

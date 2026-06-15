@@ -14,6 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_engineer_dwarf_001
   displayName: Dwarf Engineer
+  displayNameKorean: "\uBE0C\uB86C"
+  subtitleKorean: "\uB8EC\uD3EC\uC9C0 \uAE30\uC220\uC790"
+  descriptionKorean: "\uC911\uC5F4 / \uC124\uCE58 / \uAE30\uACC4. \uADE0\uC5F4 \uC555\uB825\uC744
+    \uACAC\uB514\uB294 \uB8EC \uC7A5\uCE58\uB97C \uD604\uC7A5\uC5D0\uC11C \uC870\uB9BD\uD55C\uB2E4."
+  quoteKorean:
   role: 6
   positionType: 1
   element: 4
@@ -23,6 +28,7 @@ MonoBehaviour:
   attackRange: 2.8
   skillData: {fileID: 11400000, guid: 75f36182c4802234d98053786b14ca7e, type: 2}
   portrait: {fileID: 0}
-  battleSprite: {fileID: 0}
+  conceptImage: {fileID: 0}
+  battleSprite: {fileID: 21300000, guid: 2e498766082925d48a2cde0ca153880b, type: 3}
   animatorController: {fileID: 0}
   prefab: {fileID: 0}
