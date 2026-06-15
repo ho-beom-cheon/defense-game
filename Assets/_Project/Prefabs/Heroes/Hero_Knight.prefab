@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 627750444535263426}
   - component: {fileID: 6903433852110146089}
   - component: {fileID: 926633934718745054}
+  - component: {fileID: 756279263849998867}
   - component: {fileID: 4837687188992565073}
   m_Layer: 0
   m_Name: Visual
@@ -103,11 +104,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0873fd90a03d22947913a321ada74ad9, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.PlaceholderSprite
   color: {r: 0.45, g: 0.62, b: 1, a: 1}
   size: {x: 0.72, y: 0.72}
   sortingOrder: 4
+--- !u!114 &756279263849998867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3764085548829777143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4dd8b29eb3ee4b4abee2ca3c97b46940, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuntimeSpriteFitter
+  spriteRenderer: {fileID: 0}
+  targetHeight: 1.25
 --- !u!95 &4837687188992565073
 Animator:
   serializedVersion: 7
@@ -125,7 +140,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage: 
+  m_WarningMessage:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -179,7 +194,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bd122bd1dda4490b815bc0b78ad01971, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.CharacterVisualController
   spriteRenderer: {fileID: 0}
   animator: {fileID: 0}
@@ -199,7 +214,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c075f27bf7914345a247e1c2465c56eb, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HitFlashController
   spriteRenderers: []
   flashColor: {r: 1, g: 1, b: 1, a: 1}
@@ -214,7 +229,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ef7d444b24f7794f816a682b330fec7, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillController
   skillData: {fileID: 0}
 --- !u!114 &7971233507461097672
@@ -227,7 +242,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a79e29b5e0c9aa54f99a38a3f3d4389d, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroController
   heroData: {fileID: 0}
   skillController: {fileID: 0}
@@ -374,7 +389,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0873fd90a03d22947913a321ada74ad9, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.PlaceholderSprite
   color: {r: 1, g: 1, b: 1, a: 0.22}
   size: {x: 0.9, y: 0.12}

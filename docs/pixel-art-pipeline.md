@@ -64,7 +64,7 @@ Assets/_Project/Art/RuntimePixel/
 
 ## Current State
 
-현재 BattleScene은 영웅 6인의 RuntimePixel idle 스프라이트를 사용한다. RuntimePixel 스프라이트가 없는 몬스터/보스는 `PlaceholderSprite` fallback을 사용한다. 새 컨셉 이미지는 도감/기록서 방향을 잡는 참고 이미지로만 사용한다.
+현재 BattleScene은 영웅 6인, 몬스터 6종, 보스 1종의 RuntimePixel idle 스프라이트를 사용한다. RuntimePixel 스프라이트가 없는 새 유닛은 `PlaceholderSprite` fallback을 사용한다. 새 컨셉 이미지는 도감/기록서 방향을 잡는 참고 이미지로만 사용한다.
 
 ## Required RuntimePixel Backlog
 
@@ -79,13 +79,13 @@ Heroes:
 
 Monsters:
 
-- `Assets/_Project/Art/RuntimePixel/Monsters/gate_imp_idle.png` 또는 `goblin_idle.png`
-- `Assets/_Project/Art/RuntimePixel/Monsters/orc_brute_idle.png`
-- `Assets/_Project/Art/RuntimePixel/Monsters/dire_wolf_idle.png`
-- `Assets/_Project/Art/RuntimePixel/Monsters/cave_bat_idle.png`
-- `Assets/_Project/Art/RuntimePixel/Monsters/core_slime_idle.png`
-- `Assets/_Project/Art/RuntimePixel/Monsters/bone_soldier_idle.png`
+- Done: `Assets/_Project/Art/RuntimePixel/Monsters/GateImp/gate_imp_idle.png`
+- Done: `Assets/_Project/Art/RuntimePixel/Monsters/OrcBrute/orc_brute_idle.png`
+- Done: `Assets/_Project/Art/RuntimePixel/Monsters/DireWolf/dire_wolf_idle.png`
+- Done: `Assets/_Project/Art/RuntimePixel/Monsters/CaveBat/cave_bat_idle.png`
+- Done: `Assets/_Project/Art/RuntimePixel/Monsters/CoreSlime/core_slime_idle.png`
+- Done: `Assets/_Project/Art/RuntimePixel/Monsters/BoneSoldier/bone_soldier_idle.png`
 
 Bosses:
 
-- `Assets/_Project/Art/RuntimePixel/Bosses/grumbar_idle.png`
+- Done: `Assets/_Project/Art/RuntimePixel/Bosses/Grumbar/grumbar_idle.png`

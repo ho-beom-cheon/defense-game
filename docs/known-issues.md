@@ -30,7 +30,7 @@
 
 ## Runtime Pixel Art
 
-- Final RuntimePixel battle sprites are still missing for the six monsters and Grumbar boss.
-- BattleScene uses the six hero RuntimePixel idle sprites and intentionally uses small colored placeholder fallback when `battleSprite` or `runtimeSprite` is empty.
+- First-pass RuntimePixel idle sprites exist for six heroes, six monsters, and Grumbar boss.
+- BattleScene intentionally uses small colored placeholder fallback when a future `battleSprite` or `runtimeSprite` is empty.
 - ConceptSheets images are reference/codex assets only and should not appear directly in BattleScene SpriteRenderers.
 - UI is still IMGUI-based, so additional mobile safe-area polish remains for a future pass.

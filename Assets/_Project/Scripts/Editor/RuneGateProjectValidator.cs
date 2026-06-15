@@ -105,7 +105,14 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/RuntimePixel/Heroes/Brom",
             "Assets/_Project/Art/RuntimePixel/Heroes/Nyx",
             "Assets/_Project/Art/RuntimePixel/Monsters",
+            "Assets/_Project/Art/RuntimePixel/Monsters/GateImp",
+            "Assets/_Project/Art/RuntimePixel/Monsters/OrcBrute",
+            "Assets/_Project/Art/RuntimePixel/Monsters/DireWolf",
+            "Assets/_Project/Art/RuntimePixel/Monsters/CaveBat",
+            "Assets/_Project/Art/RuntimePixel/Monsters/CoreSlime",
+            "Assets/_Project/Art/RuntimePixel/Monsters/BoneSoldier",
             "Assets/_Project/Art/RuntimePixel/Bosses",
+            "Assets/_Project/Art/RuntimePixel/Bosses/Grumbar",
             "Assets/_Project/Art/RuntimePixel/UI",
             "Assets/_Project/Art/Effects/Skills",
             "Assets/_Project/Art/Effects/Hit",
@@ -545,9 +552,13 @@ namespace RuneGate.Editor
             ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Mirea", "Assets/_Project/Data/Heroes/Priest.asset", "Mirea", errors);
             ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Brom", "Assets/_Project/Data/Heroes/Dwarf Engineer.asset", "Brom", errors);
             ValidateHeroRuntimeSprite("Assets/_Project/Art/RuntimePixel/Heroes/Nyx", "Assets/_Project/Data/Heroes/Shadow Assassin.asset", "Nyx", errors);
-            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters", "Assets/_Project/Data/Monsters/Goblin.asset", "Goblin", errors);
-            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters", "Assets/_Project/Data/Monsters/Orc.asset", "Orc", errors);
-            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Bosses", "Assets/_Project/Data/Monsters/Orc Warlord.asset", "Orc Warlord", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters/GateImp", "Assets/_Project/Data/Monsters/Goblin.asset", "GateImp", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters/OrcBrute", "Assets/_Project/Data/Monsters/Orc.asset", "OrcBrute", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters/DireWolf", "Assets/_Project/Data/Monsters/Wolf.asset", "DireWolf", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters/CaveBat", "Assets/_Project/Data/Monsters/Bat.asset", "CaveBat", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters/CoreSlime", "Assets/_Project/Data/Monsters/Slime.asset", "CoreSlime", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Monsters/BoneSoldier", "Assets/_Project/Data/Monsters/Skeleton.asset", "BoneSoldier", errors);
+            ValidateMonsterRuntimeSprite("Assets/_Project/Art/RuntimePixel/Bosses/Grumbar", "Assets/_Project/Data/Monsters/Orc Warlord.asset", "Grumbar", errors);
             ValidateSkillIconLink("Assets/_Project/Art/UI/Icons/Skills", "Assets/_Project/Data/Skills/Shield Bash.asset", "Shield Bash", errors);
             ValidateSkillIconLink("Assets/_Project/Art/UI/Icons/Skills", "Assets/_Project/Data/Skills/Rapid Shot.asset", "Rapid Shot", errors);
             ValidateRuneIconLink("Assets/_Project/Art/UI/Icons/Runes", "Assets/_Project/Data/Runes/Sword Rune.asset", "Sword Rune", errors);
