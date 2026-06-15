@@ -1,6 +1,8 @@
 # RuneGate Defense
 
-RuneGate Defense is a Unity 6 mobile 2D portrait defense prototype. The player defends a Kingdom Crystal from Goblins and Orcs advancing through 3 lanes from a Rune Gate. Knight and Archer heroes attack automatically, hero skills can be triggered manually, and rune cards are selected between waves.
+RuneGate Defense is a Unity 6 mobile 2D portrait defense prototype for a Korea-first 2D pixel fantasy direction. The player protects a sealed gate record from rift hostile entities advancing through 3 lanes. Gatekeeper heroes attack automatically, hero skills can be triggered manually, and rune choices are selected between waves.
+
+The current art identity favors `문지기`, `봉문`, `균열`, `재문`, and record-document language over generic western high-fantasy naming. Concept images live as record-style references, while BattleScene runtime units keep separate small pixel-sprite placeholders.
 
 ## Required Unity Version
 
@@ -99,7 +101,16 @@ This creates or updates the release-track prototype:
 - 6 MVP monsters and Orc Warlord boss
 - 20 rune cards
 - Tutorial overlay and local tutorial completion save
-- Initial image links for Knight, Archer, Goblin, Orc, Orc Warlord, Shield Bash, Rapid Shot, and Sword Rune when PNG files exist under `Assets/_Project/Art`
+- Initial art links for concept references, RuntimePixel battle sprites, Shield Bash, Rapid Shot, and Sword Rune when PNG files exist under `Assets/_Project/Art`
+- Korea-first identity data fields for heroes, monsters, bosses, and stages:
+  - `displayNameKorean`
+  - `subtitleKorean`
+  - `descriptionKorean`
+  - `quoteKorean` for heroes
+- Concept reference and runtime pixel art separation:
+  - `Assets/_Project/Art/ConceptSheets`
+  - `Assets/_Project/Art/RuntimePixel`
+  - BattleScene uses RuntimePixel sprites only and falls back to small placeholders when RuntimePixel art is missing.
 - Android package settings for `com.hobeomcheon.runegatedefense`
 - Build Settings scene order for Title -> Stage Select -> Battle -> Upgrade
 
@@ -131,6 +142,11 @@ To relink imported prototype images without rebuilding scenes, run:
 - `docs/store-listing-draft.md`
 - `docs/privacy-checklist.md`
 - `docs/release-notes-v1.0.md`
+- `docs/hero-character-bible.md`
+- `docs/enemy-boss-bible.md`
+- `docs/korean-world-identity-guide.md`
+- `docs/pixel-art-pipeline.md`
+- `docs/art-integration-notes.md`
 - `CHANGELOG.md`
 
 ## How To Play
@@ -250,6 +266,8 @@ Assets/_Project/
   Scenes/
   Art/
     Characters/
+    ConceptSheets/
+    RuntimePixel/
     Effects/
     UI/
     Backgrounds/

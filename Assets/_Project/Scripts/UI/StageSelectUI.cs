@@ -34,7 +34,7 @@ namespace RuneGate
             GUILayout.Label("Stage Select");
             GUILayout.Label($"Gold: {SaveManager.Current.totalGold}");
             GUILayout.Label($"Formation Slots: {SaveManager.Current.formationSlots.Count}/9");
-            GUILayout.Label("World 1: Goblin Forest");
+            GUILayout.Label("World 1: 재문 숲");
             GUILayout.Space(8f);
 
             if (stages.Count == 0)
@@ -78,7 +78,7 @@ namespace RuneGate
             bool cleared = SaveManager.IsStageCleared(stageData.StageId);
             string status = cleared ? "Cleared" : unlocked ? "Unlocked" : "Locked";
             string difficulty = GetDifficultyLabel(index);
-            string label = $"{index + 1}. {stageData.DisplayName} - {difficulty} ({status})";
+            string label = $"{index + 1}. {stageData.DisplayNameKorean} - {difficulty} ({status})";
 
             using (new GuiEnabledScope(unlocked))
             {

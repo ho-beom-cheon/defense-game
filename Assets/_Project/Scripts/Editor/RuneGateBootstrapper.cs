@@ -103,6 +103,20 @@ namespace RuneGate.Editor
             RootPath + "/Art/Characters/Bosses/OrcWarlord/Sprites",
             RootPath + "/Art/Characters/Bosses/OrcWarlord/Animations",
             RootPath + "/Art/Characters/Bosses/OrcWarlord/Materials",
+            RootPath + "/Art/ConceptSheets",
+            RootPath + "/Art/ConceptSheets/Heroes",
+            RootPath + "/Art/ConceptSheets/Enemies",
+            RootPath + "/Art/RuntimePixel",
+            RootPath + "/Art/RuntimePixel/Heroes",
+            RootPath + "/Art/RuntimePixel/Heroes/Leon",
+            RootPath + "/Art/RuntimePixel/Heroes/Seria",
+            RootPath + "/Art/RuntimePixel/Heroes/Kael",
+            RootPath + "/Art/RuntimePixel/Heroes/Mirea",
+            RootPath + "/Art/RuntimePixel/Heroes/Brom",
+            RootPath + "/Art/RuntimePixel/Heroes/Nyx",
+            RootPath + "/Art/RuntimePixel/Monsters",
+            RootPath + "/Art/RuntimePixel/Bosses",
+            RootPath + "/Art/RuntimePixel/UI",
             RootPath + "/Art/Effects/Skills",
             RootPath + "/Art/Effects/Hit",
             RootPath + "/Art/Effects/Projectiles",
@@ -275,21 +289,21 @@ namespace RuneGate.Editor
             SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "Build Turret", "Prototype turret hook with fallback damage.", 12f, 35, 1, 3.2f, TargetingType.First, ElementType.Earth, "turret_placeholder", 1f);
             SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "Shadow Strike", "High dark damage that prefers boss targets.", 10f, 120, 1, 2.2f, TargetingType.Boss, ElementType.Dark, "damage", 1f);
 
-            HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 420, 25, 1f, 1.2f, shieldBash);
-            HeroData archer = CreateHeroData("Archer", "hero_archer_001", "Archer", HeroRole.RangedDps, HeroPositionType.Back, ElementType.Wind, 180, 35, 1.5f, 4f, rapidShot);
-            HeroData fireMage = CreateHeroData("Fire Mage", "hero_mage_fire_001", "Fire Mage", HeroRole.Mage, HeroPositionType.Back, ElementType.Fire, 150, 55, 0.7f, 3.4f, meteor);
-            HeroData cleric = CreateHeroData("Priest", "hero_priest_001", "Priest", HeroRole.Healer, HeroPositionType.Middle, ElementType.Light, 170, 10, 1f, 3.2f, holyHeal);
-            HeroData dwarfEngineer = CreateHeroData("Dwarf Engineer", "hero_engineer_dwarf_001", "Dwarf Engineer", HeroRole.Engineer, HeroPositionType.Middle, ElementType.Earth, 230, 20, 1f, 2.8f, buildTurret);
-            HeroData assassin = CreateHeroData("Shadow Assassin", "hero_assassin_001", "Shadow Assassin", HeroRole.Assassin, HeroPositionType.Front, ElementType.Dark, 210, 75, 0.8f, 1.5f, shadowStrike);
+            HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", "레온", "균열 방패의 기사", "전열 / 방어 / 빛. 무너진 재문 앞에서 마지막까지 버틴 문지기 기사.", "이번에는, 절대 무너지지 않는다.", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 420, 25, 1f, 1.2f, shieldBash);
+            HeroData archer = CreateHeroData("Archer", "hero_archer_001", "Archer", "세리아", "바람길을 읽는 궁수", "후열 / 원거리 / 바람. 균열에서 새는 바람의 방향으로 적의 진입로를 읽는다.", "바람은 이미 답을 알고 있어.", HeroRole.RangedDps, HeroPositionType.Back, ElementType.Wind, 180, 35, 1.5f, 4f, rapidShot);
+            HeroData fireMage = CreateHeroData("Fire Mage", "hero_mage_fire_001", "Fire Mage", "카엘", "잿불의 방랑 마법사", "후열 / 광역 / 화염. 재문 사고 이후 떠돌며 균열의 불씨를 태워 봉한다.", "내가 나서는 건 이번뿐이다. …살아남아라.", HeroRole.Mage, HeroPositionType.Back, ElementType.Fire, 150, 55, 0.7f, 3.4f, meteor);
+            HeroData cleric = CreateHeroData("Priest", "hero_priest_001", "Priest", "미레아", "금빛 성서의 사제", "중열 / 지원 / 빛. 봉문 의식을 기록한 금빛 성서로 문지기들을 지탱한다.", "", HeroRole.Healer, HeroPositionType.Middle, ElementType.Light, 170, 10, 1f, 3.2f, holyHeal);
+            HeroData dwarfEngineer = CreateHeroData("Dwarf Engineer", "hero_engineer_dwarf_001", "Dwarf Engineer", "브롬", "룬포지 기술자", "중열 / 설치 / 기계. 균열 압력을 견디는 룬 장치를 현장에서 조립한다.", "", HeroRole.Engineer, HeroPositionType.Middle, ElementType.Earth, 230, 20, 1f, 2.8f, buildTurret);
+            HeroData assassin = CreateHeroData("Shadow Assassin", "hero_assassin_001", "Shadow Assassin", "닉스", "그림자 균열의 암살자", "전열 또는 중열 / 암살 / 어둠. 그림자 재문을 건너 핵심 적성을 먼저 끊는다.", "", HeroRole.Assassin, HeroPositionType.Front, ElementType.Dark, 210, 75, 0.8f, 1.5f, shadowStrike);
             HeroData[] heroes = { knight, archer, fireMage, cleric, dwarfEngineer, assassin };
 
-            MonsterData goblin = CreateMonsterData("Goblin", "monster_goblin_001", "Goblin", MonsterType.Normal, ElementType.None, 80, 1.2f, 1, 5);
-            MonsterData wolf = CreateMonsterData("Wolf", "monster_wolf_001", "Wolf", MonsterType.Fast, ElementType.Wind, 60, 1.85f, 1, 6);
-            MonsterData orc = CreateMonsterData("Orc", "monster_orc_001", "Orc", MonsterType.Tank, ElementType.None, 230, 0.7f, 2, 12);
-            MonsterData bat = CreateMonsterData("Bat", "monster_bat_001", "Bat", MonsterType.Flying, ElementType.Wind, 55, 2f, 1, 8);
-            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", MonsterType.Splitter, ElementType.Earth, 130, 0.8f, 1, 10);
-            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", MonsterType.Undead, ElementType.Dark, 110, 1f, 1, 9);
-            MonsterData boss = CreateMonsterData("Orc Warlord", "boss_orc_warlord_001", "Orc Warlord", MonsterType.Boss, ElementType.None, 1400, 0.45f, 5, 120);
+            MonsterData goblin = CreateMonsterData("Goblin", "monster_goblin_001", "Goblin", "문틈 도깨비", "균열 하급 적성", "문이 덜 닫힌 틈에서 가장 먼저 새어 나오는 소형 적성체.", MonsterType.Normal, ElementType.None, 80, 1.2f, 1, 5);
+            MonsterData wolf = CreateMonsterData("Wolf", "monster_wolf_001", "Wolf", "부식 늑대", "봉문 부식형 추적체", "봉문 결계를 갉아먹는 부식 기운을 두른 빠른 추적체.", MonsterType.Fast, ElementType.Wind, 60, 1.85f, 1, 6);
+            MonsterData orc = CreateMonsterData("Orc", "monster_orc_001", "Orc", "봉문 파쇄자", "중형 파쇄 적성", "오크풍 체형의 잔재는 남아 있지만, 한국 출시 기준으로는 봉문을 두드리는 파쇄 적성으로 분류한다.", MonsterType.Tank, ElementType.None, 230, 0.7f, 2, 12);
+            MonsterData bat = CreateMonsterData("Bat", "monster_bat_001", "Bat", "균열 꼬마귀", "비행 정찰 적성", "균열 위를 낮게 날며 문지기 진형을 흔드는 작은 날개 적성체.", MonsterType.Flying, ElementType.Wind, 55, 2f, 1, 8);
+            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", "재문 점액", "잔류 균열 응집체", "닫힌 문 주변에 남은 균열 찌꺼기가 뭉쳐 움직이는 점액형 적성.", MonsterType.Splitter, ElementType.Earth, 130, 0.8f, 1, 10);
+            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", "균열 잔해병", "기록 오염 잔재", "오래된 전장의 기록이 균열에 오염되어 걸어 나온 잔해 병사.", MonsterType.Undead, ElementType.Dark, 110, 1f, 1, 9);
+            MonsterData boss = CreateMonsterData("Orc Warlord", "boss_orc_warlord_001", "Orc Warlord", "그룸바르", "문파괴자", "봉문 위험 기록 최상위 개체. 재문을 직접 찢고 진입하는 대형 파쇄 적성.", MonsterType.Boss, ElementType.None, 1400, 0.45f, 5, 120);
 
             RuneData[] runes = CreateV04Runes();
             StageData[] stages = CreateV04Stages(goblin, wolf, orc, bat, slime, skeleton, boss);
@@ -377,20 +391,61 @@ namespace RuneGate.Editor
                 return;
             }
 
-            Sprite knightSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Heroes/Knight");
-            Sprite archerSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Heroes/Archer");
-            Sprite goblinSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Monsters/Goblin");
-            Sprite orcSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Monsters/Orc");
-            Sprite bossSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Bosses/OrcWarlord");
+            Sprite leonConcept = LoadSpriteByKeyword($"{RootPath}/Art/ConceptSheets/Heroes", "레온");
+            Sprite seriaConcept = LoadSpriteByKeyword($"{RootPath}/Art/ConceptSheets/Heroes", "궁수");
+            Sprite kaelConcept = LoadSpriteByKeyword($"{RootPath}/Art/ConceptSheets/Heroes", "카엘");
+            Sprite mireaConcept = LoadSpriteByKeyword($"{RootPath}/Art/ConceptSheets/Heroes", "미레아");
+            Sprite bromConcept = LoadSpriteByKeyword($"{RootPath}/Art/ConceptSheets/Heroes", "브롬");
+            Sprite nyxConcept = LoadSpriteByKeyword($"{RootPath}/Art/ConceptSheets/Heroes", "암살자");
+            Sprite enemyConcept = LoadSpriteByKeyword($"{RootPath}/Art/ConceptSheets/Enemies", "괴물");
+            Sprite bossConcept = LoadSpriteByKeyword($"{RootPath}/Art/ConceptSheets/Enemies", "그룸바르");
+
+            Sprite leonRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Leon/leon_idle.png");
+            Sprite seriaRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Seria/seria_idle.png");
+            Sprite kaelRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Kael/kael_idle.png");
+            Sprite mireaRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Mirea/mirea_idle.png");
+            Sprite bromRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Brom/brom_idle.png");
+            Sprite nyxRuntime = LoadSprite($"{RootPath}/Art/RuntimePixel/Heroes/Nyx/nyx_idle.png");
+            Sprite goblinRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "goblin", "gate_imp");
+            Sprite orcRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "orc", "brute");
+            Sprite wolfRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "wolf");
+            Sprite batRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "bat");
+            Sprite slimeRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "slime");
+            Sprite skeletonRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Monsters", "bone", "skeleton");
+            Sprite bossRuntime = LoadSpriteByKeywordStrict($"{RootPath}/Art/RuntimePixel/Bosses", "grumbar");
             Sprite shieldBashIcon = LoadSpriteByKeyword($"{RootPath}/Art/UI/Icons/Skills", "\uBC29\uD328");
             Sprite rapidShotIcon = LoadSpriteByKeyword($"{RootPath}/Art/UI/Icons/Skills", "\uD654\uC0B4");
             Sprite swordRuneIcon = LoadFirstSprite($"{RootPath}/Art/UI/Icons/Runes");
 
-            ApplyHeroSprite(content, "hero_knight_001", knightSprite);
-            ApplyHeroSprite(content, "hero_archer_001", archerSprite);
-            ApplyMonsterSprite(content, "monster_goblin_001", goblinSprite);
-            ApplyMonsterSprite(content, "monster_orc_001", orcSprite);
-            ApplyMonsterSprite(content, "boss_orc_warlord_001", bossSprite);
+            ApplyHeroConceptImage(content, "hero_knight_001", leonConcept);
+            ApplyHeroConceptImage(content, "hero_archer_001", seriaConcept);
+            ApplyHeroConceptImage(content, "hero_mage_fire_001", kaelConcept);
+            ApplyHeroConceptImage(content, "hero_priest_001", mireaConcept);
+            ApplyHeroConceptImage(content, "hero_engineer_dwarf_001", bromConcept);
+            ApplyHeroConceptImage(content, "hero_assassin_001", nyxConcept);
+
+            ApplyHeroRuntimeSprite(content, "hero_knight_001", leonRuntime);
+            ApplyHeroRuntimeSprite(content, "hero_archer_001", seriaRuntime);
+            ApplyHeroRuntimeSprite(content, "hero_mage_fire_001", kaelRuntime);
+            ApplyHeroRuntimeSprite(content, "hero_priest_001", mireaRuntime);
+            ApplyHeroRuntimeSprite(content, "hero_engineer_dwarf_001", bromRuntime);
+            ApplyHeroRuntimeSprite(content, "hero_assassin_001", nyxRuntime);
+
+            ApplyMonsterConceptImage(content, "monster_goblin_001", enemyConcept);
+            ApplyMonsterConceptImage(content, "monster_wolf_001", enemyConcept);
+            ApplyMonsterConceptImage(content, "monster_orc_001", enemyConcept);
+            ApplyMonsterConceptImage(content, "monster_bat_001", enemyConcept);
+            ApplyMonsterConceptImage(content, "monster_slime_001", enemyConcept);
+            ApplyMonsterConceptImage(content, "monster_skeleton_001", enemyConcept);
+            ApplyMonsterConceptImage(content, "boss_orc_warlord_001", bossConcept);
+
+            ApplyMonsterRuntimeSprite(content, "monster_goblin_001", goblinRuntime);
+            ApplyMonsterRuntimeSprite(content, "monster_wolf_001", wolfRuntime);
+            ApplyMonsterRuntimeSprite(content, "monster_orc_001", orcRuntime);
+            ApplyMonsterRuntimeSprite(content, "monster_bat_001", batRuntime);
+            ApplyMonsterRuntimeSprite(content, "monster_slime_001", slimeRuntime);
+            ApplyMonsterRuntimeSprite(content, "monster_skeleton_001", skeletonRuntime);
+            ApplyMonsterRuntimeSprite(content, "boss_orc_warlord_001", bossRuntime);
             ApplySkillIcon(content, "skill_shield_bash", shieldBashIcon);
             ApplySkillIcon(content, "skill_rapid_shot", rapidShotIcon);
             ApplyRuneIcon(content, "rune_sword", swordRuneIcon);
@@ -533,48 +588,48 @@ namespace RuneGate.Editor
         {
             return new[]
             {
-                CreateStageFromPlan(1, "Goblin Forest 1", 180, boss,
+                CreateStageFromPlan(1, "Goblin Forest 1", "재문 숲 1", "문틈 정찰", "문틈 도깨비가 처음 새어 나오는 재문 숲 입구.", 180, boss,
                     new WavePlan(false, Spawn(goblin, 0, 3, 0.4f, 0.9f), Spawn(goblin, 1, 3, 0.8f, 0.9f)),
                     new WavePlan(false, Spawn(goblin, 0, 4, 0.3f, 0.75f), Spawn(goblin, 2, 4, 0.7f, 0.75f))),
-                CreateStageFromPlan(2, "Goblin Forest 2", 185, boss,
+                CreateStageFromPlan(2, "Goblin Forest 2", "재문 숲 2", "바람길 흔들림", "균열 꼬리바람을 타고 빠른 적성이 섞이기 시작한다.", 185, boss,
                     new WavePlan(false, Spawn(goblin, 0, 4, 0.3f, 0.7f), Spawn(wolf, 1, 2, 1f, 0.8f)),
                     new WavePlan(false, Spawn(goblin, 1, 5, 0.4f, 0.65f), Spawn(wolf, 2, 3, 0.8f, 0.75f)),
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.4f, 0.6f), Spawn(wolf, 1, 3, 0.7f, 0.7f), Spawn(goblin, 2, 4, 0.9f, 0.6f))),
-                CreateStageFromPlan(3, "Goblin Forest 3", 190, boss,
+                CreateStageFromPlan(3, "Goblin Forest 3", "재문 숲 3", "파쇄 흔적", "봉문 파쇄자가 전열 압박을 시험하는 구간.", 190, boss,
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.3f, 0.6f), Spawn(goblin, 2, 5, 0.7f, 0.6f)),
                     new WavePlan(false, Spawn(orc, 0, 1, 0.5f, 1f), Spawn(goblin, 1, 6, 0.7f, 0.55f), Spawn(orc, 2, 1, 1f, 1f)),
                     new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 1.1f), Spawn(goblin, 1, 6, 0.8f, 0.5f), Spawn(orc, 2, 2, 1.2f, 1.1f))),
-                CreateStageFromPlan(4, "Goblin Forest 4", 195, boss,
+                CreateStageFromPlan(4, "Goblin Forest 4", "재문 숲 4", "낮은 비행로", "균열 꼬마귀가 라인 사이를 흔드는 구간.", 195, boss,
                     new WavePlan(false, Spawn(bat, 0, 3, 0.4f, 0.65f), Spawn(goblin, 1, 4, 0.8f, 0.65f)),
                     new WavePlan(false, Spawn(wolf, 1, 4, 0.3f, 0.65f), Spawn(bat, 2, 4, 0.7f, 0.65f)),
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.4f, 0.55f), Spawn(bat, 1, 4, 0.8f, 0.6f), Spawn(wolf, 2, 3, 1.1f, 0.65f))),
-                CreateStageFromPlan(5, "Goblin Forest 5", 205, boss,
+                CreateStageFromPlan(5, "Goblin Forest 5", "재문 숲 5", "봉문 충격", "중형 파쇄 적성이 본격적으로 문을 두드린다.", 205, boss,
                     new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 1f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.3f, 0.55f), Spawn(orc, 1, 2, 0.7f, 1f), Spawn(goblin, 2, 5, 1f, 0.55f)),
                     new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 0.9f), Spawn(orc, 2, 2, 0.8f, 0.9f)),
                     new WavePlan(false, Spawn(goblin, 0, 6, 0.4f, 0.5f), Spawn(orc, 1, 3, 0.6f, 0.9f), Spawn(wolf, 2, 4, 1f, 0.6f))),
-                CreateStageFromPlan(6, "Goblin Forest 6", 210, boss,
+                CreateStageFromPlan(6, "Goblin Forest 6", "재문 숲 6", "잔류 점액", "재문 주변의 잔류 균열 찌꺼기가 응집한다.", 210, boss,
                     new WavePlan(false, Spawn(slime, 0, 2, 0.4f, 1f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
                     new WavePlan(false, Spawn(slime, 1, 3, 0.5f, 0.9f), Spawn(wolf, 2, 4, 0.9f, 0.6f)),
                     new WavePlan(false, Spawn(goblin, 0, 6, 0.3f, 0.5f), Spawn(slime, 1, 3, 0.8f, 0.9f), Spawn(bat, 2, 4, 1f, 0.6f)),
                     new WavePlan(false, Spawn(slime, 0, 3, 0.5f, 0.85f), Spawn(orc, 1, 2, 0.8f, 1f), Spawn(slime, 2, 3, 1.1f, 0.85f))),
-                CreateStageFromPlan(7, "Goblin Forest 7", 215, boss,
+                CreateStageFromPlan(7, "Goblin Forest 7", "재문 숲 7", "오염 기록", "균열에 오염된 전장 기록이 잔해병으로 되살아난다.", 215, boss,
                     new WavePlan(false, Spawn(skeleton, 0, 3, 0.4f, 0.75f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
                     new WavePlan(false, Spawn(wolf, 0, 4, 0.3f, 0.6f), Spawn(skeleton, 2, 4, 0.8f, 0.75f)),
                     new WavePlan(false, Spawn(skeleton, 0, 4, 0.5f, 0.7f), Spawn(bat, 1, 4, 0.8f, 0.6f), Spawn(goblin, 2, 5, 1f, 0.5f)),
                     new WavePlan(false, Spawn(orc, 0, 2, 0.5f, 1f), Spawn(skeleton, 1, 5, 0.8f, 0.65f), Spawn(orc, 2, 2, 1.1f, 1f))),
-                CreateStageFromPlan(8, "Goblin Forest 8", 220, boss,
+                CreateStageFromPlan(8, "Goblin Forest 8", "재문 숲 8", "혼합 적성", "여러 균열 적성이 함께 밀려오는 전술 기록 구간.", 220, boss,
                     new WavePlan(false, Spawn(goblin, 0, 6, 0.3f, 0.5f), Spawn(wolf, 1, 4, 0.8f, 0.55f), Spawn(bat, 2, 4, 1f, 0.6f)),
                     new WavePlan(false, Spawn(slime, 0, 3, 0.4f, 0.8f), Spawn(skeleton, 2, 4, 0.8f, 0.7f)),
                     new WavePlan(false, Spawn(orc, 0, 2, 0.5f, 1f), Spawn(wolf, 1, 5, 0.8f, 0.55f), Spawn(slime, 2, 3, 1.1f, 0.8f)),
                     new WavePlan(false, Spawn(skeleton, 0, 5, 0.4f, 0.65f), Spawn(orc, 1, 3, 0.8f, 0.9f), Spawn(bat, 2, 5, 1f, 0.55f))),
-                CreateStageFromPlan(9, "Goblin Forest 9", 230, boss,
+                CreateStageFromPlan(9, "Goblin Forest 9", "재문 숲 9", "붕괴 전조", "그룸바르 출현 전 봉문 압력이 급격히 오른다.", 230, boss,
                     new WavePlan(false, Spawn(wolf, 0, 5, 0.3f, 0.55f), Spawn(goblin, 1, 7, 0.7f, 0.45f)),
                     new WavePlan(false, Spawn(slime, 0, 3, 0.4f, 0.8f), Spawn(skeleton, 1, 4, 0.7f, 0.65f), Spawn(bat, 2, 4, 1f, 0.55f)),
                     new WavePlan(false, Spawn(orc, 0, 3, 0.5f, 0.9f), Spawn(wolf, 2, 5, 0.8f, 0.55f)),
                     new WavePlan(false, Spawn(skeleton, 0, 5, 0.4f, 0.65f), Spawn(slime, 1, 4, 0.7f, 0.8f), Spawn(orc, 2, 3, 1f, 0.9f)),
                     new WavePlan(false, Spawn(goblin, 0, 8, 0.3f, 0.42f), Spawn(orc, 1, 4, 0.6f, 0.85f), Spawn(wolf, 2, 6, 0.9f, 0.5f))),
-                CreateStageFromPlan(10, "Goblin Forest 10", 240, boss,
+                CreateStageFromPlan(10, "Goblin Forest 10", "재문 숲 10", "문파괴자의 접근", "봉문 위험 기록 최상위 개체 그룸바르가 직접 진입한다.", 240, boss,
                     new WavePlan(false, Spawn(goblin, 0, 7, 0.3f, 0.45f), Spawn(wolf, 2, 5, 0.8f, 0.55f)),
                     new WavePlan(false, Spawn(slime, 0, 4, 0.4f, 0.75f), Spawn(skeleton, 1, 5, 0.7f, 0.6f), Spawn(bat, 2, 5, 1f, 0.55f)),
                     new WavePlan(false, Spawn(orc, 0, 3, 0.4f, 0.85f), Spawn(orc, 2, 3, 0.8f, 0.85f), Spawn(goblin, 1, 8, 1f, 0.4f)),
@@ -603,13 +658,17 @@ namespace RuneGate.Editor
             return asset;
         }
 
-        private static HeroData CreateHeroData(string assetName, string heroId, string displayName, HeroRole role, HeroPositionType positionType, ElementType element, int maxHp, int attack, float attackSpeed, float attackRange, SkillData skillData)
+        private static HeroData CreateHeroData(string assetName, string heroId, string displayName, string displayNameKorean, string subtitleKorean, string descriptionKorean, string quoteKorean, HeroRole role, HeroPositionType positionType, ElementType element, int maxHp, int attack, float attackSpeed, float attackRange, SkillData skillData)
         {
             HeroData asset = CreateOrLoadAsset<HeroData>($"{RootPath}/Data/Heroes/{assetName}.asset");
             EditAsset(asset, serializedObject =>
             {
                 SetString(serializedObject, "heroId", heroId);
                 SetString(serializedObject, "displayName", displayName);
+                SetString(serializedObject, "displayNameKorean", displayNameKorean);
+                SetString(serializedObject, "subtitleKorean", subtitleKorean);
+                SetString(serializedObject, "descriptionKorean", descriptionKorean);
+                SetString(serializedObject, "quoteKorean", quoteKorean);
                 SetEnum(serializedObject, "role", role);
                 SetEnum(serializedObject, "positionType", positionType);
                 SetEnum(serializedObject, "element", element);
@@ -619,24 +678,31 @@ namespace RuneGate.Editor
                 SetFloat(serializedObject, "attackRange", attackRange);
                 SetObject(serializedObject, "skillData", skillData);
                 SetObject(serializedObject, "portrait", null);
+                SetObject(serializedObject, "conceptImage", null);
+                SetObject(serializedObject, "battleSprite", null);
                 SetObject(serializedObject, "animatorController", null);
             });
             return asset;
         }
 
-        private static MonsterData CreateMonsterData(string assetName, string monsterId, string displayName, MonsterType monsterType, ElementType element, int maxHp, float moveSpeed, int damageToCrystal, int rewardGold)
+        private static MonsterData CreateMonsterData(string assetName, string monsterId, string displayName, string displayNameKorean, string subtitleKorean, string descriptionKorean, MonsterType monsterType, ElementType element, int maxHp, float moveSpeed, int damageToCrystal, int rewardGold)
         {
             MonsterData asset = CreateOrLoadAsset<MonsterData>($"{RootPath}/Data/Monsters/{assetName}.asset");
             EditAsset(asset, serializedObject =>
             {
                 SetString(serializedObject, "monsterId", monsterId);
                 SetString(serializedObject, "displayName", displayName);
+                SetString(serializedObject, "displayNameKorean", displayNameKorean);
+                SetString(serializedObject, "subtitleKorean", subtitleKorean);
+                SetString(serializedObject, "descriptionKorean", descriptionKorean);
                 SetEnum(serializedObject, "monsterType", monsterType);
                 SetEnum(serializedObject, "element", element);
                 SetInt(serializedObject, "maxHp", maxHp);
                 SetFloat(serializedObject, "moveSpeed", moveSpeed);
                 SetInt(serializedObject, "damageToCrystal", damageToCrystal);
                 SetInt(serializedObject, "rewardGold", rewardGold);
+                SetObject(serializedObject, "conceptImage", null);
+                SetObject(serializedObject, "runtimeSprite", null);
                 SetObject(serializedObject, "sprite", null);
                 SetObject(serializedObject, "animatorController", null);
                 SetBool(serializedObject, "isBoss", monsterType == MonsterType.Boss);
@@ -684,7 +750,7 @@ namespace RuneGate.Editor
             return asset;
         }
 
-        private static StageData CreateStageFromPlan(int stageNumber, string displayName, int crystalHp, MonsterData bossMonster, params WavePlan[] wavePlans)
+        private static StageData CreateStageFromPlan(int stageNumber, string displayName, string displayNameKorean, string subtitleKorean, string descriptionKorean, int crystalHp, MonsterData bossMonster, params WavePlan[] wavePlans)
         {
             WaveData[] waves = new WaveData[wavePlans.Length];
             for (int waveIndex = 0; waveIndex < wavePlans.Length; waveIndex++)
@@ -703,16 +769,19 @@ namespace RuneGate.Editor
                 waves[waveIndex] = CreateWave(waveName, waveIndex + 1, wavePlan.IsBossWave, spawns);
             }
 
-            return CreateStage($"Goblin Forest {stageNumber}", $"stage_goblin_forest_{stageNumber:00}", displayName, crystalHp, bossMonster, waves);
+            return CreateStage($"Goblin Forest {stageNumber}", $"stage_goblin_forest_{stageNumber:00}", displayName, displayNameKorean, subtitleKorean, descriptionKorean, crystalHp, bossMonster, waves);
         }
 
-        private static StageData CreateStage(string assetName, string stageId, string displayName, int crystalHp, MonsterData bossMonster, WaveData[] waves)
+        private static StageData CreateStage(string assetName, string stageId, string displayName, string displayNameKorean, string subtitleKorean, string descriptionKorean, int crystalHp, MonsterData bossMonster, WaveData[] waves)
         {
             StageData asset = CreateOrLoadAsset<StageData>($"{RootPath}/Data/Stages/{assetName}.asset");
             EditAsset(asset, serializedObject =>
             {
                 SetString(serializedObject, "stageId", stageId);
                 SetString(serializedObject, "displayName", displayName);
+                SetString(serializedObject, "displayNameKorean", displayNameKorean);
+                SetString(serializedObject, "subtitleKorean", subtitleKorean);
+                SetString(serializedObject, "descriptionKorean", descriptionKorean);
                 SetInt(serializedObject, "crystalHp", crystalHp);
                 SetObjectList(serializedObject, "waves", ToObjectArray(waves));
                 SetObject(serializedObject, "bossMonster", bossMonster);
@@ -833,6 +902,8 @@ namespace RuneGate.Editor
         {
             GameObject root = new GameObject("Hero_Knight");
             GameObject visual = CreatePrefabVisual("Visual", root.transform, new Color(0.45f, 0.62f, 1f), new Vector2(0.72f, 0.72f), 4);
+            RuntimeSpriteFitter fitter = visual.AddComponent<RuntimeSpriteFitter>();
+            fitter.TargetHeight = 1.25f;
             Animator animator = visual.AddComponent<Animator>();
             animator.runtimeAnimatorController = animatorController;
 
@@ -850,6 +921,8 @@ namespace RuneGate.Editor
         {
             GameObject root = new GameObject("Monster_Goblin");
             GameObject visual = CreatePrefabVisual("Visual", root.transform, new Color(0.34f, 0.78f, 0.32f), new Vector2(0.62f, 0.62f), 5);
+            RuntimeSpriteFitter fitter = visual.AddComponent<RuntimeSpriteFitter>();
+            fitter.TargetHeight = 0.9f;
             Animator animator = visual.AddComponent<Animator>();
             animator.runtimeAnimatorController = animatorController;
 
@@ -937,6 +1010,24 @@ namespace RuneGate.Editor
             return spritePaths.Length > 0 ? LoadSprite(spritePaths[0]) : null;
         }
 
+        private static Sprite LoadSpriteByKeywordStrict(string folderPath, params string[] keywords)
+        {
+            string[] spritePaths = FindTexturePaths(folderPath);
+            for (int i = 0; i < spritePaths.Length; i++)
+            {
+                for (int keywordIndex = 0; keywordIndex < keywords.Length; keywordIndex++)
+                {
+                    string keyword = keywords[keywordIndex];
+                    if (!string.IsNullOrWhiteSpace(keyword) && spritePaths[i].IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return LoadSprite(spritePaths[i]);
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private static string[] FindTexturePaths(string folderPath)
         {
             if (!AssetDatabase.IsValidFolder(folderPath))
@@ -1022,35 +1113,74 @@ namespace RuneGate.Editor
             }
         }
 
-        private static void ApplyHeroSprite(ContentBundle content, string heroId, Sprite sprite)
+        private static void ApplyHeroConceptImage(ContentBundle content, string heroId, Sprite sprite)
         {
             HeroData hero = FindHero(content, heroId);
             if (hero == null || sprite == null)
             {
-                Debug.LogWarning($"RuneGate initial art: hero sprite not linked for {heroId}. Placeholder fallback remains active.");
+                Debug.LogWarning($"RuneGate concept art: hero concept image not linked for {heroId}.");
                 return;
             }
 
             EditAsset(hero, serializedObject =>
             {
                 SetObject(serializedObject, "portrait", sprite);
-                SetObject(serializedObject, "battleSprite", sprite);
+                SetObject(serializedObject, "conceptImage", sprite);
             });
         }
 
-        private static void ApplyMonsterSprite(ContentBundle content, string monsterId, Sprite sprite)
+        private static void ApplyHeroRuntimeSprite(ContentBundle content, string heroId, Sprite sprite)
+        {
+            HeroData hero = FindHero(content, heroId);
+            if (hero == null)
+            {
+                return;
+            }
+
+            EditAsset(hero, serializedObject =>
+            {
+                SetObject(serializedObject, "battleSprite", sprite);
+            });
+
+            if (sprite == null)
+            {
+                Debug.LogWarning($"RuneGate runtime art: no RuntimePixel hero sprite for {heroId}. Battle uses placeholder fallback.");
+            }
+        }
+
+        private static void ApplyMonsterConceptImage(ContentBundle content, string monsterId, Sprite sprite)
         {
             MonsterData monster = FindMonster(content, monsterId);
             if (monster == null || sprite == null)
             {
-                Debug.LogWarning($"RuneGate initial art: monster sprite not linked for {monsterId}. Placeholder fallback remains active.");
+                Debug.LogWarning($"RuneGate concept art: monster concept image not linked for {monsterId}.");
                 return;
             }
 
             EditAsset(monster, serializedObject =>
             {
-                SetObject(serializedObject, "sprite", sprite);
+                SetObject(serializedObject, "conceptImage", sprite);
             });
+        }
+
+        private static void ApplyMonsterRuntimeSprite(ContentBundle content, string monsterId, Sprite sprite)
+        {
+            MonsterData monster = FindMonster(content, monsterId);
+            if (monster == null)
+            {
+                return;
+            }
+
+            EditAsset(monster, serializedObject =>
+            {
+                SetObject(serializedObject, "runtimeSprite", sprite);
+                SetObject(serializedObject, "sprite", null);
+            });
+
+            if (sprite == null)
+            {
+                Debug.LogWarning($"RuneGate runtime art: no RuntimePixel monster sprite for {monsterId}. Battle uses placeholder fallback.");
+            }
         }
 
         private static void ApplySkillIcon(ContentBundle content, string skillId, Sprite icon)
@@ -1193,7 +1323,7 @@ namespace RuneGate.Editor
             HeroPlacementManager heroPlacementManager = root.AddComponent<HeroPlacementManager>();
             root.AddComponent<AudioManager>();
 
-            GameObject crystalObject = CreatePlaceholderObject("Kingdom Crystal", null, new Vector3(-5.5f, 0f, 0f), new Color(0.25f, 0.92f, 1f), new Vector2(0.7f, 3.2f), 3);
+            GameObject crystalObject = CreatePlaceholderObject("Kingdom Crystal", null, new Vector3(-5.65f, 0f, 0f), new Color(0.25f, 0.92f, 1f), new Vector2(0.7f, 3.2f), 3);
             HitFlashController crystalHitFlash = crystalObject.AddComponent<HitFlashController>();
             CrystalController crystalController = crystalObject.AddComponent<CrystalController>();
             EditComponent(crystalController, serializedObject =>
@@ -1208,7 +1338,7 @@ namespace RuneGate.Editor
             for (int laneIndex = 0; laneIndex < 3; laneIndex++)
             {
                 float y = (laneIndex - 1) * 2.4f;
-                CreatePlaceholderObject($"Lane {laneIndex} Path", laneRoot.transform, new Vector3(0f, y, 0f), new Color(0.25f, 0.27f, 0.32f), new Vector2(10.8f, 0.08f), 0);
+                CreatePlaceholderObject($"Lane {laneIndex} Path", laneRoot.transform, new Vector3(0.45f, y, 0f), new Color(0.25f, 0.27f, 0.32f), new Vector2(9.6f, 0.08f), 0);
 
                 GameObject spawnPoint = new GameObject($"Lane {laneIndex} Monster Spawn");
                 spawnPoint.transform.SetParent(laneRoot.transform);
@@ -1217,13 +1347,13 @@ namespace RuneGate.Editor
 
                 GameObject targetPoint = new GameObject($"Lane {laneIndex} Crystal Target");
                 targetPoint.transform.SetParent(laneRoot.transform);
-                targetPoint.transform.position = new Vector3(-5.2f, y, 0f);
+                targetPoint.transform.position = new Vector3(-5.35f, y, 0f);
                 targetPoints[laneIndex] = targetPoint.transform;
 
                 for (int slotIndex = 0; slotIndex < 3; slotIndex++)
                 {
                     int flatIndex = laneIndex * 3 + slotIndex;
-                    float x = -2.4f - slotIndex * 0.85f;
+                    float x = -1.25f - slotIndex * 0.75f;
                     GameObject slotPoint = CreatePlaceholderObject($"Lane {laneIndex} Hero Slot {slotIndex}", laneRoot.transform, new Vector3(x, y, 0f), new Color(0.24f, 0.42f, 0.64f, 0.35f), new Vector2(0.46f, 0.46f), 1);
                     HeroPlacementSlot placementSlot = slotPoint.AddComponent<HeroPlacementSlot>();
                     EditComponent(placementSlot, serializedObject =>
@@ -1251,12 +1381,12 @@ namespace RuneGate.Editor
                 SetInt(serializedObject, "laneCount", 3);
                 SetFloat(serializedObject, "laneSpacing", 2.4f);
                 SetFloat(serializedObject, "spawnX", 5.6f);
-                SetFloat(serializedObject, "crystalX", -5.2f);
+                SetFloat(serializedObject, "crystalX", -5.35f);
                 SetObjectList(serializedObject, "laneSpawnPoints", ToObjectArray(spawnPoints));
                 SetObjectList(serializedObject, "crystalTargetPoints", ToObjectArray(targetPoints));
                 SetInt(serializedObject, "heroSlotsPerLane", 3);
-                SetFloat(serializedObject, "heroFrontSlotX", -2.4f);
-                SetFloat(serializedObject, "heroSlotSpacingX", 0.85f);
+                SetFloat(serializedObject, "heroFrontSlotX", -1.25f);
+                SetFloat(serializedObject, "heroSlotSpacingX", 0.75f);
                 SetObjectList(serializedObject, "heroSlotPoints", ToObjectArray(heroSlotPoints));
             });
 
@@ -1283,7 +1413,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "heroRoot", heroRoot.transform);
                 SetBool(serializedObject, "useSavedFormation", true);
                 SetBool(serializedObject, "writeDefaultFormationToSave", true);
-                SetVector2(serializedObject, "heroPlaceholderSize", new Vector2(0.72f, 0.72f));
+                SetVector2(serializedObject, "heroPlaceholderSize", new Vector2(1.05f, 1.05f));
             });
 
             EditComponent(battleManager, serializedObject =>
@@ -1306,7 +1436,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetObject(serializedObject, "crystalController", crystalController);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(16f, 16f, 300f, 230f));
+                SetRect(serializedObject, "panelRect", new Rect(8f, 12f, 250f, 210f));
             });
 
             EditComponent(runeSelectionUI, serializedObject =>
@@ -1314,7 +1444,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetObject(serializedObject, "runeManager", runeManager);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(300f, 110f, 460f, 310f));
+                SetRect(serializedObject, "panelRect", new Rect(430f, 96f, 420f, 280f));
             });
 
             EditComponent(stageResultUI, serializedObject =>
@@ -1332,14 +1462,14 @@ namespace RuneGate.Editor
             {
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(16f, 255f, 240f, 250f));
+                SetRect(serializedObject, "panelRect", new Rect(8f, 230f, 220f, 220f));
             });
 
             EditComponent(tutorialOverlayUI, serializedObject =>
             {
                 SetObject(serializedObject, "tutorialManager", tutorialManager);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(270f, 90f, 500f, 260f));
+                SetRect(serializedObject, "panelRect", new Rect(430f, 76f, 460f, 240f));
             });
 
             EditorSceneManager.SaveScene(scene, BattleScenePath);

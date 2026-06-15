@@ -106,14 +106,15 @@ namespace RuneGate
             if (data.IsBoss)
             {
                 hpBarSize = new Vector2(1.2f, 0.12f);
-                hpBarYOffset = 0.68f;
+                hpBarYOffset = 1.32f;
+            }
+            else
+            {
+                hpBarYOffset = RuntimeSpritePolicy.GetMonsterTargetHeight(data) * 0.58f;
             }
 
             AutoAssignFeedbackReferences();
-            if (spriteRenderer != null && data.Sprite != null)
-            {
-                spriteRenderer.sprite = data.Sprite;
-            }
+            ApplyRuntimeVisual(data);
 
             if (animator != null && data.AnimatorController != null)
             {
@@ -125,6 +126,44 @@ namespace RuneGate
             EnsureRuntimeHpBar();
             UpdateHpBar();
             HpChanged?.Invoke(currentHp, maxHp);
+        }
+
+        private void ApplyRuntimeVisual(MonsterData data)
+        {
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+            }
+
+            if (spriteRenderer == null)
+            {
+                return;
+            }
+
+            if (data.Sprite != null)
+            {
+                spriteRenderer.sprite = data.Sprite;
+            }
+            else
+            {
+                PlaceholderSprite placeholder = spriteRenderer.gameObject.GetComponent<PlaceholderSprite>();
+                if (placeholder == null)
+                {
+                    placeholder = spriteRenderer.gameObject.AddComponent<PlaceholderSprite>();
+                }
+
+                float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
+                placeholder.Configure(RuntimeSpritePolicy.GetMonsterColor(data), new Vector2(targetHeight, targetHeight), spriteRenderer.sortingOrder);
+            }
+
+            RuntimeSpriteFitter fitter = spriteRenderer.gameObject.GetComponent<RuntimeSpriteFitter>();
+            if (fitter == null)
+            {
+                fitter = spriteRenderer.gameObject.AddComponent<RuntimeSpriteFitter>();
+            }
+
+            fitter.TargetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
+            fitter.FitNow();
         }
 
         public void TakeDamage(int damage)

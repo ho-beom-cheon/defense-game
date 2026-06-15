@@ -27,3 +27,10 @@
 - No real monetization SDK is included.
 - No final store art, screenshots, or app icon set is included.
 - Balance is first-pass and should be tuned with playtest data.
+
+## Runtime Pixel Art
+
+- Final RuntimePixel battle sprites are still missing for the six monsters and Grumbar boss.
+- BattleScene uses the six hero RuntimePixel idle sprites and intentionally uses small colored placeholder fallback when `battleSprite` or `runtimeSprite` is empty.
+- ConceptSheets images are reference/codex assets only and should not appear directly in BattleScene SpriteRenderers.
+- UI is still IMGUI-based, so additional mobile safe-area polish remains for a future pass.

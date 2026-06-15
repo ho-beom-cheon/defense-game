@@ -14,12 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_slime_001
   displayName: Slime
+  displayNameKorean: "\uC7AC\uBB38 \uC810\uC561"
+  subtitleKorean: "\uC794\uB958 \uADE0\uC5F4 \uC751\uC9D1\uCCB4"
+  descriptionKorean: "\uB2EB\uD78C \uBB38 \uC8FC\uBCC0\uC5D0 \uB0A8\uC740 \uADE0\uC5F4
+    \uCC0C\uAEBC\uAE30\uAC00 \uBB49\uCCD0 \uC6C0\uC9C1\uC774\uB294 \uC810\uC561\uD615
+    \uC801\uC131."
   monsterType: 4
   element: 4
   maxHp: 130
   moveSpeed: 0.8
   damageToCrystal: 1
   rewardGold: 10
+  conceptImage: {fileID: 0}
+  runtimeSprite: {fileID: 0}
   sprite: {fileID: 0}
   animatorController: {fileID: 0}
   prefab: {fileID: 0}

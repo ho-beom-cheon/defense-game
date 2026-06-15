@@ -182,7 +182,10 @@ namespace RuneGate
             monsterObject.transform.position = spawnPosition;
             monsterObject.AddComponent<SpriteRenderer>();
             PlaceholderSprite placeholder = monsterObject.AddComponent<PlaceholderSprite>();
-            placeholder.Configure(GetPlaceholderColor(data), new Vector2(0.62f, 0.62f), 5);
+            float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
+            placeholder.Configure(RuntimeSpritePolicy.GetMonsterColor(data), new Vector2(targetHeight, targetHeight), 5);
+            RuntimeSpriteFitter fitter = monsterObject.AddComponent<RuntimeSpriteFitter>();
+            fitter.TargetHeight = targetHeight;
             monsterObject.AddComponent<CharacterVisualController>();
             monsterObject.AddComponent<HitFlashController>();
 
@@ -197,15 +200,35 @@ namespace RuneGate
 
         private void EnsureGeneratedMonsterSupport(GameObject monsterObject, MonsterData data)
         {
-            if (monsterObject.GetComponentInChildren<SpriteRenderer>() == null)
+            SpriteRenderer spriteRenderer = monsterObject.GetComponentInChildren<SpriteRenderer>();
+            if (spriteRenderer == null)
             {
                 GameObject visualObject = new GameObject("Visual");
                 visualObject.transform.SetParent(monsterObject.transform);
                 visualObject.transform.localPosition = Vector3.zero;
-                visualObject.AddComponent<SpriteRenderer>();
-                PlaceholderSprite placeholder = visualObject.AddComponent<PlaceholderSprite>();
-                placeholder.Configure(GetPlaceholderColor(data), new Vector2(0.62f, 0.62f), 5);
+                spriteRenderer = visualObject.AddComponent<SpriteRenderer>();
             }
+
+            spriteRenderer.sortingOrder = 5;
+            if (data == null || data.Sprite == null)
+            {
+                PlaceholderSprite placeholder = spriteRenderer.gameObject.GetComponent<PlaceholderSprite>();
+                if (placeholder == null)
+                {
+                    placeholder = spriteRenderer.gameObject.AddComponent<PlaceholderSprite>();
+                }
+
+                float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
+                placeholder.Configure(RuntimeSpritePolicy.GetMonsterColor(data), new Vector2(targetHeight, targetHeight), 5);
+            }
+
+            RuntimeSpriteFitter fitter = spriteRenderer.gameObject.GetComponent<RuntimeSpriteFitter>();
+            if (fitter == null)
+            {
+                fitter = spriteRenderer.gameObject.AddComponent<RuntimeSpriteFitter>();
+            }
+
+            fitter.TargetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
 
             if (monsterObject.GetComponentInChildren<CharacterVisualController>() == null)
             {
@@ -221,28 +244,6 @@ namespace RuneGate
             {
                 CircleCollider2D collider = monsterObject.AddComponent<CircleCollider2D>();
                 collider.isTrigger = false;
-            }
-        }
-
-        private Color GetPlaceholderColor(MonsterData data)
-        {
-            if (data == null)
-            {
-                return Color.gray;
-            }
-
-            switch (data.MonsterType)
-            {
-                case MonsterType.Tank:
-                    return new Color(0.72f, 0.36f, 0.18f);
-                case MonsterType.Fast:
-                    return new Color(0.95f, 0.86f, 0.22f);
-                case MonsterType.Boss:
-                    return new Color(0.72f, 0.12f, 0.12f);
-                case MonsterType.Flying:
-                    return new Color(0.55f, 0.76f, 1f);
-                default:
-                    return new Color(0.34f, 0.78f, 0.32f);
             }
         }
 

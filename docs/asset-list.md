@@ -2,22 +2,24 @@
 
 ## Heroes
 
-- `hero_knight_001` - Knight - Tank - Front - Light
-- `hero_archer_001` - Archer - Ranged DPS - Back - Wind
-- `hero_mage_fire_001` - Fire Mage - Mage - Back - Fire
-- `hero_priest_001` - Priest - Healer - Middle - Light
-- `hero_engineer_dwarf_001` - Dwarf Engineer - Engineer - Middle - Earth
-- `hero_assassin_001` - Shadow Assassin - Assassin - Front - Dark
+- `hero_knight_001` - 레온 / 균열 방패의 기사 - Tank - Front - Light
+- `hero_archer_001` - 세리아 / 바람길을 읽는 궁수 - Ranged DPS - Back - Wind
+- `hero_mage_fire_001` - 카엘 / 잿불의 방랑 마법사 - Mage - Back - Fire
+- `hero_priest_001` - 미레아 / 금빛 성서의 사제 - Healer - Middle - Light
+- `hero_engineer_dwarf_001` - 브롬 / 룬포지 기술자 - Engineer - Middle - Earth
+- `hero_assassin_001` - 닉스 / 그림자 균열의 암살자 - Assassin - Front - Dark
 
 ## Monsters
 
-- `monster_goblin_001` - Goblin - Normal
-- `monster_wolf_001` - Wolf - Fast
-- `monster_orc_001` - Orc - Tank
-- `monster_bat_001` - Bat - Flying
-- `monster_slime_001` - Slime - Splitter prototype hook
-- `monster_skeleton_001` - Skeleton - Undead prototype hook
-- `boss_orc_warlord_001` - Orc Warlord - Boss
+- `monster_goblin_001` - 문틈 도깨비 - Normal
+- `monster_wolf_001` - 부식 늑대 - Fast
+- `monster_orc_001` - 봉문 파쇄자 - Tank
+- `monster_bat_001` - 균열 꼬마귀 - Flying
+- `monster_slime_001` - 재문 점액 - Splitter prototype hook
+- `monster_skeleton_001` - 균열 잔해병 - Undead prototype hook
+- `boss_orc_warlord_001` - 그룸바르 / 문파괴자 - Boss
+
+English names remain in legacy `displayName` fields for compatibility. Korean launch-facing UI and codex work should use `displayNameKorean`, `subtitleKorean`, and `descriptionKorean`.
 
 ## Skills
 
@@ -121,13 +123,21 @@ The v0.5 runtime adds an `AudioManager` and `SfxKey` enum. Clips are optional du
 
 ## Initial Integrated Images
 
-These ChatGPT-generated prototype images are imported as Unity Sprites when present. Missing images keep the placeholder fallback path.
+The images in `Assets/_Project/Art/ConceptSheets` are concept reference assets only. They define the `문지기 기록`, `봉문 위험 기록`, and `균열 적성 기록` direction and should not be forced into BattleScene as small unit sprites.
 
-- `Assets/_Project/Art/Characters/Heroes/Knight/용감한_기사와_검과_방패.png` -> Knight `portrait` and `battleSprite`
-- `Assets/_Project/Art/Characters/Heroes/Archer/엘프_궁수의_조준_자세.png` -> Archer `portrait` and `battleSprite`
-- `Assets/_Project/Art/Characters/Monsters/Goblin/공격적인_포즈의_고블린_캐릭터.png` -> Goblin `sprite`
-- `Assets/_Project/Art/Characters/Monsters/Orc/결전_자세의_오크_전사.png` -> Orc `sprite`
-- `Assets/_Project/Art/Characters/Bosses/OrcWarlord/강렬한_전사_오크_보스.png` -> Orc Warlord `sprite`
+These ChatGPT-generated prototype images are imported as Unity Sprites when present. Large concept or character images are reference/codex assets only. Missing RuntimePixel images keep the placeholder fallback path.
+
+- `Assets/_Project/Art/ConceptSheets/Heroes/문지기_레온의_기록_카드.png` -> Knight/Leon `portrait` and `conceptImage`
+- `Assets/_Project/Art/ConceptSheets/Heroes/문지기_기록_바람길을_읽는_궁수.png` -> Archer/Seria `portrait` and `conceptImage`
+- `Assets/_Project/Art/ConceptSheets/Heroes/카엘_잿불의_방랑_마법사.png` -> Fire Mage/Kael `portrait` and `conceptImage`
+- `Assets/_Project/Art/ConceptSheets/Heroes/미레아_금빛_성서의_사제.png` -> Priest/Mirea `portrait` and `conceptImage`
+- `Assets/_Project/Art/ConceptSheets/Heroes/브롬_룬포지_기술자_카드.png` -> Dwarf Engineer/Brom `portrait` and `conceptImage`
+- `Assets/_Project/Art/ConceptSheets/Heroes/그림자_균열의_암살자_카드.png` -> Shadow Assassin/Nyx `portrait` and `conceptImage`
+- `Assets/_Project/Art/ConceptSheets/Enemies/균열_적성_기록_괴물_수집가.png` -> Monster `conceptImage` reference
+- `Assets/_Project/Art/ConceptSheets/Enemies/문파괴자_그룸바르의_위협_기록.png` -> Orc Warlord/Grumbar `conceptImage` reference
+- `Assets/_Project/Art/RuntimePixel/Heroes/*/*_idle.png` -> Hero `battleSprite`
+- `Assets/_Project/Art/RuntimePixel/Monsters/*_idle.png` -> Monster `runtimeSprite`
+- `Assets/_Project/Art/RuntimePixel/Bosses/grumbar_idle.png` -> Boss `runtimeSprite`
 - `Assets/_Project/Art/UI/Icons/Skills/영웅의_방패_충격.png` -> Shield Bash `icon`
 - `Assets/_Project/Art/UI/Icons/Skills/궁전의_화살_발사_아이콘.png` -> Rapid Shot `icon`
 - `Assets/_Project/Art/UI/Icons/Runes/마법의_검과_룬_에뮬럼.png` -> Sword Rune `icon`
@@ -135,6 +145,15 @@ These ChatGPT-generated prototype images are imported as Unity Sprites when pres
 - `Assets/_Project/Art/ConceptSheets/게임_ui_콘셉트_아트_시트.png` -> reference-only concept sheet
 
 Use `Tools/RuneGate/Apply Initial Art Images` to relink existing data without rebuilding scenes, or `Tools/RuneGate/Bootstrap v1.0 Release Track` to rebuild content and relink images together.
+
+## RuntimePixel Structure
+
+- `Assets/_Project/Art/RuntimePixel/Heroes`
+- `Assets/_Project/Art/RuntimePixel/Monsters`
+- `Assets/_Project/Art/RuntimePixel/Bosses`
+- `Assets/_Project/Art/RuntimePixel/UI`
+
+These folders are reserved for future small battle sprites and UI pixel elements.
 
 ## v1.0 Release Track
 

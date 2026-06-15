@@ -163,11 +163,33 @@ namespace RuneGate
             {
                 spriteRenderer.sprite = heroData.BattleSprite;
             }
-            else if (spriteRenderer.sprite == null && heroObject.GetComponentInChildren<PlaceholderSprite>() == null)
+            else
             {
-                PlaceholderSprite placeholder = spriteRenderer.gameObject.AddComponent<PlaceholderSprite>();
-                placeholder.Configure(GetHeroColor(heroData), heroPlaceholderSize, 4);
+                PlaceholderSprite placeholder = spriteRenderer.gameObject.GetComponent<PlaceholderSprite>();
+                if (placeholder == null)
+                {
+                    placeholder = spriteRenderer.gameObject.AddComponent<PlaceholderSprite>();
+                }
+
+                Vector2 placeholderSize = Vector2.one * RuntimeSpritePolicy.GetHeroTargetHeight(heroData);
+                if (heroPlaceholderSize.sqrMagnitude > 0.001f)
+                {
+                    placeholderSize = new Vector2(
+                        Mathf.Max(heroPlaceholderSize.x, placeholderSize.x),
+                        Mathf.Max(heroPlaceholderSize.y, placeholderSize.y));
+                }
+
+                placeholder.Configure(RuntimeSpritePolicy.GetHeroColor(heroData), placeholderSize, 4);
             }
+
+            RuntimeSpriteFitter fitter = spriteRenderer.gameObject.GetComponent<RuntimeSpriteFitter>();
+            if (fitter == null)
+            {
+                fitter = spriteRenderer.gameObject.AddComponent<RuntimeSpriteFitter>();
+            }
+
+            fitter.TargetHeight = RuntimeSpritePolicy.GetHeroTargetHeight(heroData);
+            fitter.FitNow();
 
             Animator animator = heroObject.GetComponentInChildren<Animator>();
             if (heroData.AnimatorController != null && animator == null)
@@ -224,30 +246,5 @@ namespace RuneGate
             }
         }
 
-        private Color GetHeroColor(HeroData heroData)
-        {
-            if (heroData == null)
-            {
-                return Color.white;
-            }
-
-            switch (heroData.Role)
-            {
-                case HeroRole.Tank:
-                    return new Color(0.45f, 0.62f, 1f);
-                case HeroRole.RangedDps:
-                    return new Color(0.95f, 0.78f, 0.28f);
-                case HeroRole.Mage:
-                    return new Color(1f, 0.35f, 0.18f);
-                case HeroRole.Healer:
-                    return new Color(0.8f, 0.95f, 0.55f);
-                case HeroRole.Engineer:
-                    return new Color(0.7f, 0.55f, 0.38f);
-                case HeroRole.Assassin:
-                    return new Color(0.6f, 0.45f, 0.95f);
-                default:
-                    return Color.white;
-            }
-        }
     }
 }

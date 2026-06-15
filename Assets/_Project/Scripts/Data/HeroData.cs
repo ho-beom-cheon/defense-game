@@ -7,6 +7,12 @@ namespace RuneGate
     {
         [SerializeField] private string heroId = "hero_id";
         [SerializeField] private string displayName = "Hero";
+        [SerializeField] private string displayNameKorean = "";
+        [SerializeField] private string subtitleKorean = "";
+        [TextArea]
+        [SerializeField] private string descriptionKorean = "";
+        [TextArea]
+        [SerializeField] private string quoteKorean = "";
         [SerializeField] private HeroRole role = HeroRole.MeleeDps;
         [SerializeField] private HeroPositionType positionType = HeroPositionType.Middle;
         [SerializeField] private ElementType element = ElementType.None;
@@ -16,12 +22,17 @@ namespace RuneGate
         [SerializeField] private float attackRange = 4f;
         [SerializeField] private SkillData skillData;
         [SerializeField] private Sprite portrait;
+        [SerializeField] private Sprite conceptImage;
         [SerializeField] private Sprite battleSprite;
         [SerializeField] private RuntimeAnimatorController animatorController;
         [SerializeField] private GameObject prefab;
 
         public string HeroId => heroId;
         public string DisplayName => displayName;
+        public string DisplayNameKorean => string.IsNullOrWhiteSpace(displayNameKorean) ? displayName : displayNameKorean;
+        public string SubtitleKorean => subtitleKorean;
+        public string DescriptionKorean => descriptionKorean;
+        public string QuoteKorean => quoteKorean;
         public HeroRole Role => role;
         public HeroPositionType PositionType => positionType;
         public ElementType Element => element;
@@ -31,7 +42,8 @@ namespace RuneGate
         public float AttackRange => attackRange;
         public SkillData SkillData => skillData;
         public Sprite Portrait => portrait;
-        public Sprite BattleSprite => battleSprite != null ? battleSprite : portrait;
+        public Sprite ConceptImage => conceptImage != null ? conceptImage : portrait;
+        public Sprite BattleSprite => battleSprite;
         public RuntimeAnimatorController AnimatorController => animatorController;
         public GameObject Prefab => prefab;
     }
