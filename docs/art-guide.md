@@ -28,6 +28,10 @@ Assets/_Project/Art/
         Sprites/
         Animations/
         Materials/
+      Priest/
+        Sprites/
+        Animations/
+        Materials/
       DwarfEngineer/
         Sprites/
         Animations/
@@ -121,6 +125,19 @@ icon_upgrade_crystal_reinforcement.png
 - Compression: Normal Quality for mobile test builds, None for visual QA if needed
 - Pivot: bottom-center for characters and monsters
 
+## Initial Image Integration
+
+`Tools/RuneGate/Bootstrap v1.0 Release Track` and `Tools/RuneGate/Apply Initial Art Images` scan the configured art folders for PNG/JPG files, set them to single Sprite import mode, and connect the first matching prototype image to the relevant ScriptableObject.
+
+Currently linked:
+
+- Knight and Archer hero art
+- Goblin, Orc, and Orc Warlord monster art
+- Shield Bash and Rapid Shot skill icons
+- Sword Rune icon
+
+The Crystal/Gate background and concept sheet are imported as reference Sprites, but they are not used directly as battle sprites yet. Concept sheets must remain reference material only.
+
 ## Prefab Contract
 
 The v0.5 bootstrapper creates these package-free placeholder prefabs:
@@ -156,3 +173,11 @@ Animator controllers should support these state names and parameters:
 `SkillData`, `RuneData`, and `UpgradeData` have icon fields so UI can show sample icons later without changing the data model.
 
 `HeroPlacementManager` and `WaveManager` prefer data-linked prefabs when present and fall back to placeholder sprites when those fields are empty. Adding a Knight or Goblin sample later should only require importing sprites, assigning controller clips, and connecting the relevant ScriptableObject fields.
+
+## Android Screen Baseline
+
+- Primary target: 1080 x 1920 portrait
+- Secondary check: 720 x 1280 portrait
+- Battle view must keep 3 lanes, crystal, heroes, monsters, HUD, skill buttons, rune cards, and result panel visible.
+
+Final UI polish should move from IMGUI to a proper Canvas later. The v1.0 release-track prototype keeps IMGUI to avoid adding packages or destabilizing the battle loop.

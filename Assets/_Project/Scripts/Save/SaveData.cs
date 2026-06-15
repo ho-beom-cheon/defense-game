@@ -6,6 +6,7 @@ namespace RuneGate
     [Serializable]
     public sealed class SaveData
     {
+        public int saveVersion = 1;
         public int totalGold;
         public List<string> clearedStageIds = new List<string>();
         public List<string> unlockedStageIds = new List<string>();
@@ -13,5 +14,6 @@ namespace RuneGate
         public List<FormationSlot> formationSlots = new List<FormationSlot>();
         public string lastSelectedStageId = string.Empty;
         public bool hasSeenIntro;
+        public bool hasSeenTutorial;
     }
 }

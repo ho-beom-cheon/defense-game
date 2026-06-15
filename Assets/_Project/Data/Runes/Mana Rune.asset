@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d798458a421666d4cb903dbb536e4737, type: 3}
+  m_Name: Mana Rune
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
+  runeId: rune_mana
+  displayName: Mana Rune
+  description: Reduces skill cooldowns.
+  rarity: 1
+  element: 0
+  effectKey: skill_cooldown_percent
+  value: 0.1
+  icon: {fileID: 0}

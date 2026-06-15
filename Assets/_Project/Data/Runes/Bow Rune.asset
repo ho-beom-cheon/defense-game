@@ -15,8 +15,8 @@ MonoBehaviour:
   runeId: rune_bow
   displayName: Bow Rune
   description: Increases all hero attack speed.
-  rarity: 1
+  rarity: 0
   element: 8
   effectKey: hero_attack_speed_percent
-  value: 0.15
+  value: 0.12
   icon: {fileID: 0}

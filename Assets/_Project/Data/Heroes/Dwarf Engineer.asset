@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39c9141348d178347816235080585585, type: 3}
+  m_Name: Dwarf Engineer
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
+  heroId: hero_engineer_dwarf_001
+  displayName: Dwarf Engineer
+  role: 6
+  positionType: 1
+  element: 4
+  maxHp: 230
+  attack: 20
+  attackSpeed: 1
+  attackRange: 2.8
+  skillData: {fileID: 11400000, guid: 75f36182c4802234d98053786b14ca7e, type: 2}
+  portrait: {fileID: 0}
+  battleSprite: {fileID: 0}
+  animatorController: {fileID: 0}
+  prefab: {fileID: 0}

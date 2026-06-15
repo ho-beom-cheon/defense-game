@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebed7be4f80f2cc459d826a09190d844, type: 3}
+  m_Name: Stage 10 Wave 3
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.WaveData
+  waveNo: 3
+  spawns:
+  - {fileID: 11400000, guid: 689623529c955014baec60ef54c46086, type: 2}
+  - {fileID: 11400000, guid: 23668bde51ddd704e9c31280e925d796, type: 2}
+  - {fileID: 11400000, guid: 56e2f27a7581d6c4da30c91b08c62c98, type: 2}
+  isBossWave: 0

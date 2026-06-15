@@ -10,6 +10,8 @@ namespace RuneGate
         [SerializeField] private string stageSelectSceneName = "StageSelectScene";
 
         private string feedbackMessage = string.Empty;
+        private bool confirmReset;
+        private bool showSettings;
 
         private void OnEnable()
         {
@@ -43,11 +45,31 @@ namespace RuneGate
             }
 
             GUILayout.Space(8f);
-            if (GUILayout.Button("Reset Save", GUILayout.Height(34f)))
+            if (GUILayout.Button("Settings", GUILayout.Height(34f)))
+            {
+                showSettings = !showSettings;
+                confirmReset = false;
+            }
+
+            if (showSettings)
+            {
+                GUILayout.Label("BGM Volume: 100% (placeholder)");
+                GUILayout.Label("SFX Volume: 100% (placeholder)");
+                GUILayout.Label("Vibration: On (placeholder)");
+            }
+
+            if (!confirmReset && GUILayout.Button("Reset Save", GUILayout.Height(34f)))
+            {
+                confirmReset = true;
+                feedbackMessage = "Press Confirm Reset to delete local progress.";
+            }
+
+            if (confirmReset && GUILayout.Button("Confirm Reset", GUILayout.Height(34f)))
             {
                 SaveManager.ResetSave();
                 GameSession.ClearSelectedStage();
                 GameSession.ClearLastBattleResult();
+                confirmReset = false;
                 feedbackMessage = "Save reset.";
             }
 

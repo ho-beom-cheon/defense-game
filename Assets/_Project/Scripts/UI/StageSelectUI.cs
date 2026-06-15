@@ -20,6 +20,7 @@ namespace RuneGate
         private void OnEnable()
         {
             SaveManager.LoadOrCreate();
+            EnsureStages();
         }
 
         private void OnGUI()
@@ -33,11 +34,12 @@ namespace RuneGate
             GUILayout.Label("Stage Select");
             GUILayout.Label($"Gold: {SaveManager.Current.totalGold}");
             GUILayout.Label($"Formation Slots: {SaveManager.Current.formationSlots.Count}/9");
+            GUILayout.Label("World 1: Goblin Forest");
             GUILayout.Space(8f);
 
             if (stages.Count == 0)
             {
-                GUILayout.Label("No stages assigned. Run Tools/RuneGate/Bootstrap Progression Prototype.");
+                GUILayout.Label("No stages assigned. Run Tools/RuneGate/Bootstrap v1.0 Release Track.");
             }
 
             stageScrollPosition = GUILayout.BeginScrollView(stageScrollPosition);
@@ -64,6 +66,7 @@ namespace RuneGate
 
         private void DrawStageButton(int index)
         {
+            EnsureStages();
             StageData stageData = stages[index];
             if (stageData == null)
             {
@@ -74,7 +77,8 @@ namespace RuneGate
             bool unlocked = SaveManager.IsStageUnlocked(stageData.StageId);
             bool cleared = SaveManager.IsStageCleared(stageData.StageId);
             string status = cleared ? "Cleared" : unlocked ? "Unlocked" : "Locked";
-            string label = $"{index + 1}. {stageData.DisplayName} ({status})";
+            string difficulty = GetDifficultyLabel(index);
+            string label = $"{index + 1}. {stageData.DisplayName} - {difficulty} ({status})";
 
             using (new GuiEnabledScope(unlocked))
             {
@@ -87,6 +91,26 @@ namespace RuneGate
             }
         }
 
+        private static string GetDifficultyLabel(int index)
+        {
+            if (index < 3)
+            {
+                return "Easy";
+            }
+
+            if (index < 6)
+            {
+                return "Rune Practice";
+            }
+
+            if (index < 9)
+            {
+                return "Upgrade Check";
+            }
+
+            return "Boss";
+        }
+
         private string GetNextStageId(int index)
         {
             int nextIndex = index + 1;
@@ -96,6 +120,33 @@ namespace RuneGate
             }
 
             return stages[nextIndex].StageId;
+        }
+
+        private void EnsureStages()
+        {
+            if (HasAssignedStages())
+            {
+                return;
+            }
+
+            List<StageData> loadedStages = PrototypeAssetLoader.LoadStages();
+            if (loadedStages.Count > 0)
+            {
+                stages = loadedStages;
+            }
+        }
+
+        private bool HasAssignedStages()
+        {
+            for (int i = 0; i < stages.Count; i++)
+            {
+                if (stages[i] != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private readonly struct GuiEnabledScope : System.IDisposable

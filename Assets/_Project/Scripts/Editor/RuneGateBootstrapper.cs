@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Animations;
+using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -16,6 +17,7 @@ namespace RuneGate.Editor
         private const string StageSelectScenePath = RootPath + "/Scenes/StageSelectScene.unity";
         private const string BattleScenePath = RootPath + "/Scenes/BattleScene.unity";
         private const string UpgradeScenePath = RootPath + "/Scenes/UpgradeScene.unity";
+        private const string AndroidPackageName = "com.hobeomcheon.runegatedefense";
 
         private static readonly string[] RequiredFolders =
         {
@@ -61,6 +63,10 @@ namespace RuneGate.Editor
             RootPath + "/Art/Characters/Heroes/Cleric/Sprites",
             RootPath + "/Art/Characters/Heroes/Cleric/Animations",
             RootPath + "/Art/Characters/Heroes/Cleric/Materials",
+            RootPath + "/Art/Characters/Heroes/Priest",
+            RootPath + "/Art/Characters/Heroes/Priest/Sprites",
+            RootPath + "/Art/Characters/Heroes/Priest/Animations",
+            RootPath + "/Art/Characters/Heroes/Priest/Materials",
             RootPath + "/Art/Characters/Heroes/DwarfEngineer",
             RootPath + "/Art/Characters/Heroes/DwarfEngineer/Sprites",
             RootPath + "/Art/Characters/Heroes/DwarfEngineer/Animations",
@@ -152,6 +158,65 @@ namespace RuneGate.Editor
             Selection.activeObject = content.Heroes != null && content.Heroes.Length > 0 ? content.Heroes[0] : content.DefaultFormation;
         }
 
+        [MenuItem("Tools/RuneGate/Bootstrap v1.0 Release Track")]
+        public static void BootstrapV10ReleaseTrack()
+        {
+            ContentBundle content = BootstrapContentAndScenes(true, "1.0.0", 10);
+            Debug.Log("RuneGate v1.0 release-track bootstrap complete. Run Validate Project, open TitleScene, then test Stage 1 through Stage 10.");
+            Selection.activeObject = content.Stages != null && content.Stages.Length > 0 ? content.Stages[0] : content.DefaultFormation;
+        }
+
+        [MenuItem("Tools/RuneGate/Apply Initial Art Images")]
+        public static void ApplyInitialArtImagesMenu()
+        {
+            ContentBundle content = LoadExistingContentBundle();
+            if (content == null)
+            {
+                content = CreateV04Content();
+            }
+
+            ApplyInitialArtImages(content);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("RuneGate initial art image links applied. Missing images keep their placeholder fallback.");
+        }
+
+        [MenuItem("Tools/RuneGate/Configure Android Release Settings")]
+        public static void ConfigureAndroidReleaseSettingsMenu()
+        {
+            ConfigureAndroidPlayerSettings("1.0.0", 10);
+            UpdateBuildSettings();
+            AssetDatabase.SaveAssets();
+            Debug.Log("RuneGate Android release settings configured for v1.0.0.");
+        }
+
+        [MenuItem("Tools/RuneGate/Build Android APK v1.0")]
+        public static void BuildAndroidApkV10()
+        {
+            BootstrapContentAndScenes(true, "1.0.0", 10);
+            string buildDirectory = Path.Combine("Builds", "Android");
+            Directory.CreateDirectory(buildDirectory);
+            string apkPath = Path.Combine(buildDirectory, "RuneGateDefense-v1.0.0.apk");
+
+            BuildPlayerOptions options = new BuildPlayerOptions
+            {
+                scenes = GetBuildScenePaths(),
+                locationPathName = apkPath,
+                target = BuildTarget.Android,
+                options = BuildOptions.None
+            };
+
+            try
+            {
+                BuildReport report = BuildPipeline.BuildPlayer(options);
+                Debug.Log($"RuneGate Android APK build result: {report.summary.result} at {apkPath}");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError($"RuneGate Android APK build failed. Check Android Build Support installation and Player Settings. {exception.Message}");
+            }
+        }
+
         [MenuItem("Tools/RuneGate/Bootstrap Content Prototype v0.4")]
         public static void BootstrapV04ContentPrototypeAlias()
         {
@@ -180,12 +245,13 @@ namespace RuneGate.Editor
             AssetDatabase.Refresh();
         }
 
-        private static ContentBundle BootstrapContentAndScenes(bool includeArtPrototype = false)
+        private static ContentBundle BootstrapContentAndScenes(bool includeArtPrototype = false, string androidVersion = "0.9.0", int androidVersionCode = 9)
         {
             EnsureRequiredFolders();
 
             ContentBundle content = CreateV04Content();
             ArtPrototypeBundle artPrototype = includeArtPrototype ? CreateV05ArtPrototypeAssets(content) : null;
+            ApplyInitialArtImages(content);
             UpgradeData[] upgrades = CreateSampleUpgrades();
 
             CreateOrUpdateTitleScene();
@@ -193,6 +259,7 @@ namespace RuneGate.Editor
             CreateOrUpdateBattleScene(content.Stages[0], content.Runes, upgrades, content.Stages, content.HeroRoster, content.DefaultFormation, artPrototype);
             CreateOrUpdateUpgradeScene(upgrades);
             UpdateBuildSettings();
+            ConfigureAndroidPlayerSettings(androidVersion, androidVersionCode);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -211,7 +278,7 @@ namespace RuneGate.Editor
             HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 420, 25, 1f, 1.2f, shieldBash);
             HeroData archer = CreateHeroData("Archer", "hero_archer_001", "Archer", HeroRole.RangedDps, HeroPositionType.Back, ElementType.Wind, 180, 35, 1.5f, 4f, rapidShot);
             HeroData fireMage = CreateHeroData("Fire Mage", "hero_mage_fire_001", "Fire Mage", HeroRole.Mage, HeroPositionType.Back, ElementType.Fire, 150, 55, 0.7f, 3.4f, meteor);
-            HeroData cleric = CreateHeroData("Cleric", "hero_cleric_001", "Cleric", HeroRole.Healer, HeroPositionType.Middle, ElementType.Light, 170, 10, 1f, 3.2f, holyHeal);
+            HeroData cleric = CreateHeroData("Priest", "hero_priest_001", "Priest", HeroRole.Healer, HeroPositionType.Middle, ElementType.Light, 170, 10, 1f, 3.2f, holyHeal);
             HeroData dwarfEngineer = CreateHeroData("Dwarf Engineer", "hero_engineer_dwarf_001", "Dwarf Engineer", HeroRole.Engineer, HeroPositionType.Middle, ElementType.Earth, 230, 20, 1f, 2.8f, buildTurret);
             HeroData assassin = CreateHeroData("Shadow Assassin", "hero_assassin_001", "Shadow Assassin", HeroRole.Assassin, HeroPositionType.Front, ElementType.Dark, 210, 75, 0.8f, 1.5f, shadowStrike);
             HeroData[] heroes = { knight, archer, fireMage, cleric, dwarfEngineer, assassin };
@@ -302,6 +369,139 @@ namespace RuneGate.Editor
             };
         }
 
+        private static void ApplyInitialArtImages(ContentBundle content)
+        {
+            if (content == null)
+            {
+                Debug.LogWarning("RuneGate initial art image linking skipped because content is missing.");
+                return;
+            }
+
+            Sprite knightSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Heroes/Knight");
+            Sprite archerSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Heroes/Archer");
+            Sprite goblinSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Monsters/Goblin");
+            Sprite orcSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Monsters/Orc");
+            Sprite bossSprite = LoadFirstSprite($"{RootPath}/Art/Characters/Bosses/OrcWarlord");
+            Sprite shieldBashIcon = LoadSpriteByKeyword($"{RootPath}/Art/UI/Icons/Skills", "\uBC29\uD328");
+            Sprite rapidShotIcon = LoadSpriteByKeyword($"{RootPath}/Art/UI/Icons/Skills", "\uD654\uC0B4");
+            Sprite swordRuneIcon = LoadFirstSprite($"{RootPath}/Art/UI/Icons/Runes");
+
+            ApplyHeroSprite(content, "hero_knight_001", knightSprite);
+            ApplyHeroSprite(content, "hero_archer_001", archerSprite);
+            ApplyMonsterSprite(content, "monster_goblin_001", goblinSprite);
+            ApplyMonsterSprite(content, "monster_orc_001", orcSprite);
+            ApplyMonsterSprite(content, "boss_orc_warlord_001", bossSprite);
+            ApplySkillIcon(content, "skill_shield_bash", shieldBashIcon);
+            ApplySkillIcon(content, "skill_rapid_shot", rapidShotIcon);
+            ApplyRuneIcon(content, "rune_sword", swordRuneIcon);
+
+            Sprite backgroundReference = LoadFirstSprite($"{RootPath}/Art/Backgrounds");
+            Sprite conceptReference = LoadFirstSprite($"{RootPath}/Art/ConceptSheets");
+            if (backgroundReference == null)
+            {
+                Debug.LogWarning("RuneGate initial art: Crystal/Gate background image not found. BattleScene keeps solid-color placeholder background.");
+            }
+
+            if (conceptReference == null)
+            {
+                Debug.LogWarning("RuneGate initial art: Concept sheet image not found. ConceptSheets remains a reference-only folder.");
+            }
+        }
+
+        private static ContentBundle LoadExistingContentBundle()
+        {
+            HeroData[] heroes =
+            {
+                LoadAsset<HeroData>($"{RootPath}/Data/Heroes/Knight.asset"),
+                LoadAsset<HeroData>($"{RootPath}/Data/Heroes/Archer.asset"),
+                LoadAsset<HeroData>($"{RootPath}/Data/Heroes/Fire Mage.asset"),
+                LoadAsset<HeroData>($"{RootPath}/Data/Heroes/Priest.asset"),
+                LoadAsset<HeroData>($"{RootPath}/Data/Heroes/Dwarf Engineer.asset"),
+                LoadAsset<HeroData>($"{RootPath}/Data/Heroes/Shadow Assassin.asset")
+            };
+
+            MonsterData[] monsters =
+            {
+                LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Goblin.asset"),
+                LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Wolf.asset"),
+                LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Orc.asset"),
+                LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Bat.asset"),
+                LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Slime.asset"),
+                LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Skeleton.asset")
+            };
+
+            SkillData[] skills =
+            {
+                LoadAsset<SkillData>($"{RootPath}/Data/Skills/Shield Bash.asset"),
+                LoadAsset<SkillData>($"{RootPath}/Data/Skills/Rapid Shot.asset"),
+                LoadAsset<SkillData>($"{RootPath}/Data/Skills/Meteor.asset"),
+                LoadAsset<SkillData>($"{RootPath}/Data/Skills/Holy Heal.asset"),
+                LoadAsset<SkillData>($"{RootPath}/Data/Skills/Build Turret.asset"),
+                LoadAsset<SkillData>($"{RootPath}/Data/Skills/Shadow Strike.asset")
+            };
+
+            RuneData[] runes =
+            {
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Sword Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Bow Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Healing Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Fire Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Shield Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Command Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Focus Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Explosion Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Haste Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Frost Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Lightning Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Earth Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Sacrifice Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Guardian Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Mana Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Hunter Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Purification Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Shatter Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Chain Rune.asset"),
+                LoadAsset<RuneData>($"{RootPath}/Data/Runes/Turret Rune.asset")
+            };
+
+            if (!HasAny(heroes) && !HasAny(monsters) && !HasAny(skills) && !HasAny(runes))
+            {
+                return null;
+            }
+
+            return new ContentBundle
+            {
+                Skills = skills,
+                Heroes = heroes,
+                Monsters = monsters,
+                Boss = LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Orc Warlord.asset"),
+                Runes = runes
+            };
+        }
+
+        private static T LoadAsset<T>(string assetPath) where T : UnityEngine.Object
+        {
+            return AssetDatabase.LoadAssetAtPath<T>(assetPath);
+        }
+
+        private static bool HasAny(UnityEngine.Object[] assets)
+        {
+            if (assets == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < assets.Length; i++)
+            {
+                if (assets[i] != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static RuneData[] CreateV04Runes()
         {
             return new[]
@@ -309,23 +509,23 @@ namespace RuneGate.Editor
                 CreateRune("Sword Rune", "rune_sword", "Sword Rune", "Increases all hero attack.", RuneRarity.Common, ElementType.Fire, "hero_attack_percent", 0.18f),
                 CreateRune("Bow Rune", "rune_bow", "Bow Rune", "Increases all hero attack speed.", RuneRarity.Common, ElementType.Wind, "hero_attack_speed_percent", 0.12f),
                 CreateRune("Healing Rune", "rune_healing", "Healing Rune", "Restores flat HP to the Kingdom Crystal.", RuneRarity.Common, ElementType.Light, "crystal_heal_flat", 35f),
-                CreateRune("Fire Rune", "rune_fire", "Fire Rune", "Prototype hook for fire damage.", RuneRarity.Common, ElementType.Fire, "fire_damage_placeholder", 1f),
-                CreateRune("Guard Rune", "rune_guard", "Guard Rune", "Prototype hook for crystal shielding.", RuneRarity.Common, ElementType.Light, "crystal_shield_flat", 20f),
+                CreateRune("Fire Rune", "rune_fire", "Fire Rune", "Improves mage area damage placeholder.", RuneRarity.Common, ElementType.Fire, "mage_area_percent", 0.12f),
+                CreateRune("Shield Rune", "rune_shield", "Shield Rune", "Increases tank and frontline HP.", RuneRarity.Common, ElementType.Light, "tank_hp_percent", 0.14f),
                 CreateRune("Command Rune", "rune_command", "Command Rune", "Slightly improves all hero stats.", RuneRarity.Rare, ElementType.Light, "all_hero_stats_percent", 0.07f),
                 CreateRune("Focus Rune", "rune_focus", "Focus Rune", "Increases hero attack.", RuneRarity.Common, ElementType.None, "hero_attack_percent", 0.1f),
-                CreateRune("Blast Rune", "rune_blast", "Blast Rune", "Prototype hook for blast damage.", RuneRarity.Rare, ElementType.Fire, "blast_placeholder", 1f),
-                CreateRune("Swiftness Rune", "rune_swiftness", "Swiftness Rune", "Increases attack speed.", RuneRarity.Common, ElementType.Wind, "hero_attack_speed_percent", 0.1f),
-                CreateRune("Frost Rune", "rune_frost", "Frost Rune", "Slows active monsters.", RuneRarity.Rare, ElementType.Ice, "monster_slow_percent", 0.2f),
+                CreateRune("Explosion Rune", "rune_explosion", "Explosion Rune", "Prototype hook for blast damage.", RuneRarity.Rare, ElementType.Fire, "blast_placeholder", 1f),
+                CreateRune("Haste Rune", "rune_haste", "Haste Rune", "Increases attack speed.", RuneRarity.Common, ElementType.Wind, "hero_attack_speed_percent", 0.1f),
+                CreateRune("Frost Rune", "rune_frost", "Frost Rune", "Slows active monsters.", RuneRarity.Rare, ElementType.Ice, "enemy_slow_percent", 0.2f),
                 CreateRune("Lightning Rune", "rune_lightning", "Lightning Rune", "Prototype hook for chain lightning.", RuneRarity.Rare, ElementType.Lightning, "lightning_placeholder", 1f),
                 CreateRune("Earth Rune", "rune_earth", "Earth Rune", "Increases hero max HP.", RuneRarity.Common, ElementType.Earth, "hero_hp_percent", 0.15f),
                 CreateRune("Sacrifice Rune", "rune_sacrifice", "Sacrifice Rune", "Damages the crystal to greatly increase hero attack.", RuneRarity.Rare, ElementType.Dark, "sacrifice_crystal_for_attack", 20f),
-                CreateRune("Protection Rune", "rune_protection", "Protection Rune", "Prototype hook for protection.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 25f),
+                CreateRune("Guardian Rune", "rune_guardian", "Guardian Rune", "Prototype hook for protection.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 25f),
                 CreateRune("Mana Rune", "rune_mana", "Mana Rune", "Reduces skill cooldowns.", RuneRarity.Rare, ElementType.None, "skill_cooldown_percent", 0.1f),
                 CreateRune("Hunter Rune", "rune_hunter", "Hunter Rune", "Increases damage dealt to bosses.", RuneRarity.Epic, ElementType.None, "boss_damage_percent", 0.25f),
-                CreateRune("Purify Rune", "rune_purify", "Purify Rune", "Prototype hook for cleansing.", RuneRarity.Common, ElementType.Light, "purify_placeholder", 1f),
-                CreateRune("Crush Rune", "rune_crush", "Crush Rune", "Prototype hook for armor break.", RuneRarity.Rare, ElementType.Earth, "crush_placeholder", 1f),
-                CreateRune("Chain Rune", "rune_chain", "Chain Rune", "Prototype hook for chain attacks.", RuneRarity.Rare, ElementType.Lightning, "chain_placeholder", 1f),
-                CreateRune("Turret Rune", "rune_turret", "Turret Rune", "Prototype hook for turret support.", RuneRarity.Epic, ElementType.Earth, "turret_placeholder", 1f)
+                CreateRune("Purification Rune", "rune_purification", "Purification Rune", "Prototype hook for cleansing.", RuneRarity.Common, ElementType.Light, "purify_placeholder", 1f),
+                CreateRune("Shatter Rune", "rune_shatter", "Shatter Rune", "Prototype hook for armor break.", RuneRarity.Rare, ElementType.Earth, "crush_placeholder", 1f),
+                CreateRune("Chain Rune", "rune_chain", "Chain Rune", "Adds a ranged chain-shot placeholder bonus.", RuneRarity.Rare, ElementType.Lightning, "ranged_chain_shot_placeholder", 0.14f),
+                CreateRune("Turret Rune", "rune_turret", "Turret Rune", "Improves turret and engineer placeholder damage.", RuneRarity.Epic, ElementType.Earth, "turret_attack_percent", 0.18f)
             };
         }
 
@@ -717,6 +917,172 @@ namespace RuneGate.Editor
             return anchor.transform;
         }
 
+        private static Sprite LoadFirstSprite(string folderPath)
+        {
+            string[] spritePaths = FindTexturePaths(folderPath);
+            return spritePaths.Length > 0 ? LoadSprite(spritePaths[0]) : null;
+        }
+
+        private static Sprite LoadSpriteByKeyword(string folderPath, string keyword)
+        {
+            string[] spritePaths = FindTexturePaths(folderPath);
+            for (int i = 0; i < spritePaths.Length; i++)
+            {
+                if (spritePaths[i].IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    return LoadSprite(spritePaths[i]);
+                }
+            }
+
+            return spritePaths.Length > 0 ? LoadSprite(spritePaths[0]) : null;
+        }
+
+        private static string[] FindTexturePaths(string folderPath)
+        {
+            if (!AssetDatabase.IsValidFolder(folderPath))
+            {
+                return Array.Empty<string>();
+            }
+
+            string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { folderPath });
+            List<string> paths = new List<string>();
+            for (int i = 0; i < guids.Length; i++)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[i]);
+                if (IsSupportedTexturePath(path))
+                {
+                    paths.Add(path);
+                }
+            }
+
+            paths.Sort(StringComparer.OrdinalIgnoreCase);
+            return paths.ToArray();
+        }
+
+        private static bool IsSupportedTexturePath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return false;
+            }
+
+            string extension = Path.GetExtension(path);
+            return string.Equals(extension, ".png", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".jpg", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(extension, ".jpeg", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static Sprite LoadSprite(string assetPath)
+        {
+            if (string.IsNullOrWhiteSpace(assetPath))
+            {
+                return null;
+            }
+
+            EnsureSpriteImportSettings(assetPath);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+        }
+
+        private static void EnsureSpriteImportSettings(string assetPath)
+        {
+            TextureImporter importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+            if (importer == null)
+            {
+                return;
+            }
+
+            bool dirty = false;
+            if (importer.textureType != TextureImporterType.Sprite)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                dirty = true;
+            }
+
+            if (importer.spriteImportMode != SpriteImportMode.Single)
+            {
+                importer.spriteImportMode = SpriteImportMode.Single;
+                dirty = true;
+            }
+
+            if (importer.mipmapEnabled)
+            {
+                importer.mipmapEnabled = false;
+                dirty = true;
+            }
+
+            if (!importer.alphaIsTransparency)
+            {
+                importer.alphaIsTransparency = true;
+                dirty = true;
+            }
+
+            if (dirty)
+            {
+                importer.SaveAndReimport();
+            }
+        }
+
+        private static void ApplyHeroSprite(ContentBundle content, string heroId, Sprite sprite)
+        {
+            HeroData hero = FindHero(content, heroId);
+            if (hero == null || sprite == null)
+            {
+                Debug.LogWarning($"RuneGate initial art: hero sprite not linked for {heroId}. Placeholder fallback remains active.");
+                return;
+            }
+
+            EditAsset(hero, serializedObject =>
+            {
+                SetObject(serializedObject, "portrait", sprite);
+                SetObject(serializedObject, "battleSprite", sprite);
+            });
+        }
+
+        private static void ApplyMonsterSprite(ContentBundle content, string monsterId, Sprite sprite)
+        {
+            MonsterData monster = FindMonster(content, monsterId);
+            if (monster == null || sprite == null)
+            {
+                Debug.LogWarning($"RuneGate initial art: monster sprite not linked for {monsterId}. Placeholder fallback remains active.");
+                return;
+            }
+
+            EditAsset(monster, serializedObject =>
+            {
+                SetObject(serializedObject, "sprite", sprite);
+            });
+        }
+
+        private static void ApplySkillIcon(ContentBundle content, string skillId, Sprite icon)
+        {
+            SkillData skill = FindSkill(content, skillId);
+            if (skill == null || icon == null)
+            {
+                Debug.LogWarning($"RuneGate initial art: skill icon not linked for {skillId}. UI placeholder text remains active.");
+                return;
+            }
+
+            EditAsset(skill, serializedObject =>
+            {
+                SetObject(serializedObject, "icon", icon);
+            });
+        }
+
+        private static void ApplyRuneIcon(ContentBundle content, string runeId, Sprite icon)
+        {
+            RuneData rune = FindRune(content, runeId);
+            if (rune == null || icon == null)
+            {
+                Debug.LogWarning($"RuneGate initial art: rune icon not linked for {runeId}. UI placeholder text remains active.");
+                return;
+            }
+
+            EditAsset(rune, serializedObject =>
+            {
+                SetObject(serializedObject, "icon", icon);
+            });
+        }
+
         private static GameObject SavePrefab(GameObject root, string prefabPath)
         {
             GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
@@ -747,7 +1113,7 @@ namespace RuneGate.Editor
         {
             if (content == null || content.Monsters == null)
             {
-                return null;
+                return content != null && content.Boss != null && content.Boss.MonsterId == monsterId ? content.Boss : null;
             }
 
             for (int i = 0; i < content.Monsters.Length; i++)
@@ -756,6 +1122,49 @@ namespace RuneGate.Editor
                 if (monster != null && monster.MonsterId == monsterId)
                 {
                     return monster;
+                }
+            }
+
+            if (content.Boss != null && content.Boss.MonsterId == monsterId)
+            {
+                return content.Boss;
+            }
+
+            return null;
+        }
+
+        private static SkillData FindSkill(ContentBundle content, string skillId)
+        {
+            if (content == null || content.Skills == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < content.Skills.Length; i++)
+            {
+                SkillData skill = content.Skills[i];
+                if (skill != null && skill.SkillId == skillId)
+                {
+                    return skill;
+                }
+            }
+
+            return null;
+        }
+
+        private static RuneData FindRune(ContentBundle content, string runeId)
+        {
+            if (content == null || content.Runes == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < content.Runes.Length; i++)
+            {
+                RuneData rune = content.Runes[i];
+                if (rune != null && rune.RuneId == runeId)
+                {
+                    return rune;
                 }
             }
 
@@ -834,6 +1243,8 @@ namespace RuneGate.Editor
             RuneSelectionUI runeSelectionUI = uiRoot.AddComponent<RuneSelectionUI>();
             StageResultUI stageResultUI = uiRoot.AddComponent<StageResultUI>();
             FormationSkillPanelUI formationSkillPanelUI = uiRoot.AddComponent<FormationSkillPanelUI>();
+            TutorialManager tutorialManager = uiRoot.AddComponent<TutorialManager>();
+            TutorialOverlayUI tutorialOverlayUI = uiRoot.AddComponent<TutorialOverlayUI>();
 
             EditComponent(laneManager, serializedObject =>
             {
@@ -924,6 +1335,13 @@ namespace RuneGate.Editor
                 SetRect(serializedObject, "panelRect", new Rect(16f, 255f, 240f, 250f));
             });
 
+            EditComponent(tutorialOverlayUI, serializedObject =>
+            {
+                SetObject(serializedObject, "tutorialManager", tutorialManager);
+                SetBool(serializedObject, "drawRuntimeGui", true);
+                SetRect(serializedObject, "panelRect", new Rect(270f, 90f, 500f, 260f));
+            });
+
             EditorSceneManager.SaveScene(scene, BattleScenePath);
         }
 
@@ -991,13 +1409,7 @@ namespace RuneGate.Editor
 
         private static void UpdateBuildSettings()
         {
-            string[] scenePaths =
-            {
-                TitleScenePath,
-                StageSelectScenePath,
-                BattleScenePath,
-                UpgradeScenePath
-            };
+            string[] scenePaths = GetBuildScenePaths();
 
             EditorBuildSettingsScene[] buildScenes = new EditorBuildSettingsScene[scenePaths.Length];
             for (int i = 0; i < scenePaths.Length; i++)
@@ -1006,6 +1418,29 @@ namespace RuneGate.Editor
             }
 
             EditorBuildSettings.scenes = buildScenes;
+        }
+
+        private static string[] GetBuildScenePaths()
+        {
+            return new[]
+            {
+                TitleScenePath,
+                StageSelectScenePath,
+                BattleScenePath,
+                UpgradeScenePath
+            };
+        }
+
+        private static void ConfigureAndroidPlayerSettings(string version, int versionCode)
+        {
+            PlayerSettings.companyName = "Ho Beom Cheon";
+            PlayerSettings.productName = "RuneGate Defense";
+            PlayerSettings.bundleVersion = string.IsNullOrWhiteSpace(version) ? "1.0.0" : version;
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+#pragma warning disable 618
+            PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, AndroidPackageName);
+#pragma warning restore 618
+            PlayerSettings.Android.bundleVersionCode = Mathf.Max(1, versionCode);
         }
 
         private static Camera CreateDefaultCamera(Color backgroundColor)
@@ -1095,9 +1530,15 @@ namespace RuneGate.Editor
         private static void EditSerializedObject(UnityEngine.Object target, Action<SerializedObject> edit)
         {
             SerializedObject serializedObject = new SerializedObject(target);
+            serializedObject.Update();
             edit(serializedObject);
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(target);
+
+            if (target is Component component && component.gameObject.scene.IsValid())
+            {
+                EditorSceneManager.MarkSceneDirty(component.gameObject.scene);
+            }
         }
 
         private static void SetString(SerializedObject serializedObject, string propertyName, string value)
@@ -1144,9 +1585,10 @@ namespace RuneGate.Editor
         {
             SerializedProperty property = FindProperty(serializedObject, propertyName);
             property.ClearArray();
-            for (int i = 0; i < values.Count; i++)
+            int count = values != null ? values.Count : 0;
+            property.arraySize = count;
+            for (int i = 0; i < count; i++)
             {
-                property.InsertArrayElementAtIndex(i);
                 property.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
             }
         }

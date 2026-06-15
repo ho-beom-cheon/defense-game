@@ -14,9 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_shield_bash
   displayName: Shield Bash
-  description: Deals direct earth damage to the first monster in range.
-  cooldown: 7
-  power: 36
-  range: 2.4
-  targetingType: 0
-  element: 4
+  description: Deals light damage to the nearest monster.
+  cooldown: 8
+  power: 60
+  damageHitCount: 1
+  range: 2
+  effectKey: damage
+  radius: 1
+  targetingType: 1
+  element: 5
+  icon: {fileID: 21300000, guid: 2380519454034fb44b3df79a65b0eadf, type: 3}

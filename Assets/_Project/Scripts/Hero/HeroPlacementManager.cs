@@ -21,6 +21,7 @@ namespace RuneGate
         public IReadOnlyList<HeroController> BuildRuntimeFormation(LaneManager laneManager)
         {
             ClearSpawnedHeroes();
+            EnsureFallbackContent();
 
             if (laneManager == null)
             {
@@ -208,6 +209,19 @@ namespace RuneGate
             heroController.Initialize(heroData);
 
             return heroController;
+        }
+
+        private void EnsureFallbackContent()
+        {
+            if (heroRoster == null)
+            {
+                heroRoster = PrototypeAssetLoader.LoadHeroRoster();
+            }
+
+            if (defaultFormation == null)
+            {
+                defaultFormation = PrototypeAssetLoader.LoadDefaultFormation();
+            }
         }
 
         private Color GetHeroColor(HeroData heroData)

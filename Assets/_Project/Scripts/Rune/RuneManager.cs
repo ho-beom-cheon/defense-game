@@ -19,6 +19,7 @@ namespace RuneGate
         public IReadOnlyList<RuneData> GenerateRuneOptions()
         {
             currentOptions.Clear();
+            EnsureRunes();
 
             List<RuneData> pool = new List<RuneData>();
             for (int i = 0; i < availableRunes.Count; i++)
@@ -74,6 +75,23 @@ namespace RuneGate
             RuneSelected?.Invoke(runeData);
             AudioManager.Play(SfxKey.RuneSelect);
             currentOptions.Clear();
+        }
+
+        private void EnsureRunes()
+        {
+            for (int i = 0; i < availableRunes.Count; i++)
+            {
+                if (availableRunes[i] != null)
+                {
+                    return;
+                }
+            }
+
+            List<RuneData> loadedRunes = PrototypeAssetLoader.LoadRunes();
+            if (loadedRunes.Count > 0)
+            {
+                availableRunes = loadedRunes;
+            }
         }
     }
 }

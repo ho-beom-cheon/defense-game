@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f6fa8ccaadcbd941808bebcaacd6b6f, type: 3}
+  m_Name: Stage 08 Wave 3 Orc Lane 0 Spawn 1
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.WaveSpawnData
+  monsterData: {fileID: 11400000, guid: 78fecbdc26f2b5545aac1f15e43e3b50, type: 2}
+  laneIndex: 0
+  count: 2
+  startDelay: 0.5
+  spawnInterval: 1
