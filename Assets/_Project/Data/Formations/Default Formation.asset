@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d27ad956f7c34235bde91562d7d13c5a, type: 3}
+  m_Name: Default Formation
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.FormationData
+  formationId: formation_default_mvp
+  displayName: MVP Default Formation
+  slots:
+  - laneIndex: 0
+    positionType: 0
+    heroId: hero_knight_001
+  - laneIndex: 0
+    positionType: 2
+    heroId: hero_archer_001
+  - laneIndex: 1
+    positionType: 1
+    heroId: hero_priest_001
+  - laneIndex: 1
+    positionType: 2
+    heroId: hero_mage_fire_001
+  - laneIndex: 2
+    positionType: 1
+    heroId: hero_engineer_dwarf_001
+  - laneIndex: 2
+    positionType: 0
+    heroId: hero_assassin_001

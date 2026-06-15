@@ -14,9 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_rapid_shot
   displayName: Rapid Shot
-  description: Deals direct wind damage to the nearest monster in range.
+  description: Hits the nearest monster 3 times.
   cooldown: 6
-  power: 34
-  range: 7
+  power: 25
+  damageHitCount: 3
+  range: 5
+  effectKey: multi_hit_damage
+  radius: 1
   targetingType: 1
   element: 8
+  icon: {fileID: 21300000, guid: 66a424077562b554dba3b43256c50d14, type: 3}

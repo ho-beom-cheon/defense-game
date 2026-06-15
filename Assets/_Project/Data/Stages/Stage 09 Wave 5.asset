@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebed7be4f80f2cc459d826a09190d844, type: 3}
+  m_Name: Stage 09 Wave 5
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.WaveData
+  waveNo: 5
+  spawns:
+  - {fileID: 11400000, guid: 96aa3d2d41161f4429a0173b96df50d0, type: 2}
+  - {fileID: 11400000, guid: c4cd0f0ce1081144bbd62e2cd6ac6fc4, type: 2}
+  - {fileID: 11400000, guid: 8d630725d78b4dd4ab59071f8b23e143, type: 2}
+  isBossWave: 0

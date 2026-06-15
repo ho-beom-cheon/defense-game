@@ -11,6 +11,7 @@ namespace RuneGate
     {
         public const string DefaultUnlockedStageId = "stage_goblin_forest_01";
 
+        private const int CurrentSaveVersion = 1;
         private const string SaveFileName = "runegate_save.json";
 
         private static SaveData currentSave;
@@ -67,6 +68,7 @@ namespace RuneGate
         public static SaveData CreateDefaultSave()
         {
             SaveData saveData = new SaveData();
+            saveData.saveVersion = CurrentSaveVersion;
             AddUnique(saveData.unlockedStageIds, DefaultUnlockedStageId);
             saveData.formationSlots = CreateDefaultFormationSlots();
             return saveData;
@@ -168,6 +170,18 @@ namespace RuneGate
             Save();
         }
 
+        public static bool HasSeenTutorial()
+        {
+            return Current.hasSeenTutorial;
+        }
+
+        public static void MarkTutorialSeen()
+        {
+            Current.hasSeenTutorial = true;
+            Current.hasSeenIntro = true;
+            Save();
+        }
+
         public static int GetUpgradeLevel(string upgradeId)
         {
             if (string.IsNullOrWhiteSpace(upgradeId))
@@ -218,7 +232,7 @@ namespace RuneGate
             {
                 new FormationSlot(0, HeroPositionType.Front, "hero_knight_001"),
                 new FormationSlot(0, HeroPositionType.Back, "hero_archer_001"),
-                new FormationSlot(1, HeroPositionType.Middle, "hero_cleric_001"),
+                new FormationSlot(1, HeroPositionType.Middle, "hero_priest_001"),
                 new FormationSlot(1, HeroPositionType.Back, "hero_mage_fire_001"),
                 new FormationSlot(2, HeroPositionType.Middle, "hero_engineer_dwarf_001"),
                 new FormationSlot(2, HeroPositionType.Front, "hero_assassin_001")
@@ -278,6 +292,11 @@ namespace RuneGate
 
         private static void Sanitize(SaveData saveData)
         {
+            if (saveData.saveVersion <= 0)
+            {
+                saveData.saveVersion = CurrentSaveVersion;
+            }
+
             if (saveData.clearedStageIds == null)
             {
                 saveData.clearedStageIds = new List<string>();
@@ -323,7 +342,7 @@ namespace RuneGate
                 }
 
                 int laneIndex = Mathf.Clamp(slot.LaneIndex, 0, 2);
-                saveData.formationSlots[i] = new FormationSlot(laneIndex, slot.PositionType, slot.HeroId);
+                saveData.formationSlots[i] = new FormationSlot(laneIndex, slot.PositionType, NormalizeHeroId(slot.HeroId));
             }
 
             if (saveData.formationSlots.Count == 0)
@@ -346,13 +365,15 @@ namespace RuneGate
         {
             StringBuilder builder = new StringBuilder(512);
             builder.AppendLine("{");
+            builder.Append("  \"saveVersion\": ").Append(CurrentSaveVersion).AppendLine(",");
             builder.Append("  \"totalGold\": ").Append(saveData.totalGold).AppendLine(",");
             AppendStringList(builder, "clearedStageIds", saveData.clearedStageIds, true);
             AppendStringList(builder, "unlockedStageIds", saveData.unlockedStageIds, true);
             AppendUpgradeLevels(builder, saveData.upgradeLevels, true);
             AppendFormationSlots(builder, saveData.formationSlots, true);
             builder.Append("  \"lastSelectedStageId\": \"").Append(EscapeJson(saveData.lastSelectedStageId)).AppendLine("\",");
-            builder.Append("  \"hasSeenIntro\": ").Append(saveData.hasSeenIntro ? "true" : "false").AppendLine();
+            builder.Append("  \"hasSeenIntro\": ").Append(saveData.hasSeenIntro ? "true" : "false").AppendLine(",");
+            builder.Append("  \"hasSeenTutorial\": ").Append(saveData.hasSeenTutorial ? "true" : "false").AppendLine();
             builder.AppendLine("}");
             return builder.ToString();
         }
@@ -361,13 +382,15 @@ namespace RuneGate
         {
             SaveData saveData = new SaveData
             {
+                saveVersion = ExtractInt(json, "saveVersion", CurrentSaveVersion),
                 totalGold = ExtractInt(json, "totalGold", 0),
                 clearedStageIds = ExtractStringList(json, "clearedStageIds"),
                 unlockedStageIds = ExtractStringList(json, "unlockedStageIds"),
                 upgradeLevels = ExtractUpgradeLevels(json),
                 formationSlots = ExtractFormationSlots(json),
                 lastSelectedStageId = ExtractString(json, "lastSelectedStageId", string.Empty),
-                hasSeenIntro = ExtractBool(json, "hasSeenIntro", false)
+                hasSeenIntro = ExtractBool(json, "hasSeenIntro", false),
+                hasSeenTutorial = ExtractBool(json, "hasSeenTutorial", ExtractBool(json, "hasSeenIntro", false))
             };
 
             return saveData;
@@ -562,7 +585,7 @@ namespace RuneGate
 
                 if (!string.IsNullOrWhiteSpace(heroId))
                 {
-                    slots.Add(new FormationSlot(laneIndex, positionType, heroId));
+                    slots.Add(new FormationSlot(laneIndex, positionType, NormalizeHeroId(heroId)));
                 }
             }
 
@@ -582,11 +605,16 @@ namespace RuneGate
                 FormationSlot slot = sourceSlots[i];
                 if (slot != null && !string.IsNullOrWhiteSpace(slot.HeroId))
                 {
-                    copy.Add(new FormationSlot(Mathf.Clamp(slot.LaneIndex, 0, 2), slot.PositionType, slot.HeroId));
+                    copy.Add(new FormationSlot(Mathf.Clamp(slot.LaneIndex, 0, 2), slot.PositionType, NormalizeHeroId(slot.HeroId)));
                 }
             }
 
             return copy;
+        }
+
+        private static string NormalizeHeroId(string heroId)
+        {
+            return heroId == "hero_cleric_001" ? "hero_priest_001" : heroId;
         }
 
         private static string EscapeJson(string value)

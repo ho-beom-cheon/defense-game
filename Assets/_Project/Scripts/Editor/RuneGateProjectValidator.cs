@@ -53,6 +53,10 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/Characters/Heroes/Cleric/Sprites",
             "Assets/_Project/Art/Characters/Heroes/Cleric/Animations",
             "Assets/_Project/Art/Characters/Heroes/Cleric/Materials",
+            "Assets/_Project/Art/Characters/Heroes/Priest",
+            "Assets/_Project/Art/Characters/Heroes/Priest/Sprites",
+            "Assets/_Project/Art/Characters/Heroes/Priest/Animations",
+            "Assets/_Project/Art/Characters/Heroes/Priest/Materials",
             "Assets/_Project/Art/Characters/Heroes/DwarfEngineer",
             "Assets/_Project/Art/Characters/Heroes/DwarfEngineer/Sprites",
             "Assets/_Project/Art/Characters/Heroes/DwarfEngineer/Animations",
@@ -161,6 +165,10 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/TitleUI.cs",
             "Assets/_Project/Scripts/UI/StageSelectUI.cs",
             "Assets/_Project/Scripts/UI/UpgradeSceneUI.cs",
+            "Assets/_Project/Scripts/UI/TutorialStepData.cs",
+            "Assets/_Project/Scripts/UI/TutorialManager.cs",
+            "Assets/_Project/Scripts/UI/TutorialOverlayUI.cs",
+            "Assets/_Project/Scripts/UI/SafeAreaFitter.cs",
             "Assets/_Project/Scripts/Audio/AudioManager.cs",
             "Assets/_Project/Scripts/Audio/SfxKey.cs",
             "Assets/_Project/Scripts/Editor/RuneGateBootstrapper.cs"
@@ -193,7 +201,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Data/Heroes/Knight.asset",
             "Assets/_Project/Data/Heroes/Archer.asset",
             "Assets/_Project/Data/Heroes/Fire Mage.asset",
-            "Assets/_Project/Data/Heroes/Cleric.asset",
+            "Assets/_Project/Data/Heroes/Priest.asset",
             "Assets/_Project/Data/Heroes/Dwarf Engineer.asset",
             "Assets/_Project/Data/Heroes/Shadow Assassin.asset"
         };
@@ -225,20 +233,20 @@ namespace RuneGate.Editor
             "Assets/_Project/Data/Runes/Bow Rune.asset",
             "Assets/_Project/Data/Runes/Healing Rune.asset",
             "Assets/_Project/Data/Runes/Fire Rune.asset",
-            "Assets/_Project/Data/Runes/Guard Rune.asset",
+            "Assets/_Project/Data/Runes/Shield Rune.asset",
             "Assets/_Project/Data/Runes/Command Rune.asset",
             "Assets/_Project/Data/Runes/Focus Rune.asset",
-            "Assets/_Project/Data/Runes/Blast Rune.asset",
-            "Assets/_Project/Data/Runes/Swiftness Rune.asset",
+            "Assets/_Project/Data/Runes/Explosion Rune.asset",
+            "Assets/_Project/Data/Runes/Haste Rune.asset",
             "Assets/_Project/Data/Runes/Frost Rune.asset",
             "Assets/_Project/Data/Runes/Lightning Rune.asset",
             "Assets/_Project/Data/Runes/Earth Rune.asset",
             "Assets/_Project/Data/Runes/Sacrifice Rune.asset",
-            "Assets/_Project/Data/Runes/Protection Rune.asset",
+            "Assets/_Project/Data/Runes/Guardian Rune.asset",
             "Assets/_Project/Data/Runes/Mana Rune.asset",
             "Assets/_Project/Data/Runes/Hunter Rune.asset",
-            "Assets/_Project/Data/Runes/Purify Rune.asset",
-            "Assets/_Project/Data/Runes/Crush Rune.asset",
+            "Assets/_Project/Data/Runes/Purification Rune.asset",
+            "Assets/_Project/Data/Runes/Shatter Rune.asset",
             "Assets/_Project/Data/Runes/Chain Rune.asset",
             "Assets/_Project/Data/Runes/Turret Rune.asset"
         };
@@ -272,7 +280,14 @@ namespace RuneGate.Editor
         {
             "docs/art-guide.md",
             "docs/asset-list.md",
-            "docs/v05-art-integration-plan.md"
+            "docs/v05-art-integration-plan.md",
+            "docs/android-build-guide.md",
+            "docs/release-checklist.md",
+            "docs/known-issues.md",
+            "docs/store-listing-draft.md",
+            "docs/privacy-checklist.md",
+            "docs/release-notes-v1.0.md",
+            "CHANGELOG.md"
         };
 
         [MenuItem("Tools/RuneGate/Validate Project")]
@@ -297,6 +312,12 @@ namespace RuneGate.Editor
 
         [MenuItem("Tools/RuneGate/Validate v0.5 Art Prototype")]
         public static void ValidateV05FromMenu()
+        {
+            ValidateFromMenu();
+        }
+
+        [MenuItem("Tools/RuneGate/Validate v1.0 Release Track")]
+        public static void ValidateV10FromMenu()
         {
             ValidateFromMenu();
         }
@@ -402,6 +423,7 @@ namespace RuneGate.Editor
             }
 
             ValidateV05VisualLinks(errors);
+            ValidateInitialArtLinks(errors);
 
             SaveData defaultSave = SaveManager.CreateDefaultSave();
             if (defaultSave == null || defaultSave.unlockedStageIds == null || !defaultSave.unlockedStageIds.Contains(SaveManager.DefaultUnlockedStageId))
@@ -413,6 +435,18 @@ namespace RuneGate.Editor
             {
                 errors.Add("SaveManager default save does not include default formation slots.");
             }
+
+            if (defaultSave == null || defaultSave.saveVersion <= 0)
+            {
+                errors.Add("SaveManager default save does not include a valid saveVersion.");
+            }
+
+            if (defaultSave != null && defaultSave.hasSeenTutorial)
+            {
+                errors.Add("SaveManager default save should not mark tutorial as seen.");
+            }
+
+            ValidateAndroidSettings(errors);
 
             if (!File.Exists(ToProjectPath(".gitignore")))
             {
@@ -479,6 +513,99 @@ namespace RuneGate.Editor
             if (goblin.AnimatorController == null)
             {
                 errors.Add("Goblin MonsterData is missing the v0.5 animator controller link. Run Tools/RuneGate/Bootstrap v0.5 Art Prototype.");
+            }
+        }
+
+        private static void ValidateInitialArtLinks(List<string> errors)
+        {
+            ValidateHeroSpriteLink("Assets/_Project/Art/Characters/Heroes/Knight", "Assets/_Project/Data/Heroes/Knight.asset", "Knight", errors);
+            ValidateHeroSpriteLink("Assets/_Project/Art/Characters/Heroes/Archer", "Assets/_Project/Data/Heroes/Archer.asset", "Archer", errors);
+            ValidateMonsterSpriteLink("Assets/_Project/Art/Characters/Monsters/Goblin", "Assets/_Project/Data/Monsters/Goblin.asset", "Goblin", errors);
+            ValidateMonsterSpriteLink("Assets/_Project/Art/Characters/Monsters/Orc", "Assets/_Project/Data/Monsters/Orc.asset", "Orc", errors);
+            ValidateMonsterSpriteLink("Assets/_Project/Art/Characters/Bosses/OrcWarlord", "Assets/_Project/Data/Monsters/Orc Warlord.asset", "Orc Warlord", errors);
+            ValidateSkillIconLink("Assets/_Project/Art/UI/Icons/Skills", "Assets/_Project/Data/Skills/Shield Bash.asset", "Shield Bash", errors);
+            ValidateSkillIconLink("Assets/_Project/Art/UI/Icons/Skills", "Assets/_Project/Data/Skills/Rapid Shot.asset", "Rapid Shot", errors);
+            ValidateRuneIconLink("Assets/_Project/Art/UI/Icons/Runes", "Assets/_Project/Data/Runes/Sword Rune.asset", "Sword Rune", errors);
+        }
+
+        private static void ValidateHeroSpriteLink(string artFolder, string dataPath, string label, List<string> errors)
+        {
+            if (!HasTextureInFolder(artFolder))
+            {
+                return;
+            }
+
+            HeroData data = AssetDatabase.LoadAssetAtPath<HeroData>(dataPath);
+            if (data == null || data.BattleSprite == null)
+            {
+                errors.Add($"{label} image exists but HeroData sprite link is missing: {dataPath}");
+            }
+        }
+
+        private static void ValidateMonsterSpriteLink(string artFolder, string dataPath, string label, List<string> errors)
+        {
+            if (!HasTextureInFolder(artFolder))
+            {
+                return;
+            }
+
+            MonsterData data = AssetDatabase.LoadAssetAtPath<MonsterData>(dataPath);
+            if (data == null || data.Sprite == null)
+            {
+                errors.Add($"{label} image exists but MonsterData sprite link is missing: {dataPath}");
+            }
+        }
+
+        private static void ValidateSkillIconLink(string artFolder, string dataPath, string label, List<string> errors)
+        {
+            if (!HasTextureInFolder(artFolder))
+            {
+                return;
+            }
+
+            SkillData data = AssetDatabase.LoadAssetAtPath<SkillData>(dataPath);
+            if (data == null || data.Icon == null)
+            {
+                errors.Add($"{label} image exists but SkillData icon link is missing: {dataPath}");
+            }
+        }
+
+        private static void ValidateRuneIconLink(string artFolder, string dataPath, string label, List<string> errors)
+        {
+            if (!HasTextureInFolder(artFolder))
+            {
+                return;
+            }
+
+            RuneData data = AssetDatabase.LoadAssetAtPath<RuneData>(dataPath);
+            if (data == null || data.Icon == null)
+            {
+                errors.Add($"{label} image exists but RuneData icon link is missing: {dataPath}");
+            }
+        }
+
+        private static bool HasTextureInFolder(string folderPath)
+        {
+            if (!AssetDatabase.IsValidFolder(folderPath))
+            {
+                return false;
+            }
+
+            string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { folderPath });
+            return guids != null && guids.Length > 0;
+        }
+
+        private static void ValidateAndroidSettings(List<string> errors)
+        {
+            string packageName = PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.Android);
+            if (packageName != "com.hobeomcheon.runegatedefense")
+            {
+                errors.Add("Android package name is not com.hobeomcheon.runegatedefense. Run Tools/RuneGate/Bootstrap v1.0 Release Track.");
+            }
+
+            if (PlayerSettings.defaultInterfaceOrientation != UIOrientation.Portrait)
+            {
+                errors.Add("Default orientation is not Portrait. Run Tools/RuneGate/Bootstrap v1.0 Release Track.");
             }
         }
     }

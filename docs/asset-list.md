@@ -1,11 +1,11 @@
-# RuneGate Defense v0.5 Asset List
+# RuneGate Defense v1.0 Asset List
 
 ## Heroes
 
 - `hero_knight_001` - Knight - Tank - Front - Light
 - `hero_archer_001` - Archer - Ranged DPS - Back - Wind
 - `hero_mage_fire_001` - Fire Mage - Mage - Back - Fire
-- `hero_cleric_001` - Cleric - Healer - Middle - Light
+- `hero_priest_001` - Priest - Healer - Middle - Light
 - `hero_engineer_dwarf_001` - Dwarf Engineer - Engineer - Middle - Earth
 - `hero_assassin_001` - Shadow Assassin - Assassin - Front - Dark
 
@@ -32,22 +32,22 @@
 
 - `rune_sword`
 - `rune_bow`
-- `rune_healing`
 - `rune_fire`
-- `rune_guard`
+- `rune_shield`
+- `rune_healing`
 - `rune_command`
 - `rune_focus`
-- `rune_blast`
-- `rune_swiftness`
+- `rune_explosion`
+- `rune_haste`
 - `rune_frost`
 - `rune_lightning`
 - `rune_earth`
 - `rune_sacrifice`
-- `rune_protection`
+- `rune_guardian`
 - `rune_mana`
 - `rune_hunter`
-- `rune_purify`
-- `rune_crush`
+- `rune_purification`
+- `rune_shatter`
 - `rune_chain`
 - `rune_turret`
 
@@ -70,7 +70,7 @@ Default v0.4 formation:
 
 - Lane 0 Front: `hero_knight_001`
 - Lane 0 Back: `hero_archer_001`
-- Lane 1 Middle: `hero_cleric_001`
+- Lane 1 Middle: `hero_priest_001`
 - Lane 1 Back: `hero_mage_fire_001`
 - Lane 2 Middle: `hero_engineer_dwarf_001`
 - Lane 2 Front: `hero_assassin_001`
@@ -119,10 +119,33 @@ The v0.5 runtime adds an `AudioManager` and `SfxKey` enum. Clips are optional du
 - `Victory`
 - `Defeat`
 
-## v0.5 Icon Hooks
+## Initial Integrated Images
 
-These remain placeholder-ready data hooks. Real image files are not included yet.
+These ChatGPT-generated prototype images are imported as Unity Sprites when present. Missing images keep the placeholder fallback path.
 
-- Shield Bash skill icon
-- Sword Rune icon
-- Crystal Reinforcement upgrade icon
+- `Assets/_Project/Art/Characters/Heroes/Knight/용감한_기사와_검과_방패.png` -> Knight `portrait` and `battleSprite`
+- `Assets/_Project/Art/Characters/Heroes/Archer/엘프_궁수의_조준_자세.png` -> Archer `portrait` and `battleSprite`
+- `Assets/_Project/Art/Characters/Monsters/Goblin/공격적인_포즈의_고블린_캐릭터.png` -> Goblin `sprite`
+- `Assets/_Project/Art/Characters/Monsters/Orc/결전_자세의_오크_전사.png` -> Orc `sprite`
+- `Assets/_Project/Art/Characters/Bosses/OrcWarlord/강렬한_전사_오크_보스.png` -> Orc Warlord `sprite`
+- `Assets/_Project/Art/UI/Icons/Skills/영웅의_방패_충격.png` -> Shield Bash `icon`
+- `Assets/_Project/Art/UI/Icons/Skills/궁전의_화살_발사_아이콘.png` -> Rapid Shot `icon`
+- `Assets/_Project/Art/UI/Icons/Runes/마법의_검과_룬_에뮬럼.png` -> Sword Rune `icon`
+- `Assets/_Project/Art/Backgrounds/마법의_푸른_크리스탈과_포탈.png` -> background reference asset
+- `Assets/_Project/Art/ConceptSheets/게임_ui_콘셉트_아트_시트.png` -> reference-only concept sheet
+
+Use `Tools/RuneGate/Apply Initial Art Images` to relink existing data without rebuilding scenes, or `Tools/RuneGate/Bootstrap v1.0 Release Track` to rebuild content and relink images together.
+
+## v1.0 Release Track
+
+The release-track bootstrap should create:
+
+- 6 hero assets
+- 6 monster assets
+- 1 boss asset
+- 20 rune assets
+- 10 stage assets
+- 4 upgrade assets
+- Knight/Goblin visual prototype assets
+
+Stage 10 should include an Orc Warlord boss wave.

@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47ba5a89372c0114ab1a6507eecb1fc8, type: 3}
   m_Name: Goblin Forest 1
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
-  stageId: stage_goblin_forest_1
+  stageId: stage_goblin_forest_01
   displayName: Goblin Forest 1
   crystalHp: 180
   waves:
-  - {fileID: 11400000, guid: a3407e68a87ece048b85baeca532bf95, type: 2}
-  - {fileID: 11400000, guid: b480c87344e6a3a45832beda08ad9156, type: 2}
-  bossMonster: {fileID: 11400000, guid: 78fecbdc26f2b5545aac1f15e43e3b50, type: 2}
+  - {fileID: 11400000, guid: f7e4d128bb5a116469b3914e27a20f44, type: 2}
+  - {fileID: 11400000, guid: 710f7b7bb7afa8a4495b605c0a891154, type: 2}
+  bossMonster: {fileID: 11400000, guid: fb34c19b71f69a6498c3ad009274e8e6, type: 2}

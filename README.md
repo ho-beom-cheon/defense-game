@@ -86,6 +86,29 @@ This keeps the v0.4 content/progression loop and adds the first package-free art
 
 Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Play.
 
+## Bootstrap v1.0 Release Track
+
+In Unity, run:
+
+`Tools/RuneGate/Bootstrap v1.0 Release Track`
+
+This creates or updates the release-track prototype:
+
+- Stage 1-10 Goblin Forest progression
+- 6 MVP heroes: Knight, Archer, Fire Mage, Priest, Dwarf Engineer, Assassin
+- 6 MVP monsters and Orc Warlord boss
+- 20 rune cards
+- Tutorial overlay and local tutorial completion save
+- Initial image links for Knight, Archer, Goblin, Orc, Orc Warlord, Shield Bash, Rapid Shot, and Sword Rune when PNG files exist under `Assets/_Project/Art`
+- Android package settings for `com.hobeomcheon.runegatedefense`
+- Build Settings scene order for Title -> Stage Select -> Battle -> Upgrade
+
+For Android APK builds, see [docs/android-build-guide.md](docs/android-build-guide.md).
+
+To relink imported prototype images without rebuilding scenes, run:
+
+`Tools/RuneGate/Apply Initial Art Images`
+
 ## Project Docs
 
 - `RUNEGATE_MASTER_PLAN.md`
@@ -102,19 +125,28 @@ Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Pla
 - `docs/art-guide.md`
 - `docs/asset-list.md`
 - `docs/v05-art-integration-plan.md`
+- `docs/android-build-guide.md`
+- `docs/release-checklist.md`
+- `docs/known-issues.md`
+- `docs/store-listing-draft.md`
+- `docs/privacy-checklist.md`
+- `docs/release-notes-v1.0.md`
+- `CHANGELOG.md`
 
 ## How To Play
 
-1. Run `Tools/RuneGate/Bootstrap v0.5 Art Prototype`.
+1. Run `Tools/RuneGate/Bootstrap v1.0 Release Track`.
 2. Open `Assets/_Project/Scenes/TitleScene.unity`.
 3. Press Play.
 4. Start or Continue to Stage Select.
-5. Confirm Stage 1 is unlocked and Stage 2/3 are locked on a fresh save.
-6. Select Stage 1 and clear the battle.
-7. Confirm Victory shows earned gold and unlocks Stage 2.
-8. Open Upgrade, buy an upgrade if enough gold is available, then return to Stage Select.
-9. Stop and restart Play Mode to confirm local save persistence.
-10. Use Reset Save on the Title scene to clear test progress.
+5. Confirm the tutorial appears on first battle entry.
+6. Confirm Stage 1 is unlocked and later stages are locked on a fresh save.
+7. Select Stage 1 and clear the battle.
+8. Confirm Victory shows earned gold and unlocks Stage 2.
+9. Open Upgrade, buy an upgrade if enough gold is available, then return to Stage Select.
+10. Stop and restart Play Mode to confirm local save persistence.
+11. Continue through Stage 10 and confirm Orc Warlord appears.
+12. Use Reset Save on the Title scene to clear test progress.
 
 `Tools/RuneGate/Bootstrap Playable Prototype` still creates the standalone BattleScene-only prototype.
 
@@ -161,6 +193,8 @@ Open `Assets/_Project/Scenes/TitleScene.unity` after bootstrapping and press Pla
 - Character visual controller hooks for move, attack, hit, death, skill, and facing direction
 - Runtime hit flash, damage text, projectile fallback, and delayed death cleanup
 - Optional local SFX manager hooks for combat, rune, upgrade, victory, and defeat feedback
+- v1.0 tutorial overlay and tutorial completion persistence
+- v1.0 Android release-track bootstrap and APK build menu
 - Package-free Play Mode GUI
 - Unity Editor bootstrapper and project validator
 - Unity `.gitignore`
@@ -246,6 +280,18 @@ Inside Unity, run:
 For the v0.5 art pipeline after bootstrapping, run:
 
 `Tools/RuneGate/Validate v0.5 Art Prototype`
+
+For release-track validation after bootstrapping, run:
+
+`Tools/RuneGate/Validate v1.0 Release Track`
+
+To configure Android release settings:
+
+`Tools/RuneGate/Configure Android Release Settings`
+
+To attempt an APK build:
+
+`Tools/RuneGate/Build Android APK v1.0`
 
 For command-line validation when `Unity.exe` is available:
 

@@ -166,6 +166,7 @@ namespace RuneGate
                 return GameSession.SelectedNextStageId;
             }
 
+            EnsureStageSequence();
             for (int i = 0; i < stageSequence.Count - 1; i++)
             {
                 StageData stageData = stageSequence[i];
@@ -177,6 +178,23 @@ namespace RuneGate
             }
 
             return string.Empty;
+        }
+
+        private void EnsureStageSequence()
+        {
+            for (int i = 0; i < stageSequence.Count; i++)
+            {
+                if (stageSequence[i] != null)
+                {
+                    return;
+                }
+            }
+
+            List<StageData> loadedStages = PrototypeAssetLoader.LoadStages();
+            if (loadedStages.Count > 0)
+            {
+                stageSequence = loadedStages;
+            }
         }
 
         private int CalculateGoldAward(BattleResult result)

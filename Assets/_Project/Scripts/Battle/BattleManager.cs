@@ -46,6 +46,7 @@ namespace RuneGate
 
         private void Start()
         {
+            EnsureFallbackContent();
             StageData selectedStageData = GameSession.SelectedStageData != null ? GameSession.SelectedStageData : initialStageData;
             if (autoStartOnStart && selectedStageData != null)
             {
@@ -211,6 +212,32 @@ namespace RuneGate
             {
                 heroPlacementManager = FindAnyObjectByType<HeroPlacementManager>();
             }
+        }
+
+        private void EnsureFallbackContent()
+        {
+            if (initialStageData == null)
+            {
+                initialStageData = PrototypeAssetLoader.LoadDefaultStage();
+            }
+
+            if (!HasAssignedUpgrades())
+            {
+                permanentUpgrades = PrototypeAssetLoader.LoadUpgrades();
+            }
+        }
+
+        private bool HasAssignedUpgrades()
+        {
+            for (int i = 0; i < permanentUpgrades.Count; i++)
+            {
+                if (permanentUpgrades[i] != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void BuildAndInitializeHeroes()

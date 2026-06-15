@@ -12,15 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39c9141348d178347816235080585585, type: 3}
   m_Name: Knight
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
-  heroId: hero_knight
+  heroId: hero_knight_001
   displayName: Knight
   role: 0
   positionType: 0
-  element: 4
-  maxHp: 220
-  attack: 20
+  element: 5
+  maxHp: 420
+  attack: 25
   attackSpeed: 1
-  attackRange: 2.4
+  attackRange: 1.2
   skillData: {fileID: 11400000, guid: 3d008aba0d0a5f34ab249d366299250d, type: 2}
-  portrait: {fileID: 0}
-  animatorController: {fileID: 0}
+  portrait: {fileID: 21300000, guid: 1d46978f49733c8429a57da5192d2546, type: 3}
+  battleSprite: {fileID: 21300000, guid: 1d46978f49733c8429a57da5192d2546, type: 3}
+  animatorController: {fileID: 9100000, guid: a259a24ad854c504bbfee21e0ad28243, type: 2}
+  prefab: {fileID: 5001820400792170688, guid: 237f56d67329c854796ca2210bb64be1, type: 3}

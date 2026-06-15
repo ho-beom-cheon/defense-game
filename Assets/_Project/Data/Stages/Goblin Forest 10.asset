@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47ba5a89372c0114ab1a6507eecb1fc8, type: 3}
+  m_Name: Goblin Forest 10
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
+  stageId: stage_goblin_forest_10
+  displayName: Goblin Forest 10
+  crystalHp: 240
+  waves:
+  - {fileID: 11400000, guid: 6885b0e509de6a24ab664e8802c95de3, type: 2}
+  - {fileID: 11400000, guid: 1f3c807f2e3bc30478c711fbdf86452f, type: 2}
+  - {fileID: 11400000, guid: 3a97837222ead1d4fb458c82c60360f4, type: 2}
+  - {fileID: 11400000, guid: d06bb48e2fe122948bd9c34e563d5beb, type: 2}
+  - {fileID: 11400000, guid: ed73442e817bd794cb0297ac12c56f88, type: 2}
+  bossMonster: {fileID: 11400000, guid: fb34c19b71f69a6498c3ad009274e8e6, type: 2}
