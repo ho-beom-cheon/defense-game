@@ -27,28 +27,7 @@ namespace RuneGate
 
         public static string GetSkillDisplayName(SkillData skillData)
         {
-            if (skillData == null)
-            {
-                return "스킬";
-            }
-
-            switch (skillData.SkillId)
-            {
-                case "skill_shield_bash":
-                    return "방패 강타";
-                case "skill_rapid_shot":
-                    return "연속 사격";
-                case "skill_meteor":
-                    return "유성 낙하";
-                case "skill_holy_heal":
-                    return "성스러운 회복";
-                case "skill_build_turret":
-                    return "임시 포탑";
-                case "skill_shadow_strike":
-                    return "그림자 일격";
-                default:
-                    return string.IsNullOrWhiteSpace(skillData.DisplayName) ? "스킬" : skillData.DisplayName;
-            }
+            return GameTextMapper.SkillName(skillData);
         }
 
         private void OnEnable()

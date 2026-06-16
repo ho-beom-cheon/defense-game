@@ -8,6 +8,7 @@ namespace RuneGate
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private RuneManager runeManager;
         [SerializeField] private bool drawRuntimeGui = true;
+        [SerializeField] private bool showDebugEffectKey;
         [SerializeField] private Rect panelRect = new Rect(430f, 96f, 420f, 280f);
 
         private readonly List<RuneData> displayedRunes = new List<RuneData>();
@@ -61,10 +62,14 @@ namespace RuneGate
                 }
 
                 GUILayout.BeginVertical(cardStyle);
-                GUILayout.Label($"{runeData.DisplayName} ({runeData.Rarity})");
+                GUILayout.Label($"{runeData.DisplayName} ({GameTextMapper.RuneRarityName(runeData.Rarity)})");
                 GUILayout.Label(runeData.Description);
-                GUILayout.Label($"{runeData.EffectKey}: {runeData.Value:0.##}");
-                if (GUILayout.Button("선택", GUILayout.Height(28f)))
+                if (showDebugEffectKey)
+                {
+                    GUILayout.Label($"{runeData.EffectKey}: {runeData.Value:0.##}");
+                }
+
+                if (GUILayout.Button("선택", GUILayout.Height(30f)))
                 {
                     SelectOption(i);
                 }

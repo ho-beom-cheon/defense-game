@@ -79,27 +79,28 @@ namespace RuneGate
 
         private void DrawDifficultySelector()
         {
-            GUILayout.Label($"난이도: {GetDifficultyDisplayName(SaveManager.Current.selectedDifficultyId)}");
+            GUILayout.Label($"난이도: {GameTextMapper.Difficulty(SaveManager.Current.selectedDifficultyId)}");
             GUILayout.BeginHorizontal();
-            DrawDifficultyButton("easy", "Easy", RuntimePixelAssetLoader.UiBadgeEasy, true);
-            DrawDifficultyButton("normal", "Normal", RuntimePixelAssetLoader.UiBadgeNormal, true);
-            DrawDifficultyButton("hard", "Hard", RuntimePixelAssetLoader.UiBadgeHard, false);
-            DrawDifficultyButton("nightmare", "Nightmare", RuntimePixelAssetLoader.UiBadgeNightmare, false);
+            DrawDifficultyButton("easy", RuntimePixelAssetLoader.UiBadgeEasy, true);
+            DrawDifficultyButton("normal", RuntimePixelAssetLoader.UiBadgeNormal, true);
+            DrawDifficultyButton("hard", RuntimePixelAssetLoader.UiBadgeHard, false);
+            DrawDifficultyButton("nightmare", RuntimePixelAssetLoader.UiBadgeNightmare, false);
             GUILayout.EndHorizontal();
         }
 
-        private void DrawDifficultyButton(string difficultyId, string label, string iconPath, bool enabled)
+        private void DrawDifficultyButton(string difficultyId, string iconPath, bool enabled)
         {
             GUILayout.BeginVertical(GUILayout.Width(110f));
             RuntimePixelGuiUtility.DrawIcon(iconPath, 28f);
             bool selected = SaveManager.Current.selectedDifficultyId == difficultyId;
+            string label = GameTextMapper.Difficulty(difficultyId);
             using (new GuiEnabledScope(enabled))
             {
                 string buttonLabel = selected ? $"[{label}]" : label;
                 if (GUILayout.Button(buttonLabel, GUILayout.Height(30f)))
                 {
                     GameSession.SelectDifficulty(difficultyId);
-                    feedbackMessage = $"{label} 선택됨.";
+                    feedbackMessage = $"{label} 선택됨";
                 }
             }
 
@@ -117,7 +118,7 @@ namespace RuneGate
             StageData stageData = stages[index];
             if (stageData == null)
             {
-                GUILayout.Label($"Stage {index + 1}: Missing StageData");
+                GUILayout.Label($"{index + 1}. 스테이지 데이터 없음");
                 return;
             }
 
@@ -126,7 +127,7 @@ namespace RuneGate
             string status = cleared ? "클리어" : unlocked ? "해금" : "잠김";
             string difficulty = GetStageDifficultyLabel(index);
             string iconPath = cleared ? RuntimePixelAssetLoader.UiStageNodeCleared : unlocked ? RuntimePixelAssetLoader.UiStageNodeUnlocked : RuntimePixelAssetLoader.UiStageNodeLocked;
-            string label = $"{index + 1}. {stageData.DisplayNameKorean} - {difficulty} ({status})";
+            string label = $"{index + 1}. {GameTextMapper.StageName(stageData)} - {difficulty} ({status})";
 
             GUILayout.BeginHorizontal(GUI.skin.box);
             RuntimePixelGuiUtility.DrawIcon(iconPath, 34f);
@@ -162,25 +163,10 @@ namespace RuneGate
 
             if (index < 9)
             {
-                return "어려움 예고";
+                return "어려움";
             }
 
             return "보스";
-        }
-
-        private static string GetDifficultyDisplayName(string difficultyId)
-        {
-            switch (difficultyId)
-            {
-                case "easy":
-                    return "쉬움";
-                case "hard":
-                    return "어려움";
-                case "nightmare":
-                    return "악몽";
-                default:
-                    return "보통";
-            }
         }
 
         private string GetNextStageId(int index)

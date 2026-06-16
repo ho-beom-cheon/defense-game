@@ -9,9 +9,9 @@ namespace RuneGate
         [SerializeField] private bool drawRuntimeGui = true;
         [SerializeField] private Rect panelRect = new Rect(8f, 12f, 248f, 210f);
 
-        private string crystalHpText = "크리스탈 -";
+        private string crystalHpText = "크리스탈 HP -";
         private string waveText = "웨이브 -";
-        private string battleStateText = BattleState.None.ToString();
+        private string battleStateText = GameTextMapper.BattleStateName(BattleState.None);
         private string crystalFeedbackText = string.Empty;
         private float crystalFeedbackTimer;
         private int gold;
@@ -30,6 +30,7 @@ namespace RuneGate
                 battleManager.BattleStateChanged += HandleBattleStateChanged;
                 battleManager.WaveChanged += HandleWaveChanged;
                 battleManager.GoldChanged += HandleGoldChanged;
+                HandleBattleStateChanged(battleManager.CurrentState);
             }
 
             if (crystalController != null)
@@ -86,7 +87,7 @@ namespace RuneGate
             GUILayout.Label("RuneGate Defense");
             if (battleManager != null && battleManager.ActiveStageData != null)
             {
-                GUILayout.Label($"스테이지 {battleManager.ActiveStageData.DisplayNameKorean}");
+                GUILayout.Label($"스테이지 {GameTextMapper.StageName(battleManager.ActiveStageData)}");
             }
 
             GUILayout.Label(crystalHpText);
@@ -144,7 +145,7 @@ namespace RuneGate
 
         private void HandleBattleStateChanged(BattleState battleState)
         {
-            battleStateText = battleState.ToString();
+            battleStateText = GameTextMapper.BattleStateName(battleState);
         }
 
         private void HandleGoldChanged(int amount)
