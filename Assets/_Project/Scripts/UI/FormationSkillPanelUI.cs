@@ -22,14 +22,15 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             AutoAssignReferences();
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
             GUILayout.BeginArea(panelRect, panelStyle);
-            GUILayout.Label("Hero Skills");
+            GUILayout.Label("영웅 스킬");
 
             if (battleManager == null || battleManager.Heroes.Count == 0)
             {
-                GUILayout.Label("No heroes placed.");
+                GUILayout.Label("배치된 영웅이 없습니다.");
                 GUILayout.EndArea();
                 return;
             }
@@ -52,7 +53,7 @@ namespace RuneGate
             }
 
             SkillController skillController = hero.SkillController;
-            string skillName = skillController != null && skillController.Data != null ? skillController.Data.DisplayName : "Skill";
+            string skillName = skillController != null ? KoreanFontManager.GetSkillDisplayName(skillController.Data) : "스킬";
             string status = GetStatusText(skillController);
             bool canUse = battleManager.CurrentState == BattleState.WaveRunning && skillController != null && skillController.CanUseSkill;
 
@@ -73,22 +74,22 @@ namespace RuneGate
         {
             if (battleManager == null)
             {
-                return "Battle Missing";
+                return "전투 없음";
             }
 
             if (battleManager.CurrentState == BattleState.Victory || battleManager.CurrentState == BattleState.Defeat)
             {
-                return "Battle Ended";
+                return "전투 종료";
             }
 
             if (battleManager.CurrentState == BattleState.RuneSelection)
             {
-                return "Rune Selection";
+                return "룬 선택";
             }
 
             if (skillController == null || skillController.Data == null)
             {
-                return "Missing Skill";
+                return "스킬 없음";
             }
 
             if (skillController.CooldownRemaining > 0f)
@@ -96,7 +97,7 @@ namespace RuneGate
                 return $"{skillController.CooldownRemaining:0.0}s";
             }
 
-            return "Ready";
+            return "준비 완료";
         }
 
         private void AutoAssignReferences()

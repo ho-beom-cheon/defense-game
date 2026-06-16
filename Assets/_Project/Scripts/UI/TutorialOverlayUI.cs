@@ -23,6 +23,7 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             TutorialStepData step = tutorialManager.CurrentStep;
             if (step == null)
             {
@@ -32,7 +33,7 @@ namespace RuneGate
             GUILayout.BeginArea(panelRect, GUI.skin.box);
             GUILayout.BeginHorizontal();
             RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiTutorialArrow, 30f);
-            GUILayout.Label($"Tutorial {tutorialManager.CurrentStepNumber}/{tutorialManager.StepCount}");
+            GUILayout.Label($"튜토리얼 {tutorialManager.CurrentStepNumber}/{tutorialManager.StepCount}");
             RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiTapIndicator, 30f);
             GUILayout.EndHorizontal();
             GUILayout.Space(6f);
@@ -41,12 +42,12 @@ namespace RuneGate
             GUILayout.Label(step.Body);
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Skip", GUILayout.Height(34f)))
+            if (GUILayout.Button("건너뛰기", GUILayout.Height(34f)))
             {
                 tutorialManager.Skip();
             }
 
-            string nextLabel = tutorialManager.CurrentStepNumber >= tutorialManager.StepCount ? "Finish" : "Next";
+            string nextLabel = tutorialManager.CurrentStepNumber >= tutorialManager.StepCount ? "완료" : "다음";
             if (GUILayout.Button(nextLabel, GUILayout.Height(34f)))
             {
                 tutorialManager.Next();

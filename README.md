@@ -154,6 +154,7 @@ To relink imported prototype images without rebuilding scenes, run:
 - `docs/tutorial-design.md`
 - `docs/save-system.md`
 - `docs/difficulty-design.md`
+- `docs/korean-font-setup.md`
 - `CHANGELOG.md`
 
 ## How To Play

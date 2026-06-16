@@ -6,7 +6,9 @@ namespace RuneGate
     {
         public static GUIStyle CreateBoxStyle(GUIStyle fallbackStyle, string spritePath)
         {
+            KoreanFontManager.ApplyToGuiSkin();
             GUIStyle style = new GUIStyle(fallbackStyle);
+            KoreanFontManager.ApplyFont(style);
             Texture2D texture = LoadTexture(spritePath);
             if (texture != null)
             {
@@ -19,7 +21,9 @@ namespace RuneGate
 
         public static GUIStyle CreateButtonStyle(GUIStyle fallbackStyle, string spritePath)
         {
+            KoreanFontManager.ApplyToGuiSkin();
             GUIStyle style = new GUIStyle(fallbackStyle);
+            KoreanFontManager.ApplyFont(style);
             Texture2D texture = LoadTexture(spritePath);
             if (texture != null)
             {

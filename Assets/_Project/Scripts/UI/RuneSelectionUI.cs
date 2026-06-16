@@ -44,10 +44,11 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
             GUIStyle cardStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiRuneCardBase);
             GUILayout.BeginArea(panelRect, panelStyle);
-            GUILayout.Label("Choose 1 Rune");
+            GUILayout.Label("룬 선택");
             GUILayout.Space(8f);
 
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
@@ -63,7 +64,7 @@ namespace RuneGate
                 GUILayout.Label($"{runeData.DisplayName} ({runeData.Rarity})");
                 GUILayout.Label(runeData.Description);
                 GUILayout.Label($"{runeData.EffectKey}: {runeData.Value:0.##}");
-                if (GUILayout.Button("Select", GUILayout.Height(28f)))
+                if (GUILayout.Button("선택", GUILayout.Height(28f)))
                 {
                     SelectOption(i);
                 }

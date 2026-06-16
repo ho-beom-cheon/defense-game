@@ -9,8 +9,8 @@ namespace RuneGate
         [SerializeField] private bool drawRuntimeGui = true;
         [SerializeField] private Rect panelRect = new Rect(8f, 12f, 248f, 210f);
 
-        private string crystalHpText = "Crystal HP -";
-        private string waveText = "Wave -";
+        private string crystalHpText = "크리스탈 -";
+        private string waveText = "웨이브 -";
         private string battleStateText = BattleState.None.ToString();
         private string crystalFeedbackText = string.Empty;
         private float crystalFeedbackTimer;
@@ -77,6 +77,7 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             AutoAssignReferences();
             Rect drawRect = panelRect;
             drawRect.height = Mathf.Max(drawRect.height, 220f);
@@ -85,13 +86,13 @@ namespace RuneGate
             GUILayout.Label("RuneGate Defense");
             if (battleManager != null && battleManager.ActiveStageData != null)
             {
-                GUILayout.Label($"Stage {battleManager.ActiveStageData.DisplayNameKorean}");
+                GUILayout.Label($"스테이지 {battleManager.ActiveStageData.DisplayNameKorean}");
             }
 
             GUILayout.Label(crystalHpText);
             GUILayout.Label(waveText);
-            GUILayout.Label($"State {battleStateText}");
-            GUILayout.Label($"Gold {gold}");
+            GUILayout.Label($"상태 {battleStateText}");
+            GUILayout.Label($"골드 {gold}");
             if (!string.IsNullOrWhiteSpace(crystalFeedbackText))
             {
                 GUILayout.Label(crystalFeedbackText);
@@ -108,7 +109,7 @@ namespace RuneGate
                         continue;
                     }
 
-                    GUILayout.Label($"{hero.Data.DisplayNameKorean} ATK {hero.EffectiveAttack} SPD {hero.EffectiveAttackSpeed:0.00}");
+                    GUILayout.Label($"{hero.Data.DisplayNameKorean} 공격 {hero.EffectiveAttack} 속도 {hero.EffectiveAttackSpeed:0.00}");
                 }
 
                 GUILayout.EndScrollView();
@@ -132,13 +133,13 @@ namespace RuneGate
 
         private void HandleCrystalHpChanged(int currentHp, int maxHp)
         {
-            crystalHpText = $"Crystal HP {currentHp}/{maxHp}";
+            crystalHpText = $"크리스탈 HP {currentHp}/{maxHp}";
             Debug.Log(crystalHpText);
         }
 
         private void HandleWaveChanged(int currentWave, int totalWaves)
         {
-            waveText = $"Wave {currentWave}/{totalWaves}";
+            waveText = $"웨이브 {currentWave}/{totalWaves}";
         }
 
         private void HandleBattleStateChanged(BattleState battleState)
@@ -153,7 +154,7 @@ namespace RuneGate
 
         private void HandleCrystalDamaged(int damage, int currentHp, int maxHp)
         {
-            crystalFeedbackText = $"Crystal Hit -{damage}";
+            crystalFeedbackText = $"크리스탈 피해 -{damage}";
             crystalFeedbackTimer = 1.2f;
         }
     }

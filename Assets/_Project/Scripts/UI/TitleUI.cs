@@ -25,11 +25,12 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             GUILayout.BeginArea(panelRect, GUI.skin.box);
             GUILayout.Label("RuneGate Defense");
             GUILayout.Space(12f);
 
-            if (GUILayout.Button("Start", GUILayout.Height(42f)))
+            if (GUILayout.Button("시작", GUILayout.Height(42f)))
             {
                 SaveManager.Load();
                 SaveManager.Save();
@@ -38,14 +39,14 @@ namespace RuneGate
 
             if (SaveManager.HasSaveFile())
             {
-                if (GUILayout.Button("Continue", GUILayout.Height(42f)))
+                if (GUILayout.Button("계속하기", GUILayout.Height(42f)))
                 {
                     LoadStageSelect();
                 }
             }
 
             GUILayout.Space(8f);
-            if (GUILayout.Button("Settings", GUILayout.Height(34f)))
+            if (GUILayout.Button("설정", GUILayout.Height(34f)))
             {
                 showSettings = !showSettings;
                 confirmReset = false;
@@ -54,20 +55,20 @@ namespace RuneGate
             if (showSettings)
             {
                 RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconSettings, 24f);
-                GUILayout.Label("BGM Volume: 100% (placeholder)");
-                GUILayout.Label("SFX Volume: 100% (placeholder)");
-                GUILayout.Label("Vibration: On (placeholder)");
-                if (GUILayout.Button("Replay Tutorial Next Battle", GUILayout.Height(30f)))
+                GUILayout.Label("BGM 볼륨: 100% (placeholder)");
+                GUILayout.Label("SFX 볼륨: 100% (placeholder)");
+                GUILayout.Label("진동: 켜짐 (placeholder)");
+                if (GUILayout.Button("다음 전투에서 튜토리얼 다시 보기", GUILayout.Height(30f)))
                 {
                     SaveManager.ResetTutorialSeen();
-                    feedbackMessage = "Tutorial will show again in the next battle.";
+                    feedbackMessage = "다음 전투에서 튜토리얼이 다시 표시됩니다.";
                 }
             }
 
-            if (!confirmReset && GUILayout.Button("Reset Save", GUILayout.Height(34f)))
+            if (!confirmReset && GUILayout.Button("저장 초기화", GUILayout.Height(34f)))
             {
                 confirmReset = true;
-                feedbackMessage = "Press Confirm Reset to delete local progress.";
+                feedbackMessage = "저장 데이터를 지우려면 초기화 확인을 누르세요.";
             }
 
             if (confirmReset)
@@ -75,13 +76,13 @@ namespace RuneGate
                 RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconResetSave, 24f);
             }
 
-            if (confirmReset && GUILayout.Button("Confirm Reset", GUILayout.Height(34f)))
+            if (confirmReset && GUILayout.Button("초기화 확인", GUILayout.Height(34f)))
             {
                 SaveManager.ResetSave();
                 GameSession.ClearSelectedStage();
                 GameSession.ClearLastBattleResult();
                 confirmReset = false;
-                feedbackMessage = "Save reset.";
+                feedbackMessage = "저장 데이터가 초기화되었습니다.";
             }
 
             if (!string.IsNullOrWhiteSpace(feedbackMessage))

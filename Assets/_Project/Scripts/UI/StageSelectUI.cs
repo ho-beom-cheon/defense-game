@@ -32,12 +32,13 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
             GUILayout.BeginArea(panelRect, panelStyle);
-            GUILayout.Label("Stage Select");
-            GUILayout.Label($"Gold: {SaveManager.Current.totalGold}");
-            GUILayout.Label($"Formation Slots: {SaveManager.Current.formationSlots.Count}/9");
-            GUILayout.Label("World 1: Goblin Forest");
+            GUILayout.Label("스테이지 선택");
+            GUILayout.Label($"골드: {SaveManager.Current.totalGold}");
+            GUILayout.Label($"편성 슬롯: {SaveManager.Current.formationSlots.Count}/9");
+            GUILayout.Label("월드 1: 재문 숲");
             GUILayout.Space(8f);
 
             DrawDifficultySelector();
@@ -45,7 +46,7 @@ namespace RuneGate
 
             if (stages.Count == 0)
             {
-                GUILayout.Label("No stages assigned. Run Tools/RuneGate/Bootstrap v1.0 Release Track.");
+                GUILayout.Label("스테이지 데이터가 없습니다. Tools/RuneGate/Bootstrap v1.0 Release Track을 실행하세요.");
             }
 
             stageScrollPosition = GUILayout.BeginScrollView(stageScrollPosition, GUILayout.Height(300f));
@@ -63,12 +64,12 @@ namespace RuneGate
             }
 
             GUILayout.Space(10f);
-            if (GUILayout.Button("Go to Upgrade", GUILayout.Height(34f)))
+            if (GUILayout.Button("업그레이드", GUILayout.Height(34f)))
             {
                 SceneManager.LoadScene(upgradeSceneName);
             }
 
-            if (GUILayout.Button("Back to Title", GUILayout.Height(30f)))
+            if (GUILayout.Button("타이틀로", GUILayout.Height(30f)))
             {
                 SceneManager.LoadScene(titleSceneName);
             }
@@ -78,7 +79,7 @@ namespace RuneGate
 
         private void DrawDifficultySelector()
         {
-            GUILayout.Label($"Difficulty: {GetDifficultyDisplayName(SaveManager.Current.selectedDifficultyId)}");
+            GUILayout.Label($"난이도: {GetDifficultyDisplayName(SaveManager.Current.selectedDifficultyId)}");
             GUILayout.BeginHorizontal();
             DrawDifficultyButton("easy", "Easy", RuntimePixelAssetLoader.UiBadgeEasy, true);
             DrawDifficultyButton("normal", "Normal", RuntimePixelAssetLoader.UiBadgeNormal, true);
@@ -98,13 +99,13 @@ namespace RuneGate
                 if (GUILayout.Button(buttonLabel, GUILayout.Height(30f)))
                 {
                     GameSession.SelectDifficulty(difficultyId);
-                    feedbackMessage = $"{label} selected.";
+                    feedbackMessage = $"{label} 선택됨.";
                 }
             }
 
             if (!enabled)
             {
-                GUILayout.Label("Locked");
+                GUILayout.Label("잠김");
             }
 
             GUILayout.EndVertical();
@@ -122,7 +123,7 @@ namespace RuneGate
 
             bool unlocked = SaveManager.IsStageUnlocked(stageData.StageId);
             bool cleared = SaveManager.IsStageCleared(stageData.StageId);
-            string status = cleared ? "Cleared" : unlocked ? "Unlocked" : "Locked";
+            string status = cleared ? "클리어" : unlocked ? "해금" : "잠김";
             string difficulty = GetStageDifficultyLabel(index);
             string iconPath = cleared ? RuntimePixelAssetLoader.UiStageNodeCleared : unlocked ? RuntimePixelAssetLoader.UiStageNodeUnlocked : RuntimePixelAssetLoader.UiStageNodeLocked;
             string label = $"{index + 1}. {stageData.DisplayNameKorean} - {difficulty} ({status})";
@@ -143,7 +144,7 @@ namespace RuneGate
 
             if (!unlocked)
             {
-                GUILayout.Label("Clear the previous stage to unlock this record.");
+                GUILayout.Label("이전 스테이지를 클리어하면 해금됩니다.");
             }
         }
 
@@ -151,20 +152,20 @@ namespace RuneGate
         {
             if (index < 3)
             {
-                return "Easy";
+                return "쉬움";
             }
 
             if (index < 6)
             {
-                return "Normal";
+                return "보통";
             }
 
             if (index < 9)
             {
-                return "Hard Preview";
+                return "어려움 예고";
             }
 
-            return "Boss";
+            return "보스";
         }
 
         private static string GetDifficultyDisplayName(string difficultyId)
@@ -172,13 +173,13 @@ namespace RuneGate
             switch (difficultyId)
             {
                 case "easy":
-                    return "Easy";
+                    return "쉬움";
                 case "hard":
-                    return "Hard";
+                    return "어려움";
                 case "nightmare":
-                    return "Nightmare";
+                    return "악몽";
                 default:
-                    return "Normal";
+                    return "보통";
             }
         }
 
