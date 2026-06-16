@@ -7,9 +7,16 @@ namespace RuneGate
         public static StageData SelectedStageData { get; private set; }
         public static string SelectedStageId { get; private set; } = string.Empty;
         public static string SelectedNextStageId { get; private set; } = string.Empty;
+        public static string SelectedDifficultyId { get; private set; } = "normal";
         public static BattleResult LastBattleResult { get; private set; }
         public static bool HasLastBattleResult { get; private set; }
         public static int LastEarnedGold { get; private set; }
+
+        public static void SelectDifficulty(string difficultyId)
+        {
+            SelectedDifficultyId = string.IsNullOrWhiteSpace(difficultyId) ? "normal" : difficultyId;
+            SaveManager.SetSelectedDifficultyId(SelectedDifficultyId);
+        }
 
         public static void SelectStage(StageData stageData, string nextStageId)
         {
@@ -22,6 +29,7 @@ namespace RuneGate
             SelectedStageData = stageData;
             SelectedStageId = stageData.StageId;
             SelectedNextStageId = nextStageId ?? string.Empty;
+            SelectedDifficultyId = SaveManager.Current.selectedDifficultyId;
             SaveManager.SetLastSelectedStageId(SelectedStageId);
             ClearLastBattleResult();
         }

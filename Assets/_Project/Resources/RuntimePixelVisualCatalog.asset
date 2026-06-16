@@ -24,3 +24,19 @@ MonoBehaviour:
   uiPanelDark: {fileID: 21300000, guid: b83095eef84e4ca08383c6ec771f0635, type: 3}
   uiButtonSkill: {fileID: 21300000, guid: 574d4ae3f1304a27a44b3eaeeb7e651c, type: 3}
   uiRuneCardBase: {fileID: 21300000, guid: ff61db86736246319279f3131f286e99, type: 3}
+  uiTutorialArrow: {fileID: 21300000, guid: 7e68dac77fc34a46b151ce979cec2477, type: 3}
+  uiTapIndicator: {fileID: 21300000, guid: b847e58091ab42c0b2bbddcdda0acf11, type: 3}
+  uiStageNodeUnlocked: {fileID: 21300000, guid: cac1028347e24e8080fe7b239ff4551e, type: 3}
+  uiStageNodeLocked: {fileID: 21300000, guid: a13a305b594f4999920fa905c8ade296, type: 3}
+  uiStageNodeCleared: {fileID: 21300000, guid: c8b99c97eb27459ebb288a15844e47b3, type: 3}
+  uiUpgradeCrystalHp: {fileID: 21300000, guid: c677fbf615e8412cb238810b5f971e31, type: 3}
+  uiUpgradeHeroAttack: {fileID: 21300000, guid: cd07ae71189f4320bf76e8fa30a6cf22, type: 3}
+  uiUpgradeAttackSpeed: {fileID: 21300000, guid: 0c10acabcb964822b8251e9e758eccfb, type: 3}
+  uiUpgradeSkillCooldown: {fileID: 21300000, guid: 76c0635407cb47a187074dc0fbff80da, type: 3}
+  uiIconSettings: {fileID: 21300000, guid: 0033896ddb2b496490f6aa245de31295, type: 3}
+  uiIconResetSave: {fileID: 21300000, guid: b6ff4b657ce24c068f1fdf9d8d1c1aba, type: 3}
+  uiIconSave: {fileID: 21300000, guid: 62b72bb3f7d34a458157bdbbed329494, type: 3}
+  uiBadgeEasy: {fileID: 21300000, guid: 42c99e1df17d4345ac2d425dff49979d, type: 3}
+  uiBadgeNormal: {fileID: 21300000, guid: b37a86fbe5184dbab989605c7e9315bd, type: 3}
+  uiBadgeHard: {fileID: 21300000, guid: 0ba54f45eba04ab4be461b8336a0b0b6, type: 3}
+  uiBadgeNightmare: {fileID: 21300000, guid: 11758c29d0c44b1b946fbe6873b9259b, type: 3}

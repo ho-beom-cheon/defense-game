@@ -19,6 +19,8 @@ namespace RuneGate
         private string resultTitle;
         private string resultMessage;
         private string stageStatusMessage;
+        private string nextStageMessage;
+        private string hintMessage;
         private int battleGoldEarned;
         private int goldEarned;
 
@@ -56,7 +58,7 @@ namespace RuneGate
             }
 
             Rect drawRect = panelRect;
-            drawRect.height = Mathf.Max(drawRect.height, 190f);
+            drawRect.height = Mathf.Max(drawRect.height, 290f);
             GUILayout.BeginArea(drawRect, GUI.skin.box);
             GUILayout.Label(resultTitle);
             GUILayout.Label($"Gold Awarded: {goldEarned}");
@@ -70,9 +72,19 @@ namespace RuneGate
                 GUILayout.Label(stageStatusMessage);
             }
 
+            if (!string.IsNullOrWhiteSpace(nextStageMessage))
+            {
+                GUILayout.Label(nextStageMessage);
+            }
+
             if (!string.IsNullOrWhiteSpace(resultMessage))
             {
                 GUILayout.Label(resultMessage);
+            }
+
+            if (!string.IsNullOrWhiteSpace(hintMessage))
+            {
+                GUILayout.Label(hintMessage);
             }
 
             if (GUILayout.Button("Retry", GUILayout.Height(34f)))
@@ -108,6 +120,8 @@ namespace RuneGate
             goldEarned = CalculateGoldAward(result);
             ApplyResultToSave(result);
             stageStatusMessage = result.IsVictory ? "Stage Cleared: Yes" : "Stage Cleared: No";
+            nextStageMessage = ResolveNextStageMessage(result);
+            hintMessage = result.IsVictory ? "Spend Gold on upgrades before harder stages." : BuildDefeatHint(result);
             resultMessage = $"Waves Cleared: {result.WavesCleared}";
             if (!string.IsNullOrWhiteSpace(result.Message))
             {
@@ -201,6 +215,44 @@ namespace RuneGate
         {
             int safeGold = Mathf.Max(0, result.GoldEarned);
             return result.IsVictory ? safeGold : Mathf.FloorToInt(safeGold * 0.5f);
+        }
+
+        private string ResolveNextStageMessage(BattleResult result)
+        {
+            if (!result.IsVictory)
+            {
+                return "Next stage unlock: No";
+            }
+
+            string clearedStageId = ResolveStageId(result);
+            string nextStageId = ResolveNextStageId(clearedStageId);
+            return string.IsNullOrWhiteSpace(nextStageId) ? "Chapter 1 Normal cleared." : $"Next stage unlocked: {nextStageId}";
+        }
+
+        private static string BuildDefeatHint(BattleResult result)
+        {
+            if (result.StageData == null)
+            {
+                return "Tip: Buy upgrades or choose runes that match the enemy type.";
+            }
+
+            string stageId = result.StageData.StageId ?? string.Empty;
+            if (stageId.EndsWith("03") || stageId.EndsWith("04"))
+            {
+                return "Tip: Fast enemies are easier with Seria or Speed/Slow runes.";
+            }
+
+            if (stageId.EndsWith("06") || stageId.EndsWith("08"))
+            {
+                return "Tip: Clustered lanes reward Kael, Brom, Fire, or Turret runes.";
+            }
+
+            if (stageId.EndsWith("10"))
+            {
+                return "Tip: Grumbar needs Nyx, Attack, and Boss Damage runes.";
+            }
+
+            return "Tip: If the crystal falls, try Priest, Healing Rune, or Crystal upgrades.";
         }
     }
 }

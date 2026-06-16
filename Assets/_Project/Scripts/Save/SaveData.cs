@@ -13,6 +13,7 @@ namespace RuneGate
         public List<SerializableUpgradeLevel> upgradeLevels = new List<SerializableUpgradeLevel>();
         public List<FormationSlot> formationSlots = new List<FormationSlot>();
         public string lastSelectedStageId = string.Empty;
+        public string selectedDifficultyId = "normal";
         public bool hasSeenIntro;
         public bool hasSeenTutorial;
     }

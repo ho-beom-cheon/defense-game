@@ -11,7 +11,7 @@ namespace RuneGate
     {
         public const string DefaultUnlockedStageId = "stage_goblin_forest_01";
 
-        private const int CurrentSaveVersion = 1;
+        private const int CurrentSaveVersion = 2;
         private const string SaveFileName = "runegate_save.json";
 
         private static SaveData currentSave;
@@ -96,6 +96,25 @@ namespace RuneGate
             Save();
         }
 
+        public static void BackupAndResetSave(string reason)
+        {
+            try
+            {
+                if (HasSaveFile())
+                {
+                    string backupPath = SavePath + ".bak";
+                    File.Copy(SavePath, backupPath, true);
+                    Debug.LogWarning($"SaveManager backed up damaged save to {backupPath}. {reason}");
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"SaveManager failed to backup damaged save: {exception.Message}");
+            }
+
+            ResetSave();
+        }
+
         public static void AddGold(int amount)
         {
             if (amount <= 0)
@@ -170,6 +189,12 @@ namespace RuneGate
             Save();
         }
 
+        public static void SetSelectedDifficultyId(string difficultyId)
+        {
+            Current.selectedDifficultyId = NormalizeDifficultyId(difficultyId);
+            Save();
+        }
+
         public static bool HasSeenTutorial()
         {
             return Current.hasSeenTutorial;
@@ -179,6 +204,13 @@ namespace RuneGate
         {
             Current.hasSeenTutorial = true;
             Current.hasSeenIntro = true;
+            Save();
+        }
+
+        public static void ResetTutorialSeen()
+        {
+            Current.hasSeenTutorial = false;
+            Current.hasSeenIntro = false;
             Save();
         }
 
@@ -224,6 +256,52 @@ namespace RuneGate
 
             levels.Add(new SerializableUpgradeLevel(upgradeId, Mathf.Max(0, level)));
             Save();
+        }
+
+        public static void ClampUpgradeLevels(IReadOnlyList<UpgradeData> upgrades)
+        {
+            if (upgrades == null)
+            {
+                return;
+            }
+
+            Dictionary<string, int> maxLevels = new Dictionary<string, int>();
+            for (int i = 0; i < upgrades.Count; i++)
+            {
+                UpgradeData upgrade = upgrades[i];
+                if (upgrade != null && !string.IsNullOrWhiteSpace(upgrade.UpgradeId))
+                {
+                    maxLevels[upgrade.UpgradeId] = Mathf.Max(0, upgrade.MaxLevel);
+                }
+            }
+
+            bool changed = false;
+            List<SerializableUpgradeLevel> levels = Current.upgradeLevels;
+            for (int i = levels.Count - 1; i >= 0; i--)
+            {
+                SerializableUpgradeLevel entry = levels[i];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.upgradeId))
+                {
+                    levels.RemoveAt(i);
+                    changed = true;
+                    continue;
+                }
+
+                if (maxLevels.TryGetValue(entry.upgradeId, out int maxLevel))
+                {
+                    int clampedLevel = Mathf.Clamp(entry.level, 0, maxLevel);
+                    if (entry.level != clampedLevel)
+                    {
+                        entry.level = clampedLevel;
+                        changed = true;
+                    }
+                }
+            }
+
+            if (changed)
+            {
+                Save();
+            }
         }
 
         public static List<FormationSlot> CreateDefaultFormationSlots()
@@ -278,6 +356,7 @@ namespace RuneGate
                 string json = File.ReadAllText(SavePath);
                 if (string.IsNullOrWhiteSpace(json))
                 {
+                    BackupSaveFile("empty save file");
                     return null;
                 }
 
@@ -286,13 +365,14 @@ namespace RuneGate
             catch (Exception exception)
             {
                 Debug.LogWarning($"SaveManager failed to load save data. A default save will be used. {exception.Message}");
+                BackupSaveFile(exception.Message);
                 return null;
             }
         }
 
         private static void Sanitize(SaveData saveData)
         {
-            if (saveData.saveVersion <= 0)
+            if (saveData.saveVersion < CurrentSaveVersion)
             {
                 saveData.saveVersion = CurrentSaveVersion;
             }
@@ -318,18 +398,23 @@ namespace RuneGate
             }
 
             saveData.totalGold = Mathf.Max(0, saveData.totalGold);
+            saveData.selectedDifficultyId = NormalizeDifficultyId(saveData.selectedDifficultyId);
+            saveData.clearedStageIds = DeduplicateStrings(saveData.clearedStageIds);
+            saveData.unlockedStageIds = DeduplicateStrings(saveData.unlockedStageIds);
             AddUnique(saveData.unlockedStageIds, DefaultUnlockedStageId);
 
+            HashSet<string> seenUpgradeIds = new HashSet<string>();
             for (int i = saveData.upgradeLevels.Count - 1; i >= 0; i--)
             {
                 SerializableUpgradeLevel entry = saveData.upgradeLevels[i];
-                if (entry == null || string.IsNullOrWhiteSpace(entry.upgradeId))
+                if (entry == null || string.IsNullOrWhiteSpace(entry.upgradeId) || seenUpgradeIds.Contains(entry.upgradeId))
                 {
                     saveData.upgradeLevels.RemoveAt(i);
                     continue;
                 }
 
                 entry.level = Mathf.Max(0, entry.level);
+                seenUpgradeIds.Add(entry.upgradeId);
             }
 
             for (int i = saveData.formationSlots.Count - 1; i >= 0; i--)
@@ -372,6 +457,7 @@ namespace RuneGate
             AppendUpgradeLevels(builder, saveData.upgradeLevels, true);
             AppendFormationSlots(builder, saveData.formationSlots, true);
             builder.Append("  \"lastSelectedStageId\": \"").Append(EscapeJson(saveData.lastSelectedStageId)).AppendLine("\",");
+            builder.Append("  \"selectedDifficultyId\": \"").Append(EscapeJson(NormalizeDifficultyId(saveData.selectedDifficultyId))).AppendLine("\",");
             builder.Append("  \"hasSeenIntro\": ").Append(saveData.hasSeenIntro ? "true" : "false").AppendLine(",");
             builder.Append("  \"hasSeenTutorial\": ").Append(saveData.hasSeenTutorial ? "true" : "false").AppendLine();
             builder.AppendLine("}");
@@ -389,6 +475,7 @@ namespace RuneGate
                 upgradeLevels = ExtractUpgradeLevels(json),
                 formationSlots = ExtractFormationSlots(json),
                 lastSelectedStageId = ExtractString(json, "lastSelectedStageId", string.Empty),
+                selectedDifficultyId = ExtractString(json, "selectedDifficultyId", "normal"),
                 hasSeenIntro = ExtractBool(json, "hasSeenIntro", false),
                 hasSeenTutorial = ExtractBool(json, "hasSeenTutorial", ExtractBool(json, "hasSeenIntro", false))
             };
@@ -615,6 +702,47 @@ namespace RuneGate
         private static string NormalizeHeroId(string heroId)
         {
             return heroId == "hero_cleric_001" ? "hero_priest_001" : heroId;
+        }
+
+        private static string NormalizeDifficultyId(string difficultyId)
+        {
+            string value = string.IsNullOrWhiteSpace(difficultyId) ? "normal" : difficultyId.Trim().ToLowerInvariant();
+            return value == "easy" || value == "hard" || value == "nightmare" ? value : "normal";
+        }
+
+        private static List<string> DeduplicateStrings(List<string> values)
+        {
+            List<string> result = new List<string>();
+            if (values == null)
+            {
+                return result;
+            }
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                AddUnique(result, values[i]);
+            }
+
+            return result;
+        }
+
+        private static void BackupSaveFile(string reason)
+        {
+            try
+            {
+                if (!HasSaveFile())
+                {
+                    return;
+                }
+
+                string backupPath = SavePath + ".bak";
+                File.Copy(SavePath, backupPath, true);
+                Debug.LogWarning($"SaveManager backed up invalid save to {backupPath}. Reason: {reason}");
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"SaveManager could not backup invalid save: {exception.Message}");
+            }
         }
 
         private static string EscapeJson(string value)

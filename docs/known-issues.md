@@ -17,6 +17,8 @@
 - Tutorial uses a simple IMGUI overlay instead of a full touch-driven UI flow.
 - Settings are placeholders for BGM, SFX, and vibration.
 - Safe area support is prepared as a component, but the current prototype UI is still IMGUI based.
+- Difficulty selection is UI/save ready, but Hard and Nightmare rules are not applied to combat yet.
+- Tutorial arrows and tap indicators are static overlay icons, not target-following guides yet.
 
 ## v0.9
 
