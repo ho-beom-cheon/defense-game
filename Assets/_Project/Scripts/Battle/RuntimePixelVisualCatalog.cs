@@ -17,6 +17,22 @@ namespace RuneGate
         [SerializeField] private Sprite uiPanelDark;
         [SerializeField] private Sprite uiButtonSkill;
         [SerializeField] private Sprite uiRuneCardBase;
+        [SerializeField] private Sprite uiTutorialArrow;
+        [SerializeField] private Sprite uiTapIndicator;
+        [SerializeField] private Sprite uiStageNodeUnlocked;
+        [SerializeField] private Sprite uiStageNodeLocked;
+        [SerializeField] private Sprite uiStageNodeCleared;
+        [SerializeField] private Sprite uiUpgradeCrystalHp;
+        [SerializeField] private Sprite uiUpgradeHeroAttack;
+        [SerializeField] private Sprite uiUpgradeAttackSpeed;
+        [SerializeField] private Sprite uiUpgradeSkillCooldown;
+        [SerializeField] private Sprite uiIconSettings;
+        [SerializeField] private Sprite uiIconResetSave;
+        [SerializeField] private Sprite uiIconSave;
+        [SerializeField] private Sprite uiBadgeEasy;
+        [SerializeField] private Sprite uiBadgeNormal;
+        [SerializeField] private Sprite uiBadgeHard;
+        [SerializeField] private Sprite uiBadgeNightmare;
 
         public Sprite GetSprite(string assetPath)
         {
@@ -46,6 +62,38 @@ namespace RuneGate
                     return uiButtonSkill;
                 case RuntimePixelAssetLoader.UiRuneCardBase:
                     return uiRuneCardBase;
+                case RuntimePixelAssetLoader.UiTutorialArrow:
+                    return uiTutorialArrow;
+                case RuntimePixelAssetLoader.UiTapIndicator:
+                    return uiTapIndicator;
+                case RuntimePixelAssetLoader.UiStageNodeUnlocked:
+                    return uiStageNodeUnlocked;
+                case RuntimePixelAssetLoader.UiStageNodeLocked:
+                    return uiStageNodeLocked;
+                case RuntimePixelAssetLoader.UiStageNodeCleared:
+                    return uiStageNodeCleared;
+                case RuntimePixelAssetLoader.UiUpgradeCrystalHp:
+                    return uiUpgradeCrystalHp;
+                case RuntimePixelAssetLoader.UiUpgradeHeroAttack:
+                    return uiUpgradeHeroAttack;
+                case RuntimePixelAssetLoader.UiUpgradeAttackSpeed:
+                    return uiUpgradeAttackSpeed;
+                case RuntimePixelAssetLoader.UiUpgradeSkillCooldown:
+                    return uiUpgradeSkillCooldown;
+                case RuntimePixelAssetLoader.UiIconSettings:
+                    return uiIconSettings;
+                case RuntimePixelAssetLoader.UiIconResetSave:
+                    return uiIconResetSave;
+                case RuntimePixelAssetLoader.UiIconSave:
+                    return uiIconSave;
+                case RuntimePixelAssetLoader.UiBadgeEasy:
+                    return uiBadgeEasy;
+                case RuntimePixelAssetLoader.UiBadgeNormal:
+                    return uiBadgeNormal;
+                case RuntimePixelAssetLoader.UiBadgeHard:
+                    return uiBadgeHard;
+                case RuntimePixelAssetLoader.UiBadgeNightmare:
+                    return uiBadgeNightmare;
                 default:
                     return null;
             }

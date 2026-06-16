@@ -20,6 +20,10 @@ namespace RuneGate
             }
 
             SaveManager.LoadOrCreate();
+            if (upgradeManager != null)
+            {
+                SaveManager.ClampUpgradeLevels(upgradeManager.AvailableUpgrades);
+            }
         }
 
         private void OnGUI()
@@ -37,6 +41,7 @@ namespace RuneGate
             GUILayout.BeginArea(panelRect, GUI.skin.box);
             GUILayout.Label("Upgrades");
             GUILayout.Label($"Gold: {SaveManager.Current.totalGold}");
+            RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconSave, 22f);
             GUILayout.Space(8f);
 
             if (upgradeManager == null || upgradeManager.AvailableUpgrades.Count == 0)
@@ -78,6 +83,9 @@ namespace RuneGate
             int level = upgradeManager.GetLevel(upgradeData);
             int maxLevel = Mathf.Max(0, upgradeData.MaxLevel);
             int cost = upgradeManager.GetCost(upgradeData);
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            RuntimePixelGuiUtility.DrawIcon(GetUpgradeIconPath(upgradeData), 34f);
+            GUILayout.BeginVertical();
             GUILayout.Label($"{upgradeData.DisplayName} Lv {level}/{maxLevel}");
             GUILayout.Label(upgradeData.Description);
             GUILayout.Label($"Effect: {upgradeData.EffectKey} +{upgradeData.ValuePerLevel:0.###} per level");
@@ -96,6 +104,34 @@ namespace RuneGate
 
                     feedbackMessage = purchased ? $"Purchased {upgradeData.DisplayName}." : $"Not enough gold for {upgradeData.DisplayName}.";
                 }
+            }
+
+            if (!maxed && SaveManager.Current.totalGold < cost)
+            {
+                GUILayout.Label($"Need {cost - SaveManager.Current.totalGold} more Gold.");
+            }
+
+            GUILayout.EndVertical();
+            GUILayout.EndHorizontal();
+        }
+
+        private static string GetUpgradeIconPath(UpgradeData upgradeData)
+        {
+            if (upgradeData == null)
+            {
+                return RuntimePixelAssetLoader.UiUpgradeHeroAttack;
+            }
+
+            switch (upgradeData.EffectKey)
+            {
+                case UpgradeManager.CrystalMaxHpFlat:
+                    return RuntimePixelAssetLoader.UiUpgradeCrystalHp;
+                case UpgradeManager.HeroAttackSpeedPercent:
+                    return RuntimePixelAssetLoader.UiUpgradeAttackSpeed;
+                case UpgradeManager.SkillCooldownPercent:
+                    return RuntimePixelAssetLoader.UiUpgradeSkillCooldown;
+                default:
+                    return RuntimePixelAssetLoader.UiUpgradeHeroAttack;
             }
         }
 

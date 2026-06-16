@@ -150,6 +150,10 @@ To relink imported prototype images without rebuilding scenes, run:
 - `docs/content-balance-v07.md`
 - `docs/stage-design.md`
 - `docs/rune-design.md`
+- `docs/ui-ux-v08.md`
+- `docs/tutorial-design.md`
+- `docs/save-system.md`
+- `docs/difficulty-design.md`
 - `CHANGELOG.md`
 
 ## How To Play

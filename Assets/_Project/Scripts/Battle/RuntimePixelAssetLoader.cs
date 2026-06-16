@@ -17,6 +17,22 @@ namespace RuneGate
         public const string UiPanelDark = "Assets/_Project/Art/RuntimePixel/UI/ui_panel_dark.png";
         public const string UiButtonSkill = "Assets/_Project/Art/RuntimePixel/UI/ui_button_skill.png";
         public const string UiRuneCardBase = "Assets/_Project/Art/RuntimePixel/UI/ui_rune_card_base.png";
+        public const string UiTutorialArrow = "Assets/_Project/Art/RuntimePixel/UI/Tutorial/ui_tutorial_arrow.png";
+        public const string UiTapIndicator = "Assets/_Project/Art/RuntimePixel/UI/Tutorial/ui_tap_indicator.png";
+        public const string UiStageNodeUnlocked = "Assets/_Project/Art/RuntimePixel/UI/StageSelect/ui_stage_node_unlocked.png";
+        public const string UiStageNodeLocked = "Assets/_Project/Art/RuntimePixel/UI/StageSelect/ui_stage_node_locked.png";
+        public const string UiStageNodeCleared = "Assets/_Project/Art/RuntimePixel/UI/StageSelect/ui_stage_node_cleared.png";
+        public const string UiUpgradeCrystalHp = "Assets/_Project/Art/RuntimePixel/UI/Upgrade/icon_upgrade_crystal_hp.png";
+        public const string UiUpgradeHeroAttack = "Assets/_Project/Art/RuntimePixel/UI/Upgrade/icon_upgrade_hero_attack.png";
+        public const string UiUpgradeAttackSpeed = "Assets/_Project/Art/RuntimePixel/UI/Upgrade/icon_upgrade_attack_speed.png";
+        public const string UiUpgradeSkillCooldown = "Assets/_Project/Art/RuntimePixel/UI/Upgrade/icon_upgrade_skill_cooldown.png";
+        public const string UiIconSettings = "Assets/_Project/Art/RuntimePixel/UI/System/ui_icon_settings.png";
+        public const string UiIconResetSave = "Assets/_Project/Art/RuntimePixel/UI/System/ui_icon_reset_save.png";
+        public const string UiIconSave = "Assets/_Project/Art/RuntimePixel/UI/System/ui_icon_save.png";
+        public const string UiBadgeEasy = "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_easy.png";
+        public const string UiBadgeNormal = "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_normal.png";
+        public const string UiBadgeHard = "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_hard.png";
+        public const string UiBadgeNightmare = "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_nightmare.png";
 
         private static readonly Dictionary<string, Sprite> SpriteCache = new Dictionary<string, Sprite>();
         private static RuntimePixelVisualCatalog visualCatalog;

@@ -53,15 +53,26 @@ namespace RuneGate
 
             if (showSettings)
             {
+                RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconSettings, 24f);
                 GUILayout.Label("BGM Volume: 100% (placeholder)");
                 GUILayout.Label("SFX Volume: 100% (placeholder)");
                 GUILayout.Label("Vibration: On (placeholder)");
+                if (GUILayout.Button("Replay Tutorial Next Battle", GUILayout.Height(30f)))
+                {
+                    SaveManager.ResetTutorialSeen();
+                    feedbackMessage = "Tutorial will show again in the next battle.";
+                }
             }
 
             if (!confirmReset && GUILayout.Button("Reset Save", GUILayout.Height(34f)))
             {
                 confirmReset = true;
                 feedbackMessage = "Press Confirm Reset to delete local progress.";
+            }
+
+            if (confirmReset)
+            {
+                RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconResetSave, 24f);
             }
 
             if (confirmReset && GUILayout.Button("Confirm Reset", GUILayout.Height(34f)))

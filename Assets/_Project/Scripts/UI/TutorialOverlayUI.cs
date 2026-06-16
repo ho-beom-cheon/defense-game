@@ -30,7 +30,11 @@ namespace RuneGate
             }
 
             GUILayout.BeginArea(panelRect, GUI.skin.box);
+            GUILayout.BeginHorizontal();
+            RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiTutorialArrow, 30f);
             GUILayout.Label($"Tutorial {tutorialManager.CurrentStepNumber}/{tutorialManager.StepCount}");
+            RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiTapIndicator, 30f);
+            GUILayout.EndHorizontal();
             GUILayout.Space(6f);
             GUILayout.Label(step.Title);
             GUILayout.Space(8f);

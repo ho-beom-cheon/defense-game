@@ -318,7 +318,23 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/RuntimePixel/Effects/fx_death_puff.png",
             "Assets/_Project/Art/RuntimePixel/UI/ui_panel_dark.png",
             "Assets/_Project/Art/RuntimePixel/UI/ui_button_skill.png",
-            "Assets/_Project/Art/RuntimePixel/UI/ui_rune_card_base.png"
+            "Assets/_Project/Art/RuntimePixel/UI/ui_rune_card_base.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Tutorial/ui_tutorial_arrow.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Tutorial/ui_tap_indicator.png",
+            "Assets/_Project/Art/RuntimePixel/UI/StageSelect/ui_stage_node_unlocked.png",
+            "Assets/_Project/Art/RuntimePixel/UI/StageSelect/ui_stage_node_locked.png",
+            "Assets/_Project/Art/RuntimePixel/UI/StageSelect/ui_stage_node_cleared.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Upgrade/icon_upgrade_crystal_hp.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Upgrade/icon_upgrade_hero_attack.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Upgrade/icon_upgrade_attack_speed.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Upgrade/icon_upgrade_skill_cooldown.png",
+            "Assets/_Project/Art/RuntimePixel/UI/System/ui_icon_settings.png",
+            "Assets/_Project/Art/RuntimePixel/UI/System/ui_icon_reset_save.png",
+            "Assets/_Project/Art/RuntimePixel/UI/System/ui_icon_save.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_easy.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_normal.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_hard.png",
+            "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_nightmare.png"
         };
 
         private const string RequiredCombatVisualCatalogAsset = "Assets/_Project/Resources/RuntimePixelVisualCatalog.asset";
@@ -342,6 +358,10 @@ namespace RuneGate.Editor
             "docs/content-balance-v07.md",
             "docs/stage-design.md",
             "docs/rune-design.md",
+            "docs/ui-ux-v08.md",
+            "docs/tutorial-design.md",
+            "docs/save-system.md",
+            "docs/difficulty-design.md",
             "CHANGELOG.md"
         };
 

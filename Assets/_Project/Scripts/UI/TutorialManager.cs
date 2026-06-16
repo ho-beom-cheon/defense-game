@@ -97,10 +97,11 @@ namespace RuneGate
 
             steps.Add(new TutorialStepData("Protect the Crystal", "Monsters that reach the left crystal damage it. If Crystal HP reaches 0, the battle is lost."));
             steps.Add(new TutorialStepData("Watch the Lanes", "Enemies advance through three lanes. Your formation covers those lanes automatically."));
-            steps.Add(new TutorialStepData("Heroes Auto Attack", "Knight, Archer, Fire Mage, Priest, Dwarf Engineer, and Assassin attack without extra input."));
+            steps.Add(new TutorialStepData("Heroes Auto Attack", "Leon, Seria, Kael, Mirea, Brom, and Nyx attack without extra input."));
             steps.Add(new TutorialStepData("Use Skills", "Skill buttons become available after cooldown. Tap them to help a lane at the right moment."));
             steps.Add(new TutorialStepData("Choose Runes", "After non-boss waves, pick one of three runes to strengthen this battle run."));
-            steps.Add(new TutorialStepData("Upgrade Between Battles", "Victory awards gold and unlocks the next stage. Spend gold on permanent upgrades."));
+            steps.Add(new TutorialStepData("Clear and Unlock", "Victory awards gold and unlocks the next stage."));
+            steps.Add(new TutorialStepData("Upgrade Between Battles", "Spend gold on permanent upgrades, then return to Stage Select."));
         }
     }
 }
