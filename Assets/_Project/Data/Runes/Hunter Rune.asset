@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Hunter Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_hunt
-  displayName: "?? ?"
-  description: "???? ???? ?? ??? ????."
+  displayName: "사냥 룬"
+  description: "네임드와 보스에게 주는 피해가 증가합니다."
   rarity: 1
   element: 0
   effectKey: boss_damage_percent

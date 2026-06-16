@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Guardian Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_guardian
-  displayName: "?? ?"
-  description: "???? ??? ?? ?? hook."
+  displayName: "수호 룬"
+  description: "크리스탈 보호 효과를 위한 예약 hook입니다."
   rarity: 1
   element: 5
   effectKey: crystal_shield_flat

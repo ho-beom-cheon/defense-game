@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Fire Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_fire
-  displayName: "?? ?"
-  description: "??? ?? ?? ??? ??? ????."
+  displayName: "화염 룬"
+  description: "화염과 광역 피해 선택의 가치가 증가합니다."
   rarity: 0
   element: 1
   effectKey: mage_area_percent

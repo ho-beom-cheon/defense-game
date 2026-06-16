@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_orc_001
   displayName: Orc
-  displayNameKorean: "?? ???"
-  subtitleKorean: "??? / ?? HP"
-  descriptionKorean: "?? ??? ??? ??? ???? ????? ?? ?? ??."
+  displayNameKorean: "오크 돌격병"
+  subtitleKorean: "탱커형 / 높은 HP"
+  descriptionKorean: "두꺼운 갑각을 두르고 봉문을 정면으로 밀어붙이는 중형 돌격 적성."
   monsterType: 2
   element: 0
   maxHp: 255

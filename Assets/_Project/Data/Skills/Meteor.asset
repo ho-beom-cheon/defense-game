@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Meteor
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_meteor
-  displayName: "Meteor"
-  description: "Drops fire area damage for clustered monsters."
+  displayName: "운석 낙하"
+  description: "뭉친 몬스터에게 화염 범위 피해를 줍니다."
   cooldown: 10.5
   power: 68
   damageHitCount: 1

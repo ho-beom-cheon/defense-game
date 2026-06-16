@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_slime_001
   displayName: Slime
-  displayNameKorean: "?? ??"
-  subtitleKorean: "??? / ?? hook"
-  descriptionKorean: "?? ? ??? ?? ?? ???? ?? ???? ??? ??."
+  displayNameKorean: "룬핵 점액"
+  subtitleKorean: "분열형 / 사망 hook"
+  descriptionKorean: "닫힌 문 주변에 남은 룬핵 찌꺼기가 뭉쳐 움직이는 점액형 적성."
   monsterType: 4
   element: 4
   maxHp: 155

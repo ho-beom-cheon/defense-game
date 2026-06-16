@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_bat_001
   displayName: Bat
-  displayNameKorean: "?? ???"
-  subtitleKorean: "??/??? / ?? ??"
-  descriptionKorean: "?? ?? ?? ?? ??? ??? ??? ?? ?? ???."
+  displayNameKorean: "동굴 박쥐"
+  subtitleKorean: "비행/침투형 / 빠른 이동"
+  descriptionKorean: "균열 위를 낮게 날며 문지기 진형을 흔드는 작은 날개 적성체."
   monsterType: 3
   element: 8
   maxHp: 64

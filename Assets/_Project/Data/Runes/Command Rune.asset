@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Command Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_magic
-  displayName: "?? ?"
-  description: "??/?? ?? ??? ????."
+  displayName: "마법 룬"
+  description: "마법과 광역 피해가 증가합니다."
   rarity: 1
   element: 1
   effectKey: mage_area_percent

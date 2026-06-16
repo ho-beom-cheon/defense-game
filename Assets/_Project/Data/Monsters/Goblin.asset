@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_goblin_001
   displayName: Goblin
-  displayNameKorean: "?? ???"
-  subtitleKorean: "??? / ?? ?? ???"
-  descriptionKorean: "?? ? ?? ??? ?? ?? ?? ??? ?? ???."
+  displayNameKorean: "문틈 도깨비"
+  subtitleKorean: "기본형 / 빠른 다수 몬스터"
+  descriptionKorean: "문이 덜 닫힌 틈에서 가장 먼저 새어 나오는 소형 적성체."
   monsterType: 0
   element: 0
   maxHp: 58

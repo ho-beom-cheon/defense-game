@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: boss_orc_warlord_001
   displayName: Orc Warlord
-  displayNameKorean: "????"
-  subtitleKorean: "????"
-  descriptionKorean: "?? / ?? / ??. ?? ?? ?? ??? ???, ??? ?? ?? ???? ?? ?? ??."
+  displayNameKorean: "그룸바르"
+  subtitleKorean: "문파괴자"
+  descriptionKorean: "보스 / 파괴 / 재문. 재문을 직접 찢고 진입하는 대형 파쇄 적성."
   monsterType: 6
   element: 6
   maxHp: 1750

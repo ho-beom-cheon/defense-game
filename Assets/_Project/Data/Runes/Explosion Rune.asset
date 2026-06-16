@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Explosion Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_explosion
-  displayName: "?? ?"
-  description: "?? ?? ?? ?? hook."
+  displayName: "폭발 룬"
+  description: "폭발 피해 효과를 위한 예약 hook입니다."
   rarity: 1
   element: 1
   effectKey: blast_placeholder

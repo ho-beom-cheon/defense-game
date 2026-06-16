@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Shield Bash
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_shield_bash
-  displayName: "Shield Bash"
-  description: "Stuns the line briefly in a later hook and deals reliable close damage."
+  displayName: "방패 강타"
+  description: "가까운 적에게 안정적인 빛 피해를 줍니다."
   cooldown: 7.5
   power: 70
   damageHitCount: 1

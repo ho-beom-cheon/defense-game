@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Focus Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_focus
-  displayName: "?? ?"
-  description: "?? ??? ????? ????."
+  displayName: "집중 룬"
+  description: "스킬 재사용 대기시간이 감소합니다."
   rarity: 0
   element: 0
   effectKey: skill_cooldown_percent

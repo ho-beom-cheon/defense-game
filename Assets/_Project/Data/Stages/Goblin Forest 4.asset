@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
   stageId: stage_goblin_forest_04
   displayName: Goblin Forest 4
-  displayNameKorean: "?? ? 4"
-  subtitleKorean: "?? ???"
-  descriptionKorean: "?? ???? ?? ??? ??? ??."
+  displayNameKorean: "재문 숲 4"
+  subtitleKorean: "낮은 비행로"
+  descriptionKorean: "동굴 박쥐가 낮게 날며 라인 사이를 흔드는 구간."
   crystalHp: 195
   waves:
   - {fileID: 11400000, guid: 3638fb4915ace5140a0e3c041db1f818, type: 2}

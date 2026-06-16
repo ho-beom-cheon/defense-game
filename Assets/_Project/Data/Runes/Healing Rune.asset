@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Healing Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_healing
-  displayName: "?? ?"
-  description: "???? HP? ?? ????."
+  displayName: "치유 룬"
+  description: "크리스탈 HP를 회복합니다."
   rarity: 0
   element: 5
   effectKey: crystal_heal_flat

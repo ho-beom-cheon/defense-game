@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Frost Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_frost
-  displayName: "?? ?"
-  description: "?? ??? ?? ??? ?? ??? ???."
+  displayName: "냉기 룬"
+  description: "현재 전장에 있는 몬스터의 이동 속도를 늦춥니다."
   rarity: 1
   element: 2
   effectKey: monster_slow_percent

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Chain Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_chain
-  displayName: "?? ?"
-  description: "??? ?? ??? ?? ?? ?? ???."
+  displayName: "연쇄 룬"
+  description: "원거리 연쇄 사격 효과를 위한 예약 hook입니다."
   rarity: 1
   element: 3
   effectKey: ranged_chain_shot_placeholder

@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Rapid Shot
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_rapid_shot
-  displayName: "Rapid Shot"
-  description: "Fires repeated shots into the nearest fast target."
+  displayName: "연속 사격"
+  description: "가장 가까운 빠른 적에게 여러 번 사격합니다."
   cooldown: 5.8
   power: 28
   damageHitCount: 3

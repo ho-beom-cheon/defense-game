@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Lightning Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_lightning
-  displayName: "?? ?"
-  description: "?? ?? ?? ?? hook."
+  displayName: "번개 룬"
+  description: "연쇄 번개 효과를 위한 예약 hook입니다."
   rarity: 1
   element: 3
   effectKey: lightning_placeholder

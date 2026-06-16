@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Purification Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_purification
-  displayName: "?? ?"
-  description: "??/??? ?? ?? ?? hook."
+  displayName: "정화 룬"
+  description: "오염과 언데드 정화 효과를 위한 예약 hook입니다."
   rarity: 0
   element: 5
   effectKey: purify_placeholder

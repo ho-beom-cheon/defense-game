@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Turret Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_turret
-  displayName: "?? ?"
-  description: "??? ?? ?? ?? ??? ????."
+  displayName: "포탑 룬"
+  description: "브롬의 포탑 계열 피해가 증가합니다."
   rarity: 2
   element: 4
   effectKey: turret_attack_percent

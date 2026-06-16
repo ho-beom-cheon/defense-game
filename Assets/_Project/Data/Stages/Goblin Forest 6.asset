@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
   stageId: stage_goblin_forest_06
   displayName: Goblin Forest 6
-  displayNameKorean: "?? ? 6"
-  subtitleKorean: "?? ??"
-  descriptionKorean: "?? ??? ??? ?? ??? ??? ????? ??."
+  displayNameKorean: "재문 숲 6"
+  subtitleKorean: "룬핵 점액"
+  descriptionKorean: "룬핵 점액이 등장해 광역 피해의 필요성을 알리는 구간."
   crystalHp: 210
   waves:
   - {fileID: 11400000, guid: c0894b1f12132e54aad43c7b99521568, type: 2}
