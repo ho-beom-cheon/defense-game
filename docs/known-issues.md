@@ -19,7 +19,8 @@
 - Safe area support is prepared as a component, but the current prototype UI is still IMGUI based.
 - Difficulty selection is UI/save ready, but Hard and Nightmare rules are not applied to combat yet.
 - Tutorial arrows and tap indicators are static overlay icons, not target-following guides yet.
-- TextMeshPro Font Asset은 아직 생성하지 않았다. 현재 UI는 IMGUI 기반이며 NotoSansKR Font catalog로 한글 표시를 처리한다.
+- TextMeshPro Font Asset is not generated yet. Current UI is IMGUI-based and uses the NotoSansKR Font catalog for Korean text.
+- A v0.8 data repair pass restored damaged `??` display strings in hero, monster, rune, stage, skill, and upgrade ScriptableObject assets.
 
 ## v0.9
 

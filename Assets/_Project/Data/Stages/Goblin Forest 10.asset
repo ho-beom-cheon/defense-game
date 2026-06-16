@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
   stageId: stage_goblin_forest_10
   displayName: Goblin Forest 10
-  displayNameKorean: "?? ? 10"
-  subtitleKorean: "????? ??"
-  descriptionKorean: "????? ?? ???? Chapter 1 Normal ???."
+  displayNameKorean: "재문 숲 10"
+  subtitleKorean: "문파괴자의 접근"
+  descriptionKorean: "문파괴자 그룸바르가 등장하는 Chapter 1 보스전."
   crystalHp: 240
   waves:
   - {fileID: 11400000, guid: 6885b0e509de6a24ab664e8802c95de3, type: 2}

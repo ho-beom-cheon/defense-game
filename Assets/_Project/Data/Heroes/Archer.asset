@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_archer_001
   displayName: Archer
-  displayNameKorean: "???"
-  subtitleKorean: "???? ?? ??"
-  descriptionKorean: "?? / ??? / ??. ???? ?? ??? ???? ?? ???? ???."
-  quoteKorean: "??? ?? ?? ?? ??."
+  displayNameKorean: "세리아"
+  subtitleKorean: "바람길을 읽는 궁수"
+  descriptionKorean: "후열 / 원거리 / 바람. 균열에서 새는 바람의 방향으로 적의 진입로를 읽는다."
+  quoteKorean: "바람은 이미 답을 알고 있어."
   role: 2
   positionType: 2
   element: 8

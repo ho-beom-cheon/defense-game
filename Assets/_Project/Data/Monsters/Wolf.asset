@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_wolf_001
   displayName: Wolf
-  displayNameKorean: "?? ??"
-  subtitleKorean: "??? / ?? ?? ??"
-  descriptionKorean: "?? ??? ???? ?? ??? ?? ?? ???."
+  displayNameKorean: "부식 늑대"
+  subtitleKorean: "속도형 / 빠른 라인 돌파"
+  descriptionKorean: "봉문 결계를 갉아먹는 부식 기운을 두른 빠른 추적체."
   monsterType: 1
   element: 8
   maxHp: 72

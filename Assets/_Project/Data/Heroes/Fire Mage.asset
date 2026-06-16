@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_mage_fire_001
   displayName: Fire Mage
-  displayNameKorean: "??"
-  subtitleKorean: "??? ?? ???"
-  descriptionKorean: "?? / ?? / ??. ?? ?? ?? ??? ??? ??? ?? ???."
-  quoteKorean: "?? ??? ? ?????. ??????."
+  displayNameKorean: "카엘"
+  subtitleKorean: "잿불의 방랑 마법사"
+  descriptionKorean: "후열 / 광역 / 화염. 재문 사고 이후 떠돌며 균열의 불씨를 태워 봉한다."
+  quoteKorean: "내가 나서는 건 이번뿐이다. …살아남아라."
   role: 3
   positionType: 2
   element: 1

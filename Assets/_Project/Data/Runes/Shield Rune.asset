@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Shield Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_defense
-  displayName: "?? ?"
-  description: "?? ?? ??? ???? ?? ????."
+  displayName: "방어 룬"
+  description: "전열 영웅의 방어 능력이 증가합니다."
   rarity: 0
   element: 5
   effectKey: tank_defense_percent

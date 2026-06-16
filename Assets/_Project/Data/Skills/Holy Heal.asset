@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Holy Heal
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_holy_heal
-  displayName: "Holy Heal"
-  description: "Restores HP to the Kingdom Crystal."
+  displayName: "성스러운 회복"
+  description: "왕국 크리스탈 HP를 회복합니다."
   cooldown: 8.5
   power: 45
   damageHitCount: 1

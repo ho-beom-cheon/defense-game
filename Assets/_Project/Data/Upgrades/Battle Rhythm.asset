@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Battle Rhythm
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.UpgradeData
   upgradeId: battle_rhythm
-  displayName: Battle Rhythm
-  description: "All hero attack speed +4% per level."
+  displayName: "전투 리듬"
+  description: "레벨마다 모든 영웅 공격 속도가 4% 증가합니다."
   baseCost: 80
   costMultiplier: 1.8
   maxLevel: 5

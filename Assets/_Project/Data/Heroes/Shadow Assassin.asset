@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_assassin_001
   displayName: Shadow Assassin
-  displayNameKorean: "??"
-  subtitleKorean: "??? ??? ???"
-  descriptionKorean: "?? / ?? / ??. ??? ??? ?? ?? ??? ?? ???."
-  quoteKorean: "?? ??? ?, ??? ????."
+  displayNameKorean: "닉스"
+  subtitleKorean: "그림자 균열의 암살자"
+  descriptionKorean: "전열 또는 중열 / 암살 / 어둠. 그림자 재문을 건너 핵심 적성을 먼저 끊는다."
+  quoteKorean: "빛이 닿지 않는 곳, 내가 먼저 간다."
   role: 7
   positionType: 1
   element: 6

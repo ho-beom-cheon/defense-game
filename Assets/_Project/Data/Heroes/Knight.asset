@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_knight_001
   displayName: Knight
-  displayNameKorean: "??"
-  subtitleKorean: "?? ??? ??"
-  descriptionKorean: "?? / ?? / ?. ??? ?? ??? ????? ?? ??? ??."
-  quoteKorean: "????, ?? ???? ???."
+  displayNameKorean: "레온"
+  subtitleKorean: "균열 방패의 기사"
+  descriptionKorean: "전열 / 방어 / 빛. 무너진 재문 앞에서 마지막까지 버틴 문지기 기사."
+  quoteKorean: "이번에는, 절대 무너지지 않는다."
   role: 0
   positionType: 0
   element: 5

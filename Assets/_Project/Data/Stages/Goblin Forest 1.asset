@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
   stageId: stage_goblin_forest_01
   displayName: Goblin Forest 1
-  displayNameKorean: "?? ? 1"
-  subtitleKorean: "?? ??"
-  descriptionKorean: "?? ???? ?? ?? ??? ?? ??? ??."
+  displayNameKorean: "재문 숲 1"
+  subtitleKorean: "문틈 정찰"
+  descriptionKorean: "문틈 도깨비가 처음 새어 나오는 재문 숲 입구."
   crystalHp: 180
   waves:
   - {fileID: 11400000, guid: f7e4d128bb5a116469b3914e27a20f44, type: 2}

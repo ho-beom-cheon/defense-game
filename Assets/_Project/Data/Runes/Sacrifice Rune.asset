@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Sacrifice Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_shadow
-  displayName: "??? ?"
-  description: "??? ?? ??? ???? ?? ???."
+  displayName: "그림자 룬"
+  description: "그림자 계열 폭딜 조합을 보조합니다."
   rarity: 1
   element: 6
   effectKey: hero_attack_percent

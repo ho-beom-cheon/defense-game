@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
   stageId: stage_goblin_forest_05
   displayName: Goblin Forest 5
-  displayNameKorean: "?? ? 5"
-  subtitleKorean: "?? ??"
-  descriptionKorean: "?? ???, ?? ???, ?? ??? ??? ?? ?? ??."
+  displayNameKorean: "재문 숲 5"
+  subtitleKorean: "봉문 충격"
+  descriptionKorean: "문틈 도깨비, 오크 돌격병, 부식 늑대가 섞이는 중간 점검 구간."
   crystalHp: 205
   waves:
   - {fileID: 11400000, guid: d8b8cd623fa150748a4674d17bf07d0f, type: 2}

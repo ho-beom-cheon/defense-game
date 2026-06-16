@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_engineer_dwarf_001
   displayName: Dwarf Engineer
-  displayNameKorean: "??"
-  subtitleKorean: "??? ???"
-  descriptionKorean: "?? / ?? / ??. ?? ??? ??? ? ??? ???? ????."
-  quoteKorean: "??? ?? ???? ?? ??."
+  displayNameKorean: "브롬"
+  subtitleKorean: "룬포지 기술자"
+  descriptionKorean: "중열 / 설치 / 기계. 균열 압력을 견디는 룬 장치를 현장에서 조립한다."
+  quoteKorean: "고장난 문도 두드리면 답이 나와."
   role: 6
   positionType: 1
   element: 4

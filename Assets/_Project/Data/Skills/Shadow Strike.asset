@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Shadow Strike
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_shadow_strike
-  displayName: "Shadow Strike"
-  description: "High dark damage that prefers named and boss targets."
+  displayName: "그림자 급습"
+  description: "네임드와 보스 대상을 우선하는 강한 어둠 피해를 줍니다."
   cooldown: 10
   power: 145
   damageHitCount: 1

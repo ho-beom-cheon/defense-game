@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Sword Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_attack
-  displayName: "?? ?"
-  description: "?? ??? ???? ????."
+  displayName: "공격 룬"
+  description: "모든 영웅의 공격력이 증가합니다."
   rarity: 0
   element: 0
   effectKey: hero_attack_percent

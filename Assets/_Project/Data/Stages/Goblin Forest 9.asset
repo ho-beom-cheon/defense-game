@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
   stageId: stage_goblin_forest_09
   displayName: Goblin Forest 9
-  displayNameKorean: "?? ? 9"
-  subtitleKorean: "?? ??"
-  descriptionKorean: "???? ?? ? ??? ? ??? ???? ??? ?? ???."
+  displayNameKorean: "재문 숲 9"
+  subtitleKorean: "붕괴 전조"
+  descriptionKorean: "보스전을 앞두고 여러 적성이 섞여 조합 완성도를 시험한다."
   crystalHp: 230
   waves:
   - {fileID: 11400000, guid: 0ac47c632edd1a6468abd5e412fc61d6, type: 2}

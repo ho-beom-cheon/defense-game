@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Build Turret
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_build_turret
-  displayName: "Temporary Turret"
-  description: "Deploys a temporary turret hook with fallback damage."
+  displayName: "임시 포탑"
+  description: "임시 포탑 hook을 배치하고 기본 피해를 줍니다."
   cooldown: 11
   power: 44
   damageHitCount: 1

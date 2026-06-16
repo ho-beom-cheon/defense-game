@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
   stageId: stage_goblin_forest_03
   displayName: Goblin Forest 3
-  displayNameKorean: "?? ? 3"
-  subtitleKorean: "?? ??"
-  descriptionKorean: "?? ?? ??? ?? ??? ????."
+  displayNameKorean: "재문 숲 3"
+  subtitleKorean: "부식 늑대"
+  descriptionKorean: "빠른 부식 늑대가 라인 돌파를 시도한다."
   crystalHp: 190
   waves:
   - {fileID: 11400000, guid: 9a6bc37c43d1665498e66024e6d7eea5, type: 2}

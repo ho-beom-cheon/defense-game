@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_skeleton_001
   displayName: Skeleton
-  displayNameKorean: "??? ??"
-  subtitleKorean: "???? / ?? hook"
-  descriptionKorean: "??? ??? ??? ??? ???? ?? ?? ? ??."
+  displayNameKorean: "망각의 뼈병"
+  subtitleKorean: "언데드형 / 부활 hook"
+  descriptionKorean: "오래된 전장의 기록이 균열에 오염되어 걸어 나온 뼈 병사."
   monsterType: 5
   element: 6
   maxHp: 135
