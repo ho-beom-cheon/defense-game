@@ -14,20 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_mage_fire_001
   displayName: Fire Mage
-  displayNameKorean: "\uCE74\uC5D8"
-  subtitleKorean: "\uC7BF\uBD88\uC758 \uBC29\uB791 \uB9C8\uBC95\uC0AC"
-  descriptionKorean: "\uD6C4\uC5F4 / \uAD11\uC5ED / \uD654\uC5FC. \uC7AC\uBB38 \uC0AC\uACE0
-    \uC774\uD6C4 \uB5A0\uB3CC\uBA70 \uADE0\uC5F4\uC758 \uBD88\uC528\uB97C \uD0DC\uC6CC
-    \uBD09\uD55C\uB2E4."
-  quoteKorean: "\uB0B4\uAC00 \uB098\uC11C\uB294 \uAC74 \uC774\uBC88\uBFD0\uC774\uB2E4.
-    \u2026\uC0B4\uC544\uB0A8\uC544\uB77C."
+  displayNameKorean: "??"
+  subtitleKorean: "??? ?? ???"
+  descriptionKorean: "?? / ?? / ??. ?? ?? ?? ??? ??? ??? ?? ???."
+  quoteKorean: "?? ??? ? ?????. ??????."
   role: 3
   positionType: 2
   element: 1
-  maxHp: 150
-  attack: 55
-  attackSpeed: 0.7
-  attackRange: 3.4
+  maxHp: 165
+  attack: 60
+  attackSpeed: 0.65
+  attackRange: 3.8
   skillData: {fileID: 11400000, guid: aad9993c955cbe64b8383ac33c6290a5, type: 2}
   portrait: {fileID: 21300000, guid: 5f1da152bd5b38049b9634a3d7c4bc6c, type: 3}
   conceptImage: {fileID: 21300000, guid: 5f1da152bd5b38049b9634a3d7c4bc6c, type: 3}

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Rapid Shot
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_rapid_shot
-  displayName: Rapid Shot
-  description: Hits the nearest monster 3 times.
-  cooldown: 6
-  power: 25
+  displayName: "Rapid Shot"
+  description: "Fires repeated shots into the nearest fast target."
+  cooldown: 5.8
+  power: 28
   damageHitCount: 3
   range: 5
   effectKey: multi_hit_damage

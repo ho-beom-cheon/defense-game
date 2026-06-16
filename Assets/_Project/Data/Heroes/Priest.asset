@@ -14,19 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_priest_001
   displayName: Priest
-  displayNameKorean: "\uBBF8\uB808\uC544"
-  subtitleKorean: "\uAE08\uBE5B \uC131\uC11C\uC758 \uC0AC\uC81C"
-  descriptionKorean: "\uC911\uC5F4 / \uC9C0\uC6D0 / \uBE5B. \uBD09\uBB38 \uC758\uC2DD\uC744
-    \uAE30\uB85D\uD55C \uAE08\uBE5B \uC131\uC11C\uB85C \uBB38\uC9C0\uAE30\uB4E4\uC744
-    \uC9C0\uD0F1\uD55C\uB2E4."
-  quoteKorean:
+  displayNameKorean: "???"
+  subtitleKorean: "?? ??? ??"
+  descriptionKorean: "?? / ?? / ?. ?? ??? ??? ?? ??? ????? ????."
+  quoteKorean: "?? ??? ???? ?? ????."
   role: 4
   positionType: 1
   element: 5
-  maxHp: 170
-  attack: 10
+  maxHp: 220
+  attack: 14
   attackSpeed: 1
-  attackRange: 3.2
+  attackRange: 3.5
   skillData: {fileID: 11400000, guid: 8ace64fcae630124ebd53f4e63a7bf90, type: 2}
   portrait: {fileID: 21300000, guid: d1b75b6d159e69e4dbe0d43b6c3974c3, type: 3}
   conceptImage: {fileID: 21300000, guid: d1b75b6d159e69e4dbe0d43b6c3974c3, type: 3}

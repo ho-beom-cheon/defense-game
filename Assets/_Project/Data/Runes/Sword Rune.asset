@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d798458a421666d4cb903dbb536e4737, type: 3}
   m_Name: Sword Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
-  runeId: rune_sword
-  displayName: Sword Rune
-  description: Increases all hero attack.
+  runeId: rune_attack
+  displayName: "?? ?"
+  description: "?? ??? ???? ????."
   rarity: 0
-  element: 1
+  element: 0
   effectKey: hero_attack_percent
-  value: 0.18
+  value: 0.14
   icon: {fileID: 21300000, guid: f98cb1df7bbb2db4ca20d2b1562baeaf, type: 3}

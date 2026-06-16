@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Purification Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_purification
-  displayName: Purification Rune
-  description: Prototype hook for cleansing.
+  displayName: "?? ?"
+  description: "??/??? ?? ?? ?? hook."
   rarity: 0
   element: 5
   effectKey: purify_placeholder

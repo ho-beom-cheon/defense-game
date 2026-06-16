@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Build Turret
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_build_turret
-  displayName: Build Turret
-  description: Prototype turret hook with fallback damage.
-  cooldown: 12
-  power: 35
+  displayName: "Temporary Turret"
+  description: "Deploys a temporary turret hook with fallback damage."
+  cooldown: 11
+  power: 44
   damageHitCount: 1
   range: 3.2
   effectKey: turret_placeholder

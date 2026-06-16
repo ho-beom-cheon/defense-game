@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Fire Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_fire
-  displayName: Fire Rune
-  description: Improves mage area damage placeholder.
+  displayName: "?? ?"
+  description: "??? ?? ?? ??? ??? ????."
   rarity: 0
   element: 1
   effectKey: mage_area_percent
-  value: 0.12
+  value: 0.18
   icon: {fileID: 0}

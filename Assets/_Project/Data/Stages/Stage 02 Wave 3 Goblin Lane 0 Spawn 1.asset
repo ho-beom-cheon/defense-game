@@ -15,5 +15,5 @@ MonoBehaviour:
   monsterData: {fileID: 11400000, guid: ff1a41dc50234be40b963f01a74a7864, type: 2}
   laneIndex: 0
   count: 5
-  startDelay: 0.4
-  spawnInterval: 0.6
+  startDelay: 0.35
+  spawnInterval: 0.48

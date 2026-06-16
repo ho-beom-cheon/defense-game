@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Shatter Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_shatter
-  displayName: Shatter Rune
-  description: Prototype hook for armor break.
+  displayName: "?? ?"
+  description: "?? ?? ?? ?? hook."
   rarity: 1
   element: 4
   effectKey: crush_placeholder

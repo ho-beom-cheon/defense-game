@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Explosion Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_explosion
-  displayName: Explosion Rune
-  description: Prototype hook for blast damage.
+  displayName: "?? ?"
+  description: "?? ?? ?? ?? hook."
   rarity: 1
   element: 1
   effectKey: blast_placeholder

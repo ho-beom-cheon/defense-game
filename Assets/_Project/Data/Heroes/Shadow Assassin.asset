@@ -14,19 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_assassin_001
   displayName: Shadow Assassin
-  displayNameKorean: "\uB2C9\uC2A4"
-  subtitleKorean: "\uADF8\uB9BC\uC790 \uADE0\uC5F4\uC758 \uC554\uC0B4\uC790"
-  descriptionKorean: "\uC804\uC5F4 \uB610\uB294 \uC911\uC5F4 / \uC554\uC0B4 / \uC5B4\uB460.
-    \uADF8\uB9BC\uC790 \uC7AC\uBB38\uC744 \uAC74\uB108 \uD575\uC2EC \uC801\uC131\uC744
-    \uBA3C\uC800 \uB04A\uB294\uB2E4."
-  quoteKorean:
+  displayNameKorean: "??"
+  subtitleKorean: "??? ??? ???"
+  descriptionKorean: "?? / ?? / ??. ??? ??? ?? ?? ??? ?? ???."
+  quoteKorean: "?? ??? ?, ??? ????."
   role: 7
-  positionType: 0
+  positionType: 1
   element: 6
-  maxHp: 210
-  attack: 75
-  attackSpeed: 0.8
-  attackRange: 1.5
+  maxHp: 230
+  attack: 86
+  attackSpeed: 0.75
+  attackRange: 1.75
   skillData: {fileID: 11400000, guid: 18fb5e610d4ca8e4c8a7ff13e27c0cdc, type: 2}
   portrait: {fileID: 21300000, guid: b503c5e35761dd548b81be76c574a69c, type: 3}
   conceptImage: {fileID: 21300000, guid: b503c5e35761dd548b81be76c574a69c, type: 3}

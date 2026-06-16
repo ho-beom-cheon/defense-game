@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Shadow Strike
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_shadow_strike
-  displayName: Shadow Strike
-  description: High dark damage that prefers boss targets.
+  displayName: "Shadow Strike"
+  description: "High dark damage that prefers named and boss targets."
   cooldown: 10
-  power: 120
+  power: 145
   damageHitCount: 1
-  range: 2.2
+  range: 2.4
   effectKey: damage
   radius: 1
   targetingType: 4

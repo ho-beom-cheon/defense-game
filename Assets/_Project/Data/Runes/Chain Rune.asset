@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Chain Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_chain
-  displayName: Chain Rune
-  description: Adds a ranged chain-shot placeholder bonus.
+  displayName: "?? ?"
+  description: "??? ?? ??? ?? ?? ?? ???."
   rarity: 1
   element: 3
   effectKey: ranged_chain_shot_placeholder

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Earth Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_earth
-  displayName: Earth Rune
-  description: Increases hero max HP.
+  displayName: "?? ?"
+  description: "?? ?? HP? ????."
   rarity: 0
   element: 4
-  effectKey: hero_hp_percent
-  value: 0.15
+  effectKey: hero_max_hp_percent
+  value: 0.12
   icon: {fileID: 0}

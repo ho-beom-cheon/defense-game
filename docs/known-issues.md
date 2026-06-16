@@ -9,6 +9,8 @@
 
 - Monster special abilities are represented by stat differences and placeholder hooks.
 - Chain shot, turret support, cleansing, shield, and armor break rune effects are simplified placeholders.
+- Stage 1-10 balance is a first playable pass and still needs measured Unity playtest timing.
+- Grumbar appears in Stage 10, but boss phase change and summon patterns are hook-only.
 
 ## v0.8
 
