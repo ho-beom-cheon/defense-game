@@ -54,10 +54,9 @@ namespace RuneGate
                 return;
             }
 
-            string heroName = heroController.Data != null ? heroController.Data.DisplayNameKorean : "Hero";
-            string skillName = heroController.SkillController != null && heroController.SkillController.Data != null
-                ? heroController.SkillController.Data.DisplayName
-                : "Skill";
+            KoreanFontManager.ApplyToGuiSkin();
+            string heroName = heroController.Data != null ? heroController.Data.DisplayNameKorean : "영웅";
+            string skillName = heroController.SkillController != null ? KoreanFontManager.GetSkillDisplayName(heroController.SkillController.Data) : "스킬";
             string status = GetStatusText();
             string label = $"{heroName}: {skillName}\n{status}";
 
@@ -128,12 +127,12 @@ namespace RuneGate
         {
             if (battleState == BattleState.Victory || battleState == BattleState.Defeat)
             {
-                return "Battle Ended";
+                return "전투 종료";
             }
 
             if (battleState == BattleState.RuneSelection)
             {
-                return "Rune Selection";
+                return "룬 선택";
             }
 
             if (cooldownRemaining > 0f)
@@ -141,7 +140,7 @@ namespace RuneGate
                 return $"{cooldownRemaining:0.0}s";
             }
 
-            return "Ready";
+            return "준비 완료";
         }
     }
 }

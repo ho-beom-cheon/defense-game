@@ -57,14 +57,15 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             Rect drawRect = panelRect;
             drawRect.height = Mathf.Max(drawRect.height, 290f);
             GUILayout.BeginArea(drawRect, GUI.skin.box);
             GUILayout.Label(resultTitle);
-            GUILayout.Label($"Gold Awarded: {goldEarned}");
+            GUILayout.Label($"획득 골드: {goldEarned}");
             if (battleGoldEarned != goldEarned)
             {
-                GUILayout.Label($"Battle Gold: {battleGoldEarned}");
+                GUILayout.Label($"전투 골드: {battleGoldEarned}");
             }
 
             if (!string.IsNullOrWhiteSpace(stageStatusMessage))
@@ -87,7 +88,7 @@ namespace RuneGate
                 GUILayout.Label(hintMessage);
             }
 
-            if (GUILayout.Button("Retry", GUILayout.Height(34f)))
+            if (GUILayout.Button("재시도", GUILayout.Height(34f)))
             {
                 if (battleManager != null)
                 {
@@ -99,12 +100,12 @@ namespace RuneGate
                 }
             }
 
-            if (GUILayout.Button("Upgrade", GUILayout.Height(30f)))
+            if (GUILayout.Button("업그레이드", GUILayout.Height(30f)))
             {
                 SceneManager.LoadScene(upgradeSceneName);
             }
 
-            if (GUILayout.Button("Stage Select", GUILayout.Height(30f)))
+            if (GUILayout.Button("스테이지 선택", GUILayout.Height(30f)))
             {
                 SceneManager.LoadScene(stageSelectSceneName);
             }
@@ -115,14 +116,14 @@ namespace RuneGate
         private void ShowResult(BattleResult result)
         {
             isVisible = true;
-            resultTitle = result.IsVictory ? "Victory" : "Defeat";
+            resultTitle = result.IsVictory ? "승리" : "패배";
             battleGoldEarned = result.GoldEarned;
             goldEarned = CalculateGoldAward(result);
             ApplyResultToSave(result);
-            stageStatusMessage = result.IsVictory ? "Stage Cleared: Yes" : "Stage Cleared: No";
+            stageStatusMessage = result.IsVictory ? "스테이지 클리어: 예" : "스테이지 클리어: 아니오";
             nextStageMessage = ResolveNextStageMessage(result);
-            hintMessage = result.IsVictory ? "Spend Gold on upgrades before harder stages." : BuildDefeatHint(result);
-            resultMessage = $"Waves Cleared: {result.WavesCleared}";
+            hintMessage = result.IsVictory ? "어려운 스테이지 전에 골드로 업그레이드하세요." : BuildDefeatHint(result);
+            resultMessage = $"클리어 웨이브: {result.WavesCleared}";
             if (!string.IsNullOrWhiteSpace(result.Message))
             {
                 resultMessage = $"{resultMessage}\n{result.Message}";
@@ -221,38 +222,38 @@ namespace RuneGate
         {
             if (!result.IsVictory)
             {
-                return "Next stage unlock: No";
+                return "다음 스테이지 해금: 아니오";
             }
 
             string clearedStageId = ResolveStageId(result);
             string nextStageId = ResolveNextStageId(clearedStageId);
-            return string.IsNullOrWhiteSpace(nextStageId) ? "Chapter 1 Normal cleared." : $"Next stage unlocked: {nextStageId}";
+            return string.IsNullOrWhiteSpace(nextStageId) ? "챕터 1 보통 난이도 클리어." : $"다음 스테이지 해금: {nextStageId}";
         }
 
         private static string BuildDefeatHint(BattleResult result)
         {
             if (result.StageData == null)
             {
-                return "Tip: Buy upgrades or choose runes that match the enemy type.";
+                return "팁: 업그레이드를 구매하거나 적 유형에 맞는 룬을 고르세요.";
             }
 
             string stageId = result.StageData.StageId ?? string.Empty;
             if (stageId.EndsWith("03") || stageId.EndsWith("04"))
             {
-                return "Tip: Fast enemies are easier with Seria or Speed/Slow runes.";
+                return "팁: 빠른 적은 세리아 또는 속도/냉기 룬으로 대응하세요.";
             }
 
             if (stageId.EndsWith("06") || stageId.EndsWith("08"))
             {
-                return "Tip: Clustered lanes reward Kael, Brom, Fire, or Turret runes.";
+                return "팁: 몰려오는 라인은 카엘, 브롬, 화염 룬, 포탑 룬이 좋습니다.";
             }
 
             if (stageId.EndsWith("10"))
             {
-                return "Tip: Grumbar needs Nyx, Attack, and Boss Damage runes.";
+                return "팁: 그룸바르는 닉스, 공격 룬, 보스 사냥 룬으로 상대하세요.";
             }
 
-            return "Tip: If the crystal falls, try Priest, Healing Rune, or Crystal upgrades.";
+            return "팁: 크리스탈이 무너지면 미레아, 치유 룬, 크리스탈 업그레이드를 써보세요.";
         }
     }
 }

@@ -23,6 +23,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI",
             "Assets/_Project/Scripts/Editor",
             "Assets/_Project/Scripts/Audio",
+            "Assets/_Project/Fonts",
             "Assets/_Project/Data/Heroes",
             "Assets/_Project/Data/Monsters",
             "Assets/_Project/Data/Skills",
@@ -197,6 +198,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/TutorialManager.cs",
             "Assets/_Project/Scripts/UI/TutorialOverlayUI.cs",
             "Assets/_Project/Scripts/UI/RuntimePixelGuiUtility.cs",
+            "Assets/_Project/Scripts/UI/KoreanFontCatalog.cs",
+            "Assets/_Project/Scripts/UI/KoreanFontManager.cs",
             "Assets/_Project/Scripts/UI/SafeAreaFitter.cs",
             "Assets/_Project/Scripts/Audio/AudioManager.cs",
             "Assets/_Project/Scripts/Audio/SfxKey.cs",
@@ -338,6 +341,14 @@ namespace RuneGate.Editor
         };
 
         private const string RequiredCombatVisualCatalogAsset = "Assets/_Project/Resources/RuntimePixelVisualCatalog.asset";
+        private const string RequiredKoreanFontCatalogAsset = "Assets/_Project/Resources/KoreanFontCatalog.asset";
+
+        private static readonly string[] RequiredKoreanFontAssets =
+        {
+            "Assets/_Project/Fonts/NotoSansKR-Regular.ttf",
+            "Assets/_Project/Fonts/NotoSansKR-SemiBold.ttf",
+            "Assets/_Project/Fonts/NotoSansKR-Bold.ttf"
+        };
 
         private static readonly string[] RequiredDocs =
         {
@@ -362,6 +373,7 @@ namespace RuneGate.Editor
             "docs/tutorial-design.md",
             "docs/save-system.md",
             "docs/difficulty-design.md",
+            "docs/korean-font-setup.md",
             "CHANGELOG.md"
         };
 
@@ -503,6 +515,12 @@ namespace RuneGate.Editor
             }
 
             ValidateAsset<RuntimePixelVisualCatalog>(RequiredCombatVisualCatalogAsset, "v0.6 combat visual catalog", errors);
+            ValidateAsset<KoreanFontCatalog>(RequiredKoreanFontCatalogAsset, "v0.8 Korean font catalog", errors);
+
+            for (int i = 0; i < RequiredKoreanFontAssets.Length; i++)
+            {
+                ValidateAsset<Font>(RequiredKoreanFontAssets[i], "v0.8 Korean font", errors);
+            }
 
             ValidateV05VisualLinks(errors);
             ValidateRuntimeArtPolicy(errors);

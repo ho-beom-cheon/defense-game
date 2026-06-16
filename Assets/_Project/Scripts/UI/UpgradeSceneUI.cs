@@ -33,20 +33,21 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             if (upgradeManager == null)
             {
                 upgradeManager = FindAnyObjectByType<UpgradeManager>();
             }
 
             GUILayout.BeginArea(panelRect, GUI.skin.box);
-            GUILayout.Label("Upgrades");
-            GUILayout.Label($"Gold: {SaveManager.Current.totalGold}");
+            GUILayout.Label("업그레이드");
+            GUILayout.Label($"골드: {SaveManager.Current.totalGold}");
             RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconSave, 22f);
             GUILayout.Space(8f);
 
             if (upgradeManager == null || upgradeManager.AvailableUpgrades.Count == 0)
             {
-                GUILayout.Label("No upgrades assigned. Run Tools/RuneGate/Bootstrap Progression Prototype.");
+                GUILayout.Label("업그레이드 데이터가 없습니다. Bootstrap Progression Prototype을 실행하세요.");
             }
             else
             {
@@ -58,7 +59,7 @@ namespace RuneGate
             }
 
             GUILayout.Space(10f);
-            if (GUILayout.Button("Stage Select", GUILayout.Height(36f)))
+            if (GUILayout.Button("스테이지 선택", GUILayout.Height(36f)))
             {
                 SceneManager.LoadScene(stageSelectSceneName);
             }
@@ -76,7 +77,7 @@ namespace RuneGate
         {
             if (upgradeData == null)
             {
-                GUILayout.Label("Missing UpgradeData");
+                GUILayout.Label("업그레이드 데이터 없음");
                 return;
             }
 
@@ -88,10 +89,10 @@ namespace RuneGate
             GUILayout.BeginVertical();
             GUILayout.Label($"{upgradeData.DisplayName} Lv {level}/{maxLevel}");
             GUILayout.Label(upgradeData.Description);
-            GUILayout.Label($"Effect: {upgradeData.EffectKey} +{upgradeData.ValuePerLevel:0.###} per level");
+            GUILayout.Label($"효과: {upgradeData.EffectKey} +{upgradeData.ValuePerLevel:0.###} / 레벨");
 
             bool maxed = level >= maxLevel;
-            string buttonLabel = maxed ? "Max Level" : $"Buy ({cost} Gold)";
+            string buttonLabel = maxed ? "최대 레벨" : $"구매 ({cost} 골드)";
             using (new GuiEnabledScope(!maxed && SaveManager.Current.totalGold >= cost))
             {
                 if (GUILayout.Button(buttonLabel, GUILayout.Height(30f)))
@@ -102,13 +103,13 @@ namespace RuneGate
                         AudioManager.Play(SfxKey.UpgradePurchase);
                     }
 
-                    feedbackMessage = purchased ? $"Purchased {upgradeData.DisplayName}." : $"Not enough gold for {upgradeData.DisplayName}.";
+                    feedbackMessage = purchased ? $"{upgradeData.DisplayName} 구매 완료." : $"{upgradeData.DisplayName} 구매 골드가 부족합니다.";
                 }
             }
 
             if (!maxed && SaveManager.Current.totalGold < cost)
             {
-                GUILayout.Label($"Need {cost - SaveManager.Current.totalGold} more Gold.");
+                GUILayout.Label($"{cost - SaveManager.Current.totalGold} 골드가 더 필요합니다.");
             }
 
             GUILayout.EndVertical();

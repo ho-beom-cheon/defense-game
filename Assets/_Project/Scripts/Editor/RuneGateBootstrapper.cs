@@ -33,6 +33,7 @@ namespace RuneGate.Editor
             RootPath + "/Scripts/Save",
             RootPath + "/Scripts/UI",
             RootPath + "/Scripts/Editor",
+            RootPath + "/Fonts",
             RootPath + "/Data/Heroes",
             RootPath + "/Data/Monsters",
             RootPath + "/Data/Skills",

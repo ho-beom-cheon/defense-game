@@ -19,6 +19,7 @@
 - Safe area support is prepared as a component, but the current prototype UI is still IMGUI based.
 - Difficulty selection is UI/save ready, but Hard and Nightmare rules are not applied to combat yet.
 - Tutorial arrows and tap indicators are static overlay icons, not target-following guides yet.
+- TextMeshPro Font Asset은 아직 생성하지 않았다. 현재 UI는 IMGUI 기반이며 NotoSansKR Font catalog로 한글 표시를 처리한다.
 
 ## v0.9
 

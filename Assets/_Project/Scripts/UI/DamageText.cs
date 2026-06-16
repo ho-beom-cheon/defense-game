@@ -35,6 +35,7 @@ namespace RuneGate
                 return;
             }
 
+            KoreanFontManager.ApplyToGuiSkin();
             if (mainCamera == null)
             {
                 mainCamera = Camera.main;
