@@ -6,7 +6,7 @@ namespace RuneGate
     {
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private bool drawRuntimeGui = true;
-        [SerializeField] private Rect panelRect = new Rect(16f, 230f, 230f, 250f);
+        [SerializeField] private Rect panelRect = new Rect(8f, 236f, 248f, 286f);
 
         private Vector2 scrollPosition;
 
@@ -23,7 +23,8 @@ namespace RuneGate
             }
 
             AutoAssignReferences();
-            GUILayout.BeginArea(panelRect, GUI.skin.box);
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUILayout.BeginArea(panelRect, panelStyle);
             GUILayout.Label("Hero Skills");
 
             if (battleManager == null || battleManager.Heroes.Count == 0)
@@ -58,7 +59,8 @@ namespace RuneGate
             Color previousColor = GUI.backgroundColor;
             GUI.backgroundColor = canUse ? new Color(0.75f, 1f, 0.75f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
             GUI.enabled = canUse;
-            if (GUILayout.Button($"{hero.Data.DisplayNameKorean}: {skillName}\n{status}", GUILayout.Height(48f)))
+            GUIStyle buttonStyle = RuntimePixelGuiUtility.CreateButtonStyle(GUI.skin.button, RuntimePixelAssetLoader.UiButtonSkill);
+            if (GUILayout.Button($"{hero.Data.DisplayNameKorean}: {skillName}\n{status}", buttonStyle, GUILayout.Height(50f)))
             {
                 hero.RequestManualSkill();
             }

@@ -41,6 +41,8 @@
 
 `RuntimePixel` 스프라이트가 없으면 전투는 실패하지 않고 `PlaceholderSprite` fallback을 사용한다. fallback 색상은 캐릭터 역할과 몬스터 타입에 맞춰 구분한다.
 
+전투 배경/이펙트/UI sprite는 `Assets/_Project/Resources/RuntimePixelVisualCatalog.asset`에도 참조를 보관한다. 이 catalog는 Editor Play와 빌드 후보에서 같은 RuntimePixel 이미지를 로드하기 위한 최소 연결 지점이다.
+
 ## Battle Runtime Visual Rules
 
 - `HeroData.battleSprite`는 `Assets/_Project/Art/RuntimePixel/Heroes` 아래의 작은 전투 스프라이트만 허용한다.
@@ -51,12 +53,29 @@
 
 ## Current Scale Targets
 
-- Hero: 기본 1.05 world units, 전열 탱커 1.25, 기술자 1.15
-- Small monster: 기본 0.9 world units, 빠른/비행 몬스터 0.8
-- Orc/tank monster: 1.35 world units
-- Boss: 2.25 world units
+- Hero: 기본 1.32~1.4 world units
+- Leon 같은 전열 탱커: 1.48 world units
+- Brom 같은 큰 영웅/기술자: 1.6 world units
+- Small monster: 0.95~1.08 world units
+- Orc/tank monster: 1.38 world units
+- Boss: 2.55 world units
 
 `RuntimeSpriteFitter`는 전투용 Visual child의 `SpriteRenderer.bounds`를 기준으로 높이를 보정한다. Root object는 라인 이동과 타겟팅 위치 계산에 사용하므로 scale을 직접 변경하지 않는다.
+
+`RuntimeSpriteFitter`는 스프라이트가 바뀌거나 목표 높이가 바뀔 때만 다시 맞춘다. 공격/스킬/사망 피드백은 Visual child의 local position/scale을 짧게 조정하므로, 매 프레임 fit으로 덮지 않는다.
+
+## Combat Visual Polish v0.6
+
+- `LaneManager`가 플레이 중 `Assets/_Project/Art/RuntimePixel/Backgrounds/bg_goblin_forest_lanes.png` 배경, 3개 lane ground strip, crystal ward zone, spawn rift zone, hero slot marker를 자동 생성한다.
+- Hero slot 좌표는 lane별 Front/Middle/Back을 분리한다. Front는 적 출현 쪽에 가까운 `x=-0.55`, Middle은 `x=-1.5`, Back은 `x=-2.45` 기준이다.
+- Monster path는 `spawnX=5.75`에서 `crystalX=-5.15`로 이동한다.
+- 몬스터 HP bar는 RuntimePixel target height를 기준으로 머리 위에 배치한다.
+- 공격 시 영웅 Visual child가 짧게 전진 후 복귀한다.
+- 원거리 기본 공격은 `fx_rapid_shot.png`를 우선 projectile visual로 사용한다.
+- 피격 시 기존 HitFlash와 DamageText를 사용하고, `fx_hit_spark.png`를 표시한다.
+- 사망 시 `fx_death_puff.png`를 표시하고 몬스터는 즉시 삭제되지 않고 짧게 축소/페이드 후 삭제된다.
+- 스킬 사용 시 `fx_shield_bash.png`, `fx_rapid_shot.png`, `fx_meteor_impact.png`, `fx_holy_heal.png`, `fx_turret_shot.png`, `fx_shadow_slash.png`를 우선 표시한다.
+- IMGUI 패널/스킬 버튼/룬 카드에는 `ui_panel_dark.png`, `ui_button_skill.png`, `ui_rune_card_base.png`를 가능한 범위에서 적용한다.
 
 ## Do Not Do
 

@@ -107,6 +107,8 @@ namespace RuneGate.Editor
             RootPath + "/Art/ConceptSheets/Heroes",
             RootPath + "/Art/ConceptSheets/Enemies",
             RootPath + "/Art/RuntimePixel",
+            RootPath + "/Art/RuntimePixel/Backgrounds",
+            RootPath + "/Art/RuntimePixel/Effects",
             RootPath + "/Art/RuntimePixel/Heroes",
             RootPath + "/Art/RuntimePixel/Heroes/Leon",
             RootPath + "/Art/RuntimePixel/Heroes/Seria",
@@ -1344,24 +1346,24 @@ namespace RuneGate.Editor
             Transform[] heroSlotPoints = new Transform[9];
             for (int laneIndex = 0; laneIndex < 3; laneIndex++)
             {
-                float y = (laneIndex - 1) * 2.4f;
-                CreatePlaceholderObject($"Lane {laneIndex} Path", laneRoot.transform, new Vector3(0.45f, y, 0f), new Color(0.25f, 0.27f, 0.32f), new Vector2(9.6f, 0.08f), 0);
+                float y = (laneIndex - 1) * 2.15f;
+                CreatePlaceholderObject($"Lane {laneIndex} Path", laneRoot.transform, new Vector3(0.3f, y, 0f), new Color(0.25f, 0.27f, 0.32f), new Vector2(10.9f, 0.08f), 0);
 
                 GameObject spawnPoint = new GameObject($"Lane {laneIndex} Monster Spawn");
                 spawnPoint.transform.SetParent(laneRoot.transform);
-                spawnPoint.transform.position = new Vector3(5.6f, y, 0f);
+                spawnPoint.transform.position = new Vector3(5.75f, y, 0f);
                 spawnPoints[laneIndex] = spawnPoint.transform;
 
                 GameObject targetPoint = new GameObject($"Lane {laneIndex} Crystal Target");
                 targetPoint.transform.SetParent(laneRoot.transform);
-                targetPoint.transform.position = new Vector3(-5.35f, y, 0f);
+                targetPoint.transform.position = new Vector3(-5.15f, y, 0f);
                 targetPoints[laneIndex] = targetPoint.transform;
 
                 for (int slotIndex = 0; slotIndex < 3; slotIndex++)
                 {
                     int flatIndex = laneIndex * 3 + slotIndex;
-                    float x = -1.25f - slotIndex * 0.75f;
-                    GameObject slotPoint = CreatePlaceholderObject($"Lane {laneIndex} Hero Slot {slotIndex}", laneRoot.transform, new Vector3(x, y, 0f), new Color(0.24f, 0.42f, 0.64f, 0.35f), new Vector2(0.46f, 0.46f), 1);
+                    float x = -0.55f - slotIndex * 0.95f;
+                    GameObject slotPoint = CreatePlaceholderObject($"Lane {laneIndex} Hero Slot {slotIndex}", laneRoot.transform, new Vector3(x, y, 0f), new Color(0.24f, 0.42f, 0.64f, 0.28f), new Vector2(0.42f, 0.22f), 1);
                     HeroPlacementSlot placementSlot = slotPoint.AddComponent<HeroPlacementSlot>();
                     EditComponent(placementSlot, serializedObject =>
                     {
@@ -1386,14 +1388,14 @@ namespace RuneGate.Editor
             EditComponent(laneManager, serializedObject =>
             {
                 SetInt(serializedObject, "laneCount", 3);
-                SetFloat(serializedObject, "laneSpacing", 2.4f);
-                SetFloat(serializedObject, "spawnX", 5.6f);
-                SetFloat(serializedObject, "crystalX", -5.35f);
+                SetFloat(serializedObject, "laneSpacing", 2.15f);
+                SetFloat(serializedObject, "spawnX", 5.75f);
+                SetFloat(serializedObject, "crystalX", -5.15f);
                 SetObjectList(serializedObject, "laneSpawnPoints", ToObjectArray(spawnPoints));
                 SetObjectList(serializedObject, "crystalTargetPoints", ToObjectArray(targetPoints));
                 SetInt(serializedObject, "heroSlotsPerLane", 3);
-                SetFloat(serializedObject, "heroFrontSlotX", -1.25f);
-                SetFloat(serializedObject, "heroSlotSpacingX", 0.75f);
+                SetFloat(serializedObject, "heroFrontSlotX", -0.55f);
+                SetFloat(serializedObject, "heroSlotSpacingX", 0.95f);
                 SetObjectList(serializedObject, "heroSlotPoints", ToObjectArray(heroSlotPoints));
             });
 
@@ -1469,7 +1471,7 @@ namespace RuneGate.Editor
             {
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(8f, 230f, 220f, 220f));
+                SetRect(serializedObject, "panelRect", new Rect(8f, 236f, 248f, 286f));
             });
 
             EditComponent(tutorialOverlayUI, serializedObject =>
