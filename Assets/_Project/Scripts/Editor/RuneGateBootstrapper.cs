@@ -219,13 +219,33 @@ namespace RuneGate.Editor
             Debug.Log("RuneGate Android release settings configured for v1.0.0.");
         }
 
+        [MenuItem("Tools/RuneGate/Configure Android v0.9 RC Settings")]
+        public static void ConfigureAndroidV09RcSettingsMenu()
+        {
+            ConfigureAndroidPlayerSettings("0.9.0", 9);
+            UpdateBuildSettings();
+            AssetDatabase.SaveAssets();
+            Debug.Log("RuneGate Android release candidate settings configured for v0.9.0.");
+        }
+
+        [MenuItem("Tools/RuneGate/Build Android APK v0.9 RC")]
+        public static void BuildAndroidApkV09Rc()
+        {
+            BuildAndroidApk("0.9.0", 9);
+        }
+
         [MenuItem("Tools/RuneGate/Build Android APK v1.0")]
         public static void BuildAndroidApkV10()
         {
-            BootstrapContentAndScenes(true, "1.0.0", 10);
+            BuildAndroidApk("1.0.0", 10);
+        }
+
+        private static void BuildAndroidApk(string version, int versionCode)
+        {
+            BootstrapContentAndScenes(true, version, versionCode);
             string buildDirectory = Path.Combine("Builds", "Android");
             Directory.CreateDirectory(buildDirectory);
-            string apkPath = Path.Combine(buildDirectory, "RuneGateDefense-v1.0.0.apk");
+            string apkPath = Path.Combine(buildDirectory, $"RuneGateDefense-v{version}.apk");
 
             BuildPlayerOptions options = new BuildPlayerOptions
             {

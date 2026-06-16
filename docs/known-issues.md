@@ -1,47 +1,38 @@
 # Known Issues
 
-## v0.6
+## v0.9 Release Candidate
 
-- Final Knight and Goblin art is not included. Placeholder visual prefabs remain the fallback.
-- Android APK build depends on local Unity Android Build Support installation.
-
-## v0.7
-
-- Monster special abilities are represented by stat differences and placeholder hooks.
-- Chain shot, turret support, cleansing, shield, and armor break rune effects are simplified placeholders.
-- Stage 1-10 balance is a first playable pass and still needs measured Unity playtest timing.
-- Grumbar appears in Stage 10, but boss phase change and summon patterns are hook-only.
-
-## v0.8
-
-- Tutorial uses a simple IMGUI overlay instead of a full touch-driven UI flow.
-- Settings are placeholders for BGM, SFX, and vibration.
-- Safe area support is prepared as a component, but the current prototype UI is still IMGUI based.
-- Difficulty selection is UI/save ready, but Hard and Nightmare rules are not applied to combat yet.
-- Tutorial arrows and tap indicators are static overlay icons, not target-following guides yet.
-- TextMeshPro Font Asset is not generated yet. Current UI is IMGUI-based and uses the NotoSansKR Font catalog for Korean text.
-- A v0.8 data repair pass restored damaged `??` display strings in hero, monster, rune, stage, skill, and upgrade ScriptableObject assets.
-- Result, HUD, StageSelect, Skill Button, and Rune Selection now map internal ids and enum values to Korean display text, but older planning docs may still contain English state names as design references.
-
-## v0.9
-
+- Android APK build was attempted on 2026-06-16, but Unity batchmode stopped because the project was already open in another Unity Editor instance.
+- Unity command-line validation was attempted on 2026-06-16, but Unity batchmode stopped for the same open-project lock.
 - Device install and long-session performance testing must be completed manually.
-- APK build succeeded locally on 2026-06-15, but device install testing is still pending.
+- Android Player Settings are prepared for v0.9.0, but store submission settings such as target SDK and signing must be checked again before upload.
+- App icon, adaptive foreground, splash background, and feature graphic are first-pass candidates, not final store art.
+- Some combat effects are placeholder RuntimePixel effects.
+- Current RuntimePixel unit art is still prototype-quality.
+- Balance values are first-pass and should be tuned with playtest data.
+- UI is still mostly IMGUI-based, so final mobile safe-area and touch polish remains.
+- Tutorial arrows and tap indicators are static overlay icons, not target-following guides yet.
+- TextMeshPro Font Asset is not generated yet. Current UI uses the NotoSansKR Font catalog with IMGUI.
+- Hard and Nightmare difficulty rules are UI/save ready but not applied to combat yet.
+- Boss phase change and summon patterns are hook-only.
 - AAB build has not been automated separately from APK.
+- Store policy, privacy policy URL requirement, Android permissions, target SDK, and Data Safety answers require final manual review before public release.
 
-## v1.0
+## Monetization
 
-- No real monetization SDK is included.
-- No final store art, screenshots, or app icon set is included.
-- Balance is first-pass and should be tuned with playtest data.
+- No real ad SDK is included.
+- No real billing SDK is included.
+- v1.0 may document optional rewarded ads, remove-ads purchase, starter pack, or supporter pack as future candidates, but actual SDK integration is separate work.
+- Forced ads and gacha remain prohibited.
 
-## Runtime Pixel Art
+## Runtime Pixel Art Policy
 
-- First-pass RuntimePixel idle sprites exist for six heroes, six monsters, and Grumbar boss.
-- BattleScene intentionally uses small colored placeholder fallback when a future `battleSprite` or `runtimeSprite` is empty.
+- BattleScene uses RuntimePixel sprites only.
 - ConceptSheets images are reference/codex assets only and should not appear directly in BattleScene SpriteRenderers.
-- UI is still IMGUI-based, so additional mobile safe-area polish remains for a future pass.
-- Combat feedback is placeholder-based: attack lunge, hit flash, damage text, death fade, and skill effects work, but final pixel VFX and animation strips are still needed.
-- Boss HP is still the per-unit runtime HP bar. A dedicated boss HP UI is planned for a later pass.
-- BattleScene now uses the RuntimePixel goblin forest lane background and first-pass effect sprites, but lane strip overlays remain runtime placeholders.
-- UI image application is limited by the current IMGUI prototype. Final mobile UI should move to Canvas/uGUI or UI Toolkit with safe-area handling.
+- BattleScene keeps small colored placeholder fallback when a future `battleSprite` or `runtimeSprite` is empty.
+
+## Resolved In v0.8
+
+- NotoSansKR font integration restored Korean UI rendering for IMGUI.
+- Damaged `??` display strings were restored in hero, monster, rune, stage, skill, and upgrade ScriptableObject assets.
+- Result, HUD, StageSelect, Skill Button, and Rune Selection map internal ids and enum values to Korean display text.
