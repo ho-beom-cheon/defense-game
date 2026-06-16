@@ -36,6 +36,7 @@ namespace RuneGate
         private Transform hpBarRoot;
         private PlaceholderSprite hpBarFill;
         private Coroutine hitFlashRoutine;
+        private Coroutine deathRoutine;
 
         public event Action<MonsterController> Died;
         public event Action<MonsterController> ReachedCrystal;
@@ -103,15 +104,8 @@ namespace RuneGate
             revivedOnce = false;
             initialized = true;
 
-            if (data.IsBoss)
-            {
-                hpBarSize = new Vector2(1.2f, 0.12f);
-                hpBarYOffset = 1.32f;
-            }
-            else
-            {
-                hpBarYOffset = RuntimeSpritePolicy.GetMonsterTargetHeight(data) * 0.58f;
-            }
+            hpBarSize = RuntimeSpritePolicy.GetMonsterHpBarSize(data);
+            hpBarYOffset = RuntimeSpritePolicy.GetMonsterHpBarYOffset(data);
 
             AutoAssignFeedbackReferences();
             ApplyRuntimeVisual(data);
@@ -203,11 +197,20 @@ namespace RuneGate
             removedFromWave = true;
             Died?.Invoke(this);
             ownerWaveManager?.NotifyMonsterKilled(this);
-            visualController?.PlayDeath();
-            SpawnEffect(deathEffectPrefab, GetEffectPosition(), new Color(0.7f, 0.7f, 0.7f, 0.85f), new Vector2(0.78f, 0.78f), 6);
+            float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData);
+            CombatVisualEffectFactory.SpawnDeathPuff(GetEffectPosition(), targetHeight);
             AudioManager.Play(SfxKey.MonsterDeath);
             DisableColliders();
-            Destroy(gameObject, Mathf.Max(0.05f, deathDestroyDelay));
+            if (hpBarRoot != null)
+            {
+                hpBarRoot.gameObject.SetActive(false);
+            }
+
+            float delay = Mathf.Max(0.08f, deathDestroyDelay);
+            if (deathRoutine == null)
+            {
+                deathRoutine = StartCoroutine(DeathRoutine(delay));
+            }
         }
 
         private void DamageCrystalAndRemove()
@@ -266,7 +269,8 @@ namespace RuneGate
                 PlayHitFlash();
             }
 
-            SpawnEffect(hitEffectPrefab, GetEffectPosition(), new Color(1f, 0.95f, 0.45f, 0.9f), new Vector2(0.42f, 0.42f), 7);
+            float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData);
+            CombatVisualEffectFactory.SpawnHitSpark(GetEffectPosition(), targetHeight);
             SpawnDamageText(damage);
             AudioManager.Play(SfxKey.MonsterHit);
         }
@@ -294,11 +298,19 @@ namespace RuneGate
 
         private void SpawnDamageText(int damage)
         {
-            Vector3 position = transform.position + new Vector3(0f, 0.72f, 0f);
+            float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData);
+            Vector3 position = transform.position + new Vector3(0f, Mathf.Clamp(targetHeight * 0.78f, 0.72f, 2.1f), 0f);
             DamageText damageText = damageTextPrefab != null
                 ? Instantiate(damageTextPrefab, position, Quaternion.identity)
                 : new GameObject("DamageText_Runtime").AddComponent<DamageText>();
             damageText.Show(damage, position);
+        }
+
+        private IEnumerator DeathRoutine(float delay)
+        {
+            visualController?.PlayDeathCollapse(delay);
+            yield return new WaitForSeconds(delay);
+            Destroy(gameObject);
         }
 
         private void DisableColliders()

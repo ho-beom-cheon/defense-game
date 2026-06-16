@@ -8,17 +8,48 @@ namespace RuneGate
         {
             if (heroData == null)
             {
-                return 1.1f;
+                return 1.35f;
             }
 
             switch (heroData.Role)
             {
                 case HeroRole.Tank:
-                    return 1.25f;
+                    return 1.48f;
                 case HeroRole.Engineer:
-                    return 1.15f;
+                    return 1.6f;
+                case HeroRole.Healer:
+                    return 1.4f;
+                case HeroRole.Assassin:
+                    return 1.38f;
+                case HeroRole.Mage:
+                case HeroRole.RangedDps:
+                    return 1.35f;
                 default:
-                    return 1.05f;
+                    return 1.32f;
+            }
+        }
+
+        public static Vector2 GetMonsterHpBarSize(MonsterData monsterData)
+        {
+            if (monsterData == null)
+            {
+                return new Vector2(0.72f, 0.07f);
+            }
+
+            if (monsterData.IsBoss)
+            {
+                return new Vector2(1.55f, 0.13f);
+            }
+
+            switch (monsterData.MonsterType)
+            {
+                case MonsterType.Tank:
+                    return new Vector2(0.95f, 0.09f);
+                case MonsterType.Fast:
+                case MonsterType.Flying:
+                    return new Vector2(0.64f, 0.07f);
+                default:
+                    return new Vector2(0.72f, 0.075f);
             }
         }
 
@@ -26,24 +57,33 @@ namespace RuneGate
         {
             if (monsterData == null)
             {
-                return 0.85f;
+                return 1f;
             }
 
             if (monsterData.IsBoss)
             {
-                return 2.25f;
+                return 2.55f;
             }
 
             switch (monsterData.MonsterType)
             {
                 case MonsterType.Tank:
-                    return 1.35f;
+                    return 1.38f;
                 case MonsterType.Fast:
                 case MonsterType.Flying:
-                    return 0.8f;
+                    return 0.95f;
+                case MonsterType.Splitter:
+                    return 1f;
+                case MonsterType.Undead:
+                    return 1.08f;
                 default:
-                    return 0.9f;
+                    return 1.02f;
             }
+        }
+
+        public static float GetMonsterHpBarYOffset(MonsterData monsterData)
+        {
+            return GetMonsterTargetHeight(monsterData) * (monsterData != null && monsterData.IsBoss ? 0.58f : 0.64f);
         }
 
         public static Color GetHeroColor(HeroData heroData)

@@ -8,7 +8,7 @@ namespace RuneGate
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private RuneManager runeManager;
         [SerializeField] private bool drawRuntimeGui = true;
-        [SerializeField] private Rect panelRect = new Rect(300f, 110f, 460f, 310f);
+        [SerializeField] private Rect panelRect = new Rect(430f, 96f, 420f, 280f);
 
         private readonly List<RuneData> displayedRunes = new List<RuneData>();
         private bool isVisible;
@@ -44,7 +44,9 @@ namespace RuneGate
                 return;
             }
 
-            GUILayout.BeginArea(panelRect, GUI.skin.box);
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUIStyle cardStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiRuneCardBase);
+            GUILayout.BeginArea(panelRect, panelStyle);
             GUILayout.Label("Choose 1 Rune");
             GUILayout.Space(8f);
 
@@ -57,7 +59,7 @@ namespace RuneGate
                     continue;
                 }
 
-                GUILayout.BeginVertical(GUI.skin.box);
+                GUILayout.BeginVertical(cardStyle);
                 GUILayout.Label($"{runeData.DisplayName} ({runeData.Rarity})");
                 GUILayout.Label(runeData.Description);
                 GUILayout.Label($"{runeData.EffectKey}: {runeData.Value:0.##}");

@@ -134,8 +134,10 @@ namespace RuneGate
             MonsterController target = FindTarget(skillController.Range, skillController.TargetingType);
             if (skillController.UseSkill(this, target))
             {
-                visualController?.FlipToward(target != null ? target.transform.position : transform.position + Vector3.right);
-                visualController?.PlaySkill();
+                Vector3 feedbackTarget = target != null ? target.transform.position : transform.position + Vector3.right;
+                visualController?.FlipToward(feedbackTarget);
+                visualController?.PlaySkillPulse();
+                CombatVisualEffectFactory.SpawnSkillEffect(skillController.Data, transform.position, feedbackTarget, target != null);
                 AudioManager.Play(SfxKey.HeroAttack);
             }
         }
@@ -223,7 +225,7 @@ namespace RuneGate
 
             Vector3 spawnPosition = projectileSpawnPoint != null ? projectileSpawnPoint.position : transform.position;
             visualController?.FlipToward(target.transform.position);
-            visualController?.PlayAttack();
+            visualController?.PlayAttackLunge(target.transform.position);
             AudioManager.Play(SfxKey.HeroAttack);
 
             if (projectilePrefab != null)
@@ -322,9 +324,21 @@ namespace RuneGate
         {
             GameObject projectileObject = new GameObject("Projectile_Runtime");
             projectileObject.transform.position = spawnPosition;
-            projectileObject.AddComponent<SpriteRenderer>();
-            PlaceholderSprite placeholderSprite = projectileObject.AddComponent<PlaceholderSprite>();
-            placeholderSprite.Configure(new Color(1f, 0.85f, 0.25f, 1f), new Vector2(0.18f, 0.08f), 8);
+            SpriteRenderer spriteRenderer = projectileObject.AddComponent<SpriteRenderer>();
+            Sprite projectileSprite = RuntimePixelAssetLoader.LoadSprite(RuntimePixelAssetLoader.EffectRapidShot);
+            if (projectileSprite != null)
+            {
+                spriteRenderer.sprite = projectileSprite;
+                spriteRenderer.color = new Color(1f, 0.92f, 0.38f, 0.95f);
+                spriteRenderer.sortingOrder = 12;
+                projectileObject.transform.localScale = new Vector3(0.36f, 0.18f, 1f);
+            }
+            else
+            {
+                PlaceholderSprite placeholderSprite = projectileObject.AddComponent<PlaceholderSprite>();
+                placeholderSprite.Configure(new Color(1f, 0.85f, 0.25f, 1f), new Vector2(0.18f, 0.08f), 8);
+            }
+
             return projectileObject.AddComponent<ProjectileController>();
         }
 

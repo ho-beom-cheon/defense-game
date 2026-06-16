@@ -97,6 +97,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/ConceptSheets/Heroes",
             "Assets/_Project/Art/ConceptSheets/Enemies",
             "Assets/_Project/Art/RuntimePixel",
+            "Assets/_Project/Art/RuntimePixel/Backgrounds",
+            "Assets/_Project/Art/RuntimePixel/Effects",
             "Assets/_Project/Art/RuntimePixel/Heroes",
             "Assets/_Project/Art/RuntimePixel/Heroes/Leon",
             "Assets/_Project/Art/RuntimePixel/Heroes/Seria",
@@ -168,6 +170,9 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/CharacterVisualController.cs",
             "Assets/_Project/Scripts/Battle/HitFlashController.cs",
             "Assets/_Project/Scripts/Battle/AutoDestroyEffect.cs",
+            "Assets/_Project/Scripts/Battle/CombatVisualEffectFactory.cs",
+            "Assets/_Project/Scripts/Battle/RuntimePixelAssetLoader.cs",
+            "Assets/_Project/Scripts/Battle/RuntimePixelVisualCatalog.cs",
             "Assets/_Project/Scripts/Battle/RuntimeSpriteFitter.cs",
             "Assets/_Project/Scripts/Battle/RuntimeSpritePolicy.cs",
             "Assets/_Project/Scripts/Hero/HeroController.cs",
@@ -191,6 +196,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/TutorialStepData.cs",
             "Assets/_Project/Scripts/UI/TutorialManager.cs",
             "Assets/_Project/Scripts/UI/TutorialOverlayUI.cs",
+            "Assets/_Project/Scripts/UI/RuntimePixelGuiUtility.cs",
             "Assets/_Project/Scripts/UI/SafeAreaFitter.cs",
             "Assets/_Project/Scripts/Audio/AudioManager.cs",
             "Assets/_Project/Scripts/Audio/SfxKey.cs",
@@ -298,6 +304,24 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/Characters/Heroes/Knight/Animations/Knight_Prototype.controller",
             "Assets/_Project/Art/Characters/Monsters/Goblin/Animations/Goblin_Prototype.controller"
         };
+
+        private static readonly string[] RequiredCombatVisualPolishAssets =
+        {
+            "Assets/_Project/Art/RuntimePixel/Backgrounds/bg_goblin_forest_lanes.png",
+            "Assets/_Project/Art/RuntimePixel/Effects/fx_shield_bash.png",
+            "Assets/_Project/Art/RuntimePixel/Effects/fx_rapid_shot.png",
+            "Assets/_Project/Art/RuntimePixel/Effects/fx_meteor_impact.png",
+            "Assets/_Project/Art/RuntimePixel/Effects/fx_holy_heal.png",
+            "Assets/_Project/Art/RuntimePixel/Effects/fx_turret_shot.png",
+            "Assets/_Project/Art/RuntimePixel/Effects/fx_shadow_slash.png",
+            "Assets/_Project/Art/RuntimePixel/Effects/fx_hit_spark.png",
+            "Assets/_Project/Art/RuntimePixel/Effects/fx_death_puff.png",
+            "Assets/_Project/Art/RuntimePixel/UI/ui_panel_dark.png",
+            "Assets/_Project/Art/RuntimePixel/UI/ui_button_skill.png",
+            "Assets/_Project/Art/RuntimePixel/UI/ui_rune_card_base.png"
+        };
+
+        private const string RequiredCombatVisualCatalogAsset = "Assets/_Project/Resources/RuntimePixelVisualCatalog.asset";
 
         private static readonly string[] RequiredDocs =
         {
@@ -449,6 +473,13 @@ namespace RuneGate.Editor
                     errors.Add($"Missing v0.5 art prototype asset: {RequiredV05Assets[i]}");
                 }
             }
+
+            for (int i = 0; i < RequiredCombatVisualPolishAssets.Length; i++)
+            {
+                ValidateAsset<Sprite>(RequiredCombatVisualPolishAssets[i], "v0.6 combat visual polish sprite", errors);
+            }
+
+            ValidateAsset<RuntimePixelVisualCatalog>(RequiredCombatVisualCatalogAsset, "v0.6 combat visual catalog", errors);
 
             ValidateV05VisualLinks(errors);
             ValidateRuntimeArtPolicy(errors);

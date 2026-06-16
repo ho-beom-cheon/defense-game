@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,9 +14,19 @@ namespace RuneGate
         [SerializeField] private string hitTrigger = "Hit";
         [SerializeField] private string skillTrigger = "Skill";
         [SerializeField] private string deathTrigger = "Death";
+        [SerializeField] private float attackLungeDistance = 0.18f;
+        [SerializeField] private float attackLungeDuration = 0.12f;
+        [SerializeField] private float skillPulseScale = 1.1f;
+        [SerializeField] private float skillPulseDuration = 0.18f;
 
         private readonly HashSet<int> animatorParameterHashes = new HashSet<int>();
         private RuntimeAnimatorController cachedController;
+        private Coroutine attackLungeRoutine;
+        private Coroutine skillPulseRoutine;
+        private Coroutine deathCollapseRoutine;
+        private Vector3 restLocalPosition = Vector3.zero;
+        private Vector3 restLocalScale = Vector3.one;
+        private bool restPoseCaptured;
 
         public SpriteRenderer SpriteRenderer => spriteRenderer;
         public Animator Animator => animator;
@@ -24,6 +35,7 @@ namespace RuneGate
         {
             AutoAssignReferences();
             CacheAnimatorParameters();
+            CaptureRestPose(true);
         }
 
         public void Initialize(Sprite sprite, RuntimeAnimatorController animatorController)
@@ -41,6 +53,7 @@ namespace RuneGate
                 CacheAnimatorParameters();
             }
 
+            CaptureRestPose(true);
             PlayIdle();
         }
 
@@ -60,6 +73,25 @@ namespace RuneGate
             SetTrigger(attackTrigger);
         }
 
+        public void PlayAttackLunge(Vector3 targetPosition)
+        {
+            PlayAttack();
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null || attackLungeDistance <= 0f || attackLungeDuration <= 0f)
+            {
+                return;
+            }
+
+            if (attackLungeRoutine != null)
+            {
+                StopCoroutine(attackLungeRoutine);
+                visualTransform.localPosition = restLocalPosition;
+            }
+
+            Vector3 direction = targetPosition - transform.position;
+            attackLungeRoutine = StartCoroutine(AttackLungeRoutine(Mathf.Sign(Mathf.Approximately(direction.x, 0f) ? 1f : direction.x)));
+        }
+
         public void PlayHit()
         {
             SetTrigger(hitTrigger);
@@ -71,11 +103,46 @@ namespace RuneGate
             SetTrigger(skillTrigger);
         }
 
+        public void PlaySkillPulse()
+        {
+            PlaySkill();
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null || skillPulseDuration <= 0f)
+            {
+                return;
+            }
+
+            if (skillPulseRoutine != null)
+            {
+                StopCoroutine(skillPulseRoutine);
+                visualTransform.localScale = restLocalScale;
+            }
+
+            skillPulseRoutine = StartCoroutine(SkillPulseRoutine());
+        }
+
         public void PlayDeath()
         {
             SetMoving(false);
             SetBool(deadParameter, true);
             SetTrigger(deathTrigger);
+        }
+
+        public void PlayDeathCollapse(float duration)
+        {
+            PlayDeath();
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null || duration <= 0f)
+            {
+                return;
+            }
+
+            if (deathCollapseRoutine != null)
+            {
+                StopCoroutine(deathCollapseRoutine);
+            }
+
+            deathCollapseRoutine = StartCoroutine(DeathCollapseRoutine(duration));
         }
 
         public void FlipByDirection(Vector3 direction)
@@ -104,6 +171,130 @@ namespace RuneGate
             {
                 animator = GetComponentInChildren<Animator>();
             }
+        }
+
+        private Transform GetVisualTransform()
+        {
+            AutoAssignReferences();
+            return spriteRenderer != null ? spriteRenderer.transform : transform;
+        }
+
+        private void CaptureRestPose(bool force)
+        {
+            if (restPoseCaptured && !force)
+            {
+                return;
+            }
+
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null)
+            {
+                return;
+            }
+
+            restLocalPosition = visualTransform.localPosition;
+            restLocalScale = visualTransform.localScale;
+            restPoseCaptured = true;
+        }
+
+        private IEnumerator AttackLungeRoutine(float directionX)
+        {
+            CaptureRestPose(false);
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null)
+            {
+                yield break;
+            }
+
+            Vector3 peakPosition = restLocalPosition + new Vector3(directionX * attackLungeDistance, 0f, 0f);
+            float halfDuration = attackLungeDuration * 0.5f;
+            yield return MoveVisualPosition(visualTransform, restLocalPosition, peakPosition, halfDuration);
+            yield return MoveVisualPosition(visualTransform, peakPosition, restLocalPosition, halfDuration);
+            attackLungeRoutine = null;
+        }
+
+        private IEnumerator SkillPulseRoutine()
+        {
+            CaptureRestPose(false);
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null)
+            {
+                yield break;
+            }
+
+            Vector3 peakScale = restLocalScale * Mathf.Max(1f, skillPulseScale);
+            float halfDuration = skillPulseDuration * 0.5f;
+            yield return MoveVisualScale(visualTransform, restLocalScale, peakScale, halfDuration);
+            yield return MoveVisualScale(visualTransform, peakScale, restLocalScale, halfDuration);
+            skillPulseRoutine = null;
+        }
+
+        private IEnumerator DeathCollapseRoutine(float duration)
+        {
+            CaptureRestPose(false);
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null)
+            {
+                yield break;
+            }
+
+            Color startColor = spriteRenderer != null ? spriteRenderer.color : Color.white;
+            Vector3 targetScale = restLocalScale * 0.25f;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float percent = Mathf.Clamp01(elapsed / duration);
+                visualTransform.localScale = Vector3.Lerp(restLocalScale, targetScale, percent);
+                if (spriteRenderer != null)
+                {
+                    Color color = startColor;
+                    color.a = Mathf.Lerp(startColor.a, 0f, percent);
+                    spriteRenderer.color = color;
+                }
+
+                yield return null;
+            }
+
+            deathCollapseRoutine = null;
+        }
+
+        private static IEnumerator MoveVisualPosition(Transform visualTransform, Vector3 from, Vector3 to, float duration)
+        {
+            if (duration <= 0f)
+            {
+                visualTransform.localPosition = to;
+                yield break;
+            }
+
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                visualTransform.localPosition = Vector3.Lerp(from, to, Mathf.Clamp01(elapsed / duration));
+                yield return null;
+            }
+
+            visualTransform.localPosition = to;
+        }
+
+        private static IEnumerator MoveVisualScale(Transform visualTransform, Vector3 from, Vector3 to, float duration)
+        {
+            if (duration <= 0f)
+            {
+                visualTransform.localScale = to;
+                yield break;
+            }
+
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                visualTransform.localScale = Vector3.Lerp(from, to, Mathf.Clamp01(elapsed / duration));
+                yield return null;
+            }
+
+            visualTransform.localScale = to;
         }
 
         private void SetMoving(bool isMoving)

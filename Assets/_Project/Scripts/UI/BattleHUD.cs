@@ -7,7 +7,7 @@ namespace RuneGate
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private CrystalController crystalController;
         [SerializeField] private bool drawRuntimeGui = true;
-        [SerializeField] private Rect panelRect = new Rect(16f, 16f, 300f, 170f);
+        [SerializeField] private Rect panelRect = new Rect(8f, 12f, 248f, 210f);
 
         private string crystalHpText = "Crystal HP -";
         private string waveText = "Wave -";
@@ -79,8 +79,9 @@ namespace RuneGate
 
             AutoAssignReferences();
             Rect drawRect = panelRect;
-            drawRect.height = Mathf.Max(drawRect.height, 230f);
-            GUILayout.BeginArea(drawRect, GUI.skin.box);
+            drawRect.height = Mathf.Max(drawRect.height, 220f);
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUILayout.BeginArea(drawRect, panelStyle);
             GUILayout.Label("RuneGate Defense");
             if (battleManager != null && battleManager.ActiveStageData != null)
             {

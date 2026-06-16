@@ -34,3 +34,7 @@
 - BattleScene intentionally uses small colored placeholder fallback when a future `battleSprite` or `runtimeSprite` is empty.
 - ConceptSheets images are reference/codex assets only and should not appear directly in BattleScene SpriteRenderers.
 - UI is still IMGUI-based, so additional mobile safe-area polish remains for a future pass.
+- Combat feedback is placeholder-based: attack lunge, hit flash, damage text, death fade, and skill effects work, but final pixel VFX and animation strips are still needed.
+- Boss HP is still the per-unit runtime HP bar. A dedicated boss HP UI is planned for a later pass.
+- BattleScene now uses the RuntimePixel goblin forest lane background and first-pass effect sprites, but lane strip overlays remain runtime placeholders.
+- UI image application is limited by the current IMGUI prototype. Final mobile UI should move to Canvas/uGUI or UI Toolkit with safe-area handling.

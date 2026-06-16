@@ -7,6 +7,9 @@ namespace RuneGate
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private float targetHeight = 1f;
 
+        private Sprite fittedSprite;
+        private float fittedTargetHeight = -1f;
+
         public float TargetHeight
         {
             get => targetHeight;
@@ -20,7 +23,20 @@ namespace RuneGate
 
         private void LateUpdate()
         {
-            FitNow();
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = GetComponent<SpriteRenderer>();
+            }
+
+            if (spriteRenderer == null)
+            {
+                return;
+            }
+
+            if (spriteRenderer.sprite != fittedSprite || !Mathf.Approximately(targetHeight, fittedTargetHeight))
+            {
+                FitNow();
+            }
         }
 
         public void FitNow()
@@ -49,6 +65,8 @@ namespace RuneGate
             float scaleFactor = targetHeight / currentHeight;
             Vector3 localScale = transform.localScale;
             transform.localScale = new Vector3(localScale.x * scaleFactor, localScale.y * scaleFactor, localScale.z);
+            fittedSprite = spriteRenderer.sprite;
+            fittedTargetHeight = targetHeight;
         }
     }
 }
