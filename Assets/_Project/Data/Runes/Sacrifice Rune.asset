@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d798458a421666d4cb903dbb536e4737, type: 3}
   m_Name: Sacrifice Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
-  runeId: rune_sacrifice
-  displayName: Sacrifice Rune
-  description: Damages the crystal to greatly increase hero attack.
+  runeId: rune_shadow
+  displayName: "??? ?"
+  description: "??? ?? ??? ???? ?? ???."
   rarity: 1
   element: 6
-  effectKey: sacrifice_crystal_for_attack
-  value: 20
+  effectKey: hero_attack_percent
+  value: 0.2
   icon: {fileID: 0}

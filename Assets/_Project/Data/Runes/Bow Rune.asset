@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d798458a421666d4cb903dbb536e4737, type: 3}
   m_Name: Bow Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
-  runeId: rune_bow
-  displayName: Bow Rune
-  description: Increases all hero attack speed.
+  runeId: rune_life
+  displayName: "?? ?"
+  description: "?? ??? ?? HP? ????."
   rarity: 0
-  element: 8
-  effectKey: hero_attack_speed_percent
-  value: 0.12
+  element: 4
+  effectKey: hero_max_hp_percent
+  value: 0.16
   icon: {fileID: 0}

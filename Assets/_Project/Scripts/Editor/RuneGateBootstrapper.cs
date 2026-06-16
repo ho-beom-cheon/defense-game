@@ -291,28 +291,28 @@ namespace RuneGate.Editor
 
         private static ContentBundle CreateV04Content()
         {
-            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "Shield Bash", "Deals light damage to the nearest monster.", 8f, 60, 1, 2f, TargetingType.Nearest, ElementType.Light, "damage", 1f);
-            SkillData rapidShot = CreateSkill("Rapid Shot", "skill_rapid_shot", "Rapid Shot", "Hits the nearest monster 3 times.", 6f, 25, 3, 5f, TargetingType.Nearest, ElementType.Wind, "multi_hit_damage", 1f);
-            SkillData meteor = CreateSkill("Meteor", "skill_meteor", "Meteor", "Deals area fire damage around a target.", 11f, 55, 1, 4f, TargetingType.HighestHp, ElementType.Fire, "area_damage", 1.6f);
-            SkillData holyHeal = CreateSkill("Holy Heal", "skill_holy_heal", "Holy Heal", "Restores HP to the Kingdom Crystal.", 9f, 35, 1, 3.2f, TargetingType.LowestHp, ElementType.Light, "crystal_heal_flat", 1f);
-            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "Build Turret", "Prototype turret hook with fallback damage.", 12f, 35, 1, 3.2f, TargetingType.First, ElementType.Earth, "turret_placeholder", 1f);
-            SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "Shadow Strike", "High dark damage that prefers boss targets.", 10f, 120, 1, 2.2f, TargetingType.Boss, ElementType.Dark, "damage", 1f);
+            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "Shield Bash", "Stuns the line briefly in a later hook and deals reliable close damage.", 7.5f, 70, 1, 2.1f, TargetingType.Nearest, ElementType.Light, "damage", 1f);
+            SkillData rapidShot = CreateSkill("Rapid Shot", "skill_rapid_shot", "Rapid Shot", "Fires repeated shots into the nearest fast target.", 5.8f, 28, 3, 5f, TargetingType.Nearest, ElementType.Wind, "multi_hit_damage", 1f);
+            SkillData meteor = CreateSkill("Meteor", "skill_meteor", "Meteor", "Drops fire area damage for clustered monsters.", 10.5f, 68, 1, 4.2f, TargetingType.HighestHp, ElementType.Fire, "area_damage", 1.8f);
+            SkillData holyHeal = CreateSkill("Holy Heal", "skill_holy_heal", "Holy Heal", "Restores HP to the Kingdom Crystal.", 8.5f, 45, 1, 3.5f, TargetingType.LowestHp, ElementType.Light, "crystal_heal_flat", 1f);
+            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "Temporary Turret", "Deploys a temporary turret hook with fallback damage.", 11f, 44, 1, 3.2f, TargetingType.First, ElementType.Earth, "turret_placeholder", 1f);
+            SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "Shadow Strike", "High dark damage that prefers named and boss targets.", 10f, 145, 1, 2.4f, TargetingType.Boss, ElementType.Dark, "damage", 1f);
 
-            HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", "레온", "균열 방패의 기사", "전열 / 방어 / 빛. 무너진 재문 앞에서 마지막까지 버틴 문지기 기사.", "이번에는, 절대 무너지지 않는다.", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 420, 25, 1f, 1.2f, shieldBash);
-            HeroData archer = CreateHeroData("Archer", "hero_archer_001", "Archer", "세리아", "바람길을 읽는 궁수", "후열 / 원거리 / 바람. 균열에서 새는 바람의 방향으로 적의 진입로를 읽는다.", "바람은 이미 답을 알고 있어.", HeroRole.RangedDps, HeroPositionType.Back, ElementType.Wind, 180, 35, 1.5f, 4f, rapidShot);
-            HeroData fireMage = CreateHeroData("Fire Mage", "hero_mage_fire_001", "Fire Mage", "카엘", "잿불의 방랑 마법사", "후열 / 광역 / 화염. 재문 사고 이후 떠돌며 균열의 불씨를 태워 봉한다.", "내가 나서는 건 이번뿐이다. …살아남아라.", HeroRole.Mage, HeroPositionType.Back, ElementType.Fire, 150, 55, 0.7f, 3.4f, meteor);
-            HeroData cleric = CreateHeroData("Priest", "hero_priest_001", "Priest", "미레아", "금빛 성서의 사제", "중열 / 지원 / 빛. 봉문 의식을 기록한 금빛 성서로 문지기들을 지탱한다.", "", HeroRole.Healer, HeroPositionType.Middle, ElementType.Light, 170, 10, 1f, 3.2f, holyHeal);
-            HeroData dwarfEngineer = CreateHeroData("Dwarf Engineer", "hero_engineer_dwarf_001", "Dwarf Engineer", "브롬", "룬포지 기술자", "중열 / 설치 / 기계. 균열 압력을 견디는 룬 장치를 현장에서 조립한다.", "", HeroRole.Engineer, HeroPositionType.Middle, ElementType.Earth, 230, 20, 1f, 2.8f, buildTurret);
-            HeroData assassin = CreateHeroData("Shadow Assassin", "hero_assassin_001", "Shadow Assassin", "닉스", "그림자 균열의 암살자", "전열 또는 중열 / 암살 / 어둠. 그림자 재문을 건너 핵심 적성을 먼저 끊는다.", "", HeroRole.Assassin, HeroPositionType.Front, ElementType.Dark, 210, 75, 0.8f, 1.5f, shadowStrike);
+            HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", "레온", "균열 방패의 기사", "전열 / 방어 / 빛. 무너진 재문 앞에서 마지막까지 버틴 문지기 기사.", "이번에는, 절대 무너지지 않는다.", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 520, 28, 0.95f, 1.25f, shieldBash);
+            HeroData archer = CreateHeroData("Archer", "hero_archer_001", "Archer", "세리아", "바람길을 읽는 궁수", "후열 / 원거리 / 바람. 균열에서 새는 바람의 방향으로 적의 진입로를 읽는다.", "바람은 이미 답을 알고 있어.", HeroRole.RangedDps, HeroPositionType.Back, ElementType.Wind, 190, 32, 1.75f, 4.8f, rapidShot);
+            HeroData fireMage = CreateHeroData("Fire Mage", "hero_mage_fire_001", "Fire Mage", "카엘", "잿불의 방랑 마법사", "후열 / 광역 / 화염. 재문 사고 이후 떠돌며 균열의 불씨를 태워 봉한다.", "내가 나서는 건 이번뿐이다. …살아남아라.", HeroRole.Mage, HeroPositionType.Back, ElementType.Fire, 165, 60, 0.65f, 3.8f, meteor);
+            HeroData cleric = CreateHeroData("Priest", "hero_priest_001", "Priest", "미레아", "금빛 성서의 사제", "중열 / 지원 / 빛. 봉문 의식을 기록한 금빛 성서로 문지기들을 지탱한다.", "", HeroRole.Healer, HeroPositionType.Middle, ElementType.Light, 220, 14, 1f, 3.5f, holyHeal);
+            HeroData dwarfEngineer = CreateHeroData("Dwarf Engineer", "hero_engineer_dwarf_001", "Dwarf Engineer", "브롬", "룬포지 기술자", "중열 / 설치 / 기계. 균열 압력을 견디는 룬 장치를 현장에서 조립한다.", "", HeroRole.Engineer, HeroPositionType.Middle, ElementType.Earth, 260, 24, 1f, 3f, buildTurret);
+            HeroData assassin = CreateHeroData("Shadow Assassin", "hero_assassin_001", "Shadow Assassin", "닉스", "그림자 균열의 암살자", "전열 또는 중열 / 암살 / 어둠. 그림자 재문을 건너 핵심 적성을 먼저 끊는다.", "", HeroRole.Assassin, HeroPositionType.Middle, ElementType.Dark, 230, 86, 0.75f, 1.75f, shadowStrike);
             HeroData[] heroes = { knight, archer, fireMage, cleric, dwarfEngineer, assassin };
 
-            MonsterData goblin = CreateMonsterData("Goblin", "monster_goblin_001", "Goblin", "문틈 도깨비", "균열 하급 적성", "문이 덜 닫힌 틈에서 가장 먼저 새어 나오는 소형 적성체.", MonsterType.Normal, ElementType.None, 80, 1.2f, 1, 5);
-            MonsterData wolf = CreateMonsterData("Wolf", "monster_wolf_001", "Wolf", "부식 늑대", "봉문 부식형 추적체", "봉문 결계를 갉아먹는 부식 기운을 두른 빠른 추적체.", MonsterType.Fast, ElementType.Wind, 60, 1.85f, 1, 6);
-            MonsterData orc = CreateMonsterData("Orc", "monster_orc_001", "Orc", "봉문 파쇄자", "중형 파쇄 적성", "오크풍 체형의 잔재는 남아 있지만, 한국 출시 기준으로는 봉문을 두드리는 파쇄 적성으로 분류한다.", MonsterType.Tank, ElementType.None, 230, 0.7f, 2, 12);
-            MonsterData bat = CreateMonsterData("Bat", "monster_bat_001", "Bat", "균열 꼬마귀", "비행 정찰 적성", "균열 위를 낮게 날며 문지기 진형을 흔드는 작은 날개 적성체.", MonsterType.Flying, ElementType.Wind, 55, 2f, 1, 8);
-            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", "재문 점액", "잔류 균열 응집체", "닫힌 문 주변에 남은 균열 찌꺼기가 뭉쳐 움직이는 점액형 적성.", MonsterType.Splitter, ElementType.Earth, 130, 0.8f, 1, 10);
-            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", "균열 잔해병", "기록 오염 잔재", "오래된 전장의 기록이 균열에 오염되어 걸어 나온 잔해 병사.", MonsterType.Undead, ElementType.Dark, 110, 1f, 1, 9);
-            MonsterData boss = CreateMonsterData("Orc Warlord", "boss_orc_warlord_001", "Orc Warlord", "그룸바르", "문파괴자", "봉문 위험 기록 최상위 개체. 재문을 직접 찢고 진입하는 대형 파쇄 적성.", MonsterType.Boss, ElementType.None, 1400, 0.45f, 5, 120);
+            MonsterData goblin = CreateMonsterData("Goblin", "monster_goblin_001", "Goblin", "문틈 도깨비", "기본형 / 빠른 다수 몬스터", "문이 덜 닫힌 틈에서 가장 먼저 새어 나오는 소형 적성체.", MonsterType.Normal, ElementType.None, 58, 1.45f, 1, 5);
+            MonsterData wolf = CreateMonsterData("Wolf", "monster_wolf_001", "Wolf", "부식 늑대", "속도형 / 빠른 라인 돌파", "봉문 결계를 갉아먹는 부식 기운을 두른 빠른 추적체.", MonsterType.Fast, ElementType.Wind, 72, 2.05f, 1, 7);
+            MonsterData orc = CreateMonsterData("Orc", "monster_orc_001", "Orc", "재갑 돌격병", "탱커형 / 높은 HP", "재문 갑각을 두르고 봉문을 정면으로 밀어붙이는 중형 돌격 적성.", MonsterType.Tank, ElementType.None, 255, 0.78f, 2, 14);
+            MonsterData bat = CreateMonsterData("Bat", "monster_bat_001", "Bat", "균열 까마귀", "비행/침투형 / 빠른 이동", "균열 위를 낮게 날며 문지기 진형을 흔드는 작은 날개 적성체.", MonsterType.Flying, ElementType.Wind, 64, 2.15f, 1, 8);
+            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", "룬핵 점액", "분열형 / 사망 hook", "닫힌 문 주변에 남은 룬핵 찌꺼기가 뭉쳐 움직이는 점액형 적성.", MonsterType.Splitter, ElementType.Earth, 155, 0.82f, 1, 11);
+            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", "망각의 뼈병", "언데드형 / 부활 hook", "오래된 전장의 기록이 균열에 오염되어 걸어 나온 뼈 병사.", MonsterType.Undead, ElementType.Dark, 135, 1.05f, 1, 12);
+            MonsterData boss = CreateMonsterData("Orc Warlord", "boss_orc_warlord_001", "Orc Warlord", "그룸바르", "문파괴자", "봉문 위험 기록 최상위 개체. 재문을 직접 찢고 진입하는 대형 파쇄 적성.", MonsterType.Boss, ElementType.Dark, 1750, 0.48f, 6, 360);
 
             RuneData[] runes = CreateV04Runes();
             StageData[] stages = CreateV04Stages(goblin, wolf, orc, bat, slime, skeleton, boss);
@@ -570,26 +570,26 @@ namespace RuneGate.Editor
         {
             return new[]
             {
-                CreateRune("Sword Rune", "rune_sword", "Sword Rune", "Increases all hero attack.", RuneRarity.Common, ElementType.Fire, "hero_attack_percent", 0.18f),
-                CreateRune("Bow Rune", "rune_bow", "Bow Rune", "Increases all hero attack speed.", RuneRarity.Common, ElementType.Wind, "hero_attack_speed_percent", 0.12f),
-                CreateRune("Healing Rune", "rune_healing", "Healing Rune", "Restores flat HP to the Kingdom Crystal.", RuneRarity.Common, ElementType.Light, "crystal_heal_flat", 35f),
-                CreateRune("Fire Rune", "rune_fire", "Fire Rune", "Improves mage area damage placeholder.", RuneRarity.Common, ElementType.Fire, "mage_area_percent", 0.12f),
-                CreateRune("Shield Rune", "rune_shield", "Shield Rune", "Increases tank and frontline HP.", RuneRarity.Common, ElementType.Light, "tank_hp_percent", 0.14f),
-                CreateRune("Command Rune", "rune_command", "Command Rune", "Slightly improves all hero stats.", RuneRarity.Rare, ElementType.Light, "all_hero_stats_percent", 0.07f),
-                CreateRune("Focus Rune", "rune_focus", "Focus Rune", "Increases hero attack.", RuneRarity.Common, ElementType.None, "hero_attack_percent", 0.1f),
-                CreateRune("Explosion Rune", "rune_explosion", "Explosion Rune", "Prototype hook for blast damage.", RuneRarity.Rare, ElementType.Fire, "blast_placeholder", 1f),
-                CreateRune("Haste Rune", "rune_haste", "Haste Rune", "Increases attack speed.", RuneRarity.Common, ElementType.Wind, "hero_attack_speed_percent", 0.1f),
-                CreateRune("Frost Rune", "rune_frost", "Frost Rune", "Slows active monsters.", RuneRarity.Rare, ElementType.Ice, "enemy_slow_percent", 0.2f),
-                CreateRune("Lightning Rune", "rune_lightning", "Lightning Rune", "Prototype hook for chain lightning.", RuneRarity.Rare, ElementType.Lightning, "lightning_placeholder", 1f),
-                CreateRune("Earth Rune", "rune_earth", "Earth Rune", "Increases hero max HP.", RuneRarity.Common, ElementType.Earth, "hero_hp_percent", 0.15f),
-                CreateRune("Sacrifice Rune", "rune_sacrifice", "Sacrifice Rune", "Damages the crystal to greatly increase hero attack.", RuneRarity.Rare, ElementType.Dark, "sacrifice_crystal_for_attack", 20f),
-                CreateRune("Guardian Rune", "rune_guardian", "Guardian Rune", "Prototype hook for protection.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 25f),
-                CreateRune("Mana Rune", "rune_mana", "Mana Rune", "Reduces skill cooldowns.", RuneRarity.Rare, ElementType.None, "skill_cooldown_percent", 0.1f),
-                CreateRune("Hunter Rune", "rune_hunter", "Hunter Rune", "Increases damage dealt to bosses.", RuneRarity.Epic, ElementType.None, "boss_damage_percent", 0.25f),
-                CreateRune("Purification Rune", "rune_purification", "Purification Rune", "Prototype hook for cleansing.", RuneRarity.Common, ElementType.Light, "purify_placeholder", 1f),
-                CreateRune("Shatter Rune", "rune_shatter", "Shatter Rune", "Prototype hook for armor break.", RuneRarity.Rare, ElementType.Earth, "crush_placeholder", 1f),
-                CreateRune("Chain Rune", "rune_chain", "Chain Rune", "Adds a ranged chain-shot placeholder bonus.", RuneRarity.Rare, ElementType.Lightning, "ranged_chain_shot_placeholder", 0.14f),
-                CreateRune("Turret Rune", "rune_turret", "Turret Rune", "Improves turret and engineer placeholder damage.", RuneRarity.Epic, ElementType.Earth, "turret_attack_percent", 0.18f)
+                CreateRune("Sword Rune", "rune_attack", "공격 룬", "모든 영웅의 공격력이 증가한다.", RuneRarity.Common, ElementType.None, "hero_attack_percent", 0.14f),
+                CreateRune("Shield Rune", "rune_defense", "방어 룬", "전열 방어 영웅의 생존력이 크게 증가한다.", RuneRarity.Common, ElementType.Light, "tank_defense_percent", 0.18f),
+                CreateRune("Bow Rune", "rune_life", "생명 룬", "모든 영웅의 최대 HP가 증가한다.", RuneRarity.Common, ElementType.Earth, "hero_max_hp_percent", 0.16f),
+                CreateRune("Command Rune", "rune_magic", "마법 룬", "광역/마법 계열 피해가 증가한다.", RuneRarity.Rare, ElementType.Fire, "mage_area_percent", 0.16f),
+                CreateRune("Haste Rune", "rune_speed", "속도 룬", "모든 영웅의 공격 속도가 증가한다.", RuneRarity.Common, ElementType.Wind, "hero_attack_speed_percent", 0.12f),
+                CreateRune("Healing Rune", "rune_healing", "치유 룬", "크리스탈 HP를 즉시 회복한다.", RuneRarity.Common, ElementType.Light, "crystal_heal_flat", 45f),
+                CreateRune("Fire Rune", "rune_fire", "화염 룬", "카엘과 광역 피해 선택의 가치가 증가한다.", RuneRarity.Common, ElementType.Fire, "mage_area_percent", 0.18f),
+                CreateRune("Frost Rune", "rune_frost", "냉기 룬", "현재 전장에 있는 몬스터 이동 속도를 늦춘다.", RuneRarity.Rare, ElementType.Ice, "monster_slow_percent", 0.2f),
+                CreateRune("Lightning Rune", "rune_lightning", "번개 룬", "연쇄 번개 효과 예약 hook.", RuneRarity.Rare, ElementType.Lightning, "lightning_placeholder", 1f),
+                CreateRune("Earth Rune", "rune_earth", "대지 룬", "영웅 최대 HP가 증가한다.", RuneRarity.Common, ElementType.Earth, "hero_max_hp_percent", 0.12f),
+                CreateRune("Sacrifice Rune", "rune_shadow", "그림자 룬", "닉스와 폭딜 조합을 보조하는 공격 보너스.", RuneRarity.Rare, ElementType.Dark, "hero_attack_percent", 0.2f),
+                CreateRune("Hunter Rune", "rune_hunt", "사냥 룬", "네임드와 보스에게 주는 피해가 증가한다.", RuneRarity.Rare, ElementType.None, "boss_damage_percent", 0.18f),
+                CreateRune("Focus Rune", "rune_focus", "집중 룬", "스킬 재사용 대기시간이 감소한다.", RuneRarity.Common, ElementType.None, "skill_cooldown_percent", 0.1f),
+                CreateRune("Explosion Rune", "rune_explosion", "폭발 룬", "폭발 피해 효과 예약 hook.", RuneRarity.Rare, ElementType.Fire, "blast_placeholder", 1f),
+                CreateRune("Guardian Rune", "rune_guardian", "수호 룬", "크리스탈 보호막 효과 예약 hook.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 25f),
+                CreateRune("Purification Rune", "rune_purification", "정화 룬", "오염/언데드 정화 효과 예약 hook.", RuneRarity.Common, ElementType.Light, "purify_placeholder", 1f),
+                CreateRune("Shatter Rune", "rune_shatter", "분쇄 룬", "장갑 파괴 효과 예약 hook.", RuneRarity.Rare, ElementType.Earth, "crush_placeholder", 1f),
+                CreateRune("Chain Rune", "rune_chain", "연쇄 룬", "원거리 연쇄 사격의 임시 공격 속도 보너스.", RuneRarity.Rare, ElementType.Lightning, "ranged_chain_shot_placeholder", 0.14f),
+                CreateRune("Turret Rune", "rune_turret", "포탑 룬", "브롬의 임시 포탑 계열 피해가 증가한다.", RuneRarity.Epic, ElementType.Earth, "turret_attack_percent", 0.18f),
+                CreateRune("Mana Rune", "rune_boss_hunt", "보스 사냥 룬", "그룸바르 같은 보스에게 주는 피해가 크게 증가한다.", RuneRarity.Epic, ElementType.Dark, "boss_damage_percent", 0.32f)
             };
         }
 
@@ -598,16 +598,16 @@ namespace RuneGate.Editor
             return new[]
             {
                 CreateStageFromPlan(1, "Goblin Forest 1", "재문 숲 1", "문틈 정찰", "문틈 도깨비가 처음 새어 나오는 재문 숲 입구.", 180, boss,
-                    new WavePlan(false, Spawn(goblin, 0, 3, 0.4f, 0.9f), Spawn(goblin, 1, 3, 0.8f, 0.9f)),
-                    new WavePlan(false, Spawn(goblin, 0, 4, 0.3f, 0.75f), Spawn(goblin, 2, 4, 0.7f, 0.75f))),
-                CreateStageFromPlan(2, "Goblin Forest 2", "재문 숲 2", "바람길 흔들림", "균열 꼬리바람을 타고 빠른 적성이 섞이기 시작한다.", 185, boss,
-                    new WavePlan(false, Spawn(goblin, 0, 4, 0.3f, 0.7f), Spawn(wolf, 1, 2, 1f, 0.8f)),
-                    new WavePlan(false, Spawn(goblin, 1, 5, 0.4f, 0.65f), Spawn(wolf, 2, 3, 0.8f, 0.75f)),
-                    new WavePlan(false, Spawn(goblin, 0, 5, 0.4f, 0.6f), Spawn(wolf, 1, 3, 0.7f, 0.7f), Spawn(goblin, 2, 4, 0.9f, 0.6f))),
-                CreateStageFromPlan(3, "Goblin Forest 3", "재문 숲 3", "파쇄 흔적", "봉문 파쇄자가 전열 압박을 시험하는 구간.", 190, boss,
-                    new WavePlan(false, Spawn(goblin, 0, 5, 0.3f, 0.6f), Spawn(goblin, 2, 5, 0.7f, 0.6f)),
-                    new WavePlan(false, Spawn(orc, 0, 1, 0.5f, 1f), Spawn(goblin, 1, 6, 0.7f, 0.55f), Spawn(orc, 2, 1, 1f, 1f)),
-                    new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 1.1f), Spawn(goblin, 1, 6, 0.8f, 0.5f), Spawn(orc, 2, 2, 1.2f, 1.1f))),
+                    new WavePlan(false, Spawn(goblin, 0, 5, 0.25f, 0.48f), Spawn(goblin, 1, 5, 0.45f, 0.48f)),
+                    new WavePlan(false, Spawn(goblin, 0, 6, 0.25f, 0.42f), Spawn(goblin, 2, 6, 0.45f, 0.42f))),
+                CreateStageFromPlan(2, "Goblin Forest 2", "재문 숲 2", "재갑 돌격", "문틈 도깨비 사이로 재갑 돌격병이 처음 섞이는 구간.", 185, boss,
+                    new WavePlan(false, Spawn(goblin, 0, 4, 0.3f, 0.55f), Spawn(orc, 1, 1, 1f, 1f)),
+                    new WavePlan(false, Spawn(goblin, 1, 5, 0.35f, 0.5f), Spawn(orc, 2, 1, 0.9f, 1f)),
+                    new WavePlan(false, Spawn(goblin, 0, 5, 0.35f, 0.48f), Spawn(orc, 1, 2, 0.75f, 0.9f), Spawn(goblin, 2, 4, 0.9f, 0.48f))),
+                CreateStageFromPlan(3, "Goblin Forest 3", "재문 숲 3", "부식 늑대", "빠른 부식 늑대가 라인 돌파를 시도한다.", 190, boss,
+                    new WavePlan(false, Spawn(goblin, 0, 5, 0.3f, 0.52f), Spawn(wolf, 2, 3, 0.7f, 0.62f)),
+                    new WavePlan(false, Spawn(wolf, 0, 4, 0.45f, 0.58f), Spawn(goblin, 1, 6, 0.7f, 0.5f), Spawn(wolf, 2, 3, 1f, 0.58f)),
+                    new WavePlan(false, Spawn(wolf, 0, 5, 0.35f, 0.55f), Spawn(goblin, 1, 6, 0.75f, 0.48f), Spawn(wolf, 2, 4, 1.1f, 0.55f))),
                 CreateStageFromPlan(4, "Goblin Forest 4", "재문 숲 4", "낮은 비행로", "균열 꼬마귀가 라인 사이를 흔드는 구간.", 195, boss,
                     new WavePlan(false, Spawn(bat, 0, 3, 0.4f, 0.65f), Spawn(goblin, 1, 4, 0.8f, 0.65f)),
                     new WavePlan(false, Spawn(wolf, 1, 4, 0.3f, 0.65f), Spawn(bat, 2, 4, 0.7f, 0.65f)),
@@ -800,10 +800,10 @@ namespace RuneGate.Editor
 
         private static UpgradeData[] CreateSampleUpgrades()
         {
-            UpgradeData crystal = CreateUpgrade("Crystal Reinforcement", "crystal_reinforcement", "Crystal Reinforcement", "Crystal max HP +20 per level.", 50, 1.35f, 10, UpgradeManager.CrystalMaxHpFlat, 20f);
-            UpgradeData attack = CreateUpgrade("Hero Training", "hero_training", "Hero Training", "All hero attack +5% per level.", 50, 1.35f, 10, UpgradeManager.HeroAttackPercent, 0.05f);
-            UpgradeData rhythm = CreateUpgrade("Battle Rhythm", "battle_rhythm", "Battle Rhythm", "All hero attack speed +3% per level.", 50, 1.35f, 10, UpgradeManager.HeroAttackSpeedPercent, 0.03f);
-            UpgradeData practice = CreateUpgrade("Skill Practice", "skill_practice", "Skill Practice", "All hero skill cooldown -3% per level.", 50, 1.35f, 10, UpgradeManager.SkillCooldownPercent, 0.03f);
+            UpgradeData crystal = CreateUpgrade("Crystal Reinforcement", "crystal_reinforcement", "Crystal Reinforcement", "Crystal max HP +22 per level.", 80, 1.8f, 5, UpgradeManager.CrystalMaxHpFlat, 22f);
+            UpgradeData attack = CreateUpgrade("Hero Training", "hero_training", "Hero Training", "All hero attack +6% per level.", 80, 1.8f, 5, UpgradeManager.HeroAttackPercent, 0.06f);
+            UpgradeData rhythm = CreateUpgrade("Battle Rhythm", "battle_rhythm", "Battle Rhythm", "All hero attack speed +4% per level.", 80, 1.8f, 5, UpgradeManager.HeroAttackSpeedPercent, 0.04f);
+            UpgradeData practice = CreateUpgrade("Skill Practice", "skill_practice", "Skill Practice", "All hero skill cooldown -4% per level.", 80, 1.8f, 5, UpgradeManager.SkillCooldownPercent, 0.04f);
             return new[] { crystal, attack, rhythm, practice };
         }
 

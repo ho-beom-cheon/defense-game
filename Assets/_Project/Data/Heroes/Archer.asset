@@ -14,19 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroData
   heroId: hero_archer_001
   displayName: Archer
-  displayNameKorean: "\uC138\uB9AC\uC544"
-  subtitleKorean: "\uBC14\uB78C\uAE38\uC744 \uC77D\uB294 \uAD81\uC218"
-  descriptionKorean: "\uD6C4\uC5F4 / \uC6D0\uAC70\uB9AC / \uBC14\uB78C. \uADE0\uC5F4\uC5D0\uC11C
-    \uC0C8\uB294 \uBC14\uB78C\uC758 \uBC29\uD5A5\uC73C\uB85C \uC801\uC758 \uC9C4\uC785\uB85C\uB97C
-    \uC77D\uB294\uB2E4."
-  quoteKorean: "\uBC14\uB78C\uC740 \uC774\uBBF8 \uB2F5\uC744 \uC54C\uACE0 \uC788\uC5B4."
+  displayNameKorean: "???"
+  subtitleKorean: "???? ?? ??"
+  descriptionKorean: "?? / ??? / ??. ???? ?? ??? ???? ?? ???? ???."
+  quoteKorean: "??? ?? ?? ?? ??."
   role: 2
   positionType: 2
   element: 8
-  maxHp: 180
-  attack: 35
-  attackSpeed: 1.5
-  attackRange: 4
+  maxHp: 190
+  attack: 32
+  attackSpeed: 1.75
+  attackRange: 4.8
   skillData: {fileID: 11400000, guid: 685c898ed20a8ad43a50daf5395fd03f, type: 2}
   portrait: {fileID: 21300000, guid: 7465ab560245dcc42810782e7f97076e, type: 3}
   conceptImage: {fileID: 21300000, guid: 7465ab560245dcc42810782e7f97076e, type: 3}

@@ -14,10 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageData
   stageId: stage_goblin_forest_06
   displayName: Goblin Forest 6
-  displayNameKorean: "\uC7AC\uBB38 \uC232 6"
-  subtitleKorean: "\uC794\uB958 \uC810\uC561"
-  descriptionKorean: "\uC7AC\uBB38 \uC8FC\uBCC0\uC758 \uC794\uB958 \uADE0\uC5F4 \uCC0C\uAEBC\uAE30\uAC00
-    \uC751\uC9D1\uD55C\uB2E4."
+  displayNameKorean: "?? ? 6"
+  subtitleKorean: "?? ??"
+  descriptionKorean: "?? ??? ??? ?? ??? ??? ????? ??."
   crystalHp: 210
   waves:
   - {fileID: 11400000, guid: c0894b1f12132e54aad43c7b99521568, type: 2}

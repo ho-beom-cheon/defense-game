@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Focus Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_focus
-  displayName: Focus Rune
-  description: Increases hero attack.
+  displayName: "?? ?"
+  description: "?? ??? ????? ????."
   rarity: 0
   element: 0
-  effectKey: hero_attack_percent
+  effectKey: skill_cooldown_percent
   value: 0.1
   icon: {fileID: 0}

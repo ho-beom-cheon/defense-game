@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d798458a421666d4cb903dbb536e4737, type: 3}
   m_Name: Hunter Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
-  runeId: rune_hunter
-  displayName: Hunter Rune
-  description: Increases damage dealt to bosses.
-  rarity: 2
+  runeId: rune_hunt
+  displayName: "?? ?"
+  description: "???? ???? ?? ??? ????."
+  rarity: 1
   element: 0
   effectKey: boss_damage_percent
-  value: 0.25
+  value: 0.18
   icon: {fileID: 0}

@@ -13,8 +13,10 @@ namespace RuneGate
         private const string EnemySlowPercent = "enemy_slow_percent";
         private const string SkillCooldownPercent = "skill_cooldown_percent";
         private const string BossDamagePercent = "boss_damage_percent";
+        private const string HeroMaxHpPercent = "hero_max_hp_percent";
         private const string HeroHpPercent = "hero_hp_percent";
         private const string TankHpPercent = "tank_hp_percent";
+        private const string TankDefensePercent = "tank_defense_percent";
         private const string HealingPercent = "healing_percent";
         private const string AllHeroStatsPercent = "all_hero_stats_percent";
         private const string SacrificeCrystalForAttack = "sacrifice_crystal_for_attack";
@@ -47,6 +49,7 @@ namespace RuneGate
                 case SkillCooldownPercent:
                     ApplyToHeroes(heroes, hero => hero.ApplySkillCooldownPercent(runeData.Value));
                     break;
+                case HeroMaxHpPercent:
                 case HeroHpPercent:
                     ApplyToHeroes(heroes, hero => hero.ApplyHeroHpPercent(runeData.Value));
                     break;
@@ -63,6 +66,9 @@ namespace RuneGate
                 case MageAreaPercent:
                     ApplyToHeroes(heroes, hero => hero.ApplyAttackPercent(runeData.Value * 0.8f));
                     Debug.Log("Mage area rune uses a v1.0 placeholder by applying a smaller global attack bonus.");
+                    break;
+                case TankDefensePercent:
+                    ApplyTankDefense(heroes, runeData.Value);
                     break;
                 case TankHpPercent:
                     ApplyToHeroes(heroes, hero => hero.ApplyHeroHpPercent(runeData.Value));
@@ -128,6 +134,20 @@ namespace RuneGate
                     apply(monster);
                 }
             }
+        }
+
+        private void ApplyTankDefense(IReadOnlyList<HeroController> heroes, float value)
+        {
+            ApplyToHeroes(heroes, hero =>
+            {
+                if (hero != null && hero.Data != null && hero.Data.Role == HeroRole.Tank)
+                {
+                    hero.ApplyHeroHpPercent(value);
+                    return;
+                }
+
+                hero.ApplyHeroHpPercent(value * 0.35f);
+            });
         }
     }
 }

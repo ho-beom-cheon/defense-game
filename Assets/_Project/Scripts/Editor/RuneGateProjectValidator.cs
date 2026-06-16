@@ -339,6 +339,9 @@ namespace RuneGate.Editor
             "docs/korean-world-identity-guide.md",
             "docs/pixel-art-pipeline.md",
             "docs/art-integration-notes.md",
+            "docs/content-balance-v07.md",
+            "docs/stage-design.md",
+            "docs/rune-design.md",
             "CHANGELOG.md"
         };
 

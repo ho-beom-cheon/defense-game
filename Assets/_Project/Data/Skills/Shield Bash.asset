@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: Shield Bash
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_shield_bash
-  displayName: Shield Bash
-  description: Deals light damage to the nearest monster.
-  cooldown: 8
-  power: 60
+  displayName: "Shield Bash"
+  description: "Stuns the line briefly in a later hook and deals reliable close damage."
+  cooldown: 7.5
+  power: 70
   damageHitCount: 1
-  range: 2
+  range: 2.1
   effectKey: damage
   radius: 1
   targetingType: 1

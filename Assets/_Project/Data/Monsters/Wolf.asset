@@ -14,16 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: monster_wolf_001
   displayName: Wolf
-  displayNameKorean: "\uBD80\uC2DD \uB291\uB300"
-  subtitleKorean: "\uBD09\uBB38 \uBD80\uC2DD\uD615 \uCD94\uC801\uCCB4"
-  descriptionKorean: "\uBD09\uBB38 \uACB0\uACC4\uB97C \uAC09\uC544\uBA39\uB294 \uBD80\uC2DD
-    \uAE30\uC6B4\uC744 \uB450\uB978 \uBE60\uB978 \uCD94\uC801\uCCB4."
+  displayNameKorean: "?? ??"
+  subtitleKorean: "??? / ?? ?? ??"
+  descriptionKorean: "?? ??? ???? ?? ??? ?? ?? ???."
   monsterType: 1
   element: 8
-  maxHp: 60
-  moveSpeed: 1.85
+  maxHp: 72
+  moveSpeed: 2.05
   damageToCrystal: 1
-  rewardGold: 6
+  rewardGold: 7
   conceptImage: {fileID: 21300000, guid: ab6cfd825d1e9a6408c68f7308fa8101, type: 3}
   runtimeSprite: {fileID: 21300000, guid: baaf0d61a4b442ffa8ff9288d5b78974, type: 3}
   sprite: {fileID: 0}

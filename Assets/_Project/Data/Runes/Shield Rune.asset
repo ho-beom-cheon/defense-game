@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d798458a421666d4cb903dbb536e4737, type: 3}
   m_Name: Shield Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
-  runeId: rune_shield
-  displayName: Shield Rune
-  description: Increases tank and frontline HP.
+  runeId: rune_defense
+  displayName: "?? ?"
+  description: "?? ?? ??? ???? ?? ????."
   rarity: 0
   element: 5
-  effectKey: tank_hp_percent
-  value: 0.14
+  effectKey: tank_defense_percent
+  value: 0.18
   icon: {fileID: 0}

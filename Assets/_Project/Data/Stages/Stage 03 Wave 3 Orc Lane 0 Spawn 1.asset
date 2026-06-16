@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f6fa8ccaadcbd941808bebcaacd6b6f, type: 3}
   m_Name: Stage 03 Wave 3 Orc Lane 0 Spawn 1
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.WaveSpawnData
-  monsterData: {fileID: 11400000, guid: 78fecbdc26f2b5545aac1f15e43e3b50, type: 2}
+  monsterData: {fileID: 11400000, guid: a39daacfbb7552f42a14f4a0ae98f69e, type: 2}
   laneIndex: 0
-  count: 2
-  startDelay: 0.4
-  spawnInterval: 1.1
+  count: 4
+  startDelay: 0.35
+  spawnInterval: 0.55

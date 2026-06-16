@@ -14,17 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.MonsterData
   monsterId: boss_orc_warlord_001
   displayName: Orc Warlord
-  displayNameKorean: "\uADF8\uB8F8\uBC14\uB974"
-  subtitleKorean: "\uBB38\uD30C\uAD34\uC790"
-  descriptionKorean: "\uBD09\uBB38 \uC704\uD5D8 \uAE30\uB85D \uCD5C\uC0C1\uC704 \uAC1C\uCCB4.
-    \uC7AC\uBB38\uC744 \uC9C1\uC811 \uCC22\uACE0 \uC9C4\uC785\uD558\uB294 \uB300\uD615
-    \uD30C\uC1C4 \uC801\uC131."
+  displayNameKorean: "????"
+  subtitleKorean: "????"
+  descriptionKorean: "?? / ?? / ??. ?? ?? ?? ??? ???, ??? ?? ?? ???? ?? ?? ??."
   monsterType: 6
-  element: 0
-  maxHp: 1400
-  moveSpeed: 0.45
-  damageToCrystal: 5
-  rewardGold: 120
+  element: 6
+  maxHp: 1750
+  moveSpeed: 0.48
+  damageToCrystal: 6
+  rewardGold: 360
   conceptImage: {fileID: 21300000, guid: ffa2d2b3bb6e07f479f981d32072f566, type: 3}
   runtimeSprite: {fileID: 21300000, guid: 20957c0d35f145f3a8f84ddc79e2b6b1, type: 3}
   sprite: {fileID: 0}

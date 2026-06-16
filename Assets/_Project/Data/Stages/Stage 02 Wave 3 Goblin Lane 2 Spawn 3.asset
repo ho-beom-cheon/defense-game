@@ -16,4 +16,4 @@ MonoBehaviour:
   laneIndex: 2
   count: 4
   startDelay: 0.9
-  spawnInterval: 0.6
+  spawnInterval: 0.48

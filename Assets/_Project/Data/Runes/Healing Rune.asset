@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Healing Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_healing
-  displayName: Healing Rune
-  description: Restores flat HP to the Kingdom Crystal.
+  displayName: "?? ?"
+  description: "???? HP? ?? ????."
   rarity: 0
   element: 5
   effectKey: crystal_heal_flat
-  value: 35
+  value: 45
   icon: {fileID: 0}

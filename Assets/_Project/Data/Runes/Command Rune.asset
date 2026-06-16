@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d798458a421666d4cb903dbb536e4737, type: 3}
   m_Name: Command Rune
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
-  runeId: rune_command
-  displayName: Command Rune
-  description: Slightly improves all hero stats.
+  runeId: rune_magic
+  displayName: "?? ?"
+  description: "??/?? ?? ??? ????."
   rarity: 1
-  element: 5
-  effectKey: all_hero_stats_percent
-  value: 0.07
+  element: 1
+  effectKey: mage_area_percent
+  value: 0.16
   icon: {fileID: 0}
