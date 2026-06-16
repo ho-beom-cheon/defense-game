@@ -21,6 +21,7 @@
 - Tutorial arrows and tap indicators are static overlay icons, not target-following guides yet.
 - TextMeshPro Font Asset is not generated yet. Current UI is IMGUI-based and uses the NotoSansKR Font catalog for Korean text.
 - A v0.8 data repair pass restored damaged `??` display strings in hero, monster, rune, stage, skill, and upgrade ScriptableObject assets.
+- Result, HUD, StageSelect, Skill Button, and Rune Selection now map internal ids and enum values to Korean display text, but older planning docs may still contain English state names as design references.
 
 ## v0.9
 

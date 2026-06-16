@@ -9,7 +9,7 @@ namespace RuneGate
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private List<StageData> stageSequence = new List<StageData>();
         [SerializeField] private bool drawRuntimeGui = true;
-        [SerializeField] private Rect panelRect = new Rect(300f, 170f, 410f, 220f);
+        [SerializeField] private Rect panelRect = new Rect(342f, 112f, 460f, 360f);
         [SerializeField] private string battleSceneName = "BattleScene";
         [SerializeField] private string upgradeSceneName = "UpgradeScene";
         [SerializeField] private string stageSelectSceneName = "StageSelectScene";
@@ -20,6 +20,7 @@ namespace RuneGate
         private string resultMessage;
         private string stageStatusMessage;
         private string nextStageMessage;
+        private string waveMessage;
         private string hintMessage;
         private int battleGoldEarned;
         private int goldEarned;
@@ -58,10 +59,14 @@ namespace RuneGate
             }
 
             KoreanFontManager.ApplyToGuiSkin();
-            Rect drawRect = panelRect;
-            drawRect.height = Mathf.Max(drawRect.height, 290f);
-            GUILayout.BeginArea(drawRect, GUI.skin.box);
+            DrawDimOverlay();
+
+            Rect drawRect = CenteredPanelRect();
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUILayout.BeginArea(drawRect, panelStyle);
             GUILayout.Label(resultTitle);
+            GUILayout.Space(8f);
+            GUILayout.Label(resultMessage);
             GUILayout.Label($"획득 골드: {goldEarned}");
             if (battleGoldEarned != goldEarned)
             {
@@ -78,17 +83,19 @@ namespace RuneGate
                 GUILayout.Label(nextStageMessage);
             }
 
-            if (!string.IsNullOrWhiteSpace(resultMessage))
+            if (!string.IsNullOrWhiteSpace(waveMessage))
             {
-                GUILayout.Label(resultMessage);
+                GUILayout.Label(waveMessage);
             }
 
+            GUILayout.Space(8f);
             if (!string.IsNullOrWhiteSpace(hintMessage))
             {
                 GUILayout.Label(hintMessage);
             }
 
-            if (GUILayout.Button("재시도", GUILayout.Height(34f)))
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("재시도", GUILayout.Height(36f)))
             {
                 if (battleManager != null)
                 {
@@ -100,12 +107,12 @@ namespace RuneGate
                 }
             }
 
-            if (GUILayout.Button("업그레이드", GUILayout.Height(30f)))
+            if (GUILayout.Button("업그레이드", GUILayout.Height(34f)))
             {
                 SceneManager.LoadScene(upgradeSceneName);
             }
 
-            if (GUILayout.Button("스테이지 선택", GUILayout.Height(30f)))
+            if (GUILayout.Button("스테이지 선택", GUILayout.Height(34f)))
             {
                 SceneManager.LoadScene(stageSelectSceneName);
             }
@@ -117,17 +124,14 @@ namespace RuneGate
         {
             isVisible = true;
             resultTitle = result.IsVictory ? "승리" : "패배";
+            resultMessage = result.IsVictory ? "크리스탈 방어 성공!" : "크리스탈이 파괴되었습니다.";
             battleGoldEarned = result.GoldEarned;
             goldEarned = CalculateGoldAward(result);
             ApplyResultToSave(result);
             stageStatusMessage = result.IsVictory ? "스테이지 클리어: 예" : "스테이지 클리어: 아니오";
             nextStageMessage = ResolveNextStageMessage(result);
+            waveMessage = BuildWaveMessage(result);
             hintMessage = result.IsVictory ? "어려운 스테이지 전에 골드로 업그레이드하세요." : BuildDefeatHint(result);
-            resultMessage = $"클리어 웨이브: {result.WavesCleared}";
-            if (!string.IsNullOrWhiteSpace(result.Message))
-            {
-                resultMessage = $"{resultMessage}\n{result.Message}";
-            }
         }
 
         private void HandleBattleStateChanged(BattleState state)
@@ -227,33 +231,71 @@ namespace RuneGate
 
             string clearedStageId = ResolveStageId(result);
             string nextStageId = ResolveNextStageId(clearedStageId);
-            return string.IsNullOrWhiteSpace(nextStageId) ? "챕터 1 보통 난이도 클리어." : $"다음 스테이지 해금: {nextStageId}";
+            return string.IsNullOrWhiteSpace(nextStageId) ? "챕터 1 보통 난이도 클리어!" : $"다음 스테이지 해금: {ResolveStageDisplayName(nextStageId)}";
+        }
+
+        private string ResolveStageDisplayName(string stageId)
+        {
+            EnsureStageSequence();
+            for (int i = 0; i < stageSequence.Count; i++)
+            {
+                StageData stageData = stageSequence[i];
+                if (stageData != null && stageData.StageId == stageId)
+                {
+                    return GameTextMapper.StageName(stageData);
+                }
+            }
+
+            return GameTextMapper.StageName(stageId);
+        }
+
+        private static string BuildWaveMessage(BattleResult result)
+        {
+            int totalWaves = result.StageData != null && result.StageData.Waves != null ? result.StageData.Waves.Count : result.WavesCleared;
+            return $"클리어 웨이브: {result.WavesCleared}/{Mathf.Max(1, totalWaves)}";
         }
 
         private static string BuildDefeatHint(BattleResult result)
         {
             if (result.StageData == null)
             {
-                return "팁: 업그레이드를 구매하거나 적 유형에 맞는 룬을 고르세요.";
+                return "힌트: 골드로 업그레이드하거나 조합에 맞는 룬을 선택하세요.";
             }
 
             string stageId = result.StageData.StageId ?? string.Empty;
             if (stageId.EndsWith("03") || stageId.EndsWith("04"))
             {
-                return "팁: 빠른 적은 세리아 또는 속도/냉기 룬으로 대응하세요.";
+                return "힌트: 빠른 적이 많다면 세리아 또는 속도 룬을 활용하세요.";
             }
 
             if (stageId.EndsWith("06") || stageId.EndsWith("08"))
             {
-                return "팁: 몰려오는 라인은 카엘, 브롬, 화염 룬, 포탑 룬이 좋습니다.";
+                return "힌트: 몰려오는 라인은 카엘, 브롬, 화염 룬, 포탑 룬이 좋습니다.";
             }
 
             if (stageId.EndsWith("10"))
             {
-                return "팁: 그룸바르는 닉스, 공격 룬, 보스 사냥 룬으로 상대하세요.";
+                return "힌트: 그룸바르는 닉스, 공격 룬, 보스 사냥 룬으로 상대하세요.";
             }
 
-            return "팁: 크리스탈이 무너지면 미레아, 치유 룬, 크리스탈 업그레이드를 써보세요.";
+            return "힌트: 크리스탈이 무너지면 미레아, 치유 룬, 크리스탈 업그레이드를 챙겨보세요.";
+        }
+
+        private Rect CenteredPanelRect()
+        {
+            float width = Mathf.Max(panelRect.width, 460f);
+            float height = Mathf.Max(panelRect.height, 360f);
+            float x = Mathf.Max(12f, (Screen.width - width) * 0.5f);
+            float y = Mathf.Max(12f, (Screen.height - height) * 0.5f);
+            return new Rect(x, y, width, height);
+        }
+
+        private static void DrawDimOverlay()
+        {
+            Color previousColor = GUI.color;
+            GUI.color = new Color(0f, 0f, 0f, 0.58f);
+            GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
+            GUI.color = previousColor;
         }
     }
 }

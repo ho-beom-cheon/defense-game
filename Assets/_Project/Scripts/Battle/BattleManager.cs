@@ -132,7 +132,7 @@ namespace RuneGate
             currentWaveIndex++;
             if (currentWaveIndex >= activeStageData.Waves.Count)
             {
-                FinishBattle(true, "All waves cleared.");
+                FinishBattle(true, "모든 웨이브를 클리어했습니다.");
                 return;
             }
 
@@ -147,7 +147,7 @@ namespace RuneGate
             if (waveManager == null)
             {
                 Debug.LogWarning("BattleManager cannot start a wave because WaveManager is missing.");
-                FinishBattle(false, "Wave system missing.");
+                FinishBattle(false, "웨이브 시스템이 없습니다.");
                 return;
             }
 
@@ -296,7 +296,7 @@ namespace RuneGate
             bool lastWaveCleared = activeStageData == null || currentWaveIndex >= activeStageData.Waves.Count - 1;
             if (lastWaveCleared)
             {
-                FinishBattle(true, "Kingdom Crystal defended.");
+                FinishBattle(true, "크리스탈 방어 성공!");
                 return;
             }
 
@@ -367,7 +367,7 @@ namespace RuneGate
 
         private void HandleCrystalDestroyed()
         {
-            FinishBattle(false, "Kingdom Crystal destroyed.");
+            FinishBattle(false, "크리스탈이 파괴되었습니다.");
         }
 
         private void FinishBattle(bool victory, string message)

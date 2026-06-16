@@ -53,51 +53,22 @@ namespace RuneGate
             }
 
             SkillController skillController = hero.SkillController;
-            string skillName = skillController != null ? KoreanFontManager.GetSkillDisplayName(skillController.Data) : "스킬";
-            string status = GetStatusText(skillController);
+            bool hasSkill = skillController != null && skillController.Data != null;
+            string skillName = hasSkill ? GameTextMapper.SkillName(skillController.Data) : "스킬";
+            string status = GameTextMapper.SkillStatus(battleManager.CurrentState, hasSkill ? skillController.CooldownRemaining : 0f, hasSkill);
             bool canUse = battleManager.CurrentState == BattleState.WaveRunning && skillController != null && skillController.CanUseSkill;
 
             Color previousColor = GUI.backgroundColor;
             GUI.backgroundColor = canUse ? new Color(0.75f, 1f, 0.75f, 1f) : new Color(0.65f, 0.65f, 0.65f, 1f);
             GUI.enabled = canUse;
             GUIStyle buttonStyle = RuntimePixelGuiUtility.CreateButtonStyle(GUI.skin.button, RuntimePixelAssetLoader.UiButtonSkill);
-            if (GUILayout.Button($"{hero.Data.DisplayNameKorean}: {skillName}\n{status}", buttonStyle, GUILayout.Height(50f)))
+            if (GUILayout.Button($"{hero.Data.DisplayNameKorean}: {skillName}\n{status}", buttonStyle, GUILayout.Height(54f)))
             {
                 hero.RequestManualSkill();
             }
 
             GUI.enabled = true;
             GUI.backgroundColor = previousColor;
-        }
-
-        private string GetStatusText(SkillController skillController)
-        {
-            if (battleManager == null)
-            {
-                return "전투 없음";
-            }
-
-            if (battleManager.CurrentState == BattleState.Victory || battleManager.CurrentState == BattleState.Defeat)
-            {
-                return "전투 종료";
-            }
-
-            if (battleManager.CurrentState == BattleState.RuneSelection)
-            {
-                return "룬 선택";
-            }
-
-            if (skillController == null || skillController.Data == null)
-            {
-                return "스킬 없음";
-            }
-
-            if (skillController.CooldownRemaining > 0f)
-            {
-                return $"{skillController.CooldownRemaining:0.0}s";
-            }
-
-            return "준비 완료";
         }
 
         private void AutoAssignReferences()

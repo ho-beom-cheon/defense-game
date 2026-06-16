@@ -56,8 +56,8 @@ namespace RuneGate
 
             KoreanFontManager.ApplyToGuiSkin();
             string heroName = heroController.Data != null ? heroController.Data.DisplayNameKorean : "영웅";
-            string skillName = heroController.SkillController != null ? KoreanFontManager.GetSkillDisplayName(heroController.SkillController.Data) : "스킬";
-            string status = GetStatusText();
+            string skillName = heroController.SkillController != null ? GameTextMapper.SkillName(heroController.SkillController.Data) : "스킬";
+            string status = GameTextMapper.SkillStatus(battleState, cooldownRemaining, heroController.SkillController != null);
             string label = $"{heroName}: {skillName}\n{status}";
 
             Rect drawRect = buttonRect;
@@ -121,26 +121,6 @@ namespace RuneGate
         private bool CanPressSkill()
         {
             return isInteractable && battleState == BattleState.WaveRunning;
-        }
-
-        private string GetStatusText()
-        {
-            if (battleState == BattleState.Victory || battleState == BattleState.Defeat)
-            {
-                return "전투 종료";
-            }
-
-            if (battleState == BattleState.RuneSelection)
-            {
-                return "룬 선택";
-            }
-
-            if (cooldownRemaining > 0f)
-            {
-                return $"{cooldownRemaining:0.0}s";
-            }
-
-            return "준비 완료";
         }
     }
 }
