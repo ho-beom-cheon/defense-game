@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.WaveSpawnData
   monsterData: {fileID: 11400000, guid: 78fecbdc26f2b5545aac1f15e43e3b50, type: 2}
   laneIndex: 2
-  count: 2
+  count: 6
   startDelay: 1.1
   spawnInterval: 1
