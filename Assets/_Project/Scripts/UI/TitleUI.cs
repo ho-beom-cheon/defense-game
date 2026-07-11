@@ -46,14 +46,14 @@ namespace RuneGate
             using (new GuiEnabledScope(!sceneTransitionRequested))
             {
                 string newGameLabel = SaveManager.HasSaveFile() ? "\uc0c8 \uac8c\uc784" : "\uc0c8 \uac8c\uc784 \uc2dc\uc791";
-                if (GUILayout.Button(newGameLabel, GUILayout.Height(42f)))
+                if (GUILayout.Button(newGameLabel, GUILayout.Height(UIResponsiveLayout.TouchHeight(42f))))
                 {
                     HandleNewGamePressed();
                 }
 
                 if (SaveManager.HasSaveFile())
                 {
-                    if (GUILayout.Button("\uc774\uc5b4\ud558\uae30", GUILayout.Height(42f)))
+                    if (GUILayout.Button("\uc774\uc5b4\ud558\uae30", GUILayout.Height(UIResponsiveLayout.TouchHeight(42f))))
                     {
                         LoadStageSelect();
                     }
@@ -67,13 +67,13 @@ namespace RuneGate
                 GUILayout.BeginHorizontal();
                 using (new GuiEnabledScope(!sceneTransitionRequested))
                 {
-                    if (GUILayout.Button("\uc0c8 \uac8c\uc784 \uc2dc\uc791", GUILayout.Height(34f)))
+                    if (GUILayout.Button("\uc0c8 \uac8c\uc784 \uc2dc\uc791", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
                     {
                         StartNewGame();
                     }
                 }
 
-                if (GUILayout.Button("\ucde8\uc18c", GUILayout.Height(34f)))
+                if (GUILayout.Button("\ucde8\uc18c", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
                 {
                     confirmNewGame = false;
                     feedbackMessage = string.Empty;
@@ -83,7 +83,7 @@ namespace RuneGate
             }
 
             GUILayout.Space(UIResponsiveLayout.SmallGap);
-            if (GUILayout.Button("\uc124\uc815", GUILayout.Height(34f)))
+            if (GUILayout.Button("\uc124\uc815", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
             {
                 showSettings = !showSettings;
                 confirmReset = false;
@@ -96,14 +96,14 @@ namespace RuneGate
                 GUILayout.Label("BGM \ubcfc\ub968: 100% (placeholder)");
                 GUILayout.Label("SFX \ubcfc\ub968: 100% (placeholder)");
                 GUILayout.Label("\uc9c4\ub3d9: \ucf1c\uc9d0 (placeholder)");
-                if (GUILayout.Button("\ub2e4\uc74c \uc804\ud22c\uc5d0\uc11c \ud29c\ud1a0\ub9ac\uc5bc \ub2e4\uc2dc \ubcf4\uae30", GUILayout.Height(34f)))
+                if (GUILayout.Button("\ub2e4\uc74c \uc804\ud22c\uc5d0\uc11c \ud29c\ud1a0\ub9ac\uc5bc \ub2e4\uc2dc \ubcf4\uae30", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
                 {
                     SaveManager.ResetTutorialSeen();
                     feedbackMessage = "\ub2e4\uc74c \uc804\ud22c\uc5d0\uc11c \ud29c\ud1a0\ub9ac\uc5bc\uc744 \ub2e4\uc2dc \ud45c\uc2dc\ud569\ub2c8\ub2e4.";
                 }
             }
 
-            if (!confirmReset && GUILayout.Button("\uc800\uc7a5 \ucd08\uae30\ud654", GUILayout.Height(34f)))
+            if (!confirmReset && GUILayout.Button("\uc800\uc7a5 \ucd08\uae30\ud654", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
             {
                 confirmReset = true;
                 confirmNewGame = false;
@@ -115,7 +115,7 @@ namespace RuneGate
                 RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconResetSave, 24f);
             }
 
-            if (confirmReset && GUILayout.Button("\ucd08\uae30\ud654 \ud655\uc778", GUILayout.Height(34f)))
+            if (confirmReset && GUILayout.Button("\ucd08\uae30\ud654 \ud655\uc778", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
             {
                 SaveManager.ResetSave();
                 GameSession.ClearSelectedStage();
