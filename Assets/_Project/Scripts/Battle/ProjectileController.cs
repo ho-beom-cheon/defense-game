@@ -6,6 +6,7 @@ namespace RuneGate
     {
         [SerializeField] private float moveSpeed = 10f;
         [SerializeField] private float hitDistance = 0.12f;
+        [SerializeField] private bool spawnImpactEffect = true;
 
         private MonsterController target;
         private int damage;
@@ -20,6 +21,11 @@ namespace RuneGate
 
             if (target == null || !target.IsAlive)
             {
+                if (spawnImpactEffect)
+                {
+                    CombatVisualEffectFactory.SpawnHitSpark(transform.position, 0.8f);
+                }
+
                 Destroy(gameObject);
                 return;
             }
@@ -27,6 +33,12 @@ namespace RuneGate
             transform.position = Vector3.MoveTowards(transform.position, target.transform.position, moveSpeed * Time.deltaTime);
             if (Vector3.Distance(transform.position, target.transform.position) <= hitDistance)
             {
+                if (spawnImpactEffect)
+                {
+                    CombatVisualEffectFactory.SpawnHitSpark(target.transform.position, RuntimeSpritePolicy.GetMonsterTargetHeight(target.Data));
+                }
+
+                CombatFeedbackEvents.RaiseAttackImpacted(target.transform.position);
                 target.TakeDamage(damage);
                 Destroy(gameObject);
             }

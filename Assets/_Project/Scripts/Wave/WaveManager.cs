@@ -149,10 +149,15 @@ namespace RuneGate
                 laneIndex = Mathf.Clamp(laneIndex, 0, laneManager.LaneCount - 1);
             }
 
-            Vector3 spawnPosition = laneManager.GetSpawnPosition(laneIndex);
+            float estimatedHalfWidth = RuntimeSpritePolicy.GetMonsterEstimatedHalfWidth(spawnData.MonsterData);
+            Vector3 spawnPosition = laneManager.GetSafeSpawnPosition(laneIndex, estimatedHalfWidth);
             Vector3 targetPosition = laneManager.GetCrystalTargetPosition(laneIndex);
             MonsterController monster = CreateMonsterInstance(spawnData.MonsterData, spawnPosition);
-            monster.Initialize(spawnData.MonsterData, laneIndex, targetPosition, crystalController, this);
+            MonsterVariantType variantType = ShadowContractService.RollVariant(spawnData.MonsterData, stageData, activeWave);
+            monster.Initialize(spawnData.MonsterData, laneIndex, targetPosition, crystalController, this, variantType);
+            monster.RefreshBoundsAnchors();
+            laneManager.ClampUnitInsideBattlefield(monster.transform, monster.VisualSpriteRenderer);
+            monster.RefreshBoundsAnchors();
             aliveMonsters.Add(monster);
             MonsterSpawned?.Invoke(monster);
         }
@@ -180,11 +185,14 @@ namespace RuneGate
             GameObject monsterObject = new GameObject($"Monster_{data.DisplayName}");
             monsterObject.transform.SetParent(monsterRoot);
             monsterObject.transform.position = spawnPosition;
-            monsterObject.AddComponent<SpriteRenderer>();
-            PlaceholderSprite placeholder = monsterObject.AddComponent<PlaceholderSprite>();
+            GameObject visualObject = new GameObject("Visual");
+            visualObject.transform.SetParent(monsterObject.transform);
+            visualObject.transform.localPosition = Vector3.zero;
+            visualObject.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholder = visualObject.AddComponent<PlaceholderSprite>();
             float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
             placeholder.Configure(RuntimeSpritePolicy.GetMonsterColor(data), new Vector2(targetHeight, targetHeight), 5);
-            RuntimeSpriteFitter fitter = monsterObject.AddComponent<RuntimeSpriteFitter>();
+            RuntimeSpriteFitter fitter = visualObject.AddComponent<RuntimeSpriteFitter>();
             fitter.TargetHeight = targetHeight;
             monsterObject.AddComponent<CharacterVisualController>();
             monsterObject.AddComponent<HitFlashController>();

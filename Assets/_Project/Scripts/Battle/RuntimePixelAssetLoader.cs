@@ -33,6 +33,15 @@ namespace RuneGate
         public const string UiBadgeNormal = "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_normal.png";
         public const string UiBadgeHard = "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_hard.png";
         public const string UiBadgeNightmare = "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_nightmare.png";
+        public const string UiPetShadowShard = "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_shadow_shard.png";
+        public const string UiPetContractSeal = "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_contract_seal.png";
+        public const string UiPetSlotEmpty = "Assets/_Project/Art/RuntimePixel/UI/PetContract/ui_pet_slot_empty.png";
+        public const string UiPetSlotEquipped = "Assets/_Project/Art/RuntimePixel/UI/PetContract/ui_pet_slot_equipped.png";
+        public const string UiPetPanelBg = "Assets/_Project/Art/RuntimePixel/UI/PetContract/ui_contract_panel_bg.png";
+        public const string UiPetAttackBoost = "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_attack_boost.png";
+        public const string UiPetGoldBoost = "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_gold_boost.png";
+        public const string UiPetCrystalGuard = "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_crystal_guard.png";
+        public const string UiPetSlowAura = "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_slow_aura.png";
 
         private static readonly Dictionary<string, Sprite> SpriteCache = new Dictionary<string, Sprite>();
         private static RuntimePixelVisualCatalog visualCatalog;

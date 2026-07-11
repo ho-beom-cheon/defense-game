@@ -161,6 +161,7 @@ namespace RuneGate
             float healingMultiplier = caster != null ? caster.HealingMultiplier : 1f;
             int healAmount = Mathf.Max(1, Mathf.RoundToInt(Mathf.Max(1, skillData.Power) * healingMultiplier));
             crystalController.Heal(healAmount);
+            CombatFeedbackEvents.RaiseUnitHealed(crystalController.transform.position);
             return true;
         }
     }

@@ -60,13 +60,7 @@ namespace RuneGate
             }
 
             int cost = CalculateCost(upgradeData, currentLevel);
-            if (!SaveManager.SpendGold(cost))
-            {
-                return false;
-            }
-
-            SaveManager.SetUpgradeLevel(upgradeData.UpgradeId, currentLevel + 1);
-            return true;
+            return SaveManager.TryPurchaseUpgrade(upgradeData.UpgradeId, cost, upgradeData.MaxLevel);
         }
 
         public static int CalculateCost(UpgradeData upgradeData, int currentLevel)

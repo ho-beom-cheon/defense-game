@@ -18,18 +18,33 @@ namespace RuneGate
         [SerializeField] private float attackLungeDuration = 0.12f;
         [SerializeField] private float skillPulseScale = 1.1f;
         [SerializeField] private float skillPulseDuration = 0.18f;
+        [SerializeField] private float idleBobAmplitude = 0.025f;
+        [SerializeField] private float idleBobFrequency = 2.6f;
+        [SerializeField] private float moveBobAmplitude = 0.055f;
+        [SerializeField] private float moveBobFrequency = 7.5f;
+        [SerializeField] private float hitShakeDistance = 0.055f;
+        [SerializeField] private float hitShakeDuration = 0.08f;
+        [SerializeField] private float impactPauseDuration = 0.045f;
 
         private readonly HashSet<int> animatorParameterHashes = new HashSet<int>();
         private RuntimeAnimatorController cachedController;
         private Coroutine attackLungeRoutine;
         private Coroutine skillPulseRoutine;
+        private Coroutine hitShakeRoutine;
         private Coroutine deathCollapseRoutine;
+        private float impactPauseUntil;
         private Vector3 restLocalPosition = Vector3.zero;
         private Vector3 restLocalScale = Vector3.one;
         private bool restPoseCaptured;
+        private bool isMoving;
 
         public SpriteRenderer SpriteRenderer => spriteRenderer;
         public Animator Animator => animator;
+
+        private void Update()
+        {
+            ApplyCodeMotion();
+        }
 
         private void Awake()
         {
@@ -55,6 +70,11 @@ namespace RuneGate
 
             CaptureRestPose(true);
             PlayIdle();
+        }
+
+        public void CaptureCurrentRestPose()
+        {
+            CaptureRestPose(true);
         }
 
         public void PlayIdle()
@@ -95,6 +115,12 @@ namespace RuneGate
         public void PlayHit()
         {
             SetTrigger(hitTrigger);
+            PlayHitShake();
+        }
+
+        public void PlayImpactPause()
+        {
+            impactPauseUntil = Mathf.Max(impactPauseUntil, Time.time + Mathf.Max(0f, impactPauseDuration));
         }
 
         public void PlaySkill()
@@ -143,6 +169,23 @@ namespace RuneGate
             }
 
             deathCollapseRoutine = StartCoroutine(DeathCollapseRoutine(duration));
+        }
+
+        public void PlayHitShake()
+        {
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null || hitShakeDistance <= 0f || hitShakeDuration <= 0f)
+            {
+                return;
+            }
+
+            if (hitShakeRoutine != null)
+            {
+                StopCoroutine(hitShakeRoutine);
+                visualTransform.localPosition = restLocalPosition;
+            }
+
+            hitShakeRoutine = StartCoroutine(HitShakeRoutine());
         }
 
         public void FlipByDirection(Vector3 direction)
@@ -229,6 +272,28 @@ namespace RuneGate
             skillPulseRoutine = null;
         }
 
+        private IEnumerator HitShakeRoutine()
+        {
+            CaptureRestPose(false);
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null)
+            {
+                yield break;
+            }
+
+            float elapsed = 0f;
+            while (elapsed < hitShakeDuration)
+            {
+                elapsed += Time.deltaTime;
+                float sign = Mathf.Repeat(elapsed * 80f, 2f) < 1f ? -1f : 1f;
+                visualTransform.localPosition = restLocalPosition + new Vector3(sign * hitShakeDistance, 0f, 0f);
+                yield return null;
+            }
+
+            visualTransform.localPosition = restLocalPosition;
+            hitShakeRoutine = null;
+        }
+
         private IEnumerator DeathCollapseRoutine(float duration)
         {
             CaptureRestPose(false);
@@ -299,7 +364,28 @@ namespace RuneGate
 
         private void SetMoving(bool isMoving)
         {
+            this.isMoving = isMoving;
             SetBool(movingParameter, isMoving);
+        }
+
+        private void ApplyCodeMotion()
+        {
+            Transform visualTransform = GetVisualTransform();
+            if (visualTransform == null || !restPoseCaptured || attackLungeRoutine != null || hitShakeRoutine != null || deathCollapseRoutine != null || Time.time < impactPauseUntil)
+            {
+                return;
+            }
+
+            float amplitude = isMoving ? moveBobAmplitude : idleBobAmplitude;
+            float frequency = isMoving ? moveBobFrequency : idleBobFrequency;
+            if (amplitude <= 0f || frequency <= 0f)
+            {
+                return;
+            }
+
+            float bob = Mathf.Sin(Time.time * frequency) * amplitude;
+            Vector3 nextPosition = restLocalPosition + new Vector3(0f, bob, 0f);
+            visualTransform.localPosition = nextPosition;
         }
 
         private void SetBool(string parameterName, bool value)

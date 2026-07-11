@@ -2,6 +2,34 @@ using UnityEngine;
 
 namespace RuneGate
 {
+    public readonly struct BattleLane
+    {
+        public BattleLane(int laneId, float yPosition, float heroFrontAnchorX, float heroMiddleAnchorX, float heroBackAnchorX, float enemySpawnX, float crystalTargetX, float minCombatX, float maxCombatX, float laneDepthOffset)
+        {
+            LaneId = laneId;
+            YPosition = yPosition;
+            HeroFrontAnchorX = heroFrontAnchorX;
+            HeroMiddleAnchorX = heroMiddleAnchorX;
+            HeroBackAnchorX = heroBackAnchorX;
+            EnemySpawnX = enemySpawnX;
+            CrystalTargetX = crystalTargetX;
+            MinCombatX = minCombatX;
+            MaxCombatX = maxCombatX;
+            LaneDepthOffset = laneDepthOffset;
+        }
+
+        public int LaneId { get; }
+        public float YPosition { get; }
+        public float HeroFrontAnchorX { get; }
+        public float HeroMiddleAnchorX { get; }
+        public float HeroBackAnchorX { get; }
+        public float EnemySpawnX { get; }
+        public float CrystalTargetX { get; }
+        public float MinCombatX { get; }
+        public float MaxCombatX { get; }
+        public float LaneDepthOffset { get; }
+    }
+
     public sealed class LaneManager : MonoBehaviour
     {
         [SerializeField] private int laneCount = 3;
@@ -14,6 +42,13 @@ namespace RuneGate
         [SerializeField] private float heroFrontSlotX = -0.55f;
         [SerializeField] private float heroSlotSpacingX = 0.95f;
         [SerializeField] private Transform[] heroSlotPoints;
+        [Header("Battlefield Safe Bounds")]
+        [SerializeField] private float cameraLeftPadding = 2.45f;
+        [SerializeField] private float cameraRightPadding = 0.55f;
+        [SerializeField] private float cameraTopPadding = 0.35f;
+        [SerializeField] private float cameraBottomPadding = 0.35f;
+        [SerializeField] private float crystalLeftPadding = 0.22f;
+        [SerializeField] private float laneDepthSpacing = 0.015f;
         [Header("Runtime Visuals")]
         [SerializeField] private bool createRuntimeBattlefieldVisuals = true;
         [SerializeField] private float laneStripHeight = 0.72f;
@@ -80,6 +115,75 @@ namespace RuneGate
 
             float x = heroFrontSlotX - safeSlotIndex * Mathf.Abs(heroSlotSpacingX);
             return new Vector3(x, GetLaneY(safeLaneIndex), 0f);
+        }
+
+        public BattleLane GetLaneDefinition(int laneIndex)
+        {
+            int safeLaneIndex = ClampLaneIndex(laneIndex, "lane definition");
+            Bounds safeBounds = GetBattlefieldSafeBounds();
+            float frontX = GetHeroSlotPosition(safeLaneIndex, HeroPositionType.Front).x;
+            float middleX = GetHeroSlotPosition(safeLaneIndex, HeroPositionType.Middle).x;
+            float backX = GetHeroSlotPosition(safeLaneIndex, HeroPositionType.Back).x;
+            return new BattleLane(
+                safeLaneIndex,
+                GetLaneY(safeLaneIndex),
+                frontX,
+                middleX,
+                backX,
+                GetSafeSpawnPosition(safeLaneIndex, 0f).x,
+                GetCrystalTargetPosition(safeLaneIndex).x,
+                safeBounds.min.x,
+                safeBounds.max.x,
+                GetLaneDepthOffset(safeLaneIndex));
+        }
+
+        public float GetMinCombatX()
+        {
+            return GetBattlefieldSafeBounds().min.x;
+        }
+
+        public float GetMaxCombatX()
+        {
+            return GetBattlefieldSafeBounds().max.x;
+        }
+
+        public float GetLaneDepthOffset(int laneIndex)
+        {
+            int safeLaneIndex = Mathf.Clamp(laneIndex, 0, LaneCount - 1);
+            return -safeLaneIndex * Mathf.Max(0f, laneDepthSpacing);
+        }
+
+        public Bounds GetBattlefieldSafeBounds()
+        {
+            Bounds cameraBounds = RuntimeSpriteBoundsUtility.GetCameraWorldBounds();
+            float minX = Mathf.Max(cameraBounds.min.x + Mathf.Max(0f, cameraLeftPadding), crystalX - Mathf.Max(0f, crystalLeftPadding));
+            float maxX = cameraBounds.max.x - Mathf.Max(0f, cameraRightPadding);
+            if (maxX <= minX + 0.5f)
+            {
+                minX = cameraBounds.min.x + 0.25f;
+                maxX = cameraBounds.max.x - 0.25f;
+            }
+
+            float minY = cameraBounds.min.y + Mathf.Max(0f, cameraBottomPadding);
+            float maxY = cameraBounds.max.y - Mathf.Max(0f, cameraTopPadding);
+            Bounds safeBounds = new Bounds();
+            safeBounds.SetMinMax(new Vector3(minX, minY, -0.5f), new Vector3(maxX, maxY, 0.5f));
+            return safeBounds;
+        }
+
+        public void ClampUnitInsideBattlefield(Transform rootTransform, SpriteRenderer spriteRenderer)
+        {
+            RuntimeSpriteBoundsUtility.ClampRootInsideBounds(rootTransform, spriteRenderer, GetBattlefieldSafeBounds(), 0.02f);
+        }
+
+        public Vector3 GetSafeSpawnPosition(int laneIndex, float estimatedHalfWidth)
+        {
+            Vector3 spawnPosition = GetSpawnPosition(laneIndex);
+            Bounds safeBounds = GetBattlefieldSafeBounds();
+            spawnPosition.x = Mathf.Min(spawnPosition.x, safeBounds.max.x - Mathf.Max(0f, estimatedHalfWidth));
+            spawnPosition.x = Mathf.Max(spawnPosition.x, safeBounds.min.x + Mathf.Max(0f, estimatedHalfWidth));
+            spawnPosition.y = GetLaneY(laneIndex);
+            return spawnPosition;
         }
 
         public Vector3 GetHeroSlotPosition(int laneIndex, HeroPositionType positionType)

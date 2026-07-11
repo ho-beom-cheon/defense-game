@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace RuneGate
 {
@@ -17,6 +18,8 @@ namespace RuneGate
         private Component audioSource;
         private Type audioClipType;
         private MethodInfo playOneShotMethod;
+        private static Type audioListenerType;
+        private static MethodInfo findAnyObjectByTypeMethod;
 
         private void Awake()
         {
@@ -28,7 +31,21 @@ namespace RuneGate
 
             instance = this;
             TryBindAudioSource();
+            EnsureAudioListener();
             RebuildClipLookup();
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void InitializeSceneAudioListener()
+        {
+            EnsureAudioListener();
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
+        private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            EnsureAudioListener();
         }
 
         public static void Play(SfxKey key)
@@ -95,6 +112,61 @@ namespace RuneGate
             }
 
             playOneShotMethod = audioSourceType.GetMethod("PlayOneShot", new[] { audioClipType });
+        }
+
+        private static void EnsureAudioListener()
+        {
+            Type listenerType = GetAudioListenerType();
+            if (listenerType == null || FindExistingAudioListener(listenerType) != null)
+            {
+                return;
+            }
+
+            Camera mainCamera = Camera.main;
+            if (mainCamera != null)
+            {
+                if (mainCamera.gameObject.GetComponent(listenerType) == null)
+                {
+                    mainCamera.gameObject.AddComponent(listenerType);
+                }
+
+                return;
+            }
+
+            GameObject listenerObject = new GameObject("Runtime Audio Listener");
+            listenerObject.hideFlags = HideFlags.DontSave;
+            listenerObject.AddComponent(listenerType);
+        }
+
+        private static Type GetAudioListenerType()
+        {
+            if (audioListenerType == null)
+            {
+                audioListenerType = Type.GetType("UnityEngine.AudioListener, UnityEngine.AudioModule");
+            }
+
+            return audioListenerType;
+        }
+
+        private static UnityEngine.Object FindExistingAudioListener(Type listenerType)
+        {
+            MethodInfo method = GetFindAnyObjectByTypeMethod();
+            if (method == null)
+            {
+                return null;
+            }
+
+            return method.Invoke(null, new object[] { listenerType }) as UnityEngine.Object;
+        }
+
+        private static MethodInfo GetFindAnyObjectByTypeMethod()
+        {
+            if (findAnyObjectByTypeMethod == null)
+            {
+                findAnyObjectByTypeMethod = typeof(UnityEngine.Object).GetMethod("FindAnyObjectByType", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(Type) }, null);
+            }
+
+            return findAnyObjectByTypeMethod;
         }
 
         [Serializable]

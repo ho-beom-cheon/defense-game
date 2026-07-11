@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RuneGate
@@ -11,6 +12,7 @@ namespace RuneGate
         [SerializeField] private Animator animator;
         [SerializeField] private CharacterVisualController visualController;
         [SerializeField] private HitFlashController hitFlashController;
+        [SerializeField] private UnitMovementController movementController;
         [SerializeField] private AutoDestroyEffect hitEffectPrefab;
         [SerializeField] private AutoDestroyEffect deathEffectPrefab;
         [SerializeField] private DamageText damageTextPrefab;
@@ -21,14 +23,28 @@ namespace RuneGate
         [SerializeField] private float hpBarYOffset = 0.48f;
         [SerializeField] private float hitFlashDuration = 0.08f;
         [SerializeField] private float deathDestroyDelay = 0.35f;
+        [SerializeField] private float spawnPulseDuration = 0.18f;
+        [SerializeField] private float bossSpawnPulseScale = 1.18f;
+        [Header("Organic Movement")]
+        [SerializeField] private float moveAcceleration = 6.5f;
+        [SerializeField] private float moveDeceleration = 13f;
+        [SerializeField] private float meleeStopDistance = 0.52f;
+        [SerializeField] private float attackCooldownDuration = 1.05f;
+        [SerializeField] private float monsterPersonalSpace = 0.36f;
+        [SerializeField] private float attackWindUp = 0.2f;
+        [SerializeField] private float attackRecovery = 0.32f;
 
+        private static readonly List<MonsterController> activeMonsters = new List<MonsterController>();
         private int maxHp;
         private int currentHp;
         private int laneIndex;
         private Vector3 crystalTargetPosition;
         private CrystalController crystalController;
         private WaveManager ownerWaveManager;
+        private LaneManager laneManager;
+        private MonsterVariantType variantType = MonsterVariantType.Normal;
         private float speedMultiplier = 1f;
+        private float attackCooldown;
         private bool initialized;
         private bool removedFromWave;
         private bool revivedOnce;
@@ -37,6 +53,9 @@ namespace RuneGate
         private PlaceholderSprite hpBarFill;
         private Coroutine hitFlashRoutine;
         private Coroutine deathRoutine;
+        private Coroutine spawnPulseRoutine;
+        private Coroutine attackRoutine;
+        private MonsterCombatState combatState = MonsterCombatState.Spawn;
 
         public event Action<MonsterController> Died;
         public event Action<MonsterController> ReachedCrystal;
@@ -48,6 +67,24 @@ namespace RuneGate
         public int LaneIndex => laneIndex;
         public bool IsBoss => monsterData != null && monsterData.IsBoss;
         public bool IsAlive => initialized && currentHp > 0 && !removedFromWave;
+        public MonsterVariantType VariantType => variantType;
+        public int RewardGold => ShadowContractService.GetRewardGold(monsterData, variantType);
+        public SpriteRenderer VisualSpriteRenderer => spriteRenderer;
+        public MonsterCombatState CombatState => combatState;
+        public static IReadOnlyList<MonsterController> ActiveMonsters => activeMonsters;
+
+        private void OnEnable()
+        {
+            if (!activeMonsters.Contains(this))
+            {
+                activeMonsters.Add(this);
+            }
+        }
+
+        private void OnDisable()
+        {
+            activeMonsters.Remove(this);
+        }
 
         private void Awake()
         {
@@ -62,6 +99,7 @@ namespace RuneGate
             }
 
             AutoAssignFeedbackReferences();
+            EnsureMovementController();
             CaptureOriginalSpriteColor();
         }
 
@@ -72,11 +110,27 @@ namespace RuneGate
                 return;
             }
 
-            float speed = monsterData != null ? monsterData.MoveSpeed : 0f;
+            if (attackCooldown > 0f)
+            {
+                attackCooldown -= Time.deltaTime;
+            }
+
+            float speed = ShadowContractService.GetMoveSpeed(monsterData, variantType);
             Vector3 previousPosition = transform.position;
-            transform.position = Vector3.MoveTowards(transform.position, crystalTargetPosition, speed * speedMultiplier * Time.deltaTime);
-            visualController?.FlipByDirection(transform.position - previousPosition);
-            visualController?.PlayMove();
+            HeroController blocker = FindBlockingHero();
+            if (blocker != null)
+            {
+                SetCombatState(MonsterCombatState.Attack);
+                movementController?.Stop();
+                visualController?.FlipToward(blocker.transform.position);
+                visualController?.PlayIdle();
+                TryAttackHero(blocker);
+            }
+            else
+            {
+                SetCombatState(MonsterCombatState.Advance);
+                MoveTowardCrystal(speed, previousPosition);
+            }
 
             if (Vector3.Distance(transform.position, crystalTargetPosition) <= reachDistance)
             {
@@ -85,6 +139,11 @@ namespace RuneGate
         }
 
         public void Initialize(MonsterData data, int assignedLaneIndex, Vector3 targetPosition, CrystalController targetCrystal, WaveManager waveManager)
+        {
+            Initialize(data, assignedLaneIndex, targetPosition, targetCrystal, waveManager, MonsterVariantType.Normal);
+        }
+
+        public void Initialize(MonsterData data, int assignedLaneIndex, Vector3 targetPosition, CrystalController targetCrystal, WaveManager waveManager, MonsterVariantType assignedVariantType)
         {
             if (data == null)
             {
@@ -97,17 +156,25 @@ namespace RuneGate
             crystalTargetPosition = targetPosition;
             crystalController = targetCrystal;
             ownerWaveManager = waveManager;
-            maxHp = Mathf.Max(1, data.MaxHp);
+            laneManager = FindAnyObjectByType<LaneManager>();
+            variantType = data.IsBoss ? MonsterVariantType.Normal : assignedVariantType;
+            maxHp = ShadowContractService.GetMaxHp(data, variantType);
             currentHp = maxHp;
             speedMultiplier = 1f;
+            attackCooldown = 0f;
             removedFromWave = false;
             revivedOnce = false;
             initialized = true;
+            SetCombatState(MonsterCombatState.Spawn);
 
             hpBarSize = RuntimeSpritePolicy.GetMonsterHpBarSize(data);
             hpBarYOffset = RuntimeSpritePolicy.GetMonsterHpBarYOffset(data);
 
             AutoAssignFeedbackReferences();
+            EnsureMovementController();
+            float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
+            movementController.Configure(ShadowContractService.GetMoveSpeed(data, variantType), meleeStopDistance, ResolvePersonalSpace(data, targetHeight), 2f);
+            movementController.SetMotionTuning(moveAcceleration, moveDeceleration, reachDistance);
             ApplyRuntimeVisual(data);
 
             if (animator != null && data.AnimatorController != null)
@@ -116,9 +183,13 @@ namespace RuneGate
             }
 
             visualController?.Initialize(data.Sprite, data.AnimatorController);
+            visualController?.FlipByDirection(Vector3.left);
+            ApplyVariantTint();
+            AlignVisualToGround(true);
             CaptureOriginalSpriteColor();
             EnsureRuntimeHpBar();
             UpdateHpBar();
+            PlaySpawnPulse();
             HpChanged?.Invoke(currentHp, maxHp);
         }
 
@@ -158,6 +229,23 @@ namespace RuneGate
 
             fitter.TargetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
             fitter.FitNow();
+            AlignVisualToGround(false);
+        }
+
+        public void RefreshBoundsAnchors()
+        {
+            AlignVisualToGround(true);
+            UpdateHpBarAnchor();
+            UpdateHpBar();
+        }
+
+        private void AlignVisualToGround(bool recaptureRestPose)
+        {
+            RuntimeSpriteBoundsUtility.AlignVisualBottomToGround(spriteRenderer, transform, transform.position.y);
+            if (recaptureRestPose)
+            {
+                visualController?.CaptureCurrentRestPose();
+            }
         }
 
         public void TakeDamage(int damage)
@@ -168,6 +256,8 @@ namespace RuneGate
             }
 
             PlayHitFeedback(damage);
+            SetCombatState(MonsterCombatState.Hit);
+            CombatFeedbackEvents.RaiseUnitHit(transform.position);
             currentHp = Mathf.Max(0, currentHp - damage);
             HpChanged?.Invoke(currentHp, maxHp);
             UpdateHpBar();
@@ -195,10 +285,14 @@ namespace RuneGate
             }
 
             removedFromWave = true;
+            SetCombatState(MonsterCombatState.Dead);
+            movementController?.SetDeadState(true);
+            StopAttackRoutine();
             Died?.Invoke(this);
             ownerWaveManager?.NotifyMonsterKilled(this);
             float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData);
             CombatVisualEffectFactory.SpawnDeathPuff(GetEffectPosition(), targetHeight);
+            CombatFeedbackEvents.RaiseUnitDied(transform.position);
             AudioManager.Play(SfxKey.MonsterDeath);
             DisableColliders();
             if (hpBarRoot != null)
@@ -221,14 +315,55 @@ namespace RuneGate
             }
 
             removedFromWave = true;
+            SetCombatState(MonsterCombatState.Dead);
+            movementController?.SetDeadState(true);
+            StopAttackRoutine();
             if (crystalController != null && monsterData != null)
             {
-                crystalController.TakeDamage(monsterData.DamageToCrystal);
+                crystalController.TakeDamage(ShadowContractService.GetDamageToCrystal(monsterData, variantType));
+                CombatFeedbackEvents.RaiseCrystalDamaged(transform.position);
             }
 
             ReachedCrystal?.Invoke(this);
             ownerWaveManager?.NotifyMonsterRemoved(this);
+            CombatVisualEffectFactory.SpawnHitSpark(transform.position, RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData));
             Destroy(gameObject);
+        }
+
+        private void StopAttackRoutine()
+        {
+            if (attackRoutine == null)
+            {
+                return;
+            }
+
+            StopCoroutine(attackRoutine);
+            attackRoutine = null;
+        }
+
+        private void MoveTowardCrystal(float baseSpeed, Vector3 previousPosition)
+        {
+            EnsureMovementController();
+            movementController.Configure(baseSpeed * speedMultiplier, meleeStopDistance, monsterPersonalSpace, 2f);
+            float destinationX = ApplyMonsterSeparation(crystalTargetPosition.x);
+            float laneY = ResolveLaneY();
+            float minX = laneManager != null ? laneManager.GetMinCombatX() : Mathf.Min(crystalTargetPosition.x, transform.position.x) - 0.25f;
+            float maxX = laneManager != null ? laneManager.GetMaxCombatX() : Mathf.Max(crystalTargetPosition.x, transform.position.x) + 0.25f;
+            movementController.MoveToX(destinationX, laneY, minX, maxX);
+            laneManager?.ClampUnitInsideBattlefield(transform, spriteRenderer);
+            AlignVisualToGround(false);
+            UpdateHpBarAnchor();
+
+            Vector3 delta = transform.position - previousPosition;
+            visualController?.FlipByDirection(delta.sqrMagnitude > 0.000001f ? delta : Vector3.left);
+            if (delta.sqrMagnitude > 0.000001f)
+            {
+                visualController?.PlayMove();
+            }
+            else
+            {
+                visualController?.PlayIdle();
+            }
         }
 
         private void CaptureOriginalSpriteColor()
@@ -237,6 +372,16 @@ namespace RuneGate
             {
                 originalSpriteColor = spriteRenderer.color;
             }
+        }
+
+        private void ApplyVariantTint()
+        {
+            if (spriteRenderer == null || variantType == MonsterVariantType.Normal)
+            {
+                return;
+            }
+
+            spriteRenderer.color = ShadowContractService.GetVariantTint(variantType);
         }
 
         private void AutoAssignFeedbackReferences()
@@ -255,6 +400,189 @@ namespace RuneGate
             {
                 hitEffectAnchor = transform;
             }
+        }
+
+        private void EnsureMovementController()
+        {
+            if (movementController == null)
+            {
+                movementController = GetComponent<UnitMovementController>();
+            }
+
+            if (movementController == null)
+            {
+                movementController = gameObject.AddComponent<UnitMovementController>();
+            }
+        }
+
+        private HeroController FindBlockingHero()
+        {
+            IReadOnlyList<HeroController> heroes = HeroController.ActiveHeroes;
+            HeroController selected = null;
+            float selectedDistance = float.MaxValue;
+            for (int i = 0; i < heroes.Count; i++)
+            {
+                HeroController hero = heroes[i];
+                if (hero == null || !hero.IsAlive || hero.LaneIndex != laneIndex)
+                {
+                    continue;
+                }
+
+                float distanceX = Mathf.Abs(transform.position.x - hero.transform.position.x);
+                if (distanceX > ResolveMeleeStopDistance())
+                {
+                    continue;
+                }
+
+                if (distanceX < selectedDistance)
+                {
+                    selected = hero;
+                    selectedDistance = distanceX;
+                }
+            }
+
+            return selected;
+        }
+
+        private void TryAttackHero(HeroController hero)
+        {
+            if (hero == null || attackCooldown > 0f || attackRoutine != null)
+            {
+                return;
+            }
+
+            attackRoutine = StartCoroutine(AttackHeroRoutine(hero));
+            attackCooldown = ResolveAttackCooldown();
+        }
+
+        private IEnumerator AttackHeroRoutine(HeroController hero)
+        {
+            movementController?.SetAttackState(true);
+            Vector3 targetPosition = hero != null ? hero.transform.position : transform.position + Vector3.left;
+            visualController?.FlipToward(targetPosition);
+            visualController?.PlayAttackLunge(targetPosition);
+            CombatFeedbackEvents.RaiseAttackStarted(transform.position);
+            yield return new WaitForSeconds(Mathf.Max(0f, attackWindUp));
+
+            if (hero != null && hero.IsAlive)
+            {
+                int damage = ResolveMonsterAttackDamage();
+                visualController?.PlayImpactPause();
+                CombatVisualEffectFactory.SpawnHitSpark(hero.transform.position, 1f);
+                CombatFeedbackEvents.RaiseAttackImpacted(hero.transform.position);
+                hero.TakeDamage(damage);
+            }
+
+            yield return new WaitForSeconds(Mathf.Max(0f, attackRecovery));
+            movementController?.SetAttackState(false);
+            attackRoutine = null;
+        }
+
+        private int ResolveMonsterAttackDamage()
+        {
+            int crystalDamage = ShadowContractService.GetDamageToCrystal(monsterData, variantType);
+            if (monsterData != null && monsterData.IsBoss)
+            {
+                return Mathf.Max(8, crystalDamage * 2);
+            }
+
+            return Mathf.Max(2, crystalDamage * 3);
+        }
+
+        private float ResolveAttackCooldown()
+        {
+            if (monsterData != null && monsterData.MonsterType == MonsterType.Fast)
+            {
+                return Mathf.Max(0.35f, attackCooldownDuration * 0.72f);
+            }
+
+            if (monsterData != null && monsterData.IsBoss)
+            {
+                return Mathf.Max(0.55f, attackCooldownDuration * 1.25f);
+            }
+
+            return Mathf.Max(0.35f, attackCooldownDuration);
+        }
+
+        private float ResolveMeleeStopDistance()
+        {
+            float baseDistance = meleeStopDistance;
+            if (monsterData != null && monsterData.IsBoss)
+            {
+                baseDistance += 0.42f;
+            }
+            else if (monsterData != null && monsterData.MonsterType == MonsterType.Tank)
+            {
+                baseDistance += 0.18f;
+            }
+
+            return Mathf.Max(0.2f, baseDistance);
+        }
+
+        private float ApplyMonsterSeparation(float desiredX)
+        {
+            float personalSpace = ResolvePersonalSpace(monsterData, RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData));
+            for (int i = 0; i < activeMonsters.Count; i++)
+            {
+                MonsterController other = activeMonsters[i];
+                if (other == null || other == this || !other.IsAlive || other.LaneIndex != laneIndex)
+                {
+                    continue;
+                }
+
+                float gap = Mathf.Abs(transform.position.x - other.transform.position.x);
+                if (gap >= personalSpace)
+                {
+                    continue;
+                }
+
+                if (transform.position.x >= other.transform.position.x)
+                {
+                    desiredX = Mathf.Max(desiredX, other.transform.position.x + personalSpace);
+                }
+                else
+                {
+                    desiredX = Mathf.Min(desiredX, other.transform.position.x - personalSpace * 0.5f);
+                }
+            }
+
+            return desiredX;
+        }
+
+        private float ResolvePersonalSpace(MonsterData data, float targetHeight)
+        {
+            float resolved = Mathf.Max(monsterPersonalSpace, targetHeight * 0.32f);
+            if (data != null && data.IsBoss)
+            {
+                return Mathf.Max(resolved, 1.05f);
+            }
+
+            if (data != null && data.MonsterType == MonsterType.Tank)
+            {
+                return Mathf.Max(resolved, 0.68f);
+            }
+
+            return resolved;
+        }
+
+        private float ResolveLaneY()
+        {
+            if (laneManager == null)
+            {
+                laneManager = FindAnyObjectByType<LaneManager>();
+            }
+
+            return laneManager != null ? laneManager.GetLaneY(laneIndex) : transform.position.y;
+        }
+
+        private void SetCombatState(MonsterCombatState nextState)
+        {
+            if (combatState == MonsterCombatState.Dead)
+            {
+                return;
+            }
+
+            combatState = nextState;
         }
 
         private void PlayHitFeedback(int damage)
@@ -311,6 +639,46 @@ namespace RuneGate
             visualController?.PlayDeathCollapse(delay);
             yield return new WaitForSeconds(delay);
             Destroy(gameObject);
+        }
+
+        private void PlaySpawnPulse()
+        {
+            if (visualController == null || spawnPulseDuration <= 0f)
+            {
+                return;
+            }
+
+            Transform visualTransform = visualController.SpriteRenderer != null ? visualController.SpriteRenderer.transform : transform;
+            if (visualTransform == null)
+            {
+                return;
+            }
+
+            if (spawnPulseRoutine != null)
+            {
+                StopCoroutine(spawnPulseRoutine);
+            }
+
+            spawnPulseRoutine = StartCoroutine(SpawnPulseRoutine(visualTransform));
+        }
+
+        private IEnumerator SpawnPulseRoutine(Transform visualTransform)
+        {
+            Vector3 baseScale = visualTransform.localScale;
+            float peakMultiplier = IsBoss ? bossSpawnPulseScale : 1.08f;
+            Vector3 peakScale = baseScale * Mathf.Max(1f, peakMultiplier);
+            float elapsed = 0f;
+            while (elapsed < spawnPulseDuration)
+            {
+                elapsed += Time.deltaTime;
+                float percent = Mathf.Clamp01(elapsed / spawnPulseDuration);
+                float curve = Mathf.Sin(percent * Mathf.PI);
+                visualTransform.localScale = Vector3.Lerp(baseScale, peakScale, curve);
+                yield return null;
+            }
+
+            visualTransform.localScale = baseScale;
+            spawnPulseRoutine = null;
         }
 
         private void DisableColliders()
@@ -385,10 +753,28 @@ namespace RuneGate
                 return;
             }
 
+            UpdateHpBarAnchor();
             float percent = maxHp > 0 ? Mathf.Clamp01((float)currentHp / maxHp) : 0f;
             Vector2 fillSize = new Vector2(Mathf.Max(0.01f, hpBarSize.x * percent), hpBarSize.y);
             hpBarFill.Configure(new Color(0.35f, 0.95f, 0.35f, 1f), fillSize, 21);
             hpBarFill.transform.localPosition = new Vector3(-hpBarSize.x * (1f - percent) * 0.5f, 0f, 0f);
+        }
+
+        private void UpdateHpBarAnchor()
+        {
+            if (hpBarRoot == null)
+            {
+                return;
+            }
+
+            float targetWorldY = transform.position.y + hpBarYOffset;
+            if (spriteRenderer != null && spriteRenderer.sprite != null)
+            {
+                targetWorldY = spriteRenderer.bounds.max.y + Mathf.Clamp(RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData) * 0.08f, 0.08f, 0.22f);
+            }
+
+            targetWorldY = RuntimeSpriteBoundsUtility.ClampWorldYInsideCamera(targetWorldY, 0.08f, 0.08f);
+            hpBarRoot.position = new Vector3(transform.position.x, targetWorldY, transform.position.z);
         }
 
         private void PlayHitFlash()

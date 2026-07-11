@@ -22,6 +22,8 @@ namespace RuneGate
         private BattleState currentState = BattleState.None;
         private int currentWaveIndex = -1;
         private int goldEarned;
+        private int monstersKilled;
+        private float battleStartTime;
         private bool initialized;
 
         public event Action<BattleState> BattleStateChanged;
@@ -44,10 +46,16 @@ namespace RuneGate
             BindEvents();
         }
 
+        private void OnEnable()
+        {
+            AutoAssignReferences();
+            BindEvents();
+        }
+
         private void Start()
         {
             EnsureFallbackContent();
-            StageData selectedStageData = GameSession.SelectedStageData != null ? GameSession.SelectedStageData : initialStageData;
+            StageData selectedStageData = GameSession.ResolveStageForBattle(initialStageData);
             if (autoStartOnStart && selectedStageData != null)
             {
                 InitializeStage(selectedStageData);
@@ -55,24 +63,14 @@ namespace RuneGate
             }
         }
 
+        private void OnDisable()
+        {
+            UnbindEvents();
+        }
+
         private void OnDestroy()
         {
-            if (crystalController != null)
-            {
-                crystalController.Destroyed -= HandleCrystalDestroyed;
-            }
-
-            if (waveManager != null)
-            {
-                waveManager.WaveCompleted -= HandleWaveCompleted;
-                waveManager.MonsterKilled -= HandleMonsterKilled;
-            }
-
-            if (runeManager != null)
-            {
-                runeManager.RuneOptionsGenerated -= HandleRuneOptionsGenerated;
-                runeManager.RuneSelected -= HandleRuneSelected;
-            }
+            UnbindEvents();
         }
 
         public void InitializeStage(StageData stageData)
@@ -89,9 +87,14 @@ namespace RuneGate
             activeStageData = stageData;
             currentWaveIndex = -1;
             goldEarned = 0;
+            monstersKilled = 0;
+            GameSession.BeginBattleRun();
+            battleStartTime = Time.time;
             initialized = true;
+            ShadowContractService.BeginBattle();
 
-            int crystalMaxHp = stageData.CrystalHp + UpgradeManager.GetCrystalMaxHpBonus(permanentUpgrades);
+            int difficultyAdjustedCrystalHp = DifficultyRules.ApplyCrystalMaxHp(stageData.CrystalHp);
+            int crystalMaxHp = difficultyAdjustedCrystalHp + UpgradeManager.GetCrystalMaxHpBonus(permanentUpgrades) + ShadowContractService.GetCrystalMaxHpBonus(difficultyAdjustedCrystalHp);
             crystalController?.Initialize(crystalMaxHp);
             if (crystalController == null)
             {
@@ -110,6 +113,7 @@ namespace RuneGate
             BuildAndInitializeHeroes();
 
             UpgradeManager.ApplyHeroUpgradeEffects(permanentUpgrades, heroes);
+            ShadowContractService.ApplyHeroPassives(heroes);
 
             SetState(BattleState.Preparing);
             WaveChanged?.Invoke(0, stageData.Waves.Count);
@@ -132,7 +136,7 @@ namespace RuneGate
             currentWaveIndex++;
             if (currentWaveIndex >= activeStageData.Waves.Count)
             {
-                FinishBattle(true, "모든 웨이브를 클리어했습니다.");
+                FinishBattle(true, "\ubaa8\ub4e0 \uc6e8\uc774\ube0c\ub97c \ud074\ub9ac\uc5b4\ud588\uc2b5\ub2c8\ub2e4.");
                 return;
             }
 
@@ -147,12 +151,13 @@ namespace RuneGate
             if (waveManager == null)
             {
                 Debug.LogWarning("BattleManager cannot start a wave because WaveManager is missing.");
-                FinishBattle(false, "웨이브 시스템이 없습니다.");
+                FinishBattle(false, "\uc6e8\uc774\ube0c \uc2dc\uc2a4\ud15c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.");
                 return;
             }
 
             SetState(BattleState.WaveRunning);
             WaveChanged?.Invoke(currentWaveIndex + 1, activeStageData.Waves.Count);
+            CombatFeedbackEvents.RaiseWaveStarted(currentWaveIndex + 1);
             waveManager.StartWave(wave);
         }
 
@@ -169,7 +174,7 @@ namespace RuneGate
 
         public void RestartBattle()
         {
-            StageData stageToRestart = activeStageData != null ? activeStageData : GameSession.SelectedStageData != null ? GameSession.SelectedStageData : initialStageData;
+            StageData stageToRestart = activeStageData != null ? activeStageData : GameSession.ResolveStageForBattle(initialStageData);
             if (stageToRestart == null)
             {
                 Debug.LogWarning("BattleManager cannot restart because StageData is missing.");
@@ -286,6 +291,26 @@ namespace RuneGate
             }
         }
 
+        private void UnbindEvents()
+        {
+            if (crystalController != null)
+            {
+                crystalController.Destroyed -= HandleCrystalDestroyed;
+            }
+
+            if (waveManager != null)
+            {
+                waveManager.WaveCompleted -= HandleWaveCompleted;
+                waveManager.MonsterKilled -= HandleMonsterKilled;
+            }
+
+            if (runeManager != null)
+            {
+                runeManager.RuneOptionsGenerated -= HandleRuneOptionsGenerated;
+                runeManager.RuneSelected -= HandleRuneSelected;
+            }
+        }
+
         private void HandleWaveCompleted(WaveData waveData)
         {
             if (currentState != BattleState.WaveRunning)
@@ -296,7 +321,7 @@ namespace RuneGate
             bool lastWaveCleared = activeStageData == null || currentWaveIndex >= activeStageData.Waves.Count - 1;
             if (lastWaveCleared)
             {
-                FinishBattle(true, "크리스탈 방어 성공!");
+                FinishBattle(true, "\ud06c\ub9ac\uc2a4\ud0c8 \ubc29\uc5b4 \uc131\uacf5!");
                 return;
             }
 
@@ -361,13 +386,15 @@ namespace RuneGate
                 return;
             }
 
-            goldEarned += Mathf.Max(0, monster.Data.RewardGold);
+            goldEarned += Mathf.Max(0, monster.RewardGold);
+            monstersKilled++;
+            ShadowContractService.RecordMonsterKilled(monster);
             GoldChanged?.Invoke(goldEarned);
         }
 
         private void HandleCrystalDestroyed()
         {
-            FinishBattle(false, "크리스탈이 파괴되었습니다.");
+            FinishBattle(false, "\ud06c\ub9ac\uc2a4\ud0c8\uc774 \ud30c\uad34\ub418\uc5c8\uc2b5\ub2c8\ub2e4.");
         }
 
         private void FinishBattle(bool victory, string message)
@@ -379,9 +406,21 @@ namespace RuneGate
 
             waveManager?.StopCurrentWave(!victory);
             SetState(victory ? BattleState.Victory : BattleState.Defeat);
+            if (victory)
+            {
+                CombatFeedbackEvents.RaiseVictory();
+            }
+            else
+            {
+                CombatFeedbackEvents.RaiseDefeat();
+            }
+
             AudioManager.Play(victory ? SfxKey.Victory : SfxKey.Defeat);
             int wavesCleared = victory ? currentWaveIndex + 1 : Mathf.Max(0, currentWaveIndex);
-            BattleEnded?.Invoke(new BattleResult(victory, activeStageData, wavesCleared, goldEarned, message));
+            int crystalHp = crystalController != null ? crystalController.CurrentHp : 0;
+            int crystalMaxHp = crystalController != null ? crystalController.MaxHp : 0;
+            Debug.Log($"Battle finished. Victory={victory}, Stage={activeStageData?.StageId}, WavesCleared={wavesCleared}, Gold={goldEarned}, RunId={GameSession.CurrentBattleRunId}.");
+            BattleEnded?.Invoke(new BattleResult(victory, activeStageData, wavesCleared, goldEarned, message, Mathf.Max(0f, Time.time - battleStartTime), monstersKilled, crystalHp, crystalMaxHp, GameSession.CurrentBattleRunId));
         }
 
         private void SetState(BattleState nextState)

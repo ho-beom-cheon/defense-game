@@ -86,6 +86,22 @@ namespace RuneGate
             return GetMonsterTargetHeight(monsterData) * (monsterData != null && monsterData.IsBoss ? 0.58f : 0.64f);
         }
 
+        public static float GetMonsterEstimatedHalfWidth(MonsterData monsterData)
+        {
+            float height = GetMonsterTargetHeight(monsterData);
+            if (monsterData != null && monsterData.IsBoss)
+            {
+                return height * 0.46f;
+            }
+
+            if (monsterData != null && monsterData.MonsterType == MonsterType.Tank)
+            {
+                return height * 0.42f;
+            }
+
+            return height * 0.34f;
+        }
+
         public static Color GetHeroColor(HeroData heroData)
         {
             if (heroData == null)

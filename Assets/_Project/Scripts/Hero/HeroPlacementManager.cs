@@ -13,6 +13,7 @@ namespace RuneGate
         [SerializeField] private Vector2 heroPlaceholderSize = new Vector2(0.72f, 0.72f);
 
         private readonly List<HeroController> spawnedHeroes = new List<HeroController>();
+        private LaneManager activeLaneManager;
 
         public HeroRosterData HeroRoster => heroRoster;
         public FormationData DefaultFormation => defaultFormation;
@@ -30,6 +31,7 @@ namespace RuneGate
             }
 
             EnsureHeroRoot();
+            activeLaneManager = laneManager;
             IReadOnlyList<FormationSlot> formationSlots = ResolveFormationSlots();
             HashSet<string> occupiedSlots = new HashSet<string>();
             HashSet<string> placedHeroes = new HashSet<string>();
@@ -190,6 +192,8 @@ namespace RuneGate
 
             fitter.TargetHeight = RuntimeSpritePolicy.GetHeroTargetHeight(heroData);
             fitter.FitNow();
+            RuntimeSpriteBoundsUtility.AlignVisualBottomToGround(spriteRenderer, heroObject.transform, position.y);
+            activeLaneManager?.ClampUnitInsideBattlefield(heroObject.transform, spriteRenderer);
 
             Animator animator = heroObject.GetComponentInChildren<Animator>();
             if (heroData.AnimatorController != null && animator == null)
@@ -229,6 +233,8 @@ namespace RuneGate
 
             heroController.SetLogicalPlacement(laneIndex, slotIndex);
             heroController.Initialize(heroData);
+            heroController.RefreshVisualAnchors(true);
+            activeLaneManager?.ClampUnitInsideBattlefield(heroObject.transform, spriteRenderer);
 
             return heroController;
         }
