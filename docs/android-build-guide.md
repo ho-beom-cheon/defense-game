@@ -83,11 +83,37 @@ Unity에서 아래 항목을 직접 확인한다.
 
 ## Latest Build Attempt
 
-- Date: 2026-06-16
-- Result: Failed before build start
-- Reason: another Unity instance was running with this project open
-- Log target: `unity-v09-android-build.log`
-- Next action: Unity Editor를 닫고 `Tools/RuneGate/Build Android APK v0.9 RC` 또는 command line build를 다시 실행한다.
+- Date: 2026-07-12
+- Result: Succeeded
+- Command: `RuneGate.Editor.RuneGateCurrentBuildPipeline.BuildCurrentAndroidApkFromCommandLine`
+- Output: `Builds/Android/RuneGateDefense-current.apk`
+- File size: `65,881,473 bytes`
+- SHA-256: `D8D902CBBEA90559FC68CEA7926C457706416085F9DFDBDC18E912E5CE65E824`
+- Package: `com.hobeomcheon.runegatedefense`
+- Version: `0.9.0` (`versionCode 9`)
+- SDK: minimum 25, target 36
+- App icons: Android density resources confirmed with `aapt dump badging`
+- APK integrity: `zipalign -c -v 4` passed; APK Signature Scheme v2 verification passed
+- Signing: Android Debug certificate; release keystore signing is still required for store submission
+- Remaining verification: Android device install, touch input, safe area, and long-session performance
+
+## Current Content Build
+
+진행 중인 데이터와 씬을 유지한 채 APK를 만들 때는 `Tools/RuneGate/Build Current Android APK`를 사용한다. 이 메뉴는 Bootstrap을 다시 실행하지 않으며, 현재 `EditorBuildSettings`에 활성화된 씬만 빌드한다.
+
+배치 빌드 예시:
+
+```powershell
+& "C:\Program Files\Unity\Hub\Editor\6000.4.11f1\Editor\Unity.exe" `
+  -batchmode `
+  -nographics `
+  -projectPath "C:\workspace\defense-game" `
+  -executeMethod RuneGate.Editor.RuneGateCurrentBuildPipeline.BuildCurrentAndroidApkFromCommandLine `
+  -runegateBuildPath "C:\workspace\defense-game\Builds\Android\RuneGateDefense-current.apk" `
+  -logFile "C:\workspace\defense-game\.utmp\android-current-build.log"
+```
+
+성공 시 로그에 `RUNEGATE_ANDROID_BUILD_PASSED`, 실패 시 `RUNEGATE_ANDROID_BUILD_FAILED`가 출력되고 배치 프로세스는 각각 종료 코드 `0` 또는 `1`을 반환한다.
 
 ## Common Failure Checks
 

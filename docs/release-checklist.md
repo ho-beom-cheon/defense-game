@@ -4,34 +4,35 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 ## Project Validation
 
-- [ ] Unity 컴파일 에러 없음
-- [ ] `Tools/RuneGate/Validate Project` 실행
+- [x] Unity 컴파일 에러 없음
+- [x] `Tools/RuneGate/Validate Project` 실행
 - [ ] `Tools/RuneGate/Validate v1.0 Release Track` 실행
-- [ ] `TitleScene` 실행 가능
-- [ ] `StageSelectScene` 실행 가능
-- [ ] `BattleScene` 실행 가능
-- [ ] `UpgradeScene` 실행 가능
+- [x] `TitleScene` 실행 가능
+- [x] `StageSelectScene` 실행 가능
+- [x] `BattleScene` 실행 가능
+- [x] `UpgradeScene` 실행 가능
 
 ### Latest Validation Attempt
 
-- Date: 2026-06-16
-- Command: `Unity.exe -batchmode -quit -projectPath C:\workspace\defense-game -executeMethod RuneGate.Editor.RuneGateProjectValidator.ValidateFromCommandLine`
-- Result: Failed before validation start
-- Reason: another Unity instance is running with this project open
-- Local fallback: `git diff --check`, asset existence checks, PlayerSettings text checks, and Editor.log C# error scan were performed.
+- Date: 2026-07-12
+- Project Validator: passed in Unity batchmode
+- Progression Smoke Test: passed; one compile-safe placeholder warning for shared rune effect keys
+- Windows Player Stage 1 E2E: passed
+- Windows Player Stage 1~10 full chapter E2E: passed
+- Full chapter result: 10 victories, 10 persisted upgrade purchases, Grumbar boss spawn verified
 
 ## Progression QA
 
 - [ ] 새 세이브에서 Stage 1만 해금됨
-- [ ] Stage 1 시작 가능
-- [ ] Stage 1 클리어 가능
-- [ ] Stage 2 해금 확인
-- [ ] Stage 1~10 목록 표시 확인
-- [ ] Stage 10에서 그룸바르 보스 등장 확인
-- [ ] Victory 결과창 정상 표시
+- [x] Stage 1 시작 가능
+- [x] Stage 1 클리어 가능
+- [x] Stage 2 해금 확인
+- [x] Stage 1~10 목록 표시 확인
+- [x] Stage 10에서 그룸바르 보스 등장 확인
+- [x] Victory 결과창 정상 표시
 - [ ] Defeat 결과창 정상 표시
 - [ ] Result 버튼: 재시도 / 업그레이드 / 스테이지 선택 정상
-- [ ] Upgrade 구매 정상
+- [x] Upgrade 구매 정상
 - [ ] Save/Load 정상
 - [ ] Reset Save 정상
 - [ ] 튜토리얼 표시/완료 저장 정상
@@ -58,18 +59,25 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 ## Android Build
 
 - [x] APK 빌드 시도
-- [ ] APK 빌드 성공
+- [x] APK 빌드 성공
 - [ ] 실기기 설치 확인
 - [ ] 긴 세션 플레이 확인
 - [ ] AAB 빌드 후보 확인
+- [ ] 릴리스 키스토어로 APK/AAB 서명
 
 ### Latest Build Attempt
 
-- Date: 2026-06-16
-- Command: `Unity.exe -batchmode -quit -projectPath C:\workspace\defense-game -executeMethod RuneGate.Editor.RuneGateBootstrapper.BuildAndroidApkV09Rc`
-- Result: Failed before build start
-- Reason: another Unity instance is running with this project open
-- Next action: Unity Editor를 닫은 뒤 같은 명령 또는 `Tools/RuneGate/Build Android APK v0.9 RC` 메뉴로 다시 시도한다.
+- Date: 2026-07-12
+- Command: `RuneGate.Editor.RuneGateCurrentBuildPipeline.BuildCurrentAndroidApkFromCommandLine`
+- Result: Succeeded
+- Output: `Builds/Android/RuneGateDefense-current.apk`
+- SHA-256: `D8D902CBBEA90559FC68CEA7926C457706416085F9DFDBDC18E912E5CE65E824`
+- Package/Version: `com.hobeomcheon.runegatedefense`, `0.9.0` (`9`)
+- SDK: minimum 25, target 36
+- Integrity: zipalign 및 APK Signature Scheme v2 검증 통과
+- Signing: Android Debug 인증서 사용 중
+- ADB: 연결된 실기기 없음
+- Remaining: Android 실기기 설치, 터치 입력, Safe Area, 장시간 플레이 검증
 
 ## Policy / Monetization
 
