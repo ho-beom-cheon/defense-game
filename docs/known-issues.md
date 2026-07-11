@@ -40,7 +40,7 @@
 ## Android / Release
 
 - APK/AAB builds require Unity Android Build Support and a clean build environment.
-- The latest current-content Android APK batch build succeeded on 2026-07-12 with save recovery and system-flow changes included; device installation has not been verified yet.
+- Clean-branch Android APK/AAB builds succeeded on 2026-07-12 after save, system-flow, combat movement, and pet runtime dependencies were committed; device installation has not been verified yet.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Device install, long-session performance, screen clipping, and touch validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.

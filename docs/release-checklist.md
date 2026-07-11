@@ -80,16 +80,19 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Date: 2026-07-12
 - Command: `RuneGate.Editor.RuneGateCurrentBuildPipeline.BuildCurrentAndroidApkFromCommandLine`
 - Result: Succeeded
-- Output: `Builds/Android/RuneGateDefense-current.apk`
-- SHA-256: `4AA16D2C6A555D39C42E0DB2A309E9AD42407E85AAF017E8FDFBBDD5F6340899`
+- Clean branch: `codex/issue-34-clean-android-aab`
+- Output: `C:\workspace\defense-game-issue34-artifacts\RuneGateDefense-clean.apk`
+- File size: `71,887,387 bytes`
+- SHA-256: `61AC8D256976197BDEC30718124D048900BA533383FEE50AC5AAD46D4114E03A`
 - Package/Version: `com.hobeomcheon.runegatedefense`, `0.9.0` (`9`)
 - SDK: minimum 25, target 36
 - Integrity: zipalign 및 APK Signature Scheme v2 검증 통과
 - Signing: Android Debug 인증서 사용 중
 - ADB: 연결된 실기기 없음
 - Latest APK includes the system-flow, save recovery, Result navigation, and Stage 1~10 regression changes
-- AAB candidate: `65,831,901 bytes`, SHA-256 `7081B4CA6E44F79BB8DFB97C5D74A3E0C7E1C4A5CA22061E7E609C9425435369`
+- AAB candidate: `71,825,497 bytes`, SHA-256 `0F0BB84567E9CA135B3825F90E6B55DF654C800CFAFC8E24DCD069EDB2782466`
 - AAB bundletool validation and JAR signature verification passed; signed with Android Debug certificate
+- App icon import uses uncompressed source textures and the Unity compressed-icon warning is no longer emitted
 - Permanent current-content APK/AAB menu and command-line entry points verified
 - Remaining: Android 실기기 설치, 터치 입력, Safe Area, 장시간 플레이 검증
 
