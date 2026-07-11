@@ -11,6 +11,11 @@ namespace RuneGate
     {
         private const string SmokeArgument = "-runegateSmoke";
         private const string FullChapterSmokeArgument = "-runegateSmokeFullChapter";
+        private const string SystemFlowSmokeArgument = "-runegateSmokeSystemFlows";
+        private const string SaveWriteSmokeArgument = "-runegateSmokeSaveWrite";
+        private const string SaveReadSmokeArgument = "-runegateSmokeSaveRead";
+        private const string CorruptSaveSmokeArgument = "-runegateSmokeCorruptSave";
+        private const string InterruptedSaveSmokeArgument = "-runegateSmokeInterruptedSave";
         private const string DefaultSaveFileName = "runegate_save.json";
         private const float AcceleratedTimeScale = 6f;
         private const float SceneLoadTimeoutSeconds = 15f;
@@ -22,6 +27,11 @@ namespace RuneGate
         private bool battleFinished;
         private bool failed;
         private bool fullChapterMode;
+        private bool systemFlowMode;
+        private bool saveWriteMode;
+        private bool saveReadMode;
+        private bool corruptSaveMode;
+        private bool interruptedSaveMode;
         private bool runeSelectionPending;
         private bool sawBossThisStage;
         private bool waitSucceeded;
@@ -31,7 +41,13 @@ namespace RuneGate
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
         {
-            bool smokeRequested = HasCommandLineArgument(SmokeArgument) || HasCommandLineArgument(FullChapterSmokeArgument);
+            bool smokeRequested = HasCommandLineArgument(SmokeArgument) ||
+                                  HasCommandLineArgument(FullChapterSmokeArgument) ||
+                                  HasCommandLineArgument(SystemFlowSmokeArgument) ||
+                                  HasCommandLineArgument(SaveWriteSmokeArgument) ||
+                                  HasCommandLineArgument(SaveReadSmokeArgument) ||
+                                  HasCommandLineArgument(CorruptSaveSmokeArgument) ||
+                                  HasCommandLineArgument(InterruptedSaveSmokeArgument);
             if (!smokeRequested || FindAnyObjectByType<RuneGateRuntimeSmokeRunner>() != null)
             {
                 return;
@@ -46,6 +62,11 @@ namespace RuneGate
         {
             Application.runInBackground = true;
             fullChapterMode = HasCommandLineArgument(FullChapterSmokeArgument);
+            systemFlowMode = HasCommandLineArgument(SystemFlowSmokeArgument);
+            saveWriteMode = HasCommandLineArgument(SaveWriteSmokeArgument);
+            saveReadMode = HasCommandLineArgument(SaveReadSmokeArgument);
+            corruptSaveMode = HasCommandLineArgument(CorruptSaveSmokeArgument);
+            interruptedSaveMode = HasCommandLineArgument(InterruptedSaveSmokeArgument);
             previousTimeScale = Time.timeScale;
             Time.timeScale = AcceleratedTimeScale;
 
@@ -66,8 +87,39 @@ namespace RuneGate
                 yield break;
             }
 
+            if (interruptedSaveMode)
+            {
+                RunInterruptedSaveRecoveryTest();
+                yield break;
+            }
+
+            if (corruptSaveMode)
+            {
+                RunCorruptSaveRecoveryTest();
+                yield break;
+            }
+
+            if (saveReadMode)
+            {
+                yield return RunCrossProcessSaveReadTest();
+                yield break;
+            }
+
             CleanupSmokeSave();
             SaveManager.ResetSave();
+
+            if (saveWriteMode)
+            {
+                RunCrossProcessSaveWriteTest();
+                yield break;
+            }
+
+            if (systemFlowMode)
+            {
+                yield return RunSystemFlowSmokeTest();
+                yield break;
+            }
+
             SaveManager.MarkTutorialSeen();
 
             if (!Require(SceneManager.GetActiveScene().name == "TitleScene", "Player did not start in TitleScene."))
@@ -202,7 +254,19 @@ namespace RuneGate
                 yield break;
             }
 
-            Debug.Log("[RuneGateE2E] Victory, Gold persistence, and Stage 2 unlock verified.");
+            resultUI.ContinueToNextStage();
+            yield return WaitForCondition(() =>
+            {
+                BattleManager nextBattle = FindAnyObjectByType<BattleManager>();
+                return SceneManager.GetActiveScene().name == "BattleScene" && nextBattle != null &&
+                       nextBattle.ActiveStageData != null && nextBattle.ActiveStageData.StageId == nextStageId;
+            }, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "Victory result did not continue to Stage 2."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateE2E] Victory, Gold persistence, Stage 2 unlock, and next-stage navigation verified.");
             SceneManager.LoadScene("UpgradeScene");
             yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "UpgradeScene", SceneLoadTimeoutSeconds);
             if (!Require(waitSucceeded, "UpgradeScene did not load."))
@@ -223,6 +287,407 @@ namespace RuneGate
             }
 
             Debug.Log("RUNEGATE_E2E_PASSED");
+            CleanupSmokeSave();
+            Time.timeScale = previousTimeScale;
+            Application.Quit(0);
+        }
+
+        private void RunInterruptedSaveRecoveryTest()
+        {
+            SaveData recoveredSave = SaveManager.Current;
+            if (!Require(recoveredSave != null && recoveredSave.totalGold == 777,
+                    "Interrupted save recovery did not promote the latest temporary Gold."))
+            {
+                return;
+            }
+
+            if (!Require(SaveManager.GetUpgradeLevel("upgrade_hero_attack") == 3 &&
+                         recoveredSave.hasSeenTutorial &&
+                         SaveManager.IsStageUnlocked("stage_goblin_forest_02"),
+                    "Interrupted save recovery did not promote progression fields."))
+            {
+                return;
+            }
+
+            if (!Require(File.Exists(SaveManager.SavePath) && !File.Exists(SaveManager.SavePath + ".tmp"),
+                    "Interrupted save recovery did not replace the missing primary file with the temporary save."))
+            {
+                return;
+            }
+
+            bool isolatedInvalidTemporary = File.Exists(SaveManager.SavePath + ".tmp.corrupt");
+            Debug.Log(isolatedInvalidTemporary
+                ? "RUNEGATE_INVALID_TEMP_BACKUP_RESTORE_PASSED"
+                : "RUNEGATE_INTERRUPTED_SAVE_RECOVERY_PASSED");
+            CleanupSmokeSave();
+            Time.timeScale = previousTimeScale;
+            Application.Quit(0);
+        }
+
+        private void RunCorruptSaveRecoveryTest()
+        {
+            SaveData recoveredSave = SaveManager.Current;
+            bool restoredBackup = File.Exists(SaveManager.SavePath + ".bak");
+            int expectedGold = restoredBackup ? 777 : 0;
+            if (!Require(recoveredSave != null && recoveredSave.totalGold == expectedGold,
+                    restoredBackup
+                        ? "Corrupt save recovery did not restore Gold from the valid backup."
+                        : "Corrupt save recovery did not create safe default Gold."))
+            {
+                return;
+            }
+
+            if (!Require(SaveManager.IsStageUnlocked(SaveManager.DefaultUnlockedStageId),
+                    "Corrupt save recovery did not restore the default Stage 1 unlock."))
+            {
+                return;
+            }
+
+            if (restoredBackup && !Require(SaveManager.GetUpgradeLevel("upgrade_hero_attack") == 3 &&
+                                           recoveredSave.hasSeenTutorial &&
+                                           SaveManager.IsStageUnlocked("stage_goblin_forest_02"),
+                    "Corrupt save recovery did not restore progression fields from the valid backup."))
+            {
+                return;
+            }
+
+            if (!Require(File.Exists(SaveManager.SavePath),
+                    "Corrupt save recovery did not write a replacement primary save."))
+            {
+                return;
+            }
+
+            if (!Require(File.Exists(SaveManager.SavePath + ".corrupt"),
+                    "Corrupt save recovery did not preserve the damaged source file."))
+            {
+                return;
+            }
+
+            Debug.Log(restoredBackup
+                ? "RUNEGATE_CORRUPT_SAVE_BACKUP_RESTORE_PASSED"
+                : "RUNEGATE_CORRUPT_SAVE_RECOVERY_PASSED");
+            CleanupSmokeSave();
+            Time.timeScale = previousTimeScale;
+            Application.Quit(0);
+        }
+
+        private void RunCrossProcessSaveWriteTest()
+        {
+            const string upgradeId = "upgrade_hero_attack";
+            const string selectedStageId = "stage_goblin_forest_03";
+            SaveManager.AddGold(777);
+            SaveManager.SetUpgradeLevel(upgradeId, 3);
+            SaveManager.MarkTutorialSeen();
+            SaveManager.SetLastSelectedStageId(selectedStageId);
+            SaveManager.UnlockStage("stage_goblin_forest_02");
+            SaveManager.Save();
+
+            if (!Require(File.Exists(SaveManager.SavePath), "Cross-process save writer did not create the JSON file."))
+            {
+                return;
+            }
+
+            Debug.Log("RUNEGATE_SAVE_WRITE_PASSED");
+            Time.timeScale = previousTimeScale;
+            Application.Quit(0);
+        }
+
+        private IEnumerator RunCrossProcessSaveReadTest()
+        {
+            if (!Require(File.Exists(SaveManager.SavePath), "Cross-process save reader could not find the writer JSON file."))
+            {
+                yield break;
+            }
+
+            SaveData loadedSave = SaveManager.ReloadFromDiskForDiagnostics();
+            if (!Require(loadedSave != null && loadedSave.totalGold == 777,
+                    "Cross-process save reader did not restore Gold."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.GetUpgradeLevel("upgrade_hero_attack") == 3,
+                    "Cross-process save reader did not restore the upgrade level."))
+            {
+                yield break;
+            }
+
+            if (!Require(loadedSave.hasSeenTutorial && loadedSave.lastSelectedStageId == "stage_goblin_forest_03",
+                    "Cross-process save reader did not restore tutorial or stage selection state."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.IsStageUnlocked("stage_goblin_forest_01") &&
+                         SaveManager.IsStageUnlocked("stage_goblin_forest_02"),
+                    "Cross-process save reader did not restore stage unlocks."))
+            {
+                yield break;
+            }
+
+            Debug.Log("RUNEGATE_SAVE_READ_PASSED");
+            CleanupSmokeSave();
+            Time.timeScale = previousTimeScale;
+            yield return null;
+            Application.Quit(0);
+        }
+
+        private IEnumerator RunSystemFlowSmokeTest()
+        {
+            if (!Require(SceneManager.GetActiveScene().name == "TitleScene", "System flow test did not start in TitleScene."))
+            {
+                yield break;
+            }
+
+            if (!Require(FindAnyObjectByType<TitleUI>() != null, "TitleScene is missing TitleUI."))
+            {
+                yield break;
+            }
+
+            SceneManager.LoadScene("StageSelectScene");
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "StageSelectScene did not load for the system flow test."))
+            {
+                yield break;
+            }
+
+            yield return null;
+            StageSelectUI stageSelect = FindAnyObjectByType<StageSelectUI>();
+            if (!Require(stageSelect != null && stageSelect.Stages != null && stageSelect.Stages.Count >= 2,
+                    "System flow test requires at least Stage 1 and Stage 2."))
+            {
+                yield break;
+            }
+
+            StageData firstStage = FindStage(stageSelect.Stages, 1);
+            StageData secondStage = FindStage(stageSelect.Stages, 2);
+            if (!Require(firstStage != null && secondStage != null, "Stage 1 or Stage 2 data is missing."))
+            {
+                yield break;
+            }
+
+            GameSession.SelectDifficulty("normal");
+            GameSession.SelectStage(firstStage, secondStage.StageId);
+            SceneManager.LoadScene("BattleScene");
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "BattleScene did not load for tutorial verification."))
+            {
+                yield break;
+            }
+
+            yield return WaitForCondition(() => FindAnyObjectByType<TutorialManager>() != null, SceneLoadTimeoutSeconds);
+            TutorialManager tutorialManager = FindAnyObjectByType<TutorialManager>();
+            if (!Require(waitSucceeded && tutorialManager != null && tutorialManager.IsVisible,
+                    "First battle did not show the tutorial overlay."))
+            {
+                yield break;
+            }
+
+            if (!Require(tutorialManager.StepCount >= 7, "Tutorial did not expose the expected seven guidance steps."))
+            {
+                yield break;
+            }
+
+            int tutorialGuard = tutorialManager.StepCount + 1;
+            while (tutorialManager.IsVisible && tutorialGuard-- > 0)
+            {
+                tutorialManager.Next();
+                yield return null;
+            }
+
+            if (!Require(!tutorialManager.IsVisible && SaveManager.HasSeenTutorial(),
+                    "Tutorial completion was not persisted."))
+            {
+                yield break;
+            }
+
+            if (!Require(Mathf.Approximately(Time.timeScale, AcceleratedTimeScale),
+                    "Tutorial completion did not restore the previous time scale."))
+            {
+                yield break;
+            }
+
+            const string diagnosticUpgradeId = "upgrade_hero_attack";
+            SaveManager.AddGold(321);
+            SaveManager.SetUpgradeLevel(diagnosticUpgradeId, 2);
+            SaveManager.SetLastSelectedStageId(firstStage.StageId);
+            SaveManager.Save();
+
+            SaveData reloadedSave = SaveManager.ReloadFromDiskForDiagnostics();
+            if (!Require(reloadedSave != null && reloadedSave.totalGold == 321,
+                    "Gold did not survive a real JSON disk reload."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.GetUpgradeLevel(diagnosticUpgradeId) == 2,
+                    "Upgrade level did not survive a real JSON disk reload."))
+            {
+                yield break;
+            }
+
+            if (!Require(reloadedSave.hasSeenTutorial && reloadedSave.lastSelectedStageId == firstStage.StageId,
+                    "Tutorial or selected stage state did not survive a real JSON disk reload."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateSystemE2E] Tutorial and JSON disk reload verified.");
+
+            SaveManager.ResetSave();
+            SaveData resetSave = SaveManager.ReloadFromDiskForDiagnostics();
+            if (!Require(resetSave != null && resetSave.totalGold == 0 && !resetSave.hasSeenTutorial,
+                    "Reset Save did not restore Gold and tutorial defaults."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.GetUpgradeLevel(diagnosticUpgradeId) == 0,
+                    "Reset Save did not clear persisted upgrades."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.IsStageUnlocked(firstStage.StageId) && !SaveManager.IsStageUnlocked(secondStage.StageId),
+                    "Reset Save did not restore the default Stage 1-only unlock state."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateSystemE2E] Reset Save defaults verified.");
+
+            SaveManager.MarkTutorialSeen();
+            GameSession.SelectDifficulty("normal");
+            GameSession.SelectStage(firstStage, secondStage.StageId);
+            SceneManager.LoadScene("BattleScene");
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "BattleScene did not reload for defeat verification."))
+            {
+                yield break;
+            }
+
+            yield return WaitForCondition(() =>
+            {
+                battleManager = FindAnyObjectByType<BattleManager>();
+                return battleManager != null && battleManager.ActiveStageData != null &&
+                       FindAnyObjectByType<CrystalController>() != null;
+            }, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "BattleManager or CrystalController did not initialize for defeat verification."))
+            {
+                yield break;
+            }
+
+            BindBattleEvents();
+            CrystalController crystalController = FindAnyObjectByType<CrystalController>();
+            crystalController.TakeDamage(crystalController.CurrentHp);
+            yield return WaitForCondition(() => battleFinished, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "Destroying the crystal did not end the battle."))
+            {
+                yield break;
+            }
+
+            if (!Require(!battleResult.IsVictory && battleManager.CurrentState == BattleState.Defeat,
+                    "Crystal destruction did not produce the Defeat state."))
+            {
+                yield break;
+            }
+
+            yield return null;
+            yield return null;
+            StageResultUI resultUI = FindAnyObjectByType<StageResultUI>();
+            if (!Require(resultUI != null && resultUI.IsVisible, "Defeat result UI was not shown."))
+            {
+                yield break;
+            }
+
+            if (!Require(!SaveManager.IsStageCleared(firstStage.StageId) && !SaveManager.IsStageUnlocked(secondStage.StageId),
+                    "Defeat incorrectly cleared Stage 1 or unlocked Stage 2."))
+            {
+                yield break;
+            }
+
+            resultUI.RetryBattle();
+            yield return WaitForCondition(() =>
+            {
+                CrystalController restartedCrystal = FindAnyObjectByType<CrystalController>();
+                return battleManager != null && battleManager.CurrentState == BattleState.WaveRunning &&
+                       restartedCrystal != null && restartedCrystal.CurrentHp == restartedCrystal.MaxHp &&
+                       !resultUI.IsVisible;
+            }, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "Defeat result Retry did not restart the current battle."))
+            {
+                yield break;
+            }
+
+            battleFinished = false;
+            crystalController = FindAnyObjectByType<CrystalController>();
+            crystalController.TakeDamage(crystalController.CurrentHp);
+            yield return WaitForCondition(() => battleFinished, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "Second crystal destruction did not produce a result."))
+            {
+                yield break;
+            }
+
+            yield return null;
+            resultUI = FindAnyObjectByType<StageResultUI>();
+            if (!Require(resultUI != null && resultUI.IsVisible, "Second Defeat result UI was not shown."))
+            {
+                yield break;
+            }
+
+            resultUI.OpenUpgrade();
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "UpgradeScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded && FindAnyObjectByType<UpgradeSceneUI>() != null,
+                    "Defeat result Upgrade button did not open UpgradeScene."))
+            {
+                yield break;
+            }
+
+            GameSession.SelectStage(firstStage, secondStage.StageId);
+            SceneManager.LoadScene("BattleScene");
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "BattleScene did not load for Stage Select result navigation verification."))
+            {
+                yield break;
+            }
+
+            yield return WaitForCondition(() =>
+            {
+                battleManager = FindAnyObjectByType<BattleManager>();
+                return battleManager != null && battleManager.ActiveStageData != null &&
+                       FindAnyObjectByType<CrystalController>() != null;
+            }, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "Battle did not initialize for Stage Select result navigation verification."))
+            {
+                yield break;
+            }
+
+            battleFinished = false;
+            BindBattleEvents();
+            crystalController = FindAnyObjectByType<CrystalController>();
+            crystalController.TakeDamage(crystalController.CurrentHp);
+            yield return WaitForCondition(() => battleFinished, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "Third crystal destruction did not produce a result."))
+            {
+                yield break;
+            }
+
+            yield return null;
+            resultUI = FindAnyObjectByType<StageResultUI>();
+            if (!Require(resultUI != null && resultUI.IsVisible, "Third Defeat result UI was not shown."))
+            {
+                yield break;
+            }
+
+            resultUI.OpenStageSelect();
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded && FindAnyObjectByType<StageSelectUI>() != null,
+                    "Defeat result Stage Select button did not open StageSelectScene."))
+            {
+                yield break;
+            }
+
+            Debug.Log("RUNEGATE_SYSTEM_FLOWS_E2E_PASSED: Retry, Upgrade, and Stage Select navigation verified.");
             CleanupSmokeSave();
             Time.timeScale = previousTimeScale;
             Application.Quit(0);
@@ -502,7 +967,31 @@ namespace RuneGate
         private void Fail(string message)
         {
             failed = true;
-            string prefix = fullChapterMode ? "RUNEGATE_FULL_CHAPTER_E2E_FAILED" : "RUNEGATE_E2E_FAILED";
+            string prefix;
+            if (interruptedSaveMode)
+            {
+                prefix = "RUNEGATE_INTERRUPTED_SAVE_RECOVERY_FAILED";
+            }
+            else if (corruptSaveMode)
+            {
+                prefix = "RUNEGATE_CORRUPT_SAVE_RECOVERY_FAILED";
+            }
+            else if (saveWriteMode || saveReadMode)
+            {
+                prefix = "RUNEGATE_SAVE_RESTART_E2E_FAILED";
+            }
+            else if (systemFlowMode)
+            {
+                prefix = "RUNEGATE_SYSTEM_FLOWS_E2E_FAILED";
+            }
+            else if (fullChapterMode)
+            {
+                prefix = "RUNEGATE_FULL_CHAPTER_E2E_FAILED";
+            }
+            else
+            {
+                prefix = "RUNEGATE_E2E_FAILED";
+            }
             Debug.LogError($"{prefix}: {message}");
             CleanupSmokeSave();
             Time.timeScale = previousTimeScale;
@@ -514,6 +1003,8 @@ namespace RuneGate
             TryDeleteFile(SaveManager.SavePath);
             TryDeleteFile(SaveManager.SavePath + ".tmp");
             TryDeleteFile(SaveManager.SavePath + ".bak");
+            TryDeleteFile(SaveManager.SavePath + ".corrupt");
+            TryDeleteFile(SaveManager.SavePath + ".tmp.corrupt");
         }
 
         private static void TryDeleteFile(string path)
