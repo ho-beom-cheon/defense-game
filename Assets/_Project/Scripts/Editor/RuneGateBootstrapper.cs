@@ -184,7 +184,7 @@ namespace RuneGate.Editor
         {
             ContentBundle content = BootstrapContentAndScenes(true);
             Debug.Log("RuneGate v0.5 art prototype bootstrap complete. Open Assets/_Project/Scenes/TitleScene.unity and press Play.");
-            Selection.activeObject = content.Heroes != null && content.Heroes.Length > 0 ? content.Heroes[0] : content.DefaultFormation;
+            Selection.activeObject = content.Heroes != null && content.Heroes.Length > 0 ? (UnityEngine.Object)content.Heroes[0] : content.DefaultFormation;
         }
 
         [MenuItem("Tools/RuneGate/Bootstrap v1.0 Release Track")]
@@ -192,7 +192,7 @@ namespace RuneGate.Editor
         {
             ContentBundle content = BootstrapContentAndScenes(true, "1.0.0", 10);
             Debug.Log("RuneGate v1.0 release-track bootstrap complete. Run Validate Project, open TitleScene, then test Stage 1 through Stage 10.");
-            Selection.activeObject = content.Stages != null && content.Stages.Length > 0 ? content.Stages[0] : content.DefaultFormation;
+            Selection.activeObject = content.Stages != null && content.Stages.Length > 0 ? (UnityEngine.Object)content.Stages[0] : content.DefaultFormation;
         }
 
         [MenuItem("Tools/RuneGate/Apply Initial Art Images")]
@@ -208,6 +208,82 @@ namespace RuneGate.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("RuneGate initial art image links applied. Missing images keep their placeholder fallback.");
+        }
+
+        [MenuItem("Tools/RuneGate/Sync Runtime Content Catalog")]
+        public static void SyncRuntimeContentCatalogMenu()
+        {
+            EnsureRequiredFolders();
+            ContentBundle content = LoadExistingContentBundle();
+            if (content == null || !HasAny(content.Stages) || !HasAny(content.Runes) || content.HeroRoster == null || content.DefaultFormation == null)
+            {
+                content = CreateV04Content();
+            }
+
+            UpgradeData[] upgrades = LoadExistingUpgrades();
+            if (!HasAny(upgrades))
+            {
+                upgrades = CreateSampleUpgrades();
+            }
+
+            RuntimeContentCatalog catalog = CreateOrUpdateRuntimeContentCatalog(content, upgrades);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Selection.activeObject = catalog;
+            Debug.Log("RuneGate runtime content catalog synced for Player builds.");
+        }
+
+        [MenuItem("Tools/RuneGate/Start Stage 1 Test")]
+        public static void StartStage1Test()
+        {
+            StartCombatTestStage(0);
+        }
+
+        [MenuItem("Tools/RuneGate/Playtest Stage 1")]
+        public static void PlaytestStage1()
+        {
+            StartCombatTestStage(0);
+        }
+
+        [MenuItem("Tools/RuneGate/Start Stage 2 Test")]
+        public static void StartStage2Test()
+        {
+            StartCombatTestStage(1);
+        }
+
+        [MenuItem("Tools/RuneGate/Playtest Stage 2")]
+        public static void PlaytestStage2()
+        {
+            StartCombatTestStage(1);
+        }
+
+        [MenuItem("Tools/RuneGate/Start Stage 3 Test")]
+        public static void StartStage3Test()
+        {
+            StartCombatTestStage(2);
+        }
+
+        [MenuItem("Tools/RuneGate/Playtest Stage 3")]
+        public static void PlaytestStage3()
+        {
+            StartCombatTestStage(2);
+        }
+
+        [MenuItem("Tools/RuneGate/Grant Test Gold")]
+        public static void GrantTestGold()
+        {
+            SaveManager.LoadOrCreate();
+            SaveManager.AddGold(500);
+            Debug.Log("RuneGate test gold granted: +500.");
+        }
+
+        [MenuItem("Tools/RuneGate/Reset Combat Test Save")]
+        public static void ResetCombatTestSave()
+        {
+            SaveManager.ResetSave();
+            GameSession.ClearSelectedStage();
+            GameSession.ClearLastBattleResult();
+            Debug.Log("RuneGate combat test save reset.");
         }
 
         [MenuItem("Tools/RuneGate/Configure Android Release Settings")]
@@ -238,6 +314,32 @@ namespace RuneGate.Editor
         public static void BuildAndroidApkV10()
         {
             BuildAndroidApk("1.0.0", 10);
+        }
+
+        private static void StartCombatTestStage(int stageIndex)
+        {
+            List<StageData> stages = PrototypeAssetLoader.LoadStages();
+            if (stages == null || stages.Count == 0)
+            {
+                Debug.LogWarning("RuneGate combat test cannot start because StageData assets are missing. Run Bootstrap first.");
+                return;
+            }
+
+            int safeIndex = Mathf.Clamp(stageIndex, 0, stages.Count - 1);
+            StageData selectedStage = stages[safeIndex];
+            if (selectedStage == null)
+            {
+                Debug.LogWarning($"RuneGate combat test found a missing StageData at index {safeIndex}.");
+                return;
+            }
+
+            string nextStageId = safeIndex + 1 < stages.Count && stages[safeIndex + 1] != null ? stages[safeIndex + 1].StageId : string.Empty;
+            SaveManager.LoadOrCreate();
+            SaveManager.UnlockStage(selectedStage.StageId);
+            GameSession.SelectStage(selectedStage, nextStageId);
+            EditorSceneManager.OpenScene(BattleScenePath);
+            Selection.activeObject = selectedStage;
+            Debug.Log($"RuneGate combat test ready: {selectedStage.DisplayNameKorean}. Press Play in BattleScene.");
         }
 
         private static void BuildAndroidApk(string version, int versionCode)
@@ -302,6 +404,7 @@ namespace RuneGate.Editor
             ArtPrototypeBundle artPrototype = includeArtPrototype ? CreateV05ArtPrototypeAssets(content) : null;
             ApplyInitialArtImages(content);
             UpgradeData[] upgrades = CreateSampleUpgrades();
+            CreateOrUpdateRuntimeContentCatalog(content, upgrades);
 
             CreateOrUpdateTitleScene();
             CreateOrUpdateStageSelectScene(content.Stages);
@@ -554,6 +657,20 @@ namespace RuneGate.Editor
                 LoadAsset<RuneData>($"{RootPath}/Data/Runes/Turret Rune.asset")
             };
 
+            StageData[] stages =
+            {
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 1.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 2.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 3.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 4.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 5.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 6.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 7.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 8.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 9.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 10.asset")
+            };
+
             if (!HasAny(heroes) && !HasAny(monsters) && !HasAny(skills) && !HasAny(runes))
             {
                 return null;
@@ -565,7 +682,21 @@ namespace RuneGate.Editor
                 Heroes = heroes,
                 Monsters = monsters,
                 Boss = LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Orc Warlord.asset"),
-                Runes = runes
+                Runes = runes,
+                Stages = stages,
+                HeroRoster = LoadAsset<HeroRosterData>($"{RootPath}/Data/Rosters/MVP Hero Roster.asset"),
+                DefaultFormation = LoadAsset<FormationData>($"{RootPath}/Data/Formations/Default Formation.asset")
+            };
+        }
+
+        private static UpgradeData[] LoadExistingUpgrades()
+        {
+            return new[]
+            {
+                LoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/Crystal Reinforcement.asset"),
+                LoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/Hero Training.asset"),
+                LoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/Battle Rhythm.asset"),
+                LoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/Skill Practice.asset")
             };
         }
 
@@ -781,6 +912,20 @@ namespace RuneGate.Editor
                 SetString(serializedObject, "formationId", "formation_default_mvp");
                 SetString(serializedObject, "displayName", "MVP Default Formation");
                 SetFormationSlotList(serializedObject, "slots", slots);
+            });
+            return asset;
+        }
+
+        private static RuntimeContentCatalog CreateOrUpdateRuntimeContentCatalog(ContentBundle content, UpgradeData[] upgrades)
+        {
+            RuntimeContentCatalog asset = CreateOrLoadAsset<RuntimeContentCatalog>($"{RootPath}/Resources/RuntimeContentCatalog.asset");
+            EditAsset(asset, serializedObject =>
+            {
+                SetObjectList(serializedObject, "stages", ToObjectArray(content != null ? content.Stages : null));
+                SetObjectList(serializedObject, "runes", ToObjectArray(content != null ? content.Runes : null));
+                SetObjectList(serializedObject, "upgrades", ToObjectArray(upgrades));
+                SetObject(serializedObject, "heroRoster", content != null ? content.HeroRoster : null);
+                SetObject(serializedObject, "defaultFormation", content != null ? content.DefaultFormation : null);
             });
             return asset;
         }
