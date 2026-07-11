@@ -88,7 +88,7 @@ namespace RuneGate
             }
 
             FindObjectsInactive inactiveMode = applyToInactiveObjects ? FindObjectsInactive.Include : FindObjectsInactive.Exclude;
-            Component[] components = FindObjectsByType<Component>(inactiveMode, FindObjectsSortMode.None);
+            Component[] components = FindObjectsByType<Component>(inactiveMode);
             for (int i = 0; i < components.Length; i++)
             {
                 Component component = components[i];
