@@ -7,10 +7,12 @@ namespace RuneGate
     {
         [SerializeField] private UpgradeManager upgradeManager;
         [SerializeField] private bool drawRuntimeGui = true;
-        [SerializeField] private Rect panelRect = new Rect(220f, 70f, 560f, 440f);
+        [SerializeField] private Rect panelRect = new Rect(190f, 54f, 660f, 500f);
         [SerializeField] private string stageSelectSceneName = "StageSelectScene";
 
         private string feedbackMessage = string.Empty;
+        private Vector2 scrollPosition;
+        private bool sceneTransitionRequested;
 
         private void OnEnable()
         {
@@ -24,6 +26,8 @@ namespace RuneGate
             {
                 SaveManager.ClampUpgradeLevels(upgradeManager.AvailableUpgrades);
             }
+
+            sceneTransitionRequested = false;
         }
 
         private void OnGUI()
@@ -33,41 +37,53 @@ namespace RuneGate
                 return;
             }
 
-            KoreanFontManager.ApplyToGuiSkin();
+            UIResponsiveLayout.ApplyReadableDefaults();
             if (upgradeManager == null)
             {
                 upgradeManager = FindAnyObjectByType<UpgradeManager>();
             }
 
-            GUILayout.BeginArea(panelRect, GUI.skin.box);
-            GUILayout.Label("업그레이드");
-            GUILayout.Label($"골드: {SaveManager.Current.totalGold}");
-            RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconSave, 22f);
-            GUILayout.Space(8f);
+            ScreenFrameRects frame = GameFrameLayout.UpgradeFrame();
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUI.Box(frame.FrameRoot, GUIContent.none, panelStyle);
 
+            GUILayout.BeginArea(frame.HeaderArea, GUI.skin.box);
+            GUILayout.Label("\ubd09\ubb38 \uc815\ube44\uc18c");
+            GUILayout.Label($"\ubcf4\uc720 \uace8\ub4dc: {SaveManager.Current.totalGold}");
+            GUILayout.Label("\uc804\ud22c \uc804\uc5d0 \ubc29\uc5b4\uc120\uc744 \uac15\ud654\ud558\uc138\uc694.");
+            GUILayout.EndArea();
+
+            GUILayout.BeginArea(frame.MainArea, GUI.skin.box);
             if (upgradeManager == null || upgradeManager.AvailableUpgrades.Count == 0)
             {
-                GUILayout.Label("업그레이드 데이터가 없습니다. Bootstrap Progression Prototype을 실행하세요.");
+                GUILayout.Label("\uc5c5\uadf8\ub808\uc774\ub4dc \ub370\uc774\ud130\uac00 \uc5c6\uc2b5\ub2c8\ub2e4. Bootstrap Progression Prototype\uc744 \uc2e4\ud589\ud558\uc138\uc694.");
             }
             else
             {
+                float scrollHeight = Mathf.Max(120f, frame.MainArea.height - 8f);
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Height(scrollHeight));
                 for (int i = 0; i < upgradeManager.AvailableUpgrades.Count; i++)
                 {
                     DrawUpgrade(upgradeManager.AvailableUpgrades[i]);
-                    GUILayout.Space(6f);
+                    GUILayout.Space(UIResponsiveLayout.SmallGap);
                 }
-            }
 
-            GUILayout.Space(10f);
-            if (GUILayout.Button("스테이지 선택", GUILayout.Height(36f)))
-            {
-                SceneManager.LoadScene(stageSelectSceneName);
+                GUILayout.EndScrollView();
             }
+            GUILayout.EndArea();
 
+            GUILayout.BeginArea(frame.FooterArea, GUI.skin.box);
             if (!string.IsNullOrWhiteSpace(feedbackMessage))
             {
-                GUILayout.Space(8f);
                 GUILayout.Label(feedbackMessage);
+            }
+
+            using (new GuiEnabledScope(!sceneTransitionRequested))
+            {
+                if (GUILayout.Button("\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd\uc73c\ub85c", GUILayout.Height(38f)))
+                {
+                    LoadSceneOnce(stageSelectSceneName);
+                }
             }
 
             GUILayout.EndArea();
@@ -77,24 +93,29 @@ namespace RuneGate
         {
             if (upgradeData == null)
             {
-                GUILayout.Label("업그레이드 데이터 없음");
+                GUILayout.Label("\uc5c5\uadf8\ub808\uc774\ub4dc \ub370\uc774\ud130 \uc5c6\uc74c");
                 return;
             }
 
             int level = upgradeManager.GetLevel(upgradeData);
             int maxLevel = Mathf.Max(0, upgradeData.MaxLevel);
             int cost = upgradeManager.GetCost(upgradeData);
-            GUILayout.BeginHorizontal(GUI.skin.box);
-            RuntimePixelGuiUtility.DrawIcon(GetUpgradeIconPath(upgradeData), 34f);
-            GUILayout.BeginVertical();
-            GUILayout.Label($"{upgradeData.DisplayName} Lv {level}/{maxLevel}");
-            GUILayout.Label(upgradeData.Description);
-            GUILayout.Label($"효과: {upgradeData.EffectKey} +{upgradeData.ValuePerLevel:0.###} / 레벨");
-
             bool maxed = level >= maxLevel;
-            string buttonLabel = maxed ? "최대 레벨" : $"구매 ({cost} 골드)";
-            using (new GuiEnabledScope(!maxed && SaveManager.Current.totalGold >= cost))
+            bool canAfford = SaveManager.Current.totalGold >= cost;
+
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            RuntimePixelGuiUtility.DrawIcon(GetUpgradeIconPath(upgradeData), 42f);
+            GUILayout.BeginVertical(GUILayout.MinWidth(180f));
+            string displayName = GameTextMapper.UpgradeName(upgradeData);
+            GUILayout.Label($"{displayName}  \ub808\ubca8 {level}/{maxLevel}");
+            GUILayout.Label(GameTextMapper.UpgradeDescription(upgradeData));
+            GUILayout.Label($"\ud604\uc7ac \ud6a8\uacfc: {FormatTotalEffect(upgradeData, level)}");
+            GUILayout.Label(maxed ? "\ub2e4\uc74c \ud6a8\uacfc: \ucd5c\ub300 \ub808\ubca8" : $"\ub2e4\uc74c \ud6a8\uacfc: {FormatTotalEffect(upgradeData, level + 1)}");
+            GUILayout.Label(maxed ? "\ube44\uc6a9: -" : $"\ube44\uc6a9: {cost} \uace8\ub4dc");
+
+            using (new GuiEnabledScope(!maxed && canAfford))
             {
+                string buttonLabel = maxed ? "\ucd5c\ub300 \ub808\ubca8" : canAfford ? "\uad6c\ub9e4" : "\uace8\ub4dc \ubd80\uc871";
                 if (GUILayout.Button(buttonLabel, GUILayout.Height(30f)))
                 {
                     bool purchased = upgradeManager.TryPurchase(upgradeData);
@@ -103,17 +124,32 @@ namespace RuneGate
                         AudioManager.Play(SfxKey.UpgradePurchase);
                     }
 
-                    feedbackMessage = purchased ? $"{upgradeData.DisplayName} 구매 완료." : $"{upgradeData.DisplayName} 구매 골드가 부족합니다.";
+                    feedbackMessage = purchased ? $"{displayName} \uac15\ud654 \uc644\ub8cc." : $"{displayName} \uad6c\ub9e4\uc5d0 \ud544\uc694\ud55c \uace8\ub4dc\uac00 \ubd80\uc871\ud569\ub2c8\ub2e4.";
                 }
-            }
-
-            if (!maxed && SaveManager.Current.totalGold < cost)
-            {
-                GUILayout.Label($"{cost - SaveManager.Current.totalGold} 골드가 더 필요합니다.");
             }
 
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
+        }
+
+        private static string FormatTotalEffect(UpgradeData upgradeData, int level)
+        {
+            if (upgradeData == null)
+            {
+                return "-";
+            }
+
+            float value = upgradeData.ValuePerLevel * Mathf.Max(0, level);
+            string valueText;
+            if (upgradeData.EffectKey == UpgradeManager.SkillCooldownPercent)
+            {
+                valueText = $"-{Mathf.Abs(value) * 100f:0.#}%";
+            }
+            else
+            {
+                valueText = Mathf.Abs(value) < 1f ? $"{value * 100f:0.#}%" : $"+{value:0.#}";
+            }
+            return $"{GameTextMapper.UpgradeEffectName(upgradeData.EffectKey)} {valueText}";
         }
 
         private static string GetUpgradeIconPath(UpgradeData upgradeData)
@@ -134,6 +170,17 @@ namespace RuneGate
                 default:
                     return RuntimePixelAssetLoader.UiUpgradeHeroAttack;
             }
+        }
+
+        private void LoadSceneOnce(string sceneName)
+        {
+            if (sceneTransitionRequested)
+            {
+                return;
+            }
+
+            sceneTransitionRequested = true;
+            SceneManager.LoadScene(sceneName);
         }
 
         private readonly struct GuiEnabledScope : System.IDisposable

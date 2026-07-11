@@ -6,18 +6,18 @@ namespace RuneGate
         {
             switch (state)
             {
-                case RuneGate.BattleState.Preparing:
-                    return "준비 중";
-                case RuneGate.BattleState.WaveRunning:
-                    return "전투 중";
-                case RuneGate.BattleState.RuneSelection:
-                    return "룬 선택 중";
-                case RuneGate.BattleState.Victory:
-                    return "승리";
-                case RuneGate.BattleState.Defeat:
-                    return "패배";
+                case BattleState.Preparing:
+                    return "\uc900\ube44 \uc911";
+                case BattleState.WaveRunning:
+                    return "\uc804\ud22c \uc911";
+                case BattleState.RuneSelection:
+                    return "\ub8ec \uc120\ud0dd \uc911";
+                case BattleState.Victory:
+                    return "\uc2b9\ub9ac";
+                case BattleState.Defeat:
+                    return "\ud328\ubc30";
                 default:
-                    return "대기 중";
+                    return "\ub300\uae30 \uc911";
             }
         }
 
@@ -26,15 +26,15 @@ namespace RuneGate
             switch (difficultyId)
             {
                 case "easy":
-                    return "쉬움";
+                    return "\uc26c\uc6c0";
                 case "hard":
-                    return "어려움";
+                    return "\uc5b4\ub824\uc6c0";
                 case "nightmare":
-                    return "악몽";
+                    return "\uc545\ubabd";
                 case "normal":
-                    return "보통";
+                    return "\ubcf4\ud1b5";
                 default:
-                    return "보통";
+                    return "\ubcf4\ud1b5";
             }
         }
 
@@ -42,7 +42,7 @@ namespace RuneGate
         {
             if (stageData == null)
             {
-                return "스테이지";
+                return "\uc2a4\ud14c\uc774\uc9c0";
             }
 
             if (!string.IsNullOrWhiteSpace(stageData.DisplayNameKorean))
@@ -50,7 +50,7 @@ namespace RuneGate
                 return stageData.DisplayNameKorean;
             }
 
-            return string.IsNullOrWhiteSpace(stageData.DisplayName) ? "스테이지" : stageData.DisplayName;
+            return string.IsNullOrWhiteSpace(stageData.DisplayName) ? "\uc2a4\ud14c\uc774\uc9c0" : stageData.DisplayName;
         }
 
         public static string StageName(string stageId)
@@ -66,7 +66,7 @@ namespace RuneGate
                 string suffix = stageId.Substring(stagePrefix.Length);
                 if (int.TryParse(suffix, out int stageNumber))
                 {
-                    return $"재문 숲 {stageNumber}";
+                    return $"\uc7ac\ubb38 \uc232 {stageNumber}";
                 }
             }
 
@@ -77,25 +77,25 @@ namespace RuneGate
         {
             if (skillData == null)
             {
-                return "스킬";
+                return "\uc2a4\ud0ac";
             }
 
             switch (skillData.SkillId)
             {
                 case "skill_shield_bash":
-                    return "방패 강타";
+                    return "\ubc29\ud328 \uac15\ud0c0";
                 case "skill_rapid_shot":
-                    return "연속 사격";
+                    return "\uc5f0\uc18d \uc0ac\uaca9";
                 case "skill_meteor":
-                    return "운석 낙하";
+                    return "\uc6b4\uc11d \ub099\ud558";
                 case "skill_holy_heal":
-                    return "성스러운 회복";
+                    return "\uc131\uc2a4\ub7ec\uc6b4 \ud68c\ubcf5";
                 case "skill_build_turret":
-                    return "임시 포탑";
+                    return "\uc784\uc2dc \ud3ec\ud0d1";
                 case "skill_shadow_strike":
-                    return "그림자 급습";
+                    return "\uadf8\ub9bc\uc790 \uae09\uc2b5";
                 default:
-                    return string.IsNullOrWhiteSpace(skillData.DisplayName) ? "스킬" : skillData.DisplayName;
+                    return string.IsNullOrWhiteSpace(skillData.DisplayName) ? "\uc2a4\ud0ac" : skillData.DisplayName;
             }
         }
 
@@ -103,38 +103,101 @@ namespace RuneGate
         {
             switch (rarity)
             {
-                case RuneGate.RuneRarity.Rare:
-                    return "희귀";
-                case RuneGate.RuneRarity.Epic:
-                    return "영웅";
+                case RuneRarity.Rare:
+                    return "\ud76c\uadc0";
+                case RuneRarity.Epic:
+                    return "\uc601\uc6c5";
                 default:
-                    return "일반";
+                    return "\uc77c\ubc18";
             }
         }
 
         public static string SkillStatus(BattleState battleState, float cooldownRemaining, bool hasSkill)
         {
-            if (battleState == RuneGate.BattleState.Victory || battleState == RuneGate.BattleState.Defeat)
+            if (battleState == BattleState.Victory || battleState == BattleState.Defeat)
             {
-                return "전투 종료";
+                return "\uc804\ud22c \uc885\ub8cc";
             }
 
-            if (battleState == RuneGate.BattleState.RuneSelection)
+            if (battleState == BattleState.RuneSelection)
             {
-                return "룬 선택 중";
+                return "\ub8ec \uc120\ud0dd \uc911";
             }
 
             if (!hasSkill)
             {
-                return "사용 불가";
+                return "\uc0ac\uc6a9 \ubd88\uac00";
             }
 
             if (cooldownRemaining > 0f)
             {
-                return $"재사용 대기 {cooldownRemaining:0}초";
+                return $"\uc7ac\uc0ac\uc6a9 \ub300\uae30 {cooldownRemaining:0}\ucd08";
             }
 
-            return "준비 완료";
+            return "\uc900\ube44 \uc644\ub8cc";
+        }
+
+        public static string UpgradeEffectName(string effectKey)
+        {
+            switch (effectKey)
+            {
+                case UpgradeManager.CrystalMaxHpFlat:
+                    return "\ud06c\ub9ac\uc2a4\ud0c8 \ucd5c\ub300 HP";
+                case UpgradeManager.HeroAttackPercent:
+                    return "\uc601\uc6c5 \uacf5\uaca9\ub825";
+                case UpgradeManager.HeroAttackSpeedPercent:
+                    return "\uc601\uc6c5 \uacf5\uaca9 \uc18d\ub3c4";
+                case UpgradeManager.SkillCooldownPercent:
+                    return "\uc2a4\ud0ac \uc7ac\uc0ac\uc6a9 \ub300\uae30";
+                default:
+                    return "\uc804\ud22c \ub2a5\ub825";
+            }
+        }
+
+        public static string UpgradeName(UpgradeData upgradeData)
+        {
+            if (upgradeData == null)
+            {
+                return "\uc5c5\uadf8\ub808\uc774\ub4dc";
+            }
+
+            switch (upgradeData.EffectKey)
+            {
+                case UpgradeManager.CrystalMaxHpFlat:
+                    return "\ud06c\ub9ac\uc2a4\ud0c8 \uac15\ud654";
+                case UpgradeManager.HeroAttackPercent:
+                    return "\uc601\uc6c5 \ud6c8\ub828";
+                case UpgradeManager.HeroAttackSpeedPercent:
+                    return "\uc804\ud22c \ub9ac\ub4ec";
+                case UpgradeManager.SkillCooldownPercent:
+                    return "\uc2a4\ud0ac \uc5f0\uc2b5";
+                default:
+                    return upgradeData.DisplayName;
+            }
+        }
+
+        public static string UpgradeDescription(UpgradeData upgradeData)
+        {
+            if (upgradeData == null)
+            {
+                return string.Empty;
+            }
+
+            float value = upgradeData.ValuePerLevel < 0f ? -upgradeData.ValuePerLevel : upgradeData.ValuePerLevel;
+            string percent = $"{value * 100f:0.#}%";
+            switch (upgradeData.EffectKey)
+            {
+                case UpgradeManager.CrystalMaxHpFlat:
+                    return $"\ud06c\ub9ac\uc2a4\ud0c8 \ucd5c\ub300 HP\uac00 \ub808\ubca8\ub9c8\ub2e4 {value:0.#} \uc99d\uac00\ud569\ub2c8\ub2e4.";
+                case UpgradeManager.HeroAttackPercent:
+                    return $"\ubaa8\ub4e0 \uc601\uc6c5\uc758 \uacf5\uaca9\ub825\uc774 \ub808\ubca8\ub9c8\ub2e4 {percent} \uc99d\uac00\ud569\ub2c8\ub2e4.";
+                case UpgradeManager.HeroAttackSpeedPercent:
+                    return $"\ubaa8\ub4e0 \uc601\uc6c5\uc758 \uacf5\uaca9 \uc18d\ub3c4\uac00 \ub808\ubca8\ub9c8\ub2e4 {percent} \uc99d\uac00\ud569\ub2c8\ub2e4.";
+                case UpgradeManager.SkillCooldownPercent:
+                    return $"\ubaa8\ub4e0 \uc601\uc6c5\uc758 \uc2a4\ud0ac \uc7ac\uc0ac\uc6a9 \ub300\uae30\uc2dc\uac04\uc774 \ub808\ubca8\ub9c8\ub2e4 {percent} \uac10\uc18c\ud569\ub2c8\ub2e4.";
+                default:
+                    return upgradeData.Description;
+            }
         }
     }
 }
