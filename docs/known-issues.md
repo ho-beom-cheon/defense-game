@@ -6,6 +6,8 @@
 - StageSelect, Battle HUD, Rune Selection, Result, and Upgrade screens use shared Rect math, but real Android safe-area and touch-target QA is still required.
 - If Unity is already in Play Mode while scripts change, the Game View can keep showing the previous UI. Stop Play Mode, wait for script reload, and enter Play Mode again.
 - `Tools/RuneGate/Validate Game Frame` checks static layout rectangles. Manual Game View QA is still required at 720x1280, 1080x1920, and 1440x2560 portrait.
+- Latest static frame validation passed with 83 checks and no warnings or failures; rendered text clipping and touch targets still require device QA.
+- Windows Player screenshot QA passed for six core screens at 720x1280 and desktop-capped high resolutions. Android portrait Safe Area, touch targets, and exact 1080x1920/1440x2560 rendering still require device QA.
 - `.meta` GUID format is now checked by `Tools/RuneGate/Validate Project`, but Unity may need an AssetDatabase refresh after metadata changes.
 
 ## Runtime Pixel Art
@@ -30,18 +32,19 @@
 - UpgradeScene now recovers its four upgrade assets from RuntimeContentCatalog when serialized scene slots are null. Scene references should still be regenerated before final prefab/Canvas conversion.
 
 - The game uses local JSON save only.
-- Corrupt-save fallback exists, but more destructive save-file QA is needed.
+- Automated Player coverage now verifies tutorial completion persistence, JSON disk reload, full process restart reload, Reset Save defaults, and Defeat progression guards with an isolated save path.
+- Corrupt primary fallback, valid `.bak` restoration, interrupted `.tmp` promotion, and invalid `.tmp` isolation are Player-tested; storage permission failures and real device power loss still need device QA.
 - Reset Save is available, but final release UX should add stronger confirmation polish.
 - Hard and Nightmare affect combat numbers, but unlock rules and final reward tuning need more work.
 
 ## Android / Release
 
 - APK/AAB builds require Unity Android Build Support and a clean build environment.
-- The current-content Android APK batch build succeeded on 2026-07-12; device installation has not been verified yet.
+- The latest current-content Android APK batch build succeeded on 2026-07-12 with save recovery and system-flow changes included; device installation has not been verified yet.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Device install, long-session performance, screen clipping, and touch validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.
-- AAB build automation is not separately finalized.
+- Current-content APK and AAB menu/CLI automation is implemented and build-tested; release keystore signing and Play Console upload remain manual release tasks.
 - Store submission still needs final target SDK, signing, permissions, Data Safety, and privacy review.
 
 ## Monetization

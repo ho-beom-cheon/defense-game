@@ -20,22 +20,32 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Windows Player Stage 1 E2E: passed
 - Windows Player Stage 1~10 full chapter E2E: passed
 - Full chapter result: 10 victories, 10 persisted upgrade purchases, Grumbar boss spawn verified
+- Windows Player system flows E2E: passed; tutorial persistence, JSON reload, Reset Save, Defeat Result verified
+- Result navigation E2E: passed; next stage, retry, upgrade, and stage select transitions verified
+- Cross-process save E2E: passed; independent writer/reader Players restored Gold, upgrade, tutorial, stage selection, and unlocks
+- Corrupt-save E2E: passed; invalid primary isolated as `.corrupt`, default fallback and valid `.bak` restoration verified
+- Interrupted-save E2E: passed; valid `.tmp` promotion and invalid `.tmp` isolation with `.bak` fallback verified
+- Post-recovery full chapter regression: passed; Stage 1~10 victories, 10 upgrades, Grumbar spawn, and zero save artifacts verified
+- UI Frame Validator: PASS 83, WARNING 0, FAIL 0 across 720x1280, 1080x1920, 1440x2560 and landscape fallback sizes
+- Windows Player screenshot QA: six core screens passed at 720x1280; higher requests were desktop-capped to 1080x1440 and 1440x1440, with six screens passed at each size
+- Screenshot review: Korean HUD, skill grid, StageSelect detail, Defeat Result, and Upgrade labels rendered without internal ids or broken Korean text
+- Progression Smoke Test: passed; one compile-safe placeholder warning for shared rune effect keys
 
 ## Progression QA
 
-- [ ] 새 세이브에서 Stage 1만 해금됨
+- [x] 새 세이브에서 Stage 1만 해금됨
 - [x] Stage 1 시작 가능
 - [x] Stage 1 클리어 가능
 - [x] Stage 2 해금 확인
 - [x] Stage 1~10 목록 표시 확인
 - [x] Stage 10에서 그룸바르 보스 등장 확인
 - [x] Victory 결과창 정상 표시
-- [ ] Defeat 결과창 정상 표시
-- [ ] Result 버튼: 재시도 / 업그레이드 / 스테이지 선택 정상
+- [x] Defeat 결과창 정상 표시
+- [x] Result 버튼: 다음 스테이지 / 재시도 / 업그레이드 / 스테이지 선택 정상
 - [x] Upgrade 구매 정상
-- [ ] Save/Load 정상
-- [ ] Reset Save 정상
-- [ ] 튜토리얼 표시/완료 저장 정상
+- [x] Save/Load 정상
+- [x] Reset Save 정상
+- [x] 튜토리얼 표시/완료 저장 정상
 
 ## Korean UI QA
 
@@ -62,7 +72,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] APK 빌드 성공
 - [ ] 실기기 설치 확인
 - [ ] 긴 세션 플레이 확인
-- [ ] AAB 빌드 후보 확인
+- [x] AAB 빌드 후보 확인
 - [ ] 릴리스 키스토어로 APK/AAB 서명
 
 ### Latest Build Attempt
@@ -71,12 +81,16 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Command: `RuneGate.Editor.RuneGateCurrentBuildPipeline.BuildCurrentAndroidApkFromCommandLine`
 - Result: Succeeded
 - Output: `Builds/Android/RuneGateDefense-current.apk`
-- SHA-256: `D8D902CBBEA90559FC68CEA7926C457706416085F9DFDBDC18E912E5CE65E824`
+- SHA-256: `4AA16D2C6A555D39C42E0DB2A309E9AD42407E85AAF017E8FDFBBDD5F6340899`
 - Package/Version: `com.hobeomcheon.runegatedefense`, `0.9.0` (`9`)
 - SDK: minimum 25, target 36
 - Integrity: zipalign 및 APK Signature Scheme v2 검증 통과
 - Signing: Android Debug 인증서 사용 중
 - ADB: 연결된 실기기 없음
+- Latest APK includes the system-flow, save recovery, Result navigation, and Stage 1~10 regression changes
+- AAB candidate: `65,831,901 bytes`, SHA-256 `7081B4CA6E44F79BB8DFB97C5D74A3E0C7E1C4A5CA22061E7E609C9425435369`
+- AAB bundletool validation and JAR signature verification passed; signed with Android Debug certificate
+- Permanent current-content APK/AAB menu and command-line entry points verified
 - Remaining: Android 실기기 설치, 터치 입력, Safe Area, 장시간 플레이 검증
 
 ## Policy / Monetization
