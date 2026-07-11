@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RuneGate
@@ -32,6 +33,31 @@ namespace RuneGate
             SelectedDifficultyId = SaveManager.Current.selectedDifficultyId;
             SaveManager.SetLastSelectedStageId(SelectedStageId);
             ClearLastBattleResult();
+        }
+
+        public static string ResolveNextStageId(string currentStageId)
+        {
+            return ResolveNextStageId(currentStageId, PrototypeAssetLoader.LoadStages());
+        }
+
+        public static string ResolveNextStageId(string currentStageId, IReadOnlyList<StageData> stages)
+        {
+            if (string.IsNullOrWhiteSpace(currentStageId) || stages == null)
+            {
+                return string.Empty;
+            }
+
+            for (int i = 0; i < stages.Count - 1; i++)
+            {
+                StageData stageData = stages[i];
+                if (stageData != null && stageData.StageId == currentStageId)
+                {
+                    StageData nextStageData = stages[i + 1];
+                    return nextStageData != null ? nextStageData.StageId : string.Empty;
+                }
+            }
+
+            return string.Empty;
         }
 
         public static void SetLastBattleResult(BattleResult result)

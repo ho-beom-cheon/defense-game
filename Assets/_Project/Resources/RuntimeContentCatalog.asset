@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e67d1f0a37f4eb7a404891e3ae2997c, type: 3}
+  m_Name: RuntimeContentCatalog
+  m_EditorClassIdentifier:
+  stages:
+  - {fileID: 11400000, guid: 6557acfd8e45d6c43a1157bbfb7c7043, type: 2}
+  - {fileID: 11400000, guid: 6f7611ee291208947897635f0b88fe62, type: 2}
+  - {fileID: 11400000, guid: fac74627b79a2f44fad0368626e252f8, type: 2}
+  - {fileID: 11400000, guid: ea9c7f6a07fb5424ea464a6bfc78ced7, type: 2}
+  - {fileID: 11400000, guid: e1282dd93471f3e4ea69611224157d0d, type: 2}
+  - {fileID: 11400000, guid: 9246a483d3bdda74c9868c6360f44695, type: 2}
+  - {fileID: 11400000, guid: 7c0d328230c77f84abd8c504eeaa1db3, type: 2}
+  - {fileID: 11400000, guid: 3bc17abe2fec9ab4bb253356ddfbb4bc, type: 2}
+  - {fileID: 11400000, guid: ac35cda8716fd124f9fac09a7b9d06dd, type: 2}
+  - {fileID: 11400000, guid: 1cec57c90de3f6f4f843c7c02084a088, type: 2}
+  runes:
+  - {fileID: 11400000, guid: 03efdf115ab45844cb6259cbb5045e75, type: 2}
+  - {fileID: 11400000, guid: f988cd6456c6ad745b5c3f3f1df87de0, type: 2}
+  - {fileID: 11400000, guid: 1cdcb557383873846bbc33f4ac43388c, type: 2}
+  - {fileID: 11400000, guid: afded80e2c539a444b4bd9f605bd5ac3, type: 2}
+  - {fileID: 11400000, guid: 73b365c477add334f9407a71a40f643e, type: 2}
+  - {fileID: 11400000, guid: 015824e2fc1c35a45b2c785f2a11c172, type: 2}
+  - {fileID: 11400000, guid: 22553cb8338a0cf41b7c9a3843b88ff2, type: 2}
+  - {fileID: 11400000, guid: f8bad0191fa166d45a18d4d2ac44cc0d, type: 2}
+  - {fileID: 11400000, guid: 3613c9565e4216644a9856b3c67c0a57, type: 2}
+  - {fileID: 11400000, guid: c73ec87f7d747f145af4791336591bcf, type: 2}
+  - {fileID: 11400000, guid: 7cbb33dede2f1db4985b640f1609c97f, type: 2}
+  - {fileID: 11400000, guid: 5c73db4dcc26b8c488202dfab2b749cb, type: 2}
+  - {fileID: 11400000, guid: 26d1108cc11f1c94c8900aa813a5a42b, type: 2}
+  - {fileID: 11400000, guid: db1f3b431c54b8c4a911e26833783379, type: 2}
+  - {fileID: 11400000, guid: ba05893b3639d9742a4eb5d6ba30b32a, type: 2}
+  - {fileID: 11400000, guid: c6ed610eb8b1f5d48a24f8111dc4b55d, type: 2}
+  - {fileID: 11400000, guid: cd12aa14589747941ac75c326d2dee37, type: 2}
+  - {fileID: 11400000, guid: 8d05df34e847eaf4ab88c346136a0820, type: 2}
+  - {fileID: 11400000, guid: 8a5f942e778a4f042beb2e4c376eb6d8, type: 2}
+  - {fileID: 11400000, guid: 0d4394184115d4d41a1c94d64e04ce52, type: 2}
+  upgrades:
+  - {fileID: 11400000, guid: 83ac64b28985cbd48b23ffedf3464cd0, type: 2}
+  - {fileID: 11400000, guid: 22c5f5aa20e934647bbb30666eeec587, type: 2}
+  - {fileID: 11400000, guid: 9166636a9bb616045b1bf35f45df2a2c, type: 2}
+  - {fileID: 11400000, guid: c1c728568c5b46b4ea66fd48205b03de, type: 2}
+  heroRoster: {fileID: 11400000, guid: 49134383a92fef84db7e5b2ea94e37a5, type: 2}
+  defaultFormation: {fileID: 11400000, guid: 4e3872ab3ee9f8e4eacc012c5aaf07cc, type: 2}

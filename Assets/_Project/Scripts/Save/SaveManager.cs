@@ -13,6 +13,7 @@ namespace RuneGate
 
         private const int CurrentSaveVersion = 2;
         private const string SaveFileName = "runegate_save.json";
+        private const string SavePathArgument = "-runegateSavePath";
 
         private static SaveData currentSave;
 
@@ -25,7 +26,7 @@ namespace RuneGate
             }
         }
 
-        public static string SavePath => Path.Combine(Application.persistentDataPath, SaveFileName);
+        public static string SavePath => ResolveSavePath();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void LoadOnStartup()
@@ -368,6 +369,34 @@ namespace RuneGate
                 BackupSaveFile(exception.Message);
                 return null;
             }
+        }
+
+        private static string ResolveSavePath()
+        {
+            string[] arguments = Environment.GetCommandLineArgs();
+            for (int i = 0; i < arguments.Length - 1; i++)
+            {
+                if (!string.Equals(arguments[i], SavePathArgument, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                string overridePath = arguments[i + 1];
+                if (!string.IsNullOrWhiteSpace(overridePath))
+                {
+                    try
+                    {
+                        return Path.GetFullPath(overridePath);
+                    }
+                    catch (Exception exception)
+                    {
+                        Debug.LogWarning($"SaveManager ignored an invalid {SavePathArgument} value: {exception.Message}");
+                        break;
+                    }
+                }
+            }
+
+            return Path.Combine(Application.persistentDataPath, SaveFileName);
         }
 
         private static void Sanitize(SaveData saveData)

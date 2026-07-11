@@ -14,6 +14,16 @@ namespace RuneGate
 
         public IReadOnlyList<UpgradeData> AvailableUpgrades => availableUpgrades;
 
+        private void Awake()
+        {
+            EnsureAvailableUpgrades();
+        }
+
+        private void OnEnable()
+        {
+            EnsureAvailableUpgrades();
+        }
+
         public int GetLevel(UpgradeData upgradeData)
         {
             return upgradeData == null ? 0 : SaveManager.GetUpgradeLevel(upgradeData.UpgradeId);
@@ -132,6 +142,39 @@ namespace RuneGate
             }
 
             return total;
+        }
+
+        private void EnsureAvailableUpgrades()
+        {
+            int validCount = 0;
+            for (int i = 0; i < availableUpgrades.Count; i++)
+            {
+                if (availableUpgrades[i] != null)
+                {
+                    validCount++;
+                }
+            }
+
+            if (validCount >= 4)
+            {
+                return;
+            }
+
+            List<UpgradeData> loadedUpgrades = PrototypeAssetLoader.LoadUpgrades();
+            if (loadedUpgrades.Count == 0)
+            {
+                Debug.LogWarning("UpgradeManager could not load progression upgrades from RuntimeContentCatalog.");
+                return;
+            }
+
+            availableUpgrades.Clear();
+            for (int i = 0; i < loadedUpgrades.Count; i++)
+            {
+                if (loadedUpgrades[i] != null)
+                {
+                    availableUpgrades.Add(loadedUpgrades[i]);
+                }
+            }
         }
     }
 }

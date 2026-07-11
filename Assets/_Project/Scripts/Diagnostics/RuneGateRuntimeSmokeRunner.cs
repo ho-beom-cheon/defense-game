@@ -1,0 +1,586 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace RuneGate
+{
+    public sealed class RuneGateRuntimeSmokeRunner : MonoBehaviour
+    {
+        private const string SmokeArgument = "-runegateSmoke";
+        private const string FullChapterSmokeArgument = "-runegateSmokeFullChapter";
+        private const string DefaultSaveFileName = "runegate_save.json";
+        private const float AcceleratedTimeScale = 6f;
+        private const float SceneLoadTimeoutSeconds = 15f;
+        private const float BattleTimeoutSeconds = 45f;
+
+        private BattleManager battleManager;
+        private WaveManager waveManager;
+        private BattleResult battleResult;
+        private bool battleFinished;
+        private bool failed;
+        private bool fullChapterMode;
+        private bool runeSelectionPending;
+        private bool sawBossThisStage;
+        private bool waitSucceeded;
+        private int upgradePurchaseCount;
+        private float previousTimeScale = 1f;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void Bootstrap()
+        {
+            bool smokeRequested = HasCommandLineArgument(SmokeArgument) || HasCommandLineArgument(FullChapterSmokeArgument);
+            if (!smokeRequested || FindAnyObjectByType<RuneGateRuntimeSmokeRunner>() != null)
+            {
+                return;
+            }
+
+            GameObject runnerObject = new GameObject(nameof(RuneGateRuntimeSmokeRunner));
+            DontDestroyOnLoad(runnerObject);
+            runnerObject.AddComponent<RuneGateRuntimeSmokeRunner>();
+        }
+
+        private IEnumerator Start()
+        {
+            Application.runInBackground = true;
+            fullChapterMode = HasCommandLineArgument(FullChapterSmokeArgument);
+            previousTimeScale = Time.timeScale;
+            Time.timeScale = AcceleratedTimeScale;
+
+            yield return null;
+            yield return RunSmokeTest();
+        }
+
+        private void OnDestroy()
+        {
+            UnbindBattleEvents();
+            Time.timeScale = previousTimeScale;
+        }
+
+        private IEnumerator RunSmokeTest()
+        {
+            if (!RequireIsolatedSavePath())
+            {
+                yield break;
+            }
+
+            CleanupSmokeSave();
+            SaveManager.ResetSave();
+            SaveManager.MarkTutorialSeen();
+
+            if (!Require(SceneManager.GetActiveScene().name == "TitleScene", "Player did not start in TitleScene."))
+            {
+                yield break;
+            }
+
+            if (!Require(FindAnyObjectByType<TitleUI>() != null, "TitleScene is missing TitleUI."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateE2E] TitleScene verified.");
+            SceneManager.LoadScene("StageSelectScene");
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "StageSelectScene did not load."))
+            {
+                yield break;
+            }
+
+            yield return null;
+            StageSelectUI stageSelect = FindAnyObjectByType<StageSelectUI>();
+            if (!Require(stageSelect != null, "StageSelectScene is missing StageSelectUI."))
+            {
+                yield break;
+            }
+
+            if (!Require(stageSelect.Stages != null && stageSelect.Stages.Count >= 10, "StageSelectScene did not expose Stage 1 through Stage 10."))
+            {
+                yield break;
+            }
+
+            StageData firstStage = FindStage(stageSelect.Stages, 1);
+            if (!Require(firstStage != null, "Stage 1 data is missing from StageSelectScene."))
+            {
+                yield break;
+            }
+
+            string nextStageId = GameSession.ResolveNextStageId(firstStage.StageId, stageSelect.Stages);
+            if (!Require(!string.IsNullOrWhiteSpace(nextStageId), "Stage 2 could not be resolved from Stage 1."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateE2E] StageSelectScene verified.");
+            if (fullChapterMode)
+            {
+                List<StageData> chapterStages = new List<StageData>();
+                for (int i = 0; i < stageSelect.Stages.Count; i++)
+                {
+                    if (stageSelect.Stages[i] != null)
+                    {
+                        chapterStages.Add(stageSelect.Stages[i]);
+                    }
+                }
+
+                PrototypeAssetLoader.SortStagesByStageId(chapterStages);
+                yield return RunFullChapterSmokeTest(chapterStages);
+                yield break;
+            }
+
+            GameSession.SelectDifficulty("normal");
+            GameSession.SelectStage(firstStage, nextStageId);
+            SaveManager.SetLastSelectedStageId(firstStage.StageId);
+            SceneManager.LoadScene("BattleScene");
+
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "BattleScene did not load."))
+            {
+                yield break;
+            }
+
+            yield return WaitForCondition(() =>
+            {
+                battleManager = FindAnyObjectByType<BattleManager>();
+                return battleManager != null && battleManager.ActiveStageData != null;
+            }, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "BattleManager did not initialize Stage 1."))
+            {
+                yield break;
+            }
+
+            if (!Require(battleManager.ActiveStageData.StageId == firstStage.StageId, "BattleScene initialized the wrong stage."))
+            {
+                yield break;
+            }
+
+            if (!Require(battleManager.Heroes != null && battleManager.Heroes.Count >= 6, "BattleScene did not build the six-hero formation."))
+            {
+                yield break;
+            }
+
+            BindBattleEvents();
+            Debug.Log("[RuneGateE2E] BattleScene verified. Running Stage 1 combat.");
+            yield return WaitForCondition(() => battleFinished, BattleTimeoutSeconds);
+            if (!Require(waitSucceeded, "Stage 1 combat did not finish before the smoke-test timeout."))
+            {
+                yield break;
+            }
+
+            if (!Require(battleResult.IsVictory, "Stage 1 ended in defeat during the runtime smoke test."))
+            {
+                yield break;
+            }
+
+            if (!Require(battleResult.WavesCleared == firstStage.Waves.Count,
+                    $"Victory reported {battleResult.WavesCleared} cleared waves, expected {firstStage.Waves.Count}."))
+            {
+                yield break;
+            }
+
+            yield return null;
+            yield return null;
+            StageResultUI resultUI = FindAnyObjectByType<StageResultUI>();
+            if (!Require(resultUI != null && resultUI.IsVisible, "Victory result UI was not shown."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.IsStageCleared(firstStage.StageId), "Stage 1 clear state was not saved."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.IsStageUnlocked(nextStageId), "Stage 2 was not unlocked after victory."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.Current.totalGold >= 110, "Stage 1 did not award the minimum 110 Gold."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateE2E] Victory, Gold persistence, and Stage 2 unlock verified.");
+            SceneManager.LoadScene("UpgradeScene");
+            yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "UpgradeScene", SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "UpgradeScene did not load."))
+            {
+                yield break;
+            }
+
+            yield return null;
+            if (!Require(FindAnyObjectByType<UpgradeSceneUI>() != null, "UpgradeScene is missing UpgradeSceneUI."))
+            {
+                yield break;
+            }
+
+            UpgradeManager upgradeManager = FindAnyObjectByType<UpgradeManager>();
+            if (!Require(upgradeManager != null && upgradeManager.AvailableUpgrades.Count >= 4, "UpgradeScene did not expose the four progression upgrades."))
+            {
+                yield break;
+            }
+
+            Debug.Log("RUNEGATE_E2E_PASSED");
+            CleanupSmokeSave();
+            Time.timeScale = previousTimeScale;
+            Application.Quit(0);
+        }
+
+        private IEnumerator RunFullChapterSmokeTest(IReadOnlyList<StageData> stages)
+        {
+            GameSession.SelectDifficulty("normal");
+            for (int stageNumber = 1; stageNumber <= 10; stageNumber++)
+            {
+                StageData stage = FindStage(stages, stageNumber);
+                if (!Require(stage != null, $"Stage {stageNumber} data is missing."))
+                {
+                    yield break;
+                }
+
+                if (!Require(SaveManager.IsStageUnlocked(stage.StageId), $"Stage {stageNumber} was not unlocked before selection."))
+                {
+                    yield break;
+                }
+
+                string nextStageId = GameSession.ResolveNextStageId(stage.StageId, stages);
+                GameSession.SelectStage(stage, nextStageId);
+                SaveManager.SetLastSelectedStageId(stage.StageId);
+
+                battleFinished = false;
+                runeSelectionPending = false;
+                sawBossThisStage = false;
+                SceneManager.LoadScene("BattleScene");
+                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
+                if (!Require(waitSucceeded, $"Stage {stageNumber} BattleScene did not load."))
+                {
+                    yield break;
+                }
+
+                yield return WaitForCondition(() =>
+                {
+                    battleManager = FindAnyObjectByType<BattleManager>();
+                    return battleManager != null && battleManager.ActiveStageData != null;
+                }, SceneLoadTimeoutSeconds);
+                if (!Require(waitSucceeded, $"Stage {stageNumber} BattleManager did not initialize."))
+                {
+                    yield break;
+                }
+
+                if (!Require(battleManager.ActiveStageData.StageId == stage.StageId, $"Stage {stageNumber} initialized the wrong StageData."))
+                {
+                    yield break;
+                }
+
+                if (!Require(battleManager.Heroes != null && battleManager.Heroes.Count >= 6, $"Stage {stageNumber} did not build the six-hero formation."))
+                {
+                    yield break;
+                }
+
+                waveManager = FindAnyObjectByType<WaveManager>();
+                BindBattleEvents();
+                Debug.Log($"[RuneGateFullE2E] Running Stage {stageNumber}: {stage.DisplayNameKorean}");
+                yield return WaitForCondition(() => battleFinished || failed, BattleTimeoutSeconds);
+                if (failed)
+                {
+                    yield break;
+                }
+
+                if (!Require(waitSucceeded, $"Stage {stageNumber} did not finish before the timeout."))
+                {
+                    yield break;
+                }
+
+                if (!Require(battleResult.IsVictory, $"Stage {stageNumber} ended in defeat."))
+                {
+                    yield break;
+                }
+
+                if (!Require(battleResult.WavesCleared == stage.Waves.Count,
+                        $"Stage {stageNumber} reported {battleResult.WavesCleared}/{stage.Waves.Count} cleared waves."))
+                {
+                    yield break;
+                }
+
+                yield return null;
+                yield return null;
+                StageResultUI resultUI = FindAnyObjectByType<StageResultUI>();
+                if (!Require(resultUI != null && resultUI.IsVisible, $"Stage {stageNumber} result UI was not shown."))
+                {
+                    yield break;
+                }
+
+                if (!Require(SaveManager.IsStageCleared(stage.StageId), $"Stage {stageNumber} clear state was not saved."))
+                {
+                    yield break;
+                }
+
+                if (stageNumber < 10 && !Require(!string.IsNullOrWhiteSpace(nextStageId) && SaveManager.IsStageUnlocked(nextStageId),
+                        $"Stage {stageNumber + 1} was not unlocked."))
+                {
+                    yield break;
+                }
+
+                if (stageNumber == 10 && !Require(sawBossThisStage, "Stage 10 completed without spawning a boss monster."))
+                {
+                    yield break;
+                }
+
+                Debug.Log($"[RuneGateFullE2E] Stage {stageNumber} victory verified. Gold={SaveManager.Current.totalGold}");
+                UnbindBattleEvents();
+
+                SceneManager.LoadScene("UpgradeScene");
+                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "UpgradeScene", SceneLoadTimeoutSeconds);
+                if (!Require(waitSucceeded, $"UpgradeScene did not load after Stage {stageNumber}."))
+                {
+                    yield break;
+                }
+
+                yield return null;
+                UpgradeManager upgradeManager = FindAnyObjectByType<UpgradeManager>();
+                if (!Require(upgradeManager != null && CountValidUpgrades(upgradeManager.AvailableUpgrades) >= 4,
+                        $"UpgradeScene is invalid after Stage {stageNumber}."))
+                {
+                    yield break;
+                }
+
+                TryPurchaseOneUpgrade(upgradeManager);
+                SceneManager.LoadScene("StageSelectScene");
+                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene", SceneLoadTimeoutSeconds);
+                if (!Require(waitSucceeded && FindAnyObjectByType<StageSelectUI>() != null,
+                        $"StageSelectScene did not recover after Stage {stageNumber}."))
+                {
+                    yield break;
+                }
+            }
+
+            if (!Require(upgradePurchaseCount > 0, "Full chapter completed without any persisted upgrade purchase."))
+            {
+                yield break;
+            }
+
+            Debug.Log($"RUNEGATE_FULL_CHAPTER_E2E_PASSED: upgrades={upgradePurchaseCount}, gold={SaveManager.Current.totalGold}");
+            CleanupSmokeSave();
+            Time.timeScale = previousTimeScale;
+            Application.Quit(0);
+        }
+
+        private void TryPurchaseOneUpgrade(UpgradeManager upgradeManager)
+        {
+            IReadOnlyList<UpgradeData> upgrades = upgradeManager.AvailableUpgrades;
+            for (int i = 0; i < upgrades.Count; i++)
+            {
+                UpgradeData upgrade = upgrades[i];
+                if (upgrade == null || !upgradeManager.CanPurchase(upgrade))
+                {
+                    continue;
+                }
+
+                int previousLevel = upgradeManager.GetLevel(upgrade);
+                if (upgradeManager.TryPurchase(upgrade) && upgradeManager.GetLevel(upgrade) == previousLevel + 1)
+                {
+                    upgradePurchaseCount++;
+                    Debug.Log($"[RuneGateFullE2E] Upgrade purchased: {upgrade.DisplayName} Lv.{previousLevel + 1}");
+                }
+
+                return;
+            }
+        }
+
+        private void BindBattleEvents()
+        {
+            if (battleManager == null)
+            {
+                return;
+            }
+
+            battleManager.RuneOptionsOffered -= HandleRuneOptionsOffered;
+            battleManager.BattleEnded -= HandleBattleEnded;
+            battleManager.RuneOptionsOffered += HandleRuneOptionsOffered;
+            battleManager.BattleEnded += HandleBattleEnded;
+            if (waveManager != null)
+            {
+                waveManager.MonsterSpawned -= HandleMonsterSpawned;
+                waveManager.MonsterSpawned += HandleMonsterSpawned;
+            }
+        }
+
+        private void UnbindBattleEvents()
+        {
+            if (battleManager == null)
+            {
+                return;
+            }
+
+            battleManager.RuneOptionsOffered -= HandleRuneOptionsOffered;
+            battleManager.BattleEnded -= HandleBattleEnded;
+            if (waveManager != null)
+            {
+                waveManager.MonsterSpawned -= HandleMonsterSpawned;
+            }
+        }
+
+        private void HandleRuneOptionsOffered(IReadOnlyList<RuneData> options)
+        {
+            if (battleManager == null || options == null || options.Count == 0)
+            {
+                Fail("Rune selection did not provide any choices.");
+                return;
+            }
+
+            if (!runeSelectionPending)
+            {
+                runeSelectionPending = true;
+                StartCoroutine(SelectRuneNextFrame(options[0]));
+            }
+        }
+
+        private IEnumerator SelectRuneNextFrame(RuneData rune)
+        {
+            yield return null;
+            runeSelectionPending = false;
+            if (battleManager == null || battleManager.CurrentState != BattleState.RuneSelection)
+            {
+                Fail("Battle left RuneSelection before a rune choice could be applied.");
+                yield break;
+            }
+
+            Debug.Log($"[RuneGateE2E] Selecting rune: {rune.DisplayName}");
+            battleManager.SelectRune(rune);
+        }
+
+        private void HandleBattleEnded(BattleResult result)
+        {
+            battleResult = result;
+            battleFinished = true;
+        }
+
+        private void HandleMonsterSpawned(MonsterController monster)
+        {
+            if (monster != null && monster.Data != null && monster.Data.IsBoss)
+            {
+                sawBossThisStage = true;
+                Debug.Log($"[RuneGateFullE2E] Boss spawned: {monster.Data.DisplayNameKorean}");
+            }
+        }
+
+        private IEnumerator WaitForCondition(Func<bool> condition, float timeoutSeconds)
+        {
+            waitSucceeded = false;
+            float startedAt = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - startedAt < timeoutSeconds)
+            {
+                if (condition())
+                {
+                    waitSucceeded = true;
+                    yield break;
+                }
+
+                yield return null;
+            }
+        }
+
+        private bool Require(bool condition, string failureMessage)
+        {
+            if (condition)
+            {
+                return true;
+            }
+
+            Fail(failureMessage);
+            return false;
+        }
+
+        private bool RequireIsolatedSavePath()
+        {
+            string saveFileName = Path.GetFileName(SaveManager.SavePath);
+            return Require(!string.Equals(saveFileName, DefaultSaveFileName, StringComparison.OrdinalIgnoreCase),
+                "Runtime smoke test requires -runegateSavePath with an isolated test file.");
+        }
+
+        private void Fail(string message)
+        {
+            failed = true;
+            string prefix = fullChapterMode ? "RUNEGATE_FULL_CHAPTER_E2E_FAILED" : "RUNEGATE_E2E_FAILED";
+            Debug.LogError($"{prefix}: {message}");
+            CleanupSmokeSave();
+            Time.timeScale = previousTimeScale;
+            Application.Quit(1);
+        }
+
+        private static void CleanupSmokeSave()
+        {
+            TryDeleteFile(SaveManager.SavePath);
+            TryDeleteFile(SaveManager.SavePath + ".tmp");
+            TryDeleteFile(SaveManager.SavePath + ".bak");
+        }
+
+        private static void TryDeleteFile(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                {
+                    File.Delete(path);
+                }
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"RuneGate smoke cleanup could not delete {path}: {exception.Message}");
+            }
+        }
+
+        private static StageData FindStage(IReadOnlyList<StageData> stages, int stageNumber)
+        {
+            if (stages == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < stages.Count; i++)
+            {
+                StageData stage = stages[i];
+                if (stage != null && PrototypeAssetLoader.GetStageNumber(stage) == stageNumber)
+                {
+                    return stage;
+                }
+            }
+
+            return null;
+        }
+
+        private static int CountValidUpgrades(IReadOnlyList<UpgradeData> upgrades)
+        {
+            if (upgrades == null)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < upgrades.Count; i++)
+            {
+                if (upgrades[i] != null)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private static bool HasCommandLineArgument(string argument)
+        {
+            string[] arguments = Environment.GetCommandLineArgs();
+            for (int i = 0; i < arguments.Length; i++)
+            {
+                if (string.Equals(arguments[i], argument, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+}

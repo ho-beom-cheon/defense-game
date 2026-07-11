@@ -203,7 +203,9 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/SafeAreaFitter.cs",
             "Assets/_Project/Scripts/Audio/AudioManager.cs",
             "Assets/_Project/Scripts/Audio/SfxKey.cs",
-            "Assets/_Project/Scripts/Editor/RuneGateBootstrapper.cs"
+            "Assets/_Project/Scripts/Editor/RuneGateBootstrapper.cs",
+            "Assets/_Project/Scripts/Editor/RuneGateCurrentBuildPipeline.cs",
+            "Assets/_Project/Scripts/Diagnostics/RuneGateRuntimeSmokeRunner.cs"
         };
 
         private static readonly string[] RequiredScenes =
@@ -374,6 +376,7 @@ namespace RuneGate.Editor
             "docs/save-system.md",
             "docs/difficulty-design.md",
             "docs/korean-font-setup.md",
+            "docs/runtime-e2e-smoke-test.md",
             "CHANGELOG.md"
         };
 
