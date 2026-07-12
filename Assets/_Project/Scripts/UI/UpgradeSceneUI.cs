@@ -80,7 +80,7 @@ namespace RuneGate
 
             using (new GuiEnabledScope(!sceneTransitionRequested))
             {
-                if (GUILayout.Button("\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd\uc73c\ub85c", GUILayout.Height(38f)))
+                if (GUILayout.Button("\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd\uc73c\ub85c", GUILayout.Height(UIResponsiveLayout.TouchHeight(38f))))
                 {
                     LoadSceneOnce(stageSelectSceneName);
                 }
@@ -116,7 +116,7 @@ namespace RuneGate
             using (new GuiEnabledScope(!maxed && canAfford))
             {
                 string buttonLabel = maxed ? "\ucd5c\ub300 \ub808\ubca8" : canAfford ? "\uad6c\ub9e4" : "\uace8\ub4dc \ubd80\uc871";
-                if (GUILayout.Button(buttonLabel, GUILayout.Height(30f)))
+                if (GUILayout.Button(buttonLabel, GUILayout.Height(UIResponsiveLayout.TouchHeight(30f))))
                 {
                     bool purchased = upgradeManager.TryPurchase(upgradeData);
                     if (purchased)
@@ -125,6 +125,7 @@ namespace RuneGate
                     }
 
                     feedbackMessage = purchased ? $"{displayName} \uac15\ud654 \uc644\ub8cc." : $"{displayName} \uad6c\ub9e4\uc5d0 \ud544\uc694\ud55c \uace8\ub4dc\uac00 \ubd80\uc871\ud569\ub2c8\ub2e4.";
+                    GUIUtility.ExitGUI();
                 }
             }
 
