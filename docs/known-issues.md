@@ -3,11 +3,11 @@
 ## v0.88 Game Frame / UI
 
 - The main UI is still IMGUI-based. A final mobile release should move core screens to Canvas / RectTransform prefabs.
-- StageSelect, Battle HUD, Rune Selection, Result, and Upgrade screens use shared Rect math, but real Android safe-area and touch-target QA is still required.
+- StageSelect, Battle HUD, Rune Selection, and Result passed 1080x2400 Android emulator touch/Safe Area QA. Physical devices with display cutouts still require confirmation.
 - If Unity is already in Play Mode while scripts change, the Game View can keep showing the previous UI. Stop Play Mode, wait for script reload, and enter Play Mode again.
 - `Tools/RuneGate/Validate Game Frame` checks static layout rectangles. Manual Game View QA is still required at 720x1280, 1080x1920, and 1440x2560 portrait.
 - Latest static frame validation passed with 83 checks and no warnings or failures; rendered text clipping and touch targets still require device QA.
-- Windows Player screenshot QA passed for six core screens at 720x1280 and desktop-capped high resolutions. Android portrait Safe Area, touch targets, and exact 1080x1920/1440x2560 rendering still require device QA.
+- Windows Player screenshot QA passed for six core screens. Android emulator QA passed at 1080x2400; exact 1080x1920/1440x2560 physical-device rendering remains unverified.
 - `.meta` GUID format is now checked by `Tools/RuneGate/Validate Project`, but Unity may need an AssetDatabase refresh after metadata changes.
 
 ## Runtime Pixel Art
@@ -40,9 +40,9 @@
 ## Android / Release
 
 - APK/AAB builds require Unity Android Build Support and a clean build environment.
-- Clean-branch Android APK/AAB builds succeeded on 2026-07-12 after save, system-flow, combat movement, and pet runtime dependencies were committed; device installation has not been verified yet.
+- Clean-branch Android APK/AAB builds succeeded on 2026-07-12. APK installation and the Stage 1 core flow passed on an Android 15 API 35 emulator; physical-device installation is not verified yet.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
-- Device install, long-session performance, screen clipping, and touch validation are not complete.
+- Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.
 - Current-content APK and AAB menu/CLI automation is implemented and build-tested; release keystore signing and Play Console upload remain manual release tasks.
 - Store submission still needs final target SDK, signing, permissions, Data Safety, and privacy review.

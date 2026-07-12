@@ -114,7 +114,20 @@ Unity에서 아래 항목을 직접 확인한다.
 - APK integrity: `zipalign -c -v 4` passed; APK Signature Scheme v2 verification passed
 - Signing: Android Debug certificate; release keystore signing is still required for store submission
 - Included verification scope: latest system-flow, save recovery, Result navigation, and full chapter regression changes
-- Remaining verification: Android device install, touch input, safe area, and long-session performance
+- Remaining verification: physical Android device install, physical-device touch/safe area, and long-session performance
+
+## Latest Emulator Install QA
+
+- Date: 2026-07-12
+- AVD: `RuneGate_API35_Portrait`
+- Android: 15 / API 35 / Google APIs x86_64
+- Resolution: 1080x2400 Portrait, density 420
+- APK install: passed with `adb install -r`
+- Package/version: `com.hobeomcheon.runegatedefense`, `0.9.0` (`9`)
+- Core flow: Title, StageSelect, Stage 1 Battle, Rune Selection, Victory, Stage 2 unlock passed
+- Runtime log: no fatal exception, null reference, or invalid AudioListener warning
+- Detailed evidence: `docs/android-emulator-qa-v088.md`
+- Physical Android device and release-keystore verification remain required
 
 ## Current Content Build
 

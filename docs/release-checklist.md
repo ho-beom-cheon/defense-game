@@ -16,7 +16,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 - Date: 2026-07-12
 - Project Validator: passed in Unity batchmode
-- Progression Smoke Test: passed; one compile-safe placeholder warning for shared rune effect keys
+- Progression Smoke Test: passed; 20 rune records and all supported runtime effect keys validated
 - Windows Player Stage 1 E2E: passed
 - Windows Player Stage 1~10 full chapter E2E: passed
 - Full chapter result: 10 victories, 10 persisted upgrade purchases, Grumbar boss spawn verified
@@ -29,7 +29,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - UI Frame Validator: PASS 83, WARNING 0, FAIL 0 across 720x1280, 1080x1920, 1440x2560 and landscape fallback sizes
 - Windows Player screenshot QA: six core screens passed at 720x1280; higher requests were desktop-capped to 1080x1440 and 1440x1440, with six screens passed at each size
 - Screenshot review: Korean HUD, skill grid, StageSelect detail, Defeat Result, and Upgrade labels rendered without internal ids or broken Korean text
-- Progression Smoke Test: passed; one compile-safe placeholder warning for shared rune effect keys
+- Android emulator QA: passed at 1080x2400 Portrait on Android 15 / API 35
 
 ## Progression QA
 
@@ -49,11 +49,11 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 ## Korean UI QA
 
-- [ ] 핵심 UI에 `??` 문자 없음
-- [ ] 핵심 UI에 `stage_goblin_forest` 같은 내부 id 노출 없음
-- [ ] HUD 상태가 한국어로 표시됨
-- [ ] Rune Selection에 `effectKey`가 기본 노출되지 않음
-- [ ] 세로 화면에서 주요 버튼 텍스트가 잘리지 않음
+- [x] 핵심 UI에 `??` 문자 없음
+- [x] 핵심 UI에 `stage_goblin_forest` 같은 내부 id 노출 없음
+- [x] HUD 상태가 한국어로 표시됨
+- [x] Rune Selection에 `effectKey`가 기본 노출되지 않음
+- [x] 세로 화면에서 주요 버튼 텍스트가 잘리지 않음
 
 ## Android RC Settings
 
@@ -70,6 +70,8 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 - [x] APK 빌드 시도
 - [x] APK 빌드 성공
+- [x] Android 에뮬레이터 설치 및 실행 확인
+- [x] Android 에뮬레이터 터치 입력 및 Portrait Safe Area 확인
 - [ ] 실기기 설치 확인
 - [ ] 긴 세션 플레이 확인
 - [x] AAB 빌드 후보 확인
@@ -94,7 +96,20 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - AAB bundletool validation and JAR signature verification passed; signed with Android Debug certificate
 - App icon import uses uncompressed source textures and the Unity compressed-icon warning is no longer emitted
 - Permanent current-content APK/AAB menu and command-line entry points verified
-- Remaining: Android 실기기 설치, 터치 입력, Safe Area, 장시간 플레이 검증
+- Remaining: Android 실기기 설치, 실기기 터치/Safe Area, 장시간 플레이 검증
+
+### Latest Emulator QA
+
+- Date: 2026-07-12
+- Branch: `codex/issue-36-android-emulator-qa`
+- Device: `RuneGate_API35_Portrait`, Android 15 / API 35, 1080x2400, density 420
+- APK: `71,892,795 bytes`
+- SHA-256: `040BBDF2F3F5A7F8BAEF537CD5177860BA286DCF734E30F00AD2AD6C7C5E96B3`
+- Install/Launch: passed with `adb install -r` and `UnityPlayerGameActivity`
+- Flow: Title > StageSelect > Stage 1 > Tutorial > Battle > Rune Selection > Victory passed
+- Result: Gold 110, Stage 2 unlock, Result actions visible
+- Log: no fatal exception, null reference, or invalid AudioListener warning
+- Physical device and long-session verification remain open
 
 ## Policy / Monetization
 
