@@ -25,6 +25,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - 모바일 Portrait 기준 IMGUI 레이아웃 정규화 1차 적용
 - Safe Area 기반 UI 계산, PetContract 중앙 팝업, 공통 팝업 유틸 1차 적용
 - Android 15 API 35 에뮬레이터에서 1080x2400 Portrait Stage 1 전체 흐름 검증
+- Android 에뮬레이터에서 업그레이드 구매, 재시작 저장 유지, Stage 2 진입 검증
 
 ## 실행 방법
 
@@ -114,6 +115,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/known-issues.md`
 - `docs/android-build-guide.md`
 - `docs/android-emulator-qa-v088.md`
+- `docs/android-progression-qa-v088.md`
 - `docs/release-checklist.md`
 - `docs/store-listing-draft.md`
 - `docs/privacy-checklist.md`

@@ -30,6 +30,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Windows Player screenshot QA: six core screens passed at 720x1280; higher requests were desktop-capped to 1080x1440 and 1440x1440, with six screens passed at each size
 - Screenshot review: Korean HUD, skill grid, StageSelect detail, Defeat Result, and Upgrade labels rendered without internal ids or broken Korean text
 - Android emulator QA: passed at 1080x2400 Portrait on Android 15 / API 35
+- Android progression QA: Upgrade purchase, process restart persistence, Stage 2 unlock/start passed
 
 ## Progression QA
 
@@ -43,6 +44,8 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] Defeat 결과창 정상 표시
 - [x] Result 버튼: 다음 스테이지 / 재시도 / 업그레이드 / 스테이지 선택 정상
 - [x] Upgrade 구매 정상
+- [x] Android에서 Upgrade 구매 직후 Gold/레벨 UI 갱신 정상
+- [x] Android 앱 재시작 후 Upgrade/Gold/Stage 2 해금 유지
 - [x] Save/Load 정상
 - [x] Reset Save 정상
 - [x] 튜토리얼 표시/완료 저장 정상
@@ -110,6 +113,17 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Result: Gold 110, Stage 2 unlock, Result actions visible
 - Log: no fatal exception, null reference, or invalid AudioListener warning
 - Physical device and long-session verification remain open
+
+### Android Progression QA
+
+- Date: 2026-07-12
+- Branch: `codex/issue-38-android-progression-qa`
+- Upgrade purchases: Crystal Reinforcement Level 1, Hero Training Level 1
+- Persistence: Gold, upgrade levels, Stage 2 unlock survived force-stop and process restart
+- Stage 2: BattleScene entered with `재문 숲 2`, Wave 1/3
+- Purchase redraw regression: fixed with deferred IMGUI redraw via `GUIUtility.ExitGUI()`
+- APK SHA-256: `CBD20CDB2A5E3707A0E4A30232619D1E64D7E9EB732E61FF8869871CDB1F5379`
+- Detailed evidence: `docs/android-progression-qa-v088.md`
 
 ## Policy / Monetization
 

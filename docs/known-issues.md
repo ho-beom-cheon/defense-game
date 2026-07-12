@@ -30,6 +30,7 @@
 ## Progression / Save
 
 - UpgradeScene now recovers its four upgrade assets from RuntimeContentCatalog when serialized scene slots are null. Scene references should still be regenerated before final prefab/Canvas conversion.
+- Upgrade purchase, immediate UI refresh, process-restart persistence, and Stage 2 unlock passed Android emulator QA. Physical-device scroll inertia and rapid repeated taps remain unverified.
 
 - The game uses local JSON save only.
 - Automated Player coverage now verifies tutorial completion persistence, JSON disk reload, full process restart reload, Reset Save defaults, and Defeat progression guards with an isolated save path.
