@@ -34,6 +34,26 @@ namespace RuneGate.Editor
             "turret_attack_percent"
         };
 
+        private static readonly string[] ImplementedRuntimeRuneEffects =
+        {
+            "hero_attack_percent",
+            "hero_attack_speed_percent",
+            "crystal_heal_flat",
+            "skill_cooldown_percent",
+            "hero_max_hp_percent",
+            "monster_slow_percent",
+            "boss_damage_percent",
+            "mage_area_percent",
+            "tank_defense_percent",
+            "turret_attack_percent",
+            "lightning_placeholder",
+            "blast_placeholder",
+            "crystal_shield_flat",
+            "purify_placeholder",
+            "crush_placeholder",
+            "ranged_chain_shot_placeholder"
+        };
+
         [MenuItem("Tools/RuneGate/Run Progression Smoke Test")]
         public static void RunFromMenu()
         {
@@ -264,6 +284,14 @@ namespace RuneGate.Editor
                     errors.Add($"{rune.name} has an invalid display name.");
                 }
 
+                if (string.IsNullOrWhiteSpace(rune.Description) ||
+                    rune.Description.Contains("??") ||
+                    rune.Description.IndexOf("hook", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    rune.Description.IndexOf("placeholder", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    errors.Add($"{rune.name} has a developer-facing or invalid description.");
+                }
+
                 if (!string.IsNullOrWhiteSpace(rune.EffectKey))
                 {
                     effectKeys.Add(rune.EffectKey);
@@ -278,9 +306,13 @@ namespace RuneGate.Editor
                 }
             }
 
-            if (effectKeys.Count > RequiredRuntimeRuneEffects.Length)
+            HashSet<string> implementedEffectKeys = new HashSet<string>(ImplementedRuntimeRuneEffects);
+            foreach (string effectKey in effectKeys)
             {
-                warnings.Add($"Rune catalog contains {effectKeys.Count} effect keys; unsupported keys should remain compile-safe placeholders.");
+                if (!implementedEffectKeys.Contains(effectKey))
+                {
+                    warnings.Add($"Rune catalog contains unsupported effect key: {effectKey}.");
+                }
             }
         }
 
