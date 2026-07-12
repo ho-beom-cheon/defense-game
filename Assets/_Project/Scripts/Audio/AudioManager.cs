@@ -30,9 +30,12 @@ namespace RuneGate
             }
 
             instance = this;
-            TryBindAudioSource();
-            EnsureAudioListener();
             RebuildClipLookup();
+            if (HasPlayableClip())
+            {
+                TryBindAudioSource();
+                EnsureAudioListener();
+            }
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -116,8 +119,13 @@ namespace RuneGate
 
         private static void EnsureAudioListener()
         {
+            if (instance == null || !instance.HasPlayableClip())
+            {
+                return;
+            }
+
             Type listenerType = GetAudioListenerType();
-            if (listenerType == null || FindExistingAudioListener(listenerType) != null)
+            if (!IsEngineComponentType(listenerType) || FindExistingAudioListener(listenerType) != null)
             {
                 return;
             }
@@ -136,6 +144,24 @@ namespace RuneGate
             GameObject listenerObject = new GameObject("Runtime Audio Listener");
             listenerObject.hideFlags = HideFlags.DontSave;
             listenerObject.AddComponent(listenerType);
+        }
+
+        private static bool IsEngineComponentType(Type componentType)
+        {
+            return componentType != null && typeof(Component).IsAssignableFrom(componentType);
+        }
+
+        private bool HasPlayableClip()
+        {
+            foreach (UnityEngine.Object clip in clipsByKey.Values)
+            {
+                if (clip != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static Type GetAudioListenerType()

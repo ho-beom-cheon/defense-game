@@ -61,7 +61,28 @@ namespace RuneGate
 
         private void Awake()
         {
+            EnsureBattlefieldCameraLayout();
             EnsureRuntimeBattlefieldVisuals();
+        }
+
+        private void EnsureBattlefieldCameraLayout()
+        {
+            Camera mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                Debug.LogWarning("LaneManager could not find the main camera for battlefield layout.");
+                return;
+            }
+
+            BattlefieldCameraFitter fitter = mainCamera.GetComponent<BattlefieldCameraFitter>();
+            if (fitter == null)
+            {
+                fitter = mainCamera.gameObject.AddComponent<BattlefieldCameraFitter>();
+            }
+
+            float worldWidth = Mathf.Abs(spawnX - crystalX) + 1.6f;
+            float worldHeight = Mathf.Max(7.5f, Mathf.Abs(GetLaneY(LaneCount - 1) - GetLaneY(0)) + 3.2f);
+            fitter.Configure(new Vector2((spawnX + crystalX) * 0.5f, 0f), worldWidth, worldHeight);
         }
 
         public bool IsValidLaneIndex(int laneIndex)

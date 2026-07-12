@@ -115,7 +115,8 @@ namespace RuneGate
 
             GUILayout.EndHorizontal();
 
-            if (battleManager != null && drawRect.height >= 104f)
+            bool showHeroSummary = !Application.isMobilePlatform || !GameFrameLayout.IsPortrait;
+            if (showHeroSummary && battleManager != null && drawRect.height >= 104f)
             {
                 DrawHeroSummaryStrip(drawRect.width);
             }

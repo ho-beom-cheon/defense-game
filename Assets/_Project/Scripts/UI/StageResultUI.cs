@@ -76,7 +76,10 @@ namespace RuneGate
             GUI.SetNextControlName("PopupLayer_ResultPopup");
             GUILayout.Label(latestResult.IsVictory ? "\uc2b9\ub9ac!" : "\ud328\ubc30");
             GUILayout.Space(UIResponsiveLayout.SmallGap);
-            resultScrollPosition = GUILayout.BeginScrollView(resultScrollPosition, GUILayout.Height(Mathf.Max(170f, drawRect.height - 132f)));
+            float primaryButtonHeight = UIResponsiveLayout.TouchHeight(38f);
+            float secondaryButtonHeight = UIResponsiveLayout.TouchHeight(34f);
+            float reservedActionHeight = primaryButtonHeight + secondaryButtonHeight + 70f;
+            resultScrollPosition = GUILayout.BeginScrollView(resultScrollPosition, GUILayout.Height(Mathf.Max(170f, drawRect.height - reservedActionHeight)));
             GUILayout.Label(ResultMessage);
             GUILayout.Label($"\ud68d\ub4dd \uace8\ub4dc +{goldEarned}");
             if (battleGoldEarned != goldEarned)
@@ -107,23 +110,23 @@ namespace RuneGate
             GUI.enabled = !sceneTransitionRequested;
             if (latestResult.IsVictory && HasNextStage(latestResult))
             {
-                if (GUILayout.Button("\ub2e4\uc74c \uc2a4\ud14c\uc774\uc9c0", GUILayout.Height(38f)))
+                if (GUILayout.Button("\ub2e4\uc74c \uc2a4\ud14c\uc774\uc9c0", GUILayout.Height(primaryButtonHeight)))
                 {
                     ContinueToNextStage();
                 }
             }
-            else if (GUILayout.Button("\uc7ac\uc2dc\ub3c4", GUILayout.Height(38f)))
+            else if (GUILayout.Button("\uc7ac\uc2dc\ub3c4", GUILayout.Height(primaryButtonHeight)))
             {
                 RetryBattle();
             }
 
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("\uc5c5\uadf8\ub808\uc774\ub4dc", GUILayout.Height(34f)))
+            if (GUILayout.Button("\uc5c5\uadf8\ub808\uc774\ub4dc", GUILayout.Height(secondaryButtonHeight)))
             {
                 OpenUpgrade();
             }
 
-            if (GUILayout.Button("\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd", GUILayout.Height(34f)))
+            if (GUILayout.Button("\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd", GUILayout.Height(secondaryButtonHeight)))
             {
                 OpenStageSelect();
             }
@@ -447,7 +450,10 @@ namespace RuneGate
 
         private Rect CenteredPanelRect()
         {
-            return GameFrameLayout.PopupFrame(Mathf.Max(panelRect.width, 620f), Mathf.Max(panelRect.height, 560f), 0.92f, 0.78f);
+            bool mobilePortrait = Application.isMobilePlatform && GameFrameLayout.IsPortrait;
+            float preferredWidth = mobilePortrait ? 760f : 620f;
+            float preferredHeight = mobilePortrait ? 940f : 560f;
+            return GameFrameLayout.PopupFrame(Mathf.Max(panelRect.width, preferredWidth), Mathf.Max(panelRect.height, preferredHeight), 0.92f, 0.78f);
         }
     }
 }

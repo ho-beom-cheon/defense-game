@@ -73,7 +73,7 @@ namespace RuneGate
                 GUILayout.FlexibleSpace();
                 bool previousEnabled = GUI.enabled;
                 GUI.enabled = !selectionRequested;
-                if (GUILayout.Button(selectionRequested ? "\uc801\uc6a9 \uc911" : "\uc120\ud0dd", GUILayout.Width(90f), GUILayout.Height(30f)))
+                if (GUILayout.Button(selectionRequested ? "\uc801\uc6a9 \uc911" : "\uc120\ud0dd", GUILayout.Width(100f), GUILayout.Height(UIResponsiveLayout.TouchHeight(30f))))
                 {
                     SelectOption(i);
                 }
@@ -154,7 +154,10 @@ namespace RuneGate
 
         private Rect CenteredPanelRect()
         {
-            return GameFrameLayout.PopupFrame(Mathf.Max(panelRect.width, 620f), Mathf.Max(panelRect.height, 520f), 0.92f, 0.78f);
+            bool mobilePortrait = Application.isMobilePlatform && GameFrameLayout.IsPortrait;
+            float preferredWidth = mobilePortrait ? 760f : 620f;
+            float preferredHeight = mobilePortrait ? 760f : 520f;
+            return GameFrameLayout.PopupFrame(Mathf.Max(panelRect.width, preferredWidth), Mathf.Max(panelRect.height, preferredHeight), 0.92f, 0.78f);
         }
 
         private static string FormatRuneValue(RuneData runeData)

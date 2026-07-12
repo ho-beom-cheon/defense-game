@@ -64,8 +64,10 @@ namespace RuneGate
             GUI.Box(frame.FooterArea, GUIContent.none, boxStyle);
 
             float pad = 10f;
-            float headerY = frame.HeaderArea.y + Mathf.Max(6f, (frame.HeaderArea.height - 28f) * 0.5f);
-            float difficultyButtonWidth = 112f;
+            float headerLineHeight = Mathf.Max(28f, 30f * UIResponsiveLayout.ReadabilityScale);
+            float difficultyButtonHeight = UIResponsiveLayout.TouchHeight(32f);
+            float headerY = frame.HeaderArea.y + Mathf.Max(6f, (frame.HeaderArea.height - difficultyButtonHeight) * 0.5f);
+            float difficultyButtonWidth = Mathf.Clamp(112f * UIResponsiveLayout.ReadabilityScale, 112f, 176f);
             float actionWidth = difficultyButtonWidth;
             float headerContentWidth = Mathf.Max(1f, frame.HeaderArea.width - pad * 2f - actionWidth - 8f);
             float chapterWidth = Mathf.Clamp(headerContentWidth * 0.36f, 88f, 210f);
@@ -79,13 +81,13 @@ namespace RuneGate
             }
 
             float headerX = frame.HeaderArea.x + pad;
-            GUI.Label(new Rect(headerX, headerY, chapterWidth, 28f), "Chapter 1. \uc7ac\ubb38 \uc232", headerLabelStyle);
-            GUI.Label(new Rect(headerX + chapterWidth + 6f, headerY, goldWidth, 28f), $"\ubcf4\uc720 \uace8\ub4dc: {SaveManager.Current.totalGold}", headerLabelStyle);
+            GUI.Label(new Rect(headerX, headerY, chapterWidth, headerLineHeight), "Chapter 1. \uc7ac\ubb38 \uc232", headerLabelStyle);
+            GUI.Label(new Rect(headerX + chapterWidth + 6f, headerY, goldWidth, headerLineHeight), $"\ubcf4\uc720 \uace8\ub4dc: {SaveManager.Current.totalGold}", headerLabelStyle);
             string slotText = $"\ud3b8\uc131 {SaveManager.Current.formationSlots.Count}/9";
 
-            GUI.Label(new Rect(headerX + chapterWidth + goldWidth + 12f, headerY, slotWidth, 28f), slotText, headerLabelStyle);
+            GUI.Label(new Rect(headerX + chapterWidth + goldWidth + 12f, headerY, slotWidth, headerLineHeight), slotText, headerLabelStyle);
             float difficultyButtonX = frame.HeaderArea.xMax - actionWidth - pad;
-            if (GUI.Button(new Rect(difficultyButtonX, headerY - 2f, difficultyButtonWidth, 32f), $"\ub09c\uc774\ub3c4 {GameTextMapper.Difficulty(SaveManager.Current.selectedDifficultyId)}", buttonStyle))
+            if (GUI.Button(new Rect(difficultyButtonX, headerY, difficultyButtonWidth, difficultyButtonHeight), $"\ub09c\uc774\ub3c4 {GameTextMapper.Difficulty(SaveManager.Current.selectedDifficultyId)}", buttonStyle))
             {
                 CycleDifficulty();
             }
@@ -98,9 +100,10 @@ namespace RuneGate
 
         private void DrawCompactStageListPanel(Rect area, GUIStyle buttonStyle)
         {
-            GUI.Label(new Rect(area.x + 10f, area.y + 8f, area.width - 20f, 24f), "\uc2a4\ud14c\uc774\uc9c0 \ubaa9\ub85d");
-            Rect viewRect = new Rect(area.x + 10f, area.y + 36f, Mathf.Max(1f, area.width - 20f), Mathf.Max(1f, area.height - 46f));
-            float rowHeight = 34f;
+            float titleHeight = Mathf.Max(24f, 28f * UIResponsiveLayout.ReadabilityScale);
+            GUI.Label(new Rect(area.x + 10f, area.y + 8f, area.width - 20f, titleHeight), "\uc2a4\ud14c\uc774\uc9c0 \ubaa9\ub85d");
+            Rect viewRect = new Rect(area.x + 10f, area.y + titleHeight + 12f, Mathf.Max(1f, area.width - 20f), Mathf.Max(1f, area.height - titleHeight - 22f));
+            float rowHeight = UIResponsiveLayout.TouchHeight(34f);
             Rect contentRect = new Rect(0f, 0f, Mathf.Max(1f, viewRect.width - 18f), Mathf.Max(viewRect.height, stages.Count * rowHeight + 6f));
             stageScrollPosition = GUI.BeginScrollView(viewRect, stageScrollPosition, contentRect);
 
@@ -125,8 +128,9 @@ namespace RuneGate
             bool unlocked = SaveManager.IsStageUnlocked(stageData.StageId);
             bool cleared = SaveManager.IsStageCleared(stageData.StageId);
             string iconPath = cleared ? RuntimePixelAssetLoader.UiStageNodeCleared : unlocked ? RuntimePixelAssetLoader.UiStageNodeUnlocked : RuntimePixelAssetLoader.UiStageNodeLocked;
-            DrawTextureIcon(new Rect(6f, y + 4f, 22f, 22f), iconPath);
-            if (GUI.Button(new Rect(34f, y, Mathf.Max(120f, contentWidth - 42f), rowHeight - 4f), BuildStageButtonLabel(index, stageData, unlocked, cleared), buttonStyle))
+            float iconSize = Mathf.Min(28f, rowHeight - 8f);
+            DrawTextureIcon(new Rect(6f, y + (rowHeight - iconSize) * 0.5f, iconSize, iconSize), iconPath);
+            if (GUI.Button(new Rect(38f, y, Mathf.Max(120f, contentWidth - 46f), rowHeight - 4f), BuildStageButtonLabel(index, stageData, unlocked, cleared), buttonStyle))
             {
                 selectedStageIndex = index;
             }
@@ -150,28 +154,32 @@ namespace RuneGate
 
             bool unlocked = SaveManager.IsStageUnlocked(selectedStage.StageId);
             bool cleared = SaveManager.IsStageCleared(selectedStage.StageId);
-            Rect contentRect = new Rect(area.x + 12f, area.y + 10f, Mathf.Max(1f, area.width - 24f), Mathf.Max(1f, area.height - 62f));
-            Rect scrollContent = new Rect(0f, 0f, contentRect.width - 18f, 220f);
+            float actionHeight = UIResponsiveLayout.TouchHeight(34f);
+            Rect contentRect = new Rect(area.x + 12f, area.y + 10f, Mathf.Max(1f, area.width - 24f), Mathf.Max(1f, area.height - actionHeight - 30f));
+            float lineHeight = Mathf.Max(26f, 28f * UIResponsiveLayout.ReadabilityScale);
+            float descriptionHeight = Mathf.Max(lineHeight * 2f, GUI.skin.label.CalcHeight(new GUIContent(string.IsNullOrWhiteSpace(selectedStage.DescriptionKorean) ? "\uade0\uc5f4\uc5d0\uc11c \ubab0\ub824\uc624\ub294 \uc801\uc744 \ub9c9\uc73c\uc138\uc694." : selectedStage.DescriptionKorean), contentRect.width - 18f));
+            float requiredHeight = lineHeight * 6f + descriptionHeight + 24f;
+            Rect scrollContent = new Rect(0f, 0f, contentRect.width - 18f, Mathf.Max(contentRect.height, requiredHeight));
             detailScrollPosition = GUI.BeginScrollView(contentRect, detailScrollPosition, scrollContent);
             float y = 0f;
-            GUI.Label(new Rect(0f, y, scrollContent.width, 24f), GameTextMapper.StageName(selectedStage));
-            y += 26f;
-            GUI.Label(new Rect(0f, y, scrollContent.width, 22f), $"\ub09c\uc774\ub3c4: {GetStageDifficultyLabel(selectedStageIndex)}");
-            y += 24f;
-            GUI.Label(new Rect(0f, y, scrollContent.width, 22f), cleared ? "\uc0c1\ud0dc: \ud074\ub9ac\uc5b4" : unlocked ? "\uc0c1\ud0dc: \ud574\uae08" : "\uc0c1\ud0dc: \uc7a0\uae40");
-            y += 28f;
-            GUI.Label(new Rect(0f, y, scrollContent.width, 24f), string.IsNullOrWhiteSpace(selectedStage.SubtitleKorean) ? "\uade0\uc5f4 \ubc29\uc5b4 \uc804\uc120" : selectedStage.SubtitleKorean);
-            y += 28f;
-            GUI.Label(new Rect(0f, y, scrollContent.width, 52f), string.IsNullOrWhiteSpace(selectedStage.DescriptionKorean) ? "\uade0\uc5f4\uc5d0\uc11c \ubab0\ub824\uc624\ub294 \uc801\uc744 \ub9c9\uc73c\uc138\uc694." : selectedStage.DescriptionKorean);
-            y += 56f;
-            GUI.Label(new Rect(0f, y, scrollContent.width, 22f), $"\ud06c\ub9ac\uc2a4\ud0c8 HP: {selectedStage.CrystalHp}");
-            y += 24f;
-            GUI.Label(new Rect(0f, y, scrollContent.width, 22f), $"\uc6e8\uc774\ube0c: {(selectedStage.Waves != null ? selectedStage.Waves.Count : 0)}");
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), GameTextMapper.StageName(selectedStage));
+            y += lineHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\ub09c\uc774\ub3c4: {GetStageDifficultyLabel(selectedStageIndex)}");
+            y += lineHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), cleared ? "\uc0c1\ud0dc: \ud074\ub9ac\uc5b4" : unlocked ? "\uc0c1\ud0dc: \ud574\uae08" : "\uc0c1\ud0dc: \uc7a0\uae40");
+            y += lineHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), string.IsNullOrWhiteSpace(selectedStage.SubtitleKorean) ? "\uade0\uc5f4 \ubc29\uc5b4 \uc804\uc120" : selectedStage.SubtitleKorean);
+            y += lineHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, descriptionHeight), string.IsNullOrWhiteSpace(selectedStage.DescriptionKorean) ? "\uade0\uc5f4\uc5d0\uc11c \ubab0\ub824\uc624\ub294 \uc801\uc744 \ub9c9\uc73c\uc138\uc694." : selectedStage.DescriptionKorean);
+            y += descriptionHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\ud06c\ub9ac\uc2a4\ud0c8 HP: {selectedStage.CrystalHp}");
+            y += lineHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\uc6e8\uc774\ube0c: {(selectedStage.Waves != null ? selectedStage.Waves.Count : 0)}");
             GUI.EndScrollView();
 
             bool previousEnabled = GUI.enabled;
             GUI.enabled = unlocked && !sceneTransitionRequested;
-            if (GUI.Button(new Rect(area.x + 12f, area.yMax - 46f, area.width - 24f, 34f), "\uc804\ud22c \uc2dc\uc791", buttonStyle))
+            if (GUI.Button(new Rect(area.x + 12f, area.yMax - actionHeight - 12f, area.width - 24f, actionHeight), "\uc804\ud22c \uc2dc\uc791", buttonStyle))
             {
                 StartSelectedStage(selectedStage);
             }
@@ -187,15 +195,16 @@ namespace RuneGate
             }
 
             float buttonWidth = Mathf.Min(240f, (area.width - 36f) * 0.5f);
-            float y = area.y + Mathf.Max(6f, (area.height - 34f) * 0.5f);
+            float buttonHeight = UIResponsiveLayout.TouchHeight(34f);
+            float y = area.y + Mathf.Max(4f, (area.height - buttonHeight) * 0.5f);
             bool previousEnabled = GUI.enabled;
             GUI.enabled = !sceneTransitionRequested;
-            if (GUI.Button(new Rect(area.xMax - buttonWidth * 2f - 18f, y, buttonWidth, 34f), "\uc5c5\uadf8\ub808\uc774\ub4dc", buttonStyle))
+            if (GUI.Button(new Rect(area.xMax - buttonWidth * 2f - 18f, y, buttonWidth, buttonHeight), "\uc5c5\uadf8\ub808\uc774\ub4dc", buttonStyle))
             {
                 LoadSceneOnce(upgradeSceneName);
             }
 
-            if (GUI.Button(new Rect(area.xMax - buttonWidth - 10f, y, buttonWidth, 34f), "\ud0c0\uc774\ud2c0\ub85c", buttonStyle))
+            if (GUI.Button(new Rect(area.xMax - buttonWidth - 10f, y, buttonWidth, buttonHeight), "\ud0c0\uc774\ud2c0\ub85c", buttonStyle))
             {
                 LoadSceneOnce(titleSceneName);
             }
