@@ -93,9 +93,9 @@ namespace RuneGate
             if (showSettings)
             {
                 RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconSettings, 24f);
-                GUILayout.Label("BGM \ubcfc\ub968: 100% (placeholder)");
-                GUILayout.Label("SFX \ubcfc\ub968: 100% (placeholder)");
-                GUILayout.Label("\uc9c4\ub3d9: \ucf1c\uc9d0 (placeholder)");
+                GUILayout.Label("BGM \ubcfc\ub968: 100%");
+                GUILayout.Label("SFX \ubcfc\ub968: 100%");
+                GUILayout.Label("\uc9c4\ub3d9: \ucf1c\uc9d0");
                 if (GUILayout.Button("\ub2e4\uc74c \uc804\ud22c\uc5d0\uc11c \ud29c\ud1a0\ub9ac\uc5bc \ub2e4\uc2dc \ubcf4\uae30", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
                 {
                     SaveManager.ResetTutorialSeen();

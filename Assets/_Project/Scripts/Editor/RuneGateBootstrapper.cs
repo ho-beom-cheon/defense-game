@@ -420,11 +420,11 @@ namespace RuneGate.Editor
 
         private static ContentBundle CreateV04Content()
         {
-            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "Shield Bash", "Stuns the line briefly in a later hook and deals reliable close damage.", 7.5f, 70, 1, 2.1f, TargetingType.Nearest, ElementType.Light, "damage", 1f);
+            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "방패 강타", "가까운 적에게 강한 피해를 주고 전선을 밀어냅니다.", 7.5f, 70, 1, 2.1f, TargetingType.Nearest, ElementType.Light, "damage", 1f);
             SkillData rapidShot = CreateSkill("Rapid Shot", "skill_rapid_shot", "Rapid Shot", "Fires repeated shots into the nearest fast target.", 5.8f, 28, 3, 5f, TargetingType.Nearest, ElementType.Wind, "multi_hit_damage", 1f);
             SkillData meteor = CreateSkill("Meteor", "skill_meteor", "Meteor", "Drops fire area damage for clustered monsters.", 10.5f, 68, 1, 4.2f, TargetingType.HighestHp, ElementType.Fire, "area_damage", 1.8f);
             SkillData holyHeal = CreateSkill("Holy Heal", "skill_holy_heal", "Holy Heal", "Restores HP to the Kingdom Crystal.", 8.5f, 45, 1, 3.5f, TargetingType.LowestHp, ElementType.Light, "crystal_heal_flat", 1f);
-            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "Temporary Turret", "Deploys a temporary turret hook with fallback damage.", 11f, 44, 1, 3.2f, TargetingType.First, ElementType.Earth, "turret_placeholder", 1f);
+            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "임시 포탑", "임시 포탑을 배치하고 적에게 기본 피해를 줍니다.", 11f, 44, 1, 3.2f, TargetingType.First, ElementType.Earth, "turret_placeholder", 1f);
             SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "Shadow Strike", "High dark damage that prefers named and boss targets.", 10f, 145, 1, 2.4f, TargetingType.Boss, ElementType.Dark, "damage", 1f);
 
             HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", "레온", "균열 방패의 기사", "전열 / 방어 / 빛. 무너진 재문 앞에서 마지막까지 버틴 문지기 기사.", "이번에는, 절대 무너지지 않는다.", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 520, 28, 0.95f, 1.25f, shieldBash);
@@ -439,8 +439,8 @@ namespace RuneGate.Editor
             MonsterData wolf = CreateMonsterData("Wolf", "monster_wolf_001", "Wolf", "부식 늑대", "속도형 / 빠른 라인 돌파", "봉문 결계를 갉아먹는 부식 기운을 두른 빠른 추적체.", MonsterType.Fast, ElementType.Wind, 72, 2.05f, 1, 7);
             MonsterData orc = CreateMonsterData("Orc", "monster_orc_001", "Orc", "재갑 돌격병", "탱커형 / 높은 HP", "재문 갑각을 두르고 봉문을 정면으로 밀어붙이는 중형 돌격 적성.", MonsterType.Tank, ElementType.None, 255, 0.78f, 2, 14);
             MonsterData bat = CreateMonsterData("Bat", "monster_bat_001", "Bat", "균열 까마귀", "비행/침투형 / 빠른 이동", "균열 위를 낮게 날며 문지기 진형을 흔드는 작은 날개 적성체.", MonsterType.Flying, ElementType.Wind, 64, 2.15f, 1, 8);
-            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", "룬핵 점액", "분열형 / 사망 hook", "닫힌 문 주변에 남은 룬핵 찌꺼기가 뭉쳐 움직이는 점액형 적성.", MonsterType.Splitter, ElementType.Earth, 155, 0.82f, 1, 11);
-            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", "망각의 뼈병", "언데드형 / 부활 hook", "오래된 전장의 기록이 균열에 오염되어 걸어 나온 뼈 병사.", MonsterType.Undead, ElementType.Dark, 135, 1.05f, 1, 12);
+            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", "룬핵 점액", "분열형 / 사망 시 증식", "닫힌 문 주변에 남은 룬핵 찌꺼기가 뭉쳐 움직이는 점액형 적성.", MonsterType.Splitter, ElementType.Earth, 155, 0.82f, 1, 11);
+            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", "망각의 뼈병", "언데드형 / 재기동 가능성", "오래된 전장의 기록이 균열에 오염되어 걸어 나온 뼈 병사.", MonsterType.Undead, ElementType.Dark, 135, 1.05f, 1, 12);
             MonsterData boss = CreateMonsterData("Orc Warlord", "boss_orc_warlord_001", "Orc Warlord", "그룸바르", "문파괴자", "봉문 위험 기록 최상위 개체. 재문을 직접 찢고 진입하는 대형 파쇄 적성.", MonsterType.Boss, ElementType.Dark, 1750, 0.48f, 6, 360);
 
             RuneData[] runes = CreateV04Runes();
@@ -735,16 +735,16 @@ namespace RuneGate.Editor
                 CreateRune("Healing Rune", "rune_healing", "치유 룬", "크리스탈 HP를 즉시 회복한다.", RuneRarity.Common, ElementType.Light, "crystal_heal_flat", 45f),
                 CreateRune("Fire Rune", "rune_fire", "화염 룬", "카엘과 광역 피해 선택의 가치가 증가한다.", RuneRarity.Common, ElementType.Fire, "mage_area_percent", 0.18f),
                 CreateRune("Frost Rune", "rune_frost", "냉기 룬", "현재 전장에 있는 몬스터 이동 속도를 늦춘다.", RuneRarity.Rare, ElementType.Ice, "monster_slow_percent", 0.2f),
-                CreateRune("Lightning Rune", "rune_lightning", "번개 룬", "연쇄 번개 효과 예약 hook.", RuneRarity.Rare, ElementType.Lightning, "lightning_placeholder", 1f),
+                CreateRune("Lightning Rune", "rune_lightning", "번개 룬", "모든 영웅의 공격 속도가 14% 증가합니다.", RuneRarity.Rare, ElementType.Lightning, "lightning_placeholder", 0.14f),
                 CreateRune("Earth Rune", "rune_earth", "대지 룬", "영웅 최대 HP가 증가한다.", RuneRarity.Common, ElementType.Earth, "hero_max_hp_percent", 0.12f),
                 CreateRune("Sacrifice Rune", "rune_shadow", "그림자 룬", "닉스와 폭딜 조합을 보조하는 공격 보너스.", RuneRarity.Rare, ElementType.Dark, "hero_attack_percent", 0.2f),
                 CreateRune("Hunter Rune", "rune_hunt", "사냥 룬", "네임드와 보스에게 주는 피해가 증가한다.", RuneRarity.Rare, ElementType.None, "boss_damage_percent", 0.18f),
                 CreateRune("Focus Rune", "rune_focus", "집중 룬", "스킬 재사용 대기시간이 감소한다.", RuneRarity.Common, ElementType.None, "skill_cooldown_percent", 0.1f),
-                CreateRune("Explosion Rune", "rune_explosion", "폭발 룬", "폭발 피해 효과 예약 hook.", RuneRarity.Rare, ElementType.Fire, "blast_placeholder", 1f),
-                CreateRune("Guardian Rune", "rune_guardian", "수호 룬", "크리스탈 보호막 효과 예약 hook.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 25f),
-                CreateRune("Purification Rune", "rune_purification", "정화 룬", "오염/언데드 정화 효과 예약 hook.", RuneRarity.Common, ElementType.Light, "purify_placeholder", 1f),
-                CreateRune("Shatter Rune", "rune_shatter", "분쇄 룬", "장갑 파괴 효과 예약 hook.", RuneRarity.Rare, ElementType.Earth, "crush_placeholder", 1f),
-                CreateRune("Chain Rune", "rune_chain", "연쇄 룬", "원거리 연쇄 사격의 임시 공격 속도 보너스.", RuneRarity.Rare, ElementType.Lightning, "ranged_chain_shot_placeholder", 0.14f),
+                CreateRune("Explosion Rune", "rune_explosion", "폭발 룬", "모든 영웅의 공격력이 16% 증가합니다.", RuneRarity.Rare, ElementType.Fire, "blast_placeholder", 0.16f),
+                CreateRune("Guardian Rune", "rune_guardian", "수호 룬", "크리스탈 HP를 25 회복합니다.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 25f),
+                CreateRune("Purification Rune", "rune_purification", "정화 룬", "영웅의 회복 효과가 20% 증가합니다.", RuneRarity.Common, ElementType.Light, "purify_placeholder", 0.2f),
+                CreateRune("Shatter Rune", "rune_shatter", "분쇄 룬", "보스에게 주는 피해가 20% 증가합니다.", RuneRarity.Rare, ElementType.Earth, "crush_placeholder", 0.2f),
+                CreateRune("Chain Rune", "rune_chain", "연쇄 룬", "모든 영웅의 공격 속도가 14% 증가합니다.", RuneRarity.Rare, ElementType.Lightning, "ranged_chain_shot_placeholder", 0.14f),
                 CreateRune("Turret Rune", "rune_turret", "포탑 룬", "브롬의 임시 포탑 계열 피해가 증가한다.", RuneRarity.Epic, ElementType.Earth, "turret_attack_percent", 0.18f),
                 CreateRune("Mana Rune", "rune_boss_hunt", "보스 사냥 룬", "그룸바르 같은 보스에게 주는 피해가 크게 증가한다.", RuneRarity.Epic, ElementType.Dark, "boss_damage_percent", 0.32f)
             };

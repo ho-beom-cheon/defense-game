@@ -15,7 +15,7 @@ MonoBehaviour:
   monsterId: monster_skeleton_001
   displayName: Skeleton
   displayNameKorean: "망각의 뼈병"
-  subtitleKorean: "언데드형 / 부활 hook"
+  subtitleKorean: "언데드형 / 재기동 가능성"
   descriptionKorean: "오래된 전장의 기록이 균열에 오염되어 걸어 나온 뼈 병사."
   monsterType: 5
   element: 6

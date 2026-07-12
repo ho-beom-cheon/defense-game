@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_build_turret
   displayName: "임시 포탑"
-  description: "임시 포탑 hook을 배치하고 기본 피해를 줍니다."
+  description: "임시 포탑을 배치하고 적에게 기본 피해를 줍니다."
   cooldown: 11
   power: 44
   damageHitCount: 1

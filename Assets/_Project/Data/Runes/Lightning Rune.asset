@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_lightning
   displayName: "번개 룬"
-  description: "연쇄 번개 효과를 위한 예약 hook입니다."
+  description: "모든 영웅의 공격 속도가 14% 증가합니다."
   rarity: 1
   element: 3
   effectKey: lightning_placeholder
-  value: 1
+  value: 0.14
   icon: {fileID: 0}

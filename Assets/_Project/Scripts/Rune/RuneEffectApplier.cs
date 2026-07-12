@@ -21,6 +21,10 @@ namespace RuneGate
         private const string AllHeroStatsPercent = "all_hero_stats_percent";
         private const string SacrificeCrystalForAttack = "sacrifice_crystal_for_attack";
         private const string MageAreaPercent = "mage_area_percent";
+        private const string LightningPlaceholder = "lightning_placeholder";
+        private const string BlastPlaceholder = "blast_placeholder";
+        private const string PurifyPlaceholder = "purify_placeholder";
+        private const string CrushPlaceholder = "crush_placeholder";
         private const string RangedChainShotPlaceholder = "ranged_chain_shot_placeholder";
         private const string TurretAttackPercent = "turret_attack_percent";
 
@@ -74,8 +78,17 @@ namespace RuneGate
                     ApplyToHeroes(heroes, hero => hero.ApplyHeroHpPercent(runeData.Value));
                     break;
                 case RangedChainShotPlaceholder:
-                    ApplyToHeroes(heroes, hero => hero.ApplyAttackSpeedPercent(Mathf.Max(0f, runeData.Value) * 0.5f));
-                    Debug.Log("Ranged chain shot is reserved as a v1.1 combat hook. Applying temporary attack speed support.");
+                case LightningPlaceholder:
+                    ApplyToHeroes(heroes, hero => hero.ApplyAttackSpeedPercent(Mathf.Max(0f, runeData.Value)));
+                    break;
+                case BlastPlaceholder:
+                    ApplyToHeroes(heroes, hero => hero.ApplyAttackPercent(Mathf.Max(0f, runeData.Value)));
+                    break;
+                case PurifyPlaceholder:
+                    ApplyToHeroes(heroes, hero => hero.ApplyHealingPercent(Mathf.Max(0f, runeData.Value)));
+                    break;
+                case CrushPlaceholder:
+                    ApplyToHeroes(heroes, hero => hero.ApplyBossDamagePercent(Mathf.Max(0f, runeData.Value)));
                     break;
                 case TurretAttackPercent:
                     ApplyToHeroes(heroes, hero => hero.ApplyAttackPercent(Mathf.Max(0f, runeData.Value) * 0.6f));
@@ -97,7 +110,10 @@ namespace RuneGate
                     ApplyToHeroes(heroes, hero => hero.ApplyAttackPercent(0.25f));
                     break;
                 case CrystalShieldFlat:
-                    Debug.Log($"Rune effect '{runeData.EffectKey}' is reserved as a prototype hook.");
+                    if (crystalController != null)
+                    {
+                        crystalController.Heal(Mathf.RoundToInt(runeData.Value));
+                    }
                     break;
                 default:
                     Debug.Log($"RuneEffectApplier reserved rune effect key '{runeData.EffectKey}' for a later prototype.");
