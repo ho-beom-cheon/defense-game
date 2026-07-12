@@ -606,6 +606,21 @@ namespace RuneGate.Editor
                     errors.Add($"{label} StageSelect list/detail panels are too narrow. List {stageSelect.StageListPanel.width:0.0}, Detail {stageSelect.StageDetailPanel.width:0.0}.");
                 }
 
+                ScreenFrameRects upgrade = GameFrameLayout.UpgradeFrameForSize(size.x, size.y);
+                ValidatePositiveRect($"{label} Upgrade root", upgrade.FrameRoot, errors);
+                ValidateRectInside($"{label} Upgrade header", upgrade.HeaderArea, upgrade.FrameRoot, errors);
+                ValidateRectInside($"{label} Upgrade main", upgrade.MainArea, upgrade.FrameRoot, errors);
+                ValidateRectInside($"{label} Upgrade footer", upgrade.FooterArea, upgrade.FrameRoot, errors);
+                if (upgrade.MainArea.Overlaps(upgrade.FooterArea))
+                {
+                    errors.Add($"{label} Upgrade main area and footer overlap.");
+                }
+
+                if (size.y >= size.x && upgrade.FooterArea.height < 88f)
+                {
+                    errors.Add($"{label} Upgrade footer is too short for feedback and a touch button: {upgrade.FooterArea.height:0.0}.");
+                }
+
                 BattleFrameRects battle = GameFrameLayout.BattleFrameForSize(size.x, size.y);
                 Rect safeRect = GameFrameLayout.SafeRectForSize(size.x, size.y);
                 ValidatePositiveRect($"{label} Battle root", battle.FrameRoot, errors);
