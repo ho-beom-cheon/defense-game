@@ -11,7 +11,7 @@ namespace RuneGate
     {
         public const string DefaultUnlockedStageId = "stage_goblin_forest_01";
 
-        private const int CurrentSaveVersion = 4;
+        private const int CurrentSaveVersion = 5;
         private const string SaveFileName = "runegate_save.json";
         private const string SavePathArgument = "-runegateSavePath";
         private const string TemporarySaveExtension = ".tmp";
@@ -239,9 +239,19 @@ namespace RuneGate
             return !string.IsNullOrWhiteSpace(stageId) && Current.clearedStageIds.Contains(stageId);
         }
 
+        public static bool IsStageCleared(string stageId, string difficultyId)
+        {
+            return IsStageCleared(Current, stageId, difficultyId);
+        }
+
         public static bool IsStageUnlocked(string stageId)
         {
             return !string.IsNullOrWhiteSpace(stageId) && Current.unlockedStageIds.Contains(stageId);
+        }
+
+        public static bool IsStageUnlocked(string stageId, string difficultyId)
+        {
+            return IsStageUnlocked(Current, stageId, difficultyId);
         }
 
         public static void SetLastSelectedStageId(string stageId)
@@ -280,6 +290,12 @@ namespace RuneGate
 
         public static bool TryApplyBattleResultProgression(SaveData saveData, string battleRunId, int goldAward, bool victory, string clearedStageId, string nextStageId)
         {
+            string difficultyId = saveData != null ? saveData.selectedDifficultyId : DifficultyRules.Normal;
+            return TryApplyBattleResultProgression(saveData, battleRunId, goldAward, victory, clearedStageId, nextStageId, difficultyId);
+        }
+
+        public static bool TryApplyBattleResultProgression(SaveData saveData, string battleRunId, int goldAward, bool victory, string clearedStageId, string nextStageId, string difficultyId)
+        {
             if (saveData == null)
             {
                 Debug.LogWarning("SaveManager cannot apply battle result to a null save data.");
@@ -299,11 +315,26 @@ namespace RuneGate
 
             if (victory && !string.IsNullOrWhiteSpace(clearedStageId))
             {
+                string normalizedDifficulty = DifficultyRules.Normalize(difficultyId);
+                bool difficultyStageWasUnlocked = IsStageUnlocked(saveData, clearedStageId, normalizedDifficulty);
                 AddUnique(saveData.clearedStageIds, clearedStageId);
                 AddUnique(saveData.unlockedStageIds, clearedStageId);
                 if (!string.IsNullOrWhiteSpace(nextStageId))
                 {
                     AddUnique(saveData.unlockedStageIds, nextStageId);
+                }
+
+                if (difficultyStageWasUnlocked)
+                {
+                    AddUnique(saveData.clearedDifficultyStageKeys, BuildDifficultyStageKey(normalizedDifficulty, clearedStageId));
+                }
+
+                if (difficultyStageWasUnlocked && clearedStageId == DifficultyRules.ChapterOneFinalStageId)
+                {
+                    if (DifficultyRules.IsUnlocked(saveData, normalizedDifficulty))
+                    {
+                        AddUnique(saveData.clearedDifficultyIds, normalizedDifficulty);
+                    }
                 }
             }
 
@@ -317,8 +348,25 @@ namespace RuneGate
 
         public static void SetSelectedDifficultyId(string difficultyId)
         {
-            Current.selectedDifficultyId = NormalizeDifficultyId(difficultyId);
+            string normalized = NormalizeDifficultyId(difficultyId);
+            if (!DifficultyRules.IsUnlocked(Current, normalized))
+            {
+                Debug.LogWarning($"SaveManager ignored locked difficulty: {normalized}.");
+                normalized = DifficultyRules.Normal;
+            }
+
+            Current.selectedDifficultyId = normalized;
             Save();
+        }
+
+        public static bool IsDifficultyUnlocked(string difficultyId)
+        {
+            return DifficultyRules.IsUnlocked(Current, difficultyId);
+        }
+
+        public static bool IsDifficultyCompleted(string difficultyId)
+        {
+            return DifficultyRules.IsCompleted(Current, difficultyId);
         }
 
         public static bool HasSeenTutorial()
@@ -876,6 +924,7 @@ namespace RuneGate
 
         private static void Sanitize(SaveData saveData)
         {
+            bool migrateDifficultyProgress = saveData.saveVersion < CurrentSaveVersion;
             if (saveData.saveVersion < CurrentSaveVersion)
             {
                 saveData.saveVersion = CurrentSaveVersion;
@@ -889,6 +938,16 @@ namespace RuneGate
             if (saveData.unlockedStageIds == null)
             {
                 saveData.unlockedStageIds = new List<string>();
+            }
+
+            if (saveData.clearedDifficultyIds == null)
+            {
+                saveData.clearedDifficultyIds = new List<string>();
+            }
+
+            if (saveData.clearedDifficultyStageKeys == null)
+            {
+                saveData.clearedDifficultyStageKeys = new List<string>();
             }
 
             if (saveData.upgradeLevels == null)
@@ -916,8 +975,38 @@ namespace RuneGate
             saveData.selectedDifficultyId = NormalizeDifficultyId(saveData.selectedDifficultyId);
             saveData.clearedStageIds = DeduplicateStrings(saveData.clearedStageIds);
             saveData.unlockedStageIds = DeduplicateStrings(saveData.unlockedStageIds);
+            saveData.clearedDifficultyIds = SanitizeDifficultyIds(saveData.clearedDifficultyIds);
+            saveData.clearedDifficultyStageKeys = SanitizeDifficultyStageKeys(saveData.clearedDifficultyStageKeys);
             saveData.contractedPetIds = DeduplicateStrings(saveData.contractedPetIds);
             AddUnique(saveData.unlockedStageIds, DefaultUnlockedStageId);
+
+            if (migrateDifficultyProgress && saveData.clearedStageIds.Contains(DifficultyRules.ChapterOneFinalStageId))
+            {
+                AddUnique(saveData.clearedDifficultyIds, DifficultyRules.Normal);
+                if (saveData.selectedDifficultyId == DifficultyRules.Hard || saveData.selectedDifficultyId == DifficultyRules.Nightmare)
+                {
+                    AddUnique(saveData.clearedDifficultyIds, DifficultyRules.Hard);
+                }
+
+                if (saveData.selectedDifficultyId == DifficultyRules.Nightmare)
+                {
+                    AddUnique(saveData.clearedDifficultyIds, DifficultyRules.Nightmare);
+                }
+            }
+
+            if (migrateDifficultyProgress)
+            {
+                for (int i = 0; i < saveData.clearedStageIds.Count; i++)
+                {
+                    AddUnique(saveData.clearedDifficultyStageKeys,
+                        BuildDifficultyStageKey(DifficultyRules.Normal, saveData.clearedStageIds[i]));
+                }
+            }
+
+            if (!DifficultyRules.IsUnlocked(saveData, saveData.selectedDifficultyId))
+            {
+                saveData.selectedDifficultyId = DifficultyRules.Normal;
+            }
 
             HashSet<string> seenUpgradeIds = new HashSet<string>();
             for (int i = saveData.upgradeLevels.Count - 1; i >= 0; i--)
@@ -976,6 +1065,8 @@ namespace RuneGate
             builder.Append("  \"totalGold\": ").Append(saveData.totalGold).AppendLine(",");
             AppendStringList(builder, "clearedStageIds", saveData.clearedStageIds, true);
             AppendStringList(builder, "unlockedStageIds", saveData.unlockedStageIds, true);
+            AppendStringList(builder, "clearedDifficultyIds", saveData.clearedDifficultyIds, true);
+            AppendStringList(builder, "clearedDifficultyStageKeys", saveData.clearedDifficultyStageKeys, true);
             AppendUpgradeLevels(builder, saveData.upgradeLevels, true);
             AppendFormationSlots(builder, saveData.formationSlots, true);
             AppendMonsterShardCounts(builder, saveData.monsterShardCounts, true);
@@ -999,6 +1090,8 @@ namespace RuneGate
                 totalGold = ExtractInt(json, "totalGold", 0),
                 clearedStageIds = ExtractStringList(json, "clearedStageIds"),
                 unlockedStageIds = ExtractStringList(json, "unlockedStageIds"),
+                clearedDifficultyIds = ExtractStringList(json, "clearedDifficultyIds"),
+                clearedDifficultyStageKeys = ExtractStringList(json, "clearedDifficultyStageKeys"),
                 upgradeLevels = ExtractUpgradeLevels(json),
                 formationSlots = ExtractFormationSlots(json),
                 monsterShardCounts = ExtractMonsterShardCounts(json),
@@ -1315,6 +1408,112 @@ namespace RuneGate
             for (int i = 0; i < values.Count; i++)
             {
                 AddUnique(result, values[i]);
+            }
+
+            return result;
+        }
+
+        private static List<string> SanitizeDifficultyIds(List<string> values)
+        {
+            List<string> result = new List<string>();
+            if (values == null)
+            {
+                return result;
+            }
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                string normalized = NormalizeDifficultyId(values[i]);
+                if (string.Equals(values[i], normalized, StringComparison.OrdinalIgnoreCase))
+                {
+                    AddUnique(result, normalized);
+                }
+            }
+
+            return result;
+        }
+
+        public static bool IsStageCleared(SaveData saveData, string stageId, string difficultyId)
+        {
+            if (saveData == null || string.IsNullOrWhiteSpace(stageId))
+            {
+                return false;
+            }
+
+            string normalizedDifficulty = DifficultyRules.Normalize(difficultyId);
+            if (normalizedDifficulty == DifficultyRules.Easy || normalizedDifficulty == DifficultyRules.Normal)
+            {
+                return saveData.clearedStageIds != null && saveData.clearedStageIds.Contains(stageId);
+            }
+
+            return saveData.clearedDifficultyStageKeys != null &&
+                   saveData.clearedDifficultyStageKeys.Contains(BuildDifficultyStageKey(normalizedDifficulty, stageId));
+        }
+
+        public static bool IsStageUnlocked(SaveData saveData, string stageId, string difficultyId)
+        {
+            if (saveData == null || string.IsNullOrWhiteSpace(stageId) || !DifficultyRules.IsUnlocked(saveData, difficultyId))
+            {
+                return false;
+            }
+
+            string normalizedDifficulty = DifficultyRules.Normalize(difficultyId);
+            if (normalizedDifficulty == DifficultyRules.Easy || normalizedDifficulty == DifficultyRules.Normal)
+            {
+                return saveData.unlockedStageIds != null && saveData.unlockedStageIds.Contains(stageId);
+            }
+
+            if (stageId == DefaultUnlockedStageId)
+            {
+                return true;
+            }
+
+            string previousStageId = ResolvePreviousStageId(stageId);
+            return !string.IsNullOrWhiteSpace(previousStageId) &&
+                   IsStageCleared(saveData, previousStageId, normalizedDifficulty);
+        }
+
+        private static string ResolvePreviousStageId(string stageId)
+        {
+            int separatorIndex = string.IsNullOrWhiteSpace(stageId) ? -1 : stageId.LastIndexOf('_');
+            if (separatorIndex < 0 || separatorIndex >= stageId.Length - 1 ||
+                !int.TryParse(stageId.Substring(separatorIndex + 1), out int stageNumber) || stageNumber <= 1)
+            {
+                return string.Empty;
+            }
+
+            return stageId.Substring(0, separatorIndex + 1) + (stageNumber - 1).ToString("D2");
+        }
+
+        private static string BuildDifficultyStageKey(string difficultyId, string stageId)
+        {
+            return $"{DifficultyRules.Normalize(difficultyId)}:{stageId}";
+        }
+
+        private static List<string> SanitizeDifficultyStageKeys(List<string> values)
+        {
+            List<string> result = new List<string>();
+            if (values == null)
+            {
+                return result;
+            }
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                int separatorIndex = string.IsNullOrWhiteSpace(value) ? -1 : value.IndexOf(':');
+                if (separatorIndex <= 0 || separatorIndex >= value.Length - 1)
+                {
+                    continue;
+                }
+
+                string difficultyId = value.Substring(0, separatorIndex);
+                string stageId = value.Substring(separatorIndex + 1);
+                string normalizedDifficulty = NormalizeDifficultyId(difficultyId);
+                if (string.Equals(difficultyId, normalizedDifficulty, StringComparison.OrdinalIgnoreCase))
+                {
+                    AddUnique(result, BuildDifficultyStageKey(normalizedDifficulty, stageId));
+                }
             }
 
             return result;

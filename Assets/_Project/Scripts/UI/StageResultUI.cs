@@ -19,11 +19,13 @@ namespace RuneGate
         private BattleResult latestResult;
         private int battleGoldEarned;
         private int goldEarned;
+        private string newlyUnlockedDifficultyId = string.Empty;
         private Vector2 resultScrollPosition;
         private bool sceneTransitionRequested;
 
         public bool IsVisible => isVisible;
         public string ResultMessage { get; private set; }
+        public string NewlyUnlockedDifficultyId => newlyUnlockedDifficultyId;
 
         private void OnEnable()
         {
@@ -92,6 +94,11 @@ namespace RuneGate
             GUILayout.Label($"\ucc98\uce58 \uc801 {latestResult.MonstersKilled}");
             GUILayout.Label($"\ud074\ub9ac\uc5b4 \uc6e8\uc774\ube0c {latestResult.WavesCleared}/{GetTotalWaves(latestResult)}");
             GUILayout.Label($"\ub09c\uc774\ub3c4 {GameTextMapper.Difficulty(DifficultyRules.CurrentDifficultyId)} / \ubcf4\uc0c1 x{DifficultyRules.RewardMultiplier(DifficultyRules.CurrentDifficultyId):0.##}");
+            if (!string.IsNullOrWhiteSpace(newlyUnlockedDifficultyId))
+            {
+                GUILayout.Label($"새 난이도 해금: {GameTextMapper.Difficulty(newlyUnlockedDifficultyId)}");
+            }
+
             DrawShardRewards();
             if (latestResult.IsVictory)
             {
@@ -183,6 +190,7 @@ namespace RuneGate
             sceneTransitionRequested = false;
             battleGoldEarned = result.GoldEarned;
             goldEarned = CalculateGoldAward(result);
+            newlyUnlockedDifficultyId = string.Empty;
             bool progressApplied = ApplyResultToSave(result);
             if (!progressApplied && SaveManager.HasProcessedBattleRun(result.BattleRunId))
             {
@@ -215,6 +223,7 @@ namespace RuneGate
 
             string clearedStageId = result.IsVictory ? ResolveStageId(result) : string.Empty;
             string nextStageId = result.IsVictory ? ResolveNextStageId(clearedStageId) : string.Empty;
+            string nextLockedDifficultyId = DifficultyRules.NextLockedDifficultyId(SaveManager.Current);
             bool applied;
             if (result.IsVictory)
             {
@@ -223,6 +232,12 @@ namespace RuneGate
             else
             {
                 applied = SaveManager.TryApplyBattleResultProgression(result.BattleRunId, CalculateGoldAward(result), false, string.Empty, string.Empty);
+            }
+
+            if (applied && result.IsVictory && !string.IsNullOrWhiteSpace(nextLockedDifficultyId) &&
+                SaveManager.IsDifficultyUnlocked(nextLockedDifficultyId))
+            {
+                newlyUnlockedDifficultyId = nextLockedDifficultyId;
             }
 
             saveApplied = true;
@@ -342,7 +357,7 @@ namespace RuneGate
             string nextStageId = ResolveNextStageId(ResolveStageId(result));
             if (string.IsNullOrWhiteSpace(nextStageId))
             {
-                return "\ucc55\ud130 1 \ud074\ub9ac\uc5b4";
+                return $"{GameTextMapper.Difficulty(DifficultyRules.CurrentDifficultyId)} Chapter 1 클리어";
             }
 
             StageData nextStage = ResolveStageData(nextStageId);

@@ -17,8 +17,8 @@ namespace RuneGate
 
         public static void SelectDifficulty(string difficultyId)
         {
-            SelectedDifficultyId = string.IsNullOrWhiteSpace(difficultyId) ? "normal" : difficultyId;
-            SaveManager.SetSelectedDifficultyId(SelectedDifficultyId);
+            SaveManager.SetSelectedDifficultyId(difficultyId);
+            SelectedDifficultyId = SaveManager.Current.selectedDifficultyId;
         }
 
         public static void SelectStage(StageData stageData, string nextStageId)

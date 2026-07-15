@@ -8,6 +8,15 @@ namespace RuneGate
         public const string Normal = "normal";
         public const string Hard = "hard";
         public const string Nightmare = "nightmare";
+        public const string ChapterOneFinalStageId = "stage_goblin_forest_10";
+
+        private static readonly string[] OrderedDifficultyIds =
+        {
+            Easy,
+            Normal,
+            Hard,
+            Nightmare
+        };
 
         public static string CurrentDifficultyId => Normalize(SaveManager.Current.selectedDifficultyId);
 
@@ -88,6 +97,70 @@ namespace RuneGate
                 default:
                     return 1f;
             }
+        }
+
+        public static bool IsUnlocked(string difficultyId)
+        {
+            return IsUnlocked(SaveManager.Current, difficultyId);
+        }
+
+        public static bool IsUnlocked(SaveData saveData, string difficultyId)
+        {
+            string normalized = Normalize(difficultyId);
+            if (normalized == Easy || normalized == Normal)
+            {
+                return true;
+            }
+
+            if (saveData == null || saveData.clearedDifficultyIds == null)
+            {
+                return false;
+            }
+
+            return normalized == Hard
+                ? saveData.clearedDifficultyIds.Contains(Normal)
+                : saveData.clearedDifficultyIds.Contains(Hard);
+        }
+
+        public static bool IsCompleted(SaveData saveData, string difficultyId)
+        {
+            return saveData != null && saveData.clearedDifficultyIds != null &&
+                   saveData.clearedDifficultyIds.Contains(Normalize(difficultyId));
+        }
+
+        public static string NextLockedDifficultyId(SaveData saveData)
+        {
+            if (!IsUnlocked(saveData, Hard))
+            {
+                return Hard;
+            }
+
+            return !IsUnlocked(saveData, Nightmare) ? Nightmare : string.Empty;
+        }
+
+        public static string NextSelectableDifficultyId(SaveData saveData, string currentDifficultyId)
+        {
+            string current = Normalize(currentDifficultyId);
+            int currentIndex = 0;
+            for (int i = 0; i < OrderedDifficultyIds.Length; i++)
+            {
+                if (OrderedDifficultyIds[i] == current)
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            for (int offset = 1; offset <= OrderedDifficultyIds.Length; offset++)
+            {
+                string candidate = OrderedDifficultyIds[(currentIndex + offset) % OrderedDifficultyIds.Length];
+                if (IsUnlocked(saveData, candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            return Normal;
         }
 
         public static bool UndeadRevives(string difficultyId)

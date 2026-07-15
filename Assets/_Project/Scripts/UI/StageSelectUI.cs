@@ -152,8 +152,9 @@ namespace RuneGate
                 return;
             }
 
-            bool unlocked = SaveManager.IsStageUnlocked(stageData.StageId);
-            bool cleared = SaveManager.IsStageCleared(stageData.StageId);
+            string selectedDifficultyId = SaveManager.Current.selectedDifficultyId;
+            bool unlocked = SaveManager.IsStageUnlocked(stageData.StageId, selectedDifficultyId);
+            bool cleared = SaveManager.IsStageCleared(stageData.StageId, selectedDifficultyId);
             string iconPath = cleared ? RuntimePixelAssetLoader.UiStageNodeCleared : unlocked ? RuntimePixelAssetLoader.UiStageNodeUnlocked : RuntimePixelAssetLoader.UiStageNodeLocked;
             float iconSize = Mathf.Min(28f, rowHeight - 8f);
             DrawTextureIcon(new Rect(6f, y + (rowHeight - iconSize) * 0.5f, iconSize, iconSize), iconPath);
@@ -179,19 +180,23 @@ namespace RuneGate
                 return;
             }
 
-            bool unlocked = SaveManager.IsStageUnlocked(selectedStage.StageId);
-            bool cleared = SaveManager.IsStageCleared(selectedStage.StageId);
+            string selectedDifficultyId = SaveManager.Current.selectedDifficultyId;
+            bool unlocked = SaveManager.IsStageUnlocked(selectedStage.StageId, selectedDifficultyId);
+            bool cleared = SaveManager.IsStageCleared(selectedStage.StageId, selectedDifficultyId);
             float actionHeight = UIResponsiveLayout.TouchHeight(34f);
             Rect contentRect = new Rect(area.x + 12f, area.y + 10f, Mathf.Max(1f, area.width - 24f), Mathf.Max(1f, area.height - actionHeight - 30f));
             float lineHeight = Mathf.Max(26f, 28f * UIResponsiveLayout.ReadabilityScale);
             float descriptionHeight = Mathf.Max(lineHeight * 2f, GUI.skin.label.CalcHeight(new GUIContent(string.IsNullOrWhiteSpace(selectedStage.DescriptionKorean) ? "\uade0\uc5f4\uc5d0\uc11c \ubab0\ub824\uc624\ub294 \uc801\uc744 \ub9c9\uc73c\uc138\uc694." : selectedStage.DescriptionKorean), contentRect.width - 18f));
-            float requiredHeight = lineHeight * 6f + descriptionHeight + 24f;
+            float requiredHeight = lineHeight * 8f + descriptionHeight + 24f;
             Rect scrollContent = new Rect(0f, 0f, contentRect.width - 18f, Mathf.Max(contentRect.height, requiredHeight));
             detailScrollPosition = GUI.BeginScrollView(contentRect, detailScrollPosition, scrollContent);
             float y = 0f;
             GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), GameTextMapper.StageName(selectedStage));
             y += lineHeight;
             GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\ub09c\uc774\ub3c4: {GetStageDifficultyLabel(selectedStageIndex)}");
+            y += lineHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight),
+                $"도전 난이도: {GameTextMapper.Difficulty(selectedDifficultyId)} / 보상 x{DifficultyRules.RewardMultiplier(selectedDifficultyId):0.##}");
             y += lineHeight;
             GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), cleared ? "\uc0c1\ud0dc: \ud074\ub9ac\uc5b4" : unlocked ? "\uc0c1\ud0dc: \ud574\uae08" : "\uc0c1\ud0dc: \uc7a0\uae40");
             y += lineHeight;
@@ -202,6 +207,8 @@ namespace RuneGate
             GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\ud06c\ub9ac\uc2a4\ud0c8 HP: {selectedStage.CrystalHp}");
             y += lineHeight;
             GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\uc6e8\uc774\ube0c: {(selectedStage.Waves != null ? selectedStage.Waves.Count : 0)}");
+            y += lineHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), BuildDifficultyProgressText());
             GUI.EndScrollView();
 
             bool previousEnabled = GUI.enabled;
@@ -541,28 +548,24 @@ namespace RuneGate
             return "\ubcf4\uc2a4";
         }
 
-        private static void CycleDifficulty()
+        private void CycleDifficulty()
         {
-            string current = SaveManager.Current.selectedDifficultyId;
-            if (current == "easy")
+            SaveData saveData = SaveManager.Current;
+            GameSession.SelectDifficulty(DifficultyRules.NextSelectableDifficultyId(saveData, saveData.selectedDifficultyId));
+            selectedStageIndex = FindFirstUnlockedStageIndex();
+            stageScrollPosition = Vector2.zero;
+            detailScrollPosition = Vector2.zero;
+        }
+
+        private static string BuildDifficultyProgressText()
+        {
+            string nextLockedDifficultyId = DifficultyRules.NextLockedDifficultyId(SaveManager.Current);
+            if (string.IsNullOrWhiteSpace(nextLockedDifficultyId))
             {
-                GameSession.SelectDifficulty("normal");
-                return;
+                return "난이도 진행: 모든 난이도 해금 완료";
             }
 
-            if (current == "normal")
-            {
-                GameSession.SelectDifficulty("hard");
-                return;
-            }
-
-            if (current == "hard")
-            {
-                GameSession.SelectDifficulty("nightmare");
-                return;
-            }
-
-            GameSession.SelectDifficulty("easy");
+            return $"다음 해금: {GameTextMapper.Difficulty(nextLockedDifficultyId)} - {GameTextMapper.DifficultyUnlockRequirement(nextLockedDifficultyId)}";
         }
 
         private StageData GetSelectedStage()
@@ -577,9 +580,10 @@ namespace RuneGate
 
         private int FindFirstUnlockedStageIndex()
         {
+            string selectedDifficultyId = SaveManager.Current.selectedDifficultyId;
             for (int i = 0; i < stages.Count; i++)
             {
-                if (stages[i] != null && SaveManager.IsStageUnlocked(stages[i].StageId))
+                if (stages[i] != null && SaveManager.IsStageUnlocked(stages[i].StageId, selectedDifficultyId))
                 {
                     return i;
                 }

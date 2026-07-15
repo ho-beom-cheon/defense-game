@@ -124,6 +124,19 @@ namespace RuneGate
             }
         }
 
+        public static string DifficultyUnlockRequirement(string difficultyId)
+        {
+            switch (DifficultyRules.Normalize(difficultyId))
+            {
+                case DifficultyRules.Hard:
+                    return "보통 재문 숲 10 클리어";
+                case DifficultyRules.Nightmare:
+                    return "어려움 재문 숲 10 클리어";
+                default:
+                    return "기본 해금";
+            }
+        }
+
         public static string HeroPositionName(HeroPositionType positionType)
         {
             switch (positionType)

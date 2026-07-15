@@ -10,6 +10,8 @@ namespace RuneGate
         public int totalGold;
         public List<string> clearedStageIds = new List<string>();
         public List<string> unlockedStageIds = new List<string>();
+        public List<string> clearedDifficultyIds = new List<string>();
+        public List<string> clearedDifficultyStageKeys = new List<string>();
         public List<SerializableUpgradeLevel> upgradeLevels = new List<SerializableUpgradeLevel>();
         public List<FormationSlot> formationSlots = new List<FormationSlot>();
         public List<SerializableMonsterShardCount> monsterShardCounts = new List<SerializableMonsterShardCount>();
