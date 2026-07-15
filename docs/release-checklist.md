@@ -299,6 +299,20 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - SHA-256: `BCB10A46FDD46D918B2162CFB62FD86267D9E191DE8CB0FFED4671CF354B5D5F`
 - Detailed evidence: `docs/android-wave-transition-banner-v090.md`
 
+### Android Runtime Sprite Alpha QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-81-runtime-sprite-alpha-cleanup`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: Stage 3 wolf, Stage 7 bone soldier, and Stage 10 Grumbar displayed without opaque black rectangles
+- Asset guard: Project Validator rejects opaque near-black pixels touching RuntimePixel monster or boss image borders
+- Project Validator: passed
+- Progression Smoke Test: passed
+- Regression: Normal Stage 1~10, 10 upgrades, Hard/Nightmare unlocks, and Grumbar phase/pattern smoke passed
+- APK: `72,097,413 bytes`
+- SHA-256: `0C24E184DFF4B479D2A83620E66F2456DDB2C5C71910817828115341A63F5F75`
+- Detailed evidence: `docs/android-runtime-sprite-alpha-qa-v090.md`
+
 ## Audio QA
 
 - [x] Unity 내장 Audio 모듈 활성화

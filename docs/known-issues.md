@@ -18,6 +18,7 @@
 - Final combat art should provide consistent Idle / Walk / Attack / Hit / Death sprite sheets.
 - ConceptSheets are reference/codex art only and must not be used directly by BattleScene SpriteRenderers.
 - If a RuntimePixel sprite is missing, the game still falls back to a small placeholder.
+- 몬스터 6종과 그룸바르의 경계 연결 검은 픽셀은 정리했으며 Validator가 불투명 검정 경계를 검사한다. Android 1080x2400 Stage 3/7/10 화면에서는 검은 직사각형이 재현되지 않았다.
 
 ## Combat
 
@@ -68,6 +69,7 @@
 - Battle status HUD, pause touch, Rune Selection state, crystal shield bar, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device cutout and long-session state refresh remain unverified.
 - Rune card layout, rarity/element presentation, selection touch, Wave 2 transition, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device font scaling and repeated-touch endurance remain unverified.
 - Opening/final/boss wave banners, applied-rune feedback, Stage 10 boss warning, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device cutout and long-session banner timing remain unverified.
+- RuntimePixel actor alpha cleanup, Stage 3 wolf, Stage 7 bone soldier, Stage 10 Grumbar rendering, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device GPU/texture compression remains unverified.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.
