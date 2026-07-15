@@ -59,3 +59,11 @@
 - No real billing SDK is included.
 - v1.0 docs may mention optional rewarded ads, remove-ads purchase, starter pack, and supporter pack as future candidates only.
 - Forced ads and gacha remain prohibited.
+
+## Audio
+
+- 전투 및 주요 UI에는 외부 에셋 없는 절차형 SFX 폴백 9종이 적용되어 있다.
+- 절차형 SFX는 기능 검증용이며 최종 음질, 믹싱, 음량 균형을 대표하지 않는다.
+- SFX 음소거 설정은 Android 재실행 후 유지되는 것을 확인했다.
+- BGM과 BGM 볼륨 설정은 아직 구현되지 않았다.
+- 실기기 스피커와 이어폰의 체감 음량은 추가 검증이 필요하다.

@@ -139,6 +139,16 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - APK SHA-256: `E85A28099C0D731CE75BB2BFE74E9E244577F9E6F5C959DA848AFCCF9E449412`
 - Detailed evidence: `docs/android-full-chapter-qa-v088.md`
 
+## Audio QA
+
+- [x] Unity 내장 Audio 모듈 활성화
+- [x] `SfxKey` 9종 절차형 폴백 생성
+- [x] Android 시스템 플로우에서 9개 클립 존재 확인
+- [x] TitleScene SFX 켜기/끄기 동작 확인
+- [x] 앱 재실행 후 SFX 설정 유지 확인
+- [ ] 실기기 스피커/이어폰 음량 확인
+- [ ] 최종 WAV 및 BGM 적용
+
 ## Policy / Monetization
 
 - [x] 강제 광고 없음
