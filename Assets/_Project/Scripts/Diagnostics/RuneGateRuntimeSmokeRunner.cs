@@ -35,6 +35,11 @@ namespace RuneGate
         private bool interruptedSaveMode;
         private bool runeSelectionPending;
         private bool sawBossThisStage;
+        private bool sawBossPhaseTwoThisStage;
+        private bool sawBossPhaseThreeThisStage;
+        private bool sawBossHudThisStage;
+        private int bossReinforcementsSpawnedThisStage;
+        private BossPhaseController observedBossPhaseController;
         private bool waitSucceeded;
         private int upgradePurchaseCount;
         private float previousTimeScale = 1f;
@@ -827,6 +832,11 @@ namespace RuneGate
                 battleFinished = false;
                 runeSelectionPending = false;
                 sawBossThisStage = false;
+                sawBossPhaseTwoThisStage = false;
+                sawBossPhaseThreeThisStage = false;
+                sawBossHudThisStage = false;
+                bossReinforcementsSpawnedThisStage = 0;
+                observedBossPhaseController = null;
                 SceneManager.LoadScene("BattleScene");
                 yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
                 if (!Require(waitSucceeded, $"Stage {stageNumber} BattleScene did not load."))
@@ -905,6 +915,24 @@ namespace RuneGate
                 }
 
                 if (stageNumber == 10 && !Require(sawBossThisStage, "Stage 10 completed without spawning a boss monster."))
+                {
+                    yield break;
+                }
+
+                if (stageNumber == 10 && !Require(sawBossPhaseTwoThisStage && sawBossPhaseThreeThisStage,
+                        "Stage 10 boss did not complete all three phases."))
+                {
+                    yield break;
+                }
+
+                if (stageNumber == 10 && !Require(bossReinforcementsSpawnedThisStage >= 5,
+                        $"Stage 10 boss spawned only {bossReinforcementsSpawnedThisStage}/5 reinforcements."))
+                {
+                    yield break;
+                }
+
+                if (stageNumber == 10 && !Require(sawBossHudThisStage,
+                        "Stage 10 boss HUD did not expose the Korean boss name and phase."))
                 {
                     yield break;
                 }
@@ -1007,23 +1035,27 @@ namespace RuneGate
             if (waveManager != null)
             {
                 waveManager.MonsterSpawned -= HandleMonsterSpawned;
+                waveManager.BossReinforcementSpawned -= HandleBossReinforcementSpawned;
                 waveManager.MonsterSpawned += HandleMonsterSpawned;
+                waveManager.BossReinforcementSpawned += HandleBossReinforcementSpawned;
             }
         }
 
         private void UnbindBattleEvents()
         {
-            if (battleManager == null)
+            if (battleManager != null)
             {
-                return;
+                battleManager.RuneOptionsOffered -= HandleRuneOptionsOffered;
+                battleManager.BattleEnded -= HandleBattleEnded;
             }
 
-            battleManager.RuneOptionsOffered -= HandleRuneOptionsOffered;
-            battleManager.BattleEnded -= HandleBattleEnded;
             if (waveManager != null)
             {
                 waveManager.MonsterSpawned -= HandleMonsterSpawned;
+                waveManager.BossReinforcementSpawned -= HandleBossReinforcementSpawned;
             }
+
+            UnbindObservedBossPhaseController();
         }
 
         private void HandleRuneOptionsOffered(IReadOnlyList<RuneData> options)
@@ -1066,7 +1098,51 @@ namespace RuneGate
             if (monster != null && monster.Data != null && monster.Data.IsBoss)
             {
                 sawBossThisStage = true;
+                UnbindObservedBossPhaseController();
+                observedBossPhaseController = monster.BossPhaseController;
+                if (observedBossPhaseController == null)
+                {
+                    Fail("Stage 10 boss spawned without BossPhaseController.");
+                    return;
+                }
+
+                observedBossPhaseController.PhaseChanged += HandleBossPhaseChanged;
+                BattleHUD hud = FindAnyObjectByType<BattleHUD>();
+                if (hud != null)
+                {
+                    hud.RefreshBossStatus();
+                    sawBossHudThisStage = hud.BossStatusText.Contains(monster.Data.DisplayNameKorean) &&
+                                          hud.BossStatusText.Contains("페이즈");
+                }
+
                 Debug.Log($"[RuneGateFullE2E] Boss spawned: {monster.Data.DisplayNameKorean}");
+            }
+        }
+
+        private void HandleBossPhaseChanged(int phase)
+        {
+            sawBossPhaseTwoThisStage |= phase >= 2;
+            sawBossPhaseThreeThisStage |= phase >= 3;
+            Debug.Log($"[RuneGateFullE2E] Boss phase verified: {phase}");
+        }
+
+        private void HandleBossReinforcementSpawned(MonsterController reinforcement)
+        {
+            if (reinforcement == null || reinforcement.Data == null)
+            {
+                return;
+            }
+
+            bossReinforcementsSpawnedThisStage++;
+            Debug.Log($"[RuneGateFullE2E] Boss reinforcement spawned: {reinforcement.Data.DisplayNameKorean}, Lane={reinforcement.LaneIndex}");
+        }
+
+        private void UnbindObservedBossPhaseController()
+        {
+            if (observedBossPhaseController != null)
+            {
+                observedBossPhaseController.PhaseChanged -= HandleBossPhaseChanged;
+                observedBossPhaseController = null;
             }
         }
 
