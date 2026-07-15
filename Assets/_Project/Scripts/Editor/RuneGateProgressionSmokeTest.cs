@@ -774,6 +774,31 @@ namespace RuneGate.Editor
                     errors.Add($"{label} Battle skill panel is too short: {battle.SkillPanelArea.height:0.0}.");
                 }
 
+                Rect skillContent = new Rect(0f, 0f, Mathf.Max(1f, battle.SkillPanelArea.width - 20f), Mathf.Max(1f, battle.SkillPanelArea.height - 44f));
+                Rect[] skillCards = new Rect[ExpectedHeroCount];
+                for (int cardIndex = 0; cardIndex < skillCards.Length; cardIndex++)
+                {
+                    skillCards[cardIndex] = FormationSkillPanelUI.CalculateCardRect(skillContent, cardIndex, skillCards.Length);
+                    ValidateRectInside($"{label} Skill card {cardIndex + 1}", skillCards[cardIndex], skillContent, errors);
+                    if (skillCards[cardIndex].width < 80f || skillCards[cardIndex].height < 40f)
+                    {
+                        errors.Add($"{label} Skill card {cardIndex + 1} is too small: {FormatRect(skillCards[cardIndex])}.");
+                    }
+
+                    for (int previousIndex = 0; previousIndex < cardIndex; previousIndex++)
+                    {
+                        if (skillCards[cardIndex].Overlaps(skillCards[previousIndex]))
+                        {
+                            errors.Add($"{label} Skill cards {previousIndex + 1} and {cardIndex + 1} overlap.");
+                        }
+                    }
+                }
+
+                if (size.y >= size.x && battle.SkillPanelArea.width >= 540f && FormationSkillPanelUI.ResolveColumnCount(skillContent.width, ExpectedHeroCount) != 3)
+                {
+                    errors.Add($"{label} portrait skill cards must use three columns when enough width is available.");
+                }
+
                 if (size.y >= size.x)
                 {
                     float viewportAspect = battle.BattleFieldFrame.width / Mathf.Max(1f, battle.BattleFieldFrame.height);
