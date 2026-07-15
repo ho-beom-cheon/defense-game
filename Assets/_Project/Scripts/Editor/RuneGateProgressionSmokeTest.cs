@@ -787,6 +787,18 @@ namespace RuneGate.Editor
                     errors.Add($"{label} Crystal health colors must distinguish healthy, warning, and danger states.");
                 }
 
+                Rect waveAnnouncement = BattleHUD.CalculateWaveAnnouncementRect(battle.BattleFieldFrame);
+                ValidateRectInside($"{label} Wave announcement", waveAnnouncement, battle.BattleFieldFrame, errors);
+                if (waveAnnouncement.width < 280f || waveAnnouncement.height < 88f)
+                {
+                    errors.Add($"{label} Wave announcement is too small: {FormatRect(waveAnnouncement)}.");
+                }
+
+                if (waveAnnouncement.Overlaps(battle.HeaderArea) || waveAnnouncement.Overlaps(battle.SkillPanelArea))
+                {
+                    errors.Add($"{label} Wave announcement overlaps fixed battle HUD areas.");
+                }
+
                 if (battle.BattleFieldFrame.Overlaps(battle.SkillPanelArea))
                 {
                     errors.Add($"{label} Battle field and skill panel overlap.");
@@ -915,6 +927,28 @@ namespace RuneGate.Editor
                 {
                     errors.Add($"Rune card element glyph is missing for {element}.");
                 }
+            }
+
+            string openingWaveTitle = BattleHUD.WaveAnnouncementTitle(1, 3, false);
+            string finalWaveTitle = BattleHUD.WaveAnnouncementTitle(3, 3, false);
+            string bossWaveTitle = BattleHUD.WaveAnnouncementTitle(3, 3, true);
+            if (string.IsNullOrWhiteSpace(openingWaveTitle) || openingWaveTitle == finalWaveTitle || finalWaveTitle == bossWaveTitle)
+            {
+                errors.Add("Wave announcements must distinguish opening, final, and boss waves.");
+            }
+
+            string runeWaveSubtitle = BattleHUD.WaveAnnouncementSubtitle(2, 3, 8, "공격 룬");
+            if (!runeWaveSubtitle.Contains("2/3") || !runeWaveSubtitle.Contains("8") || !runeWaveSubtitle.Contains("공격 룬"))
+            {
+                errors.Add("Wave announcement subtitle must include progress, enemy count, and applied rune name.");
+            }
+
+            Color normalWaveColor = BattleHUD.WaveAnnouncementAccent(false, false);
+            Color finalWaveColor = BattleHUD.WaveAnnouncementAccent(false, true);
+            Color bossWaveColor = BattleHUD.WaveAnnouncementAccent(true, true);
+            if (normalWaveColor == finalWaveColor || finalWaveColor == bossWaveColor || normalWaveColor == bossWaveColor)
+            {
+                errors.Add("Wave announcement colors must distinguish normal, final, and boss waves.");
             }
         }
 

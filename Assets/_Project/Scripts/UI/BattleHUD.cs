@@ -7,6 +7,8 @@ namespace RuneGate
     {
         private const float HeaderPadding = 8f;
         private const float HeaderGap = 8f;
+        private const float WaveAnnouncementDuration = 2.2f;
+        private const float WaveAnnouncementFadeDuration = 0.35f;
 
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private CrystalController crystalController;
@@ -27,11 +29,19 @@ namespace RuneGate
         private int totalWaves;
         private string bossStatusText = string.Empty;
         private float bossHealthPercent;
+        private string waveAnnouncementTitle = string.Empty;
+        private string waveAnnouncementSubtitle = string.Empty;
+        private string pendingRuneName = string.Empty;
+        private Color waveAnnouncementColor = Color.white;
+        private float waveAnnouncementTimer;
 
         public string CrystalHpText => crystalHpText;
         public string WaveText => waveText;
         public string BattleStateText => battleStateText;
         public string BossStatusText => bossStatusText;
+        public string WaveAnnouncementTitleText => waveAnnouncementTitle;
+        public string WaveAnnouncementSubtitleText => waveAnnouncementSubtitle;
+        public bool IsWaveAnnouncementVisible => waveAnnouncementTimer > 0f;
 
         private void OnEnable()
         {
@@ -42,6 +52,7 @@ namespace RuneGate
                 battleManager.BattleStateChanged += HandleBattleStateChanged;
                 battleManager.WaveChanged += HandleWaveChanged;
                 battleManager.GoldChanged += HandleGoldChanged;
+                battleManager.RuneSelected += HandleRuneSelected;
                 HandleBattleStateChanged(battleManager.CurrentState);
             }
 
@@ -62,6 +73,7 @@ namespace RuneGate
                 battleManager.BattleStateChanged -= HandleBattleStateChanged;
                 battleManager.WaveChanged -= HandleWaveChanged;
                 battleManager.GoldChanged -= HandleGoldChanged;
+                battleManager.RuneSelected -= HandleRuneSelected;
             }
 
             if (crystalController != null)
@@ -75,6 +87,11 @@ namespace RuneGate
         private void Update()
         {
             RefreshBossStatus();
+            if (waveAnnouncementTimer > 0f && !IsWaveAnnouncementBlocked())
+            {
+                waveAnnouncementTimer = Mathf.Max(0f, waveAnnouncementTimer - Time.unscaledDeltaTime);
+            }
+
             if (crystalFeedbackTimer <= 0f)
             {
                 return;
@@ -103,6 +120,7 @@ namespace RuneGate
             GUI.SetNextControlName("BattleFrame_HeaderArea");
             DrawBattleStatusHeader(drawRect);
             DrawBossStatus(battleFrame.BattleFieldFrame);
+            DrawWaveAnnouncement(battleFrame.BattleFieldFrame);
 
             if (pauseController != null && pauseController.IsPaused)
             {
@@ -144,6 +162,56 @@ namespace RuneGate
             }
 
             return new Color(0.22f, 0.82f, 0.46f, 1f);
+        }
+
+        public static Rect CalculateWaveAnnouncementRect(Rect battlefieldRect)
+        {
+            float width = Mathf.Clamp(battlefieldRect.width * 0.78f, 300f, 760f);
+            float height = Mathf.Clamp(battlefieldRect.height * 0.13f, 96f, 148f);
+            float centerY = battlefieldRect.y + battlefieldRect.height * 0.24f;
+            Rect rect = new Rect(
+                battlefieldRect.center.x - width * 0.5f,
+                centerY - height * 0.5f,
+                width,
+                height);
+            return ClampRectInside(rect, battlefieldRect);
+        }
+
+        public static string WaveAnnouncementTitle(int currentWave, int totalWaves, bool isBossWave)
+        {
+            if (isBossWave)
+            {
+                return "봉문 경보 · 보스 출현";
+            }
+
+            if (totalWaves > 0 && currentWave >= totalWaves)
+            {
+                return "최종 웨이브";
+            }
+
+            return currentWave <= 1 ? "전투 개시" : $"웨이브 {Mathf.Max(1, currentWave)}";
+        }
+
+        public static string WaveAnnouncementSubtitle(int currentWave, int totalWaves, int enemyCount, string appliedRuneName)
+        {
+            string waveProgress = totalWaves > 0
+                ? $"웨이브 {Mathf.Max(1, currentWave)}/{totalWaves}"
+                : $"웨이브 {Mathf.Max(1, currentWave)}";
+            string enemySummary = enemyCount > 0 ? $" · 적 {enemyCount}기" : string.Empty;
+            string runeSummary = string.IsNullOrWhiteSpace(appliedRuneName) ? string.Empty : $" · {appliedRuneName} 적용";
+            return waveProgress + enemySummary + runeSummary;
+        }
+
+        public static Color WaveAnnouncementAccent(bool isBossWave, bool isFinalWave)
+        {
+            if (isBossWave)
+            {
+                return new Color(0.94f, 0.24f, 0.20f, 1f);
+            }
+
+            return isFinalWave
+                ? new Color(1f, 0.66f, 0.18f, 1f)
+                : new Color(0.28f, 0.82f, 0.68f, 1f);
         }
 
         private void DrawBattleStatusHeader(Rect drawRect)
@@ -354,6 +422,50 @@ namespace RuneGate
             GUILayout.EndArea();
         }
 
+        private void DrawWaveAnnouncement(Rect battlefieldRect)
+        {
+            if (waveAnnouncementTimer <= 0f || battleManager == null || battleManager.CurrentState != BattleState.WaveRunning || IsWaveAnnouncementBlocked())
+            {
+                return;
+            }
+
+            float elapsed = WaveAnnouncementDuration - waveAnnouncementTimer;
+            float fadeIn = Mathf.Clamp01(elapsed / WaveAnnouncementFadeDuration);
+            float fadeOut = Mathf.Clamp01(waveAnnouncementTimer / WaveAnnouncementFadeDuration);
+            float alpha = Mathf.Min(fadeIn, fadeOut);
+            float scale = 0.98f + Mathf.Sin(Mathf.Clamp01(elapsed / WaveAnnouncementDuration) * Mathf.PI) * 0.02f;
+            Rect baseRect = CalculateWaveAnnouncementRect(battlefieldRect);
+            Rect rect = new Rect(
+                baseRect.center.x - baseRect.width * scale * 0.5f,
+                baseRect.center.y - baseRect.height * scale * 0.5f,
+                baseRect.width * scale,
+                baseRect.height * scale);
+
+            int previousDepth = GUI.depth;
+            Color previousColor = GUI.color;
+            Color previousBackground = GUI.backgroundColor;
+            GUI.depth = -60;
+            GUI.color = new Color(1f, 1f, 1f, alpha);
+            GUI.backgroundColor = new Color(waveAnnouncementColor.r, waveAnnouncementColor.g, waveAnnouncementColor.b, 0.92f);
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUI.Box(rect, GUIContent.none, panelStyle);
+            GUI.backgroundColor = previousBackground;
+
+            float stripeHeight = Mathf.Clamp(rect.height * 0.08f, 6f, 10f);
+            Color accent = new Color(waveAnnouncementColor.r, waveAnnouncementColor.g, waveAnnouncementColor.b, alpha);
+            DrawColoredRect(new Rect(rect.x + 8f, rect.y + 7f, rect.width - 16f, stripeHeight), accent);
+            float titleHeight = rect.height * 0.52f;
+            GUIStyle titleStyle = CreateLabelStyle(TextAnchor.LowerCenter, true, 22f);
+            titleStyle.normal.textColor = waveAnnouncementColor;
+            GUI.Label(new Rect(rect.x + 14f, rect.y + stripeHeight + 4f, rect.width - 28f, titleHeight), waveAnnouncementTitle, titleStyle);
+            GUIStyle subtitleStyle = CreateLabelStyle(TextAnchor.UpperCenter, false, 12f);
+            subtitleStyle.normal.textColor = new Color(0.84f, 0.90f, 0.89f, 1f);
+            GUI.Label(new Rect(rect.x + 14f, rect.y + stripeHeight + 4f + titleHeight, rect.width - 28f, rect.height - titleHeight - stripeHeight - 12f), waveAnnouncementSubtitle, subtitleStyle);
+
+            GUI.color = previousColor;
+            GUI.depth = previousDepth;
+        }
+
         public void RefreshBossStatus()
         {
             MonsterController activeBoss = null;
@@ -498,11 +610,34 @@ namespace RuneGate
             this.currentWave = Mathf.Max(0, currentWave);
             this.totalWaves = Mathf.Max(0, totalWaves);
             waveText = $"\uc6e8\uc774\ube0c {currentWave}/{totalWaves}";
+            if (currentWave <= 0)
+            {
+                waveAnnouncementTimer = 0f;
+                return;
+            }
+
+            WaveData waveData = ResolveWaveData(currentWave);
+            bool isBossWave = waveData != null && waveData.IsBossWave;
+            bool isFinalWave = totalWaves > 0 && currentWave >= totalWaves;
+            waveAnnouncementTitle = WaveAnnouncementTitle(currentWave, totalWaves, isBossWave);
+            waveAnnouncementSubtitle = WaveAnnouncementSubtitle(currentWave, totalWaves, CountWaveEnemies(waveData), pendingRuneName);
+            waveAnnouncementColor = WaveAnnouncementAccent(isBossWave, isFinalWave);
+            waveAnnouncementTimer = WaveAnnouncementDuration;
+            pendingRuneName = string.Empty;
         }
 
         private void HandleBattleStateChanged(BattleState battleState)
         {
             battleStateText = GameTextMapper.BattleStateName(battleState);
+            if (battleState != BattleState.WaveRunning)
+            {
+                waveAnnouncementTimer = 0f;
+            }
+        }
+
+        private void HandleRuneSelected(RuneData runeData)
+        {
+            pendingRuneName = runeData != null ? runeData.DisplayName : string.Empty;
         }
 
         private void HandleGoldChanged(int amount)
@@ -514,6 +649,67 @@ namespace RuneGate
         {
             crystalFeedbackText = $"\ud06c\ub9ac\uc2a4\ud0c8 \ud53c\ud574 -{damage}";
             crystalFeedbackTimer = 1.2f;
+        }
+
+        private WaveData ResolveWaveData(int waveNumber)
+        {
+            if (battleManager == null || battleManager.ActiveStageData == null || battleManager.ActiveStageData.Waves == null)
+            {
+                return null;
+            }
+
+            int index = waveNumber - 1;
+            return index >= 0 && index < battleManager.ActiveStageData.Waves.Count
+                ? battleManager.ActiveStageData.Waves[index]
+                : null;
+        }
+
+        private static int CountWaveEnemies(WaveData waveData)
+        {
+            if (waveData == null || waveData.Spawns == null)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < waveData.Spawns.Count; i++)
+            {
+                WaveSpawnData spawn = waveData.Spawns[i];
+                if (spawn != null)
+                {
+                    count += Mathf.Max(0, spawn.Count);
+                }
+            }
+
+            return count;
+        }
+
+        private static Rect ClampRectInside(Rect rect, Rect bounds)
+        {
+            float width = Mathf.Min(rect.width, Mathf.Max(1f, bounds.width));
+            float height = Mathf.Min(rect.height, Mathf.Max(1f, bounds.height));
+            float x = Mathf.Clamp(rect.x, bounds.x, Mathf.Max(bounds.x, bounds.xMax - width));
+            float y = Mathf.Clamp(rect.y, bounds.y, Mathf.Max(bounds.y, bounds.yMax - height));
+            return new Rect(x, y, width, height);
+        }
+
+        private static void DrawColoredRect(Rect rect, Color color)
+        {
+            Color previousColor = GUI.color;
+            GUI.color = color;
+            GUI.DrawTexture(rect, Texture2D.whiteTexture, ScaleMode.StretchToFill, true);
+            GUI.color = previousColor;
+        }
+
+        private bool IsWaveAnnouncementBlocked()
+        {
+            if (pauseController != null && pauseController.IsPaused)
+            {
+                return true;
+            }
+
+            TutorialManager tutorial = FindAnyObjectByType<TutorialManager>();
+            return tutorial != null && tutorial.IsVisible;
         }
     }
 }
