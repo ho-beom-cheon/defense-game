@@ -839,7 +839,10 @@ namespace RuneGate.Editor
                     }
                 }
 
-                Rect runePopup = GameFrameLayout.PopupFrameForSize(size.x, size.y, 620f, 520f, 0.92f, 0.78f);
+                bool portraitPopup = size.y >= size.x;
+                float runePreferredWidth = portraitPopup ? 760f : 620f;
+                float runePreferredHeight = portraitPopup ? 760f : 520f;
+                Rect runePopup = GameFrameLayout.PopupFrameForSize(size.x, size.y, runePreferredWidth, runePreferredHeight, 0.92f, 0.78f);
                 Rect resultPopup = GameFrameLayout.PopupFrameForSize(size.x, size.y, 620f, 560f, 0.92f, 0.78f);
                 ValidatePositiveRect($"{label} Rune popup", runePopup, errors);
                 ValidatePositiveRect($"{label} Result popup", resultPopup, errors);
@@ -849,6 +852,38 @@ namespace RuneGate.Editor
                 if (runePopup.width < 300f || runePopup.height < 280f)
                 {
                     errors.Add($"{label} Rune popup is too small: {FormatRect(runePopup)}.");
+                }
+
+                float runeTitleHeight = Mathf.Clamp(runePopup.height * 0.08f, 34f, 54f);
+                float runeSubtitleHeight = Mathf.Clamp(runePopup.height * 0.06f, 28f, 42f);
+                float runeContentTop = runePopup.y + 12f + runeTitleHeight + runeSubtitleHeight;
+                Rect runeContent = new Rect(
+                    runePopup.x + 14f,
+                    runeContentTop,
+                    runePopup.width - 28f,
+                    Mathf.Max(1f, runePopup.yMax - runeContentTop - 14f));
+                Rect[] runeCards = new Rect[3];
+                for (int cardIndex = 0; cardIndex < runeCards.Length; cardIndex++)
+                {
+                    runeCards[cardIndex] = RuneSelectionUI.CalculateCardRect(runeContent, cardIndex, runeCards.Length);
+                    ValidateRectInside($"{label} Rune card {cardIndex + 1}", runeCards[cardIndex], runeContent, errors);
+                    if (runeCards[cardIndex].width < 120f || runeCards[cardIndex].height < 220f)
+                    {
+                        errors.Add($"{label} Rune card {cardIndex + 1} is too small: {FormatRect(runeCards[cardIndex])}.");
+                    }
+
+                    for (int previousIndex = 0; previousIndex < cardIndex; previousIndex++)
+                    {
+                        if (runeCards[cardIndex].Overlaps(runeCards[previousIndex]))
+                        {
+                            errors.Add($"{label} Rune cards {previousIndex + 1} and {cardIndex + 1} overlap.");
+                        }
+                    }
+                }
+
+                if (portraitPopup && runeContent.width >= 540f && RuneSelectionUI.ResolveColumnCount(runeContent.width, runeCards.Length) != 3)
+                {
+                    errors.Add($"{label} portrait rune choices must use three columns when enough width is available.");
                 }
 
                 if (resultPopup.width < 300f || resultPopup.height < 300f)
@@ -864,6 +899,22 @@ namespace RuneGate.Editor
             if (portraitHeroHeight <= landscapeHeroHeight || portraitMonsterHeight <= landscapeMonsterHeight)
             {
                 errors.Add("Portrait RuntimePixel presentation scale must improve hero and monster readability.");
+            }
+
+            Color commonRuneColor = RuneSelectionUI.RarityColor(RuneRarity.Common);
+            Color rareRuneColor = RuneSelectionUI.RarityColor(RuneRarity.Rare);
+            Color epicRuneColor = RuneSelectionUI.RarityColor(RuneRarity.Epic);
+            if (commonRuneColor == rareRuneColor || rareRuneColor == epicRuneColor || commonRuneColor == epicRuneColor)
+            {
+                errors.Add("Rune card rarity colors must distinguish Common, Rare, and Epic choices.");
+            }
+
+            foreach (ElementType element in System.Enum.GetValues(typeof(ElementType)))
+            {
+                if (string.IsNullOrWhiteSpace(RuneSelectionUI.ElementGlyph(element)))
+                {
+                    errors.Add($"Rune card element glyph is missing for {element}.");
+                }
             }
         }
 
