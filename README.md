@@ -130,6 +130,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/android-emulator-qa-v088.md`
 - `docs/android-progression-qa-v088.md`
 - `docs/android-full-chapter-qa-v088.md`
+- `docs/android-battle-camera-framing-v090.md`
 - `docs/battle-pause-lifecycle-v089.md`
 - `docs/procedural-sfx-v089.md`
 - `docs/scene-bgm-audio-settings-v090.md`

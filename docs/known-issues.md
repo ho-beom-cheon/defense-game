@@ -37,7 +37,7 @@
 ## Progression / Save
 
 - StageSelect의 3x3 편성 편집은 Android 자동 시스템 흐름에서 슬롯 교환, JSON 재로드, BattleScene 반영까지 통과했다.
-- 편성 팝업은 IMGUI 기반이며 ADB 일반 실행 화면 캡처가 화면 전환 뒤 검은 프레임을 반환해 최종 터치 영역과 텍스트 잘림은 Unity Game View 또는 실기기에서 추가 수동 확인이 필요하다.
+- StageSelect에서 BattleScene으로 이어지는 Android 일반 실행/터치/캡처는 1080x2400 에뮬레이터에서 통과했다. 편성 팝업의 최종 터치 영역과 텍스트 잘림은 실기기에서 추가 확인이 필요하다.
 - 드래그 앤 드롭, 영웅 프리셋, 편성별 추천 표시는 아직 제공하지 않는다.
 - UpgradeScene now recovers its four upgrade assets from RuntimeContentCatalog when serialized scene slots are null. Scene references should still be regenerated before final prefab/Canvas conversion.
 - Upgrade purchase, immediate UI refresh, process-restart persistence, and Stage 2 unlock passed Android emulator QA. Physical-device scroll inertia and rapid repeated taps remain unverified.
@@ -54,6 +54,7 @@
 - APK/AAB builds require Unity Android Build Support and a clean build environment.
 - Clean-branch Android APK/AAB builds succeeded on 2026-07-12. APK installation and the Stage 1 core flow passed on an Android 15 API 35 emulator; physical-device installation is not verified yet.
 - Android 15 API 35 emulator full-chapter QA passed on 2026-07-15: Stage 1~10 Victory, 10 upgrade purchases, and the Stage 10 Grumbar spawn were verified at 1080x2400 Portrait.
+- Android BattleScene now fills the portrait battlefield viewport with an explicit runtime backdrop and clears non-camera IMGUI regions, preventing StageSelect UI residue after scene transitions.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.
