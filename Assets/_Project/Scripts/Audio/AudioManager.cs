@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,32 +9,63 @@ namespace RuneGate
     {
         [SerializeField] private List<SfxEntry> sfxEntries = new List<SfxEntry>();
         [SerializeField] private bool warnWhenClipMissing;
+        [SerializeField] private bool useProceduralFallback = true;
+        [SerializeField] [Range(0f, 1f)] private float sfxVolume = 0.55f;
 
+        private const string SfxEnabledPreferenceKey = "RuneGate.SfxEnabled";
         private static AudioManager instance;
         private static readonly HashSet<SfxKey> warnedMissingKeys = new HashSet<SfxKey>();
 
-        private readonly Dictionary<SfxKey, UnityEngine.Object> clipsByKey = new Dictionary<SfxKey, UnityEngine.Object>();
-        private Component audioSource;
-        private Type audioClipType;
-        private MethodInfo playOneShotMethod;
-        private static Type audioListenerType;
-        private static MethodInfo findAnyObjectByTypeMethod;
+        private readonly Dictionary<SfxKey, AudioClip> clipsByKey = new Dictionary<SfxKey, AudioClip>();
+        private AudioSource audioSource;
 
         private void Awake()
         {
             if (instance != null && instance != this)
             {
-                Destroy(gameObject);
+                instance.AbsorbAssignedClips(sfxEntries);
+                Destroy(this);
                 return;
             }
 
             instance = this;
+            DontDestroyOnLoad(gameObject);
             RebuildClipLookup();
+            TryBindAudioSource();
+            BuildProceduralFallbacks();
             if (HasPlayableClip())
             {
-                TryBindAudioSource();
                 EnsureAudioListener();
             }
+
+            ApplyAudioSourceSettings();
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this)
+            {
+                instance = null;
+            }
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void EnsureRuntimeInstance()
+        {
+            if (instance != null)
+            {
+                return;
+            }
+
+            AudioManager existing = FindAnyObjectByType<AudioManager>();
+            if (existing != null)
+            {
+                instance = existing;
+                return;
+            }
+
+            GameObject runtimeObject = new GameObject("Runtime Audio Manager");
+            runtimeObject.AddComponent<AudioManager>();
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -53,7 +83,7 @@ namespace RuneGate
 
         public static void Play(SfxKey key)
         {
-            if (instance == null)
+            if (instance == null || !SfxEnabled)
             {
                 return;
             }
@@ -63,7 +93,12 @@ namespace RuneGate
 
         public void PlayLocal(SfxKey key)
         {
-            if (!clipsByKey.TryGetValue(key, out UnityEngine.Object clip) || clip == null)
+            if (!SfxEnabled)
+            {
+                return;
+            }
+
+            if (!clipsByKey.TryGetValue(key, out AudioClip clip) || clip == null)
             {
                 if (warnWhenClipMissing && warnedMissingKeys.Add(key))
                 {
@@ -73,12 +108,28 @@ namespace RuneGate
                 return;
             }
 
-            if (audioSource == null || playOneShotMethod == null || audioClipType == null || !audioClipType.IsInstanceOfType(clip))
+            if (audioSource == null)
             {
                 return;
             }
 
-            playOneShotMethod.Invoke(audioSource, new object[] { clip });
+            audioSource.PlayOneShot(clip);
+        }
+
+        public static bool SfxEnabled => PlayerPrefs.GetInt(SfxEnabledPreferenceKey, 1) != 0;
+
+        public int PlayableClipCount => clipsByKey.Count;
+
+        public bool HasClip(SfxKey key)
+        {
+            return clipsByKey.TryGetValue(key, out AudioClip clip) && clip != null;
+        }
+
+        public static void SetSfxEnabled(bool enabled)
+        {
+            PlayerPrefs.SetInt(SfxEnabledPreferenceKey, enabled ? 1 : 0);
+            PlayerPrefs.Save();
+            instance?.ApplyAudioSourceSettings();
         }
 
         private void RebuildClipLookup()
@@ -96,25 +147,72 @@ namespace RuneGate
 
         private void TryBindAudioSource()
         {
-            Type audioSourceType = Type.GetType("UnityEngine.AudioSource, UnityEngine.AudioModule");
-            if (audioSourceType == null)
-            {
-                return;
-            }
-
-            audioSource = GetComponent(audioSourceType);
+            audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
             {
-                audioSource = gameObject.AddComponent(audioSourceType);
+                audioSource = gameObject.AddComponent<AudioSource>();
             }
+        }
 
-            audioClipType = Type.GetType("UnityEngine.AudioClip, UnityEngine.AudioModule");
-            if (audioClipType == null)
+        private void BuildProceduralFallbacks()
+        {
+            if (!useProceduralFallback || !ProceduralSfxFactory.IsAvailable)
             {
                 return;
             }
 
-            playOneShotMethod = audioSourceType.GetMethod("PlayOneShot", new[] { audioClipType });
+            int generatedCount = 0;
+            Array keys = Enum.GetValues(typeof(SfxKey));
+            for (int i = 0; i < keys.Length; i++)
+            {
+                SfxKey key = (SfxKey)keys.GetValue(i);
+                if (HasClip(key))
+                {
+                    continue;
+                }
+
+                AudioClip clip = ProceduralSfxFactory.Create(key);
+                if (clip == null)
+                {
+                    continue;
+                }
+
+                clipsByKey[key] = clip;
+                generatedCount++;
+            }
+
+            if (generatedCount > 0)
+            {
+                Debug.Log($"AudioManager generated {generatedCount} procedural SFX fallback clips.");
+            }
+        }
+
+        private void AbsorbAssignedClips(IReadOnlyList<SfxEntry> entries)
+        {
+            if (entries == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                SfxEntry entry = entries[i];
+                if (entry != null && entry.Clip != null)
+                {
+                    clipsByKey[entry.Key] = entry.Clip;
+                }
+            }
+        }
+
+        private void ApplyAudioSourceSettings()
+        {
+            if (audioSource == null)
+            {
+                return;
+            }
+
+            audioSource.volume = Mathf.Clamp01(sfxVolume);
+            audioSource.mute = !SfxEnabled;
         }
 
         private static void EnsureAudioListener()
@@ -124,8 +222,7 @@ namespace RuneGate
                 return;
             }
 
-            Type listenerType = GetAudioListenerType();
-            if (!IsEngineComponentType(listenerType) || FindExistingAudioListener(listenerType) != null)
+            if (FindAnyObjectByType<AudioListener>() != null)
             {
                 return;
             }
@@ -133,9 +230,9 @@ namespace RuneGate
             Camera mainCamera = Camera.main;
             if (mainCamera != null)
             {
-                if (mainCamera.gameObject.GetComponent(listenerType) == null)
+                if (mainCamera.gameObject.GetComponent<AudioListener>() == null)
                 {
-                    mainCamera.gameObject.AddComponent(listenerType);
+                    mainCamera.gameObject.AddComponent<AudioListener>();
                 }
 
                 return;
@@ -143,17 +240,12 @@ namespace RuneGate
 
             GameObject listenerObject = new GameObject("Runtime Audio Listener");
             listenerObject.hideFlags = HideFlags.DontSave;
-            listenerObject.AddComponent(listenerType);
-        }
-
-        private static bool IsEngineComponentType(Type componentType)
-        {
-            return componentType != null && typeof(Component).IsAssignableFrom(componentType);
+            listenerObject.AddComponent<AudioListener>();
         }
 
         private bool HasPlayableClip()
         {
-            foreach (UnityEngine.Object clip in clipsByKey.Values)
+            foreach (AudioClip clip in clipsByKey.Values)
             {
                 if (clip != null)
                 {
@@ -164,45 +256,14 @@ namespace RuneGate
             return false;
         }
 
-        private static Type GetAudioListenerType()
-        {
-            if (audioListenerType == null)
-            {
-                audioListenerType = Type.GetType("UnityEngine.AudioListener, UnityEngine.AudioModule");
-            }
-
-            return audioListenerType;
-        }
-
-        private static UnityEngine.Object FindExistingAudioListener(Type listenerType)
-        {
-            MethodInfo method = GetFindAnyObjectByTypeMethod();
-            if (method == null)
-            {
-                return null;
-            }
-
-            return method.Invoke(null, new object[] { listenerType }) as UnityEngine.Object;
-        }
-
-        private static MethodInfo GetFindAnyObjectByTypeMethod()
-        {
-            if (findAnyObjectByTypeMethod == null)
-            {
-                findAnyObjectByTypeMethod = typeof(UnityEngine.Object).GetMethod("FindAnyObjectByType", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(Type) }, null);
-            }
-
-            return findAnyObjectByTypeMethod;
-        }
-
         [Serializable]
         private sealed class SfxEntry
         {
             [SerializeField] private SfxKey key;
-            [SerializeField] private UnityEngine.Object clip;
+            [SerializeField] private AudioClip clip;
 
             public SfxKey Key => key;
-            public UnityEngine.Object Clip => clip;
+            public AudioClip Clip => clip;
         }
     }
 }

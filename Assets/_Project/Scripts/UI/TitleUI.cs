@@ -93,9 +93,22 @@ namespace RuneGate
             if (showSettings)
             {
                 RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconSettings, 24f);
-                GUILayout.Label("BGM \ubcfc\ub968: 100%");
-                GUILayout.Label("SFX \ubcfc\ub968: 100%");
-                GUILayout.Label("\uc9c4\ub3d9: \ucf1c\uc9d0");
+                GUILayout.Label("BGM: \uc900\ube44 \uc911");
+                string sfxLabel = AudioManager.SfxEnabled ? "SFX: \ucf1c\uc9d0" : "SFX: \uaebc\uc9d0";
+                if (GUILayout.Button(sfxLabel, GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
+                {
+                    bool enableSfx = !AudioManager.SfxEnabled;
+                    AudioManager.SetSfxEnabled(enableSfx);
+                    if (enableSfx)
+                    {
+                        AudioManager.Play(SfxKey.ButtonClick);
+                    }
+
+                    feedbackMessage = enableSfx
+                        ? "\uc804\ud22c \ud6a8\uacfc\uc74c\uc744 \ucf30\uc2b5\ub2c8\ub2e4."
+                        : "\uc804\ud22c \ud6a8\uacfc\uc74c\uc744 \uaecf\uc2b5\ub2c8\ub2e4.";
+                }
+
                 if (GUILayout.Button("\ub2e4\uc74c \uc804\ud22c\uc5d0\uc11c \ud29c\ud1a0\ub9ac\uc5bc \ub2e4\uc2dc \ubcf4\uae30", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
                 {
                     SaveManager.ResetTutorialSeen();
