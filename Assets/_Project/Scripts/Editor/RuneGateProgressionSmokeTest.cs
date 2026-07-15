@@ -80,6 +80,7 @@ namespace RuneGate.Editor
             ValidateFullStageUnlockProgression(catalog, errors);
             ValidateStagePlayabilityEstimates(catalog, errors, warnings);
             ValidateUpgradePurchaseAfterStageOne(catalog, errors);
+            ValidateUpgradeDisplayRules(catalog, errors);
             ValidateResponsiveLayouts(errors);
             ValidateAudioRules(errors);
             ValidateAndroidBuildPipelineRules(errors);
@@ -819,6 +820,76 @@ namespace RuneGate.Editor
                     errors.Add($"{label} Upgrade footer is too short for feedback and a touch button: {upgrade.FooterArea.height:0.0}.");
                 }
 
+                UpgradeScreenLayoutRects upgradeScreen = UpgradeScreenLayout.CalculateForSize(size.x, size.y);
+                ValidateRectInside($"{label} Upgrade title", upgradeScreen.HeaderTitle, upgrade.HeaderArea, errors);
+                ValidateRectInside($"{label} Upgrade summary", upgradeScreen.HeaderSummary, upgrade.HeaderArea, errors);
+                ValidateRectInside($"{label} Upgrade wallet", upgradeScreen.GoldWallet, upgrade.HeaderArea, errors);
+                ValidateRectInside($"{label} Upgrade viewport", upgradeScreen.Viewport, upgrade.MainArea, errors);
+                ValidateRectInside($"{label} Upgrade feedback", upgradeScreen.FooterFeedback, upgrade.FooterArea, errors);
+                ValidateRectInside($"{label} Upgrade return button", upgradeScreen.FooterButton, upgrade.FooterArea, errors);
+                int expectedUpgradeColumns = size.y >= size.x && upgrade.MainArea.width >= 820f && upgrade.MainArea.height >= 760f ? 2 : 1;
+                if (upgradeScreen.Columns != expectedUpgradeColumns)
+                {
+                    errors.Add($"{label} Upgrade columns were {upgradeScreen.Columns}, expected {expectedUpgradeColumns}.");
+                }
+
+                Rect previousUpgradeCard = default;
+                for (int upgradeIndex = 0; upgradeIndex < UpgradeScreenLayout.ExpectedUpgradeCount; upgradeIndex++)
+                {
+                    Rect upgradeCard = upgradeScreen.CardRect(upgradeIndex);
+                    ValidatePositiveRect($"{label} Upgrade card {upgradeIndex + 1}", upgradeCard, errors);
+                    ValidateRectInside($"{label} Upgrade card {upgradeIndex + 1}", upgradeCard, upgradeScreen.Content, errors);
+                    if (upgradeIndex > 0 && upgradeCard.Overlaps(previousUpgradeCard))
+                    {
+                        errors.Add($"{label} Upgrade cards {upgradeIndex} and {upgradeIndex + 1} overlap.");
+                    }
+
+                    UpgradeCardLayoutRects cardLayout = UpgradeScreenLayout.CardLayout(upgradeCard);
+                    Rect[] cardSections =
+                    {
+                        cardLayout.Icon,
+                        cardLayout.Title,
+                        cardLayout.Category,
+                        cardLayout.Level,
+                        cardLayout.LevelProgress,
+                        cardLayout.Description,
+                        cardLayout.CurrentEffect,
+                        cardLayout.NextEffect,
+                        cardLayout.Cost,
+                        cardLayout.Action
+                    };
+                    string[] cardSectionNames =
+                    {
+                        "icon",
+                        "title",
+                        "category",
+                        "level",
+                        "progress",
+                        "description",
+                        "current effect",
+                        "next effect",
+                        "cost",
+                        "action"
+                    };
+                    for (int sectionIndex = 0; sectionIndex < cardSections.Length; sectionIndex++)
+                    {
+                        ValidatePositiveRect($"{label} Upgrade card {upgradeIndex + 1} {cardSectionNames[sectionIndex]}", cardSections[sectionIndex], errors);
+                        ValidateRectInside($"{label} Upgrade card {upgradeIndex + 1} {cardSectionNames[sectionIndex]}", cardSections[sectionIndex], upgradeCard, errors);
+                    }
+
+                    if (cardLayout.CurrentEffect.Overlaps(cardLayout.NextEffect) || cardLayout.Cost.Overlaps(cardLayout.Action))
+                    {
+                        errors.Add($"{label} Upgrade card {upgradeIndex + 1} action/stat sections overlap.");
+                    }
+
+                    if (cardLayout.Action.height < 44f || cardLayout.Action.width < 120f)
+                    {
+                        errors.Add($"{label} Upgrade card {upgradeIndex + 1} action is too small: {FormatRect(cardLayout.Action)}.");
+                    }
+
+                    previousUpgradeCard = upgradeCard;
+                }
+
                 BattleFrameRects battle = GameFrameLayout.BattleFrameForSize(size.x, size.y);
                 Rect safeRect = GameFrameLayout.SafeRectForSize(size.x, size.y);
                 ValidatePositiveRect($"{label} Battle root", battle.FrameRoot, errors);
@@ -1325,6 +1396,41 @@ namespace RuneGate.Editor
             if (SaveManager.TryPurchaseUpgrade(poorSave, firstUpgrade.UpgradeId, cost, firstUpgrade.MaxLevel))
             {
                 errors.Add($"{firstUpgrade.name} purchase succeeded without enough gold.");
+            }
+        }
+
+        private static void ValidateUpgradeDisplayRules(RuntimeContentCatalog catalog, List<string> errors)
+        {
+            if (catalog == null || catalog.Upgrades == null)
+            {
+                errors.Add("Upgrade display validation requires RuntimeContentCatalog upgrades.");
+                return;
+            }
+
+            for (int i = 0; i < catalog.Upgrades.Count; i++)
+            {
+                UpgradeData upgrade = catalog.Upgrades[i];
+                if (upgrade == null)
+                {
+                    continue;
+                }
+
+                string zeroLevel = UpgradeSceneUI.FormatTotalEffectForDisplay(upgrade, 0);
+                string nextLevel = UpgradeSceneUI.FormatTotalEffectForDisplay(upgrade, 1);
+                if (string.IsNullOrWhiteSpace(zeroLevel) || string.IsNullOrWhiteSpace(nextLevel))
+                {
+                    errors.Add($"{upgrade.name} is missing its UpgradeScene effect display.");
+                }
+
+                if (zeroLevel.Contains(upgrade.EffectKey) || nextLevel.Contains(upgrade.EffectKey))
+                {
+                    errors.Add($"{upgrade.name} exposes its internal effect key in UpgradeScene text.");
+                }
+
+                if (upgrade.EffectKey == UpgradeManager.CrystalMaxHpFlat && zeroLevel.Contains("%"))
+                {
+                    errors.Add($"{upgrade.name} flat crystal HP is displayed as a percentage at level zero: '{zeroLevel}'.");
+                }
             }
         }
 
