@@ -28,6 +28,7 @@
 - Attack, hit, and death feedback is still prototype-level.
 - Some skill effects are RuntimePixel placeholders, not final animation.
 - All six hero skills now have distinct runtime mechanics. Their timing, damage, healing, and turret duration still need long-form physical-device balance testing.
+- Android Portrait 전투 스킬 HUD는 3x2 카드, RuntimePixel 영웅 초상, HP, 준비/쿨다운/비활성 상태를 표시한다. 전용 스킬 아이콘과 카드 애니메이션은 아직 최종 아트가 아니다.
 - Grumbar has three HP-based phases, five Gate Imp reinforcements, phase-gated damage, a dedicated boss HUD, and three telegraphed phase-specific area attacks.
 - Boss attack telegraphs and impacts still use RuntimePixel/colored fallback effects; final attack animation, unique audio, and additional reinforcement types are not implemented.
 - Grumbar remains at the crystal and attacks it repeatedly instead of being removed on contact; final crystal-pressure tuning is still provisional.
@@ -60,6 +61,7 @@
 - Android BattleScene now fills the portrait battlefield viewport with an explicit runtime backdrop and clears non-camera IMGUI regions, preventing StageSelect UI residue after scene transitions.
 - Portrait BattleScene now spreads three lanes across about half of the camera world height and scales RuntimePixel units for readability. The current landscape background is stretched to the portrait camera bounds, so final portrait or tileable battlefield art is still required.
 - Spawn, crystal target, and hero slot y positions now resolve from the same runtime lane policy. Physical-device cutout and long-session combat readability remain unverified.
+- Skill card touch, cooldown state, Rune Selection disable state, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device font scaling and repeated-touch endurance remain unverified.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.
