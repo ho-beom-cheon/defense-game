@@ -759,6 +759,34 @@ namespace RuneGate.Editor
                 ValidateRectInside($"{label} Battle footer", battle.FooterArea, battle.FrameRoot, errors);
                 ValidateRectInside($"{label} Battle popup layer", battle.PopupLayer, safeRect, errors);
 
+                BattleHUD.CalculateHeaderRects(battle.HeaderArea, out Rect stageStatus, out Rect crystalStatus, out Rect battleStatus, out Rect pauseStatus);
+                Rect[] headerSections = { stageStatus, crystalStatus, battleStatus, pauseStatus };
+                string[] headerSectionNames = { "stage", "crystal", "battle", "pause" };
+                for (int headerIndex = 0; headerIndex < headerSections.Length; headerIndex++)
+                {
+                    ValidateRectInside($"{label} Battle header {headerSectionNames[headerIndex]}", headerSections[headerIndex], battle.HeaderArea, errors);
+                    if (headerSections[headerIndex].width < 72f || headerSections[headerIndex].height < 44f)
+                    {
+                        errors.Add($"{label} Battle header {headerSectionNames[headerIndex]} is too small: {FormatRect(headerSections[headerIndex])}.");
+                    }
+
+                    for (int previousIndex = 0; previousIndex < headerIndex; previousIndex++)
+                    {
+                        if (headerSections[headerIndex].Overlaps(headerSections[previousIndex]))
+                        {
+                            errors.Add($"{label} Battle header {headerSectionNames[previousIndex]} and {headerSectionNames[headerIndex]} overlap.");
+                        }
+                    }
+                }
+
+                Color healthyCrystal = BattleHUD.CrystalHealthColor(0.8f);
+                Color warningCrystal = BattleHUD.CrystalHealthColor(0.5f);
+                Color dangerCrystal = BattleHUD.CrystalHealthColor(0.2f);
+                if (healthyCrystal == warningCrystal || warningCrystal == dangerCrystal || healthyCrystal == dangerCrystal)
+                {
+                    errors.Add($"{label} Crystal health colors must distinguish healthy, warning, and danger states.");
+                }
+
                 if (battle.BattleFieldFrame.Overlaps(battle.SkillPanelArea))
                 {
                     errors.Add($"{label} Battle field and skill panel overlap.");
