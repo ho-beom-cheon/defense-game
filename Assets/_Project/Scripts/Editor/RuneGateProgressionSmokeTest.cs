@@ -847,6 +847,71 @@ namespace RuneGate.Editor
                     }
                 }
 
+                BattlePauseMenuLayoutRects pauseMenu = BattleHUD.CalculatePauseMenuLayoutForSize(size.x, size.y);
+                ValidatePositiveRect($"{label} Battle pause panel", pauseMenu.Panel, errors);
+                ValidateRectInside($"{label} Battle pause panel", pauseMenu.Panel, pauseMenu.SafeArea, errors);
+                Rect[] pauseSections =
+                {
+                    pauseMenu.HeaderArea,
+                    pauseMenu.SummaryArea,
+                    pauseMenu.AudioArea,
+                    pauseMenu.FeedbackArea,
+                    pauseMenu.ContinueButton
+                };
+                string[] pauseSectionNames = { "header", "summary", "audio", "feedback", "continue" };
+                for (int pauseIndex = 0; pauseIndex < pauseSections.Length; pauseIndex++)
+                {
+                    ValidatePositiveRect($"{label} Battle pause {pauseSectionNames[pauseIndex]}", pauseSections[pauseIndex], errors);
+                    ValidateRectInside($"{label} Battle pause {pauseSectionNames[pauseIndex]}", pauseSections[pauseIndex], pauseMenu.Panel, errors);
+                    for (int previousIndex = 0; previousIndex < pauseIndex; previousIndex++)
+                    {
+                        if (pauseSections[pauseIndex].Overlaps(pauseSections[previousIndex]))
+                        {
+                            errors.Add($"{label} Battle pause {pauseSectionNames[previousIndex]} and {pauseSectionNames[pauseIndex]} overlap.");
+                        }
+                    }
+                }
+
+                Rect[] pauseActionButtons = { pauseMenu.ContinueButton, pauseMenu.RestartButton, pauseMenu.StageSelectButton };
+                string[] pauseActionNames = { "continue", "restart", "stage select" };
+                for (int actionIndex = 0; actionIndex < pauseActionButtons.Length; actionIndex++)
+                {
+                    ValidateRectInside($"{label} Battle pause {pauseActionNames[actionIndex]} button", pauseActionButtons[actionIndex], pauseMenu.Panel, errors);
+                    if (pauseActionButtons[actionIndex].height < 48f || pauseActionButtons[actionIndex].width < 120f)
+                    {
+                        errors.Add($"{label} Battle pause {pauseActionNames[actionIndex]} touch target is too small: {FormatRect(pauseActionButtons[actionIndex])}.");
+                    }
+                }
+
+                if (pauseMenu.RestartButton.Overlaps(pauseMenu.StageSelectButton) ||
+                    pauseMenu.ContinueButton.Overlaps(pauseMenu.RestartButton) ||
+                    pauseMenu.ContinueButton.Overlaps(pauseMenu.StageSelectButton))
+                {
+                    errors.Add($"{label} Battle pause action buttons overlap.");
+                }
+
+                ValidatePositiveRect($"{label} Battle pause confirmation", pauseMenu.ConfirmationPanel, errors);
+                ValidateRectInside($"{label} Battle pause confirmation", pauseMenu.ConfirmationPanel, pauseMenu.Panel, errors);
+                ValidateRectInside($"{label} Battle pause confirmation title", pauseMenu.ConfirmationTitle, pauseMenu.ConfirmationPanel, errors);
+                ValidateRectInside($"{label} Battle pause confirmation body", pauseMenu.ConfirmationBody, pauseMenu.ConfirmationPanel, errors);
+                ValidateRectInside($"{label} Battle pause confirmation cancel", pauseMenu.ConfirmationCancelButton, pauseMenu.ConfirmationPanel, errors);
+                ValidateRectInside($"{label} Battle pause confirmation confirm", pauseMenu.ConfirmationConfirmButton, pauseMenu.ConfirmationPanel, errors);
+                if (pauseMenu.ConfirmationCancelButton.height < 48f || pauseMenu.ConfirmationConfirmButton.height < 48f ||
+                    pauseMenu.ConfirmationCancelButton.Overlaps(pauseMenu.ConfirmationConfirmButton))
+                {
+                    errors.Add($"{label} Battle pause confirmation actions are not touch safe.");
+                }
+
+                if (string.IsNullOrWhiteSpace(BattleHUD.PauseReasonText(false)) ||
+                    string.IsNullOrWhiteSpace(BattleHUD.PauseReasonText(true)) ||
+                    BattleHUD.PauseReasonText(false) == BattleHUD.PauseReasonText(true) ||
+                    string.IsNullOrWhiteSpace(BattleHUD.PauseConfirmationTitle(true)) ||
+                    string.IsNullOrWhiteSpace(BattleHUD.PauseConfirmationMessage(false)) ||
+                    string.IsNullOrWhiteSpace(BattleHUD.PauseConfirmationConfirmLabel(false)))
+                {
+                    errors.Add("Battle pause menu localization or lifecycle guidance is incomplete.");
+                }
+
                 Color healthyCrystal = BattleHUD.CrystalHealthColor(0.8f);
                 Color warningCrystal = BattleHUD.CrystalHealthColor(0.5f);
                 Color dangerCrystal = BattleHUD.CrystalHealthColor(0.2f);

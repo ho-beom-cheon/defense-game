@@ -3,6 +3,56 @@ using UnityEngine;
 
 namespace RuneGate
 {
+    public readonly struct BattlePauseMenuLayoutRects
+    {
+        public BattlePauseMenuLayoutRects(
+            Rect safeArea,
+            Rect panel,
+            Rect headerArea,
+            Rect summaryArea,
+            Rect audioArea,
+            Rect feedbackArea,
+            Rect continueButton,
+            Rect restartButton,
+            Rect stageSelectButton,
+            Rect confirmationPanel,
+            Rect confirmationTitle,
+            Rect confirmationBody,
+            Rect confirmationCancelButton,
+            Rect confirmationConfirmButton)
+        {
+            SafeArea = safeArea;
+            Panel = panel;
+            HeaderArea = headerArea;
+            SummaryArea = summaryArea;
+            AudioArea = audioArea;
+            FeedbackArea = feedbackArea;
+            ContinueButton = continueButton;
+            RestartButton = restartButton;
+            StageSelectButton = stageSelectButton;
+            ConfirmationPanel = confirmationPanel;
+            ConfirmationTitle = confirmationTitle;
+            ConfirmationBody = confirmationBody;
+            ConfirmationCancelButton = confirmationCancelButton;
+            ConfirmationConfirmButton = confirmationConfirmButton;
+        }
+
+        public Rect SafeArea { get; }
+        public Rect Panel { get; }
+        public Rect HeaderArea { get; }
+        public Rect SummaryArea { get; }
+        public Rect AudioArea { get; }
+        public Rect FeedbackArea { get; }
+        public Rect ContinueButton { get; }
+        public Rect RestartButton { get; }
+        public Rect StageSelectButton { get; }
+        public Rect ConfirmationPanel { get; }
+        public Rect ConfirmationTitle { get; }
+        public Rect ConfirmationBody { get; }
+        public Rect ConfirmationCancelButton { get; }
+        public Rect ConfirmationConfirmButton { get; }
+    }
+
     public sealed class BattleHUD : MonoBehaviour
     {
         private const float HeaderPadding = 8f;
@@ -34,6 +84,15 @@ namespace RuneGate
         private string pendingRuneName = string.Empty;
         private Color waveAnnouncementColor = Color.white;
         private float waveAnnouncementTimer;
+        private PauseConfirmation pauseConfirmation;
+        private string pauseFeedbackMessage = string.Empty;
+
+        private enum PauseConfirmation
+        {
+            None,
+            Restart,
+            StageSelect
+        }
 
         public string CrystalHpText => crystalHpText;
         public string WaveText => waveText;
@@ -82,6 +141,9 @@ namespace RuneGate
                 crystalController.ShieldChanged -= HandleCrystalShieldChanged;
                 crystalController.Damaged -= HandleCrystalDamaged;
             }
+
+            pauseConfirmation = PauseConfirmation.None;
+            pauseFeedbackMessage = string.Empty;
         }
 
         private void Update()
@@ -126,6 +188,11 @@ namespace RuneGate
             {
                 DrawPausePopup();
             }
+            else
+            {
+                pauseConfirmation = PauseConfirmation.None;
+                pauseFeedbackMessage = string.Empty;
+            }
         }
 
         public static void CalculateHeaderRects(Rect headerRect, out Rect stageRect, out Rect crystalRect, out Rect battleRect, out Rect pauseRect)
@@ -147,6 +214,118 @@ namespace RuneGate
             crystalRect = new Rect(stageRect.xMax + gap, content.y, crystalWidth, content.height);
             battleRect = new Rect(crystalRect.xMax + gap, content.y, battleWidth, content.height);
             pauseRect = new Rect(battleRect.xMax + gap, content.y, pauseWidth, content.height);
+        }
+
+        public static BattlePauseMenuLayoutRects CalculatePauseMenuLayoutForSize(float width, float height)
+        {
+            Rect safeArea = GameFrameLayout.SafeRectForSize(width, height);
+            bool portrait = height >= width;
+            float panelWidth = Mathf.Min(safeArea.width * 0.92f, portrait ? 760f : 940f);
+            float panelHeight = Mathf.Min(safeArea.height * (portrait ? 0.70f : 0.86f), portrait ? 980f : 640f);
+            Rect panel = new Rect(
+                safeArea.x + (safeArea.width - panelWidth) * 0.5f,
+                safeArea.y + (safeArea.height - panelHeight) * 0.5f,
+                panelWidth,
+                panelHeight);
+
+            float inset = Mathf.Clamp(Mathf.Min(panel.width, panel.height) * 0.035f, 14f, 28f);
+            float gap = Mathf.Clamp(Mathf.Min(panel.width, panel.height) * 0.018f, 8f, 16f);
+            Rect content = new Rect(panel.x + inset, panel.y + inset, panel.width - inset * 2f, panel.height - inset * 2f);
+            float headerHeight = Mathf.Clamp(content.height * 0.12f, 72f, 112f);
+            float feedbackHeight = Mathf.Clamp(content.height * 0.06f, 38f, 54f);
+            float primaryHeight = Mathf.Clamp(content.height * 0.075f, 52f, 68f);
+            float secondaryHeight = Mathf.Clamp(content.height * 0.07f, 50f, 62f);
+            float remainingHeight = Mathf.Max(1f, content.height - headerHeight - feedbackHeight - primaryHeight - secondaryHeight - gap * 5f);
+            float summaryHeight = Mathf.Clamp(remainingHeight * 0.42f, 112f, 220f);
+            float audioHeight = Mathf.Max(1f, remainingHeight - summaryHeight);
+
+            float y = content.y;
+            Rect headerArea = new Rect(content.x, y, content.width, headerHeight);
+            y = headerArea.yMax + gap;
+            Rect summaryArea = new Rect(content.x, y, content.width, summaryHeight);
+            y = summaryArea.yMax + gap;
+            Rect audioArea = new Rect(content.x, y, content.width, audioHeight);
+            y = audioArea.yMax + gap;
+            Rect feedbackArea = new Rect(content.x, y, content.width, feedbackHeight);
+            y = feedbackArea.yMax + gap;
+            Rect continueButton = new Rect(content.x, y, content.width, primaryHeight);
+            y = continueButton.yMax + gap;
+
+            float secondaryGap = gap;
+            float secondaryWidth = Mathf.Max(1f, (content.width - secondaryGap) * 0.5f);
+            Rect restartButton = new Rect(content.x, y, secondaryWidth, secondaryHeight);
+            Rect stageSelectButton = new Rect(restartButton.xMax + secondaryGap, y, secondaryWidth, secondaryHeight);
+
+            float confirmationWidth = Mathf.Min(panel.width * 0.86f, 580f);
+            float confirmationHeight = Mathf.Min(panel.height * 0.48f, 380f);
+            Rect confirmationPanel = new Rect(
+                panel.center.x - confirmationWidth * 0.5f,
+                panel.center.y - confirmationHeight * 0.5f,
+                confirmationWidth,
+                confirmationHeight);
+            float confirmationInset = Mathf.Clamp(Mathf.Min(confirmationWidth, confirmationHeight) * 0.07f, 16f, 26f);
+            float confirmationGap = Mathf.Clamp(gap, 8f, 14f);
+            Rect confirmationContent = new Rect(
+                confirmationPanel.x + confirmationInset,
+                confirmationPanel.y + confirmationInset,
+                confirmationPanel.width - confirmationInset * 2f,
+                confirmationPanel.height - confirmationInset * 2f);
+            float confirmationTitleHeight = Mathf.Clamp(confirmationContent.height * 0.22f, 48f, 72f);
+            float confirmationButtonHeight = Mathf.Clamp(confirmationContent.height * 0.20f, 48f, 62f);
+            Rect confirmationTitle = new Rect(confirmationContent.x, confirmationContent.y, confirmationContent.width, confirmationTitleHeight);
+            Rect confirmationButtonRow = new Rect(
+                confirmationContent.x,
+                confirmationContent.yMax - confirmationButtonHeight,
+                confirmationContent.width,
+                confirmationButtonHeight);
+            Rect confirmationBody = new Rect(
+                confirmationContent.x,
+                confirmationTitle.yMax + confirmationGap,
+                confirmationContent.width,
+                Mathf.Max(1f, confirmationButtonRow.y - confirmationTitle.yMax - confirmationGap * 2f));
+            float confirmationButtonWidth = Mathf.Max(1f, (confirmationButtonRow.width - confirmationGap) * 0.5f);
+            Rect confirmationCancelButton = new Rect(confirmationButtonRow.x, confirmationButtonRow.y, confirmationButtonWidth, confirmationButtonRow.height);
+            Rect confirmationConfirmButton = new Rect(confirmationCancelButton.xMax + confirmationGap, confirmationButtonRow.y, confirmationButtonWidth, confirmationButtonRow.height);
+
+            return new BattlePauseMenuLayoutRects(
+                safeArea,
+                panel,
+                headerArea,
+                summaryArea,
+                audioArea,
+                feedbackArea,
+                continueButton,
+                restartButton,
+                stageSelectButton,
+                confirmationPanel,
+                confirmationTitle,
+                confirmationBody,
+                confirmationCancelButton,
+                confirmationConfirmButton);
+        }
+
+        public static string PauseReasonText(bool pausedByLifecycle)
+        {
+            return pausedByLifecycle
+                ? "\uc571\uc774 \ubc31\uadf8\ub77c\uc6b4\ub4dc\ub85c \uc804\ud658\ub418\uc5b4 \uc804\ud22c\ub97c \uc548\uc804\ud558\uac8c \uba48\ucdc4\uc2b5\ub2c8\ub2e4."
+                : "\uc804\ud22c \uc0c1\ud669\uc744 \ud655\uc778\ud55c \ub4a4 \uacc4\uc18d\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.";
+        }
+
+        public static string PauseConfirmationTitle(bool restart)
+        {
+            return restart ? "\uc804\ud22c\ub97c \ub2e4\uc2dc \uc2dc\uc791\ud560\uae4c\uc694?" : "\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd\uc73c\ub85c \ub3cc\uc544\uac08\uae4c\uc694?";
+        }
+
+        public static string PauseConfirmationMessage(bool restart)
+        {
+            return restart
+                ? "\ud604\uc7ac \uc804\ud22c\uc5d0\uc11c \uc5bb\uc740 \uace8\ub4dc\uc640 \ub8ec \ud6a8\uacfc\uac00 \ucd08\uae30\ud654\ub418\uace0 \ucc98\uc74c\ubd80\ud130 \ub2e4\uc2dc \uc2dc\uc791\ud569\ub2c8\ub2e4."
+                : "\ud604\uc7ac \uc804\ud22c \uc9c4\ud589\uc740 \uc800\uc7a5\ub418\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4. \uae30\uc874 \uc2a4\ud14c\uc774\uc9c0 \ud574\uae08\uacfc \uc5c5\uadf8\ub808\uc774\ub4dc\ub294 \uc720\uc9c0\ub429\ub2c8\ub2e4.";
+        }
+
+        public static string PauseConfirmationConfirmLabel(bool restart)
+        {
+            return restart ? "\ub2e4\uc2dc \uc2dc\uc791" : "\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd";
         }
 
         public static Color CrystalHealthColor(float healthRatio)
@@ -496,37 +675,241 @@ namespace RuneGate
 
         private void DrawPausePopup()
         {
-            UIPopupGuiUtility.DrawDimOverlay();
-            Rect popupRect = GameFrameLayout.PopupFrame(620f, 520f, 0.88f, 0.54f);
+            UIPopupGuiUtility.DrawDimOverlay(0.72f);
+            BattlePauseMenuLayoutRects layout = CalculatePauseMenuLayoutForSize(Screen.width, Screen.height);
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
-            GUILayout.BeginArea(popupRect, panelStyle);
-            GUI.SetNextControlName("PopupLayer_BattlePause");
-            GUILayout.Label("전투 일시정지");
-            GUILayout.Space(UIResponsiveLayout.SmallGap);
-            GUILayout.Label(pauseController.PausedByLifecycle
-                ? "앱이 백그라운드로 전환되어 전투를 멈췄습니다."
-                : "전투가 멈춰 있습니다.");
-            GUILayout.FlexibleSpace();
+            GUIStyle sectionStyle = RuntimePixelGuiUtility.CreateSolidPanelStyle(GUI.skin.box, true);
+            GUIStyle buttonStyle = CreatePauseButtonStyle();
+            GUIStyle titleStyle = CreateLabelStyle(TextAnchor.MiddleLeft, true, 24f);
+            GUIStyle subtitleStyle = CreateLabelStyle(TextAnchor.UpperLeft, false, 13f);
+            subtitleStyle.wordWrap = true;
+            GUIStyle feedbackStyle = CreateLabelStyle(TextAnchor.MiddleCenter, false, 12f);
+            feedbackStyle.wordWrap = true;
 
-            float primaryHeight = UIResponsiveLayout.TouchHeight(44f);
-            float secondaryHeight = UIResponsiveLayout.TouchHeight(38f);
-            if (GUILayout.Button("계속하기", GUILayout.Height(primaryHeight)))
+            GUI.SetNextControlName("PopupLayer_BattlePause");
+            GUI.Box(layout.Panel, GUIContent.none, panelStyle);
+            DrawColoredRect(new Rect(layout.Panel.x + 8f, layout.Panel.y + 7f, layout.Panel.width - 16f, 7f), new Color(0.25f, 0.82f, 0.64f, 0.95f));
+
+            float titleHeight = layout.HeaderArea.height * 0.46f;
+            GUI.Label(new Rect(layout.HeaderArea.x, layout.HeaderArea.y, layout.HeaderArea.width, titleHeight), "\uc804\ud22c \uc77c\uc2dc\uc815\uc9c0", titleStyle);
+            GUI.Label(
+                new Rect(layout.HeaderArea.x, layout.HeaderArea.y + titleHeight, layout.HeaderArea.width, layout.HeaderArea.height - titleHeight),
+                PauseReasonText(pauseController.PausedByLifecycle),
+                subtitleStyle);
+
+            DrawPauseSummary(layout.SummaryArea, sectionStyle);
+
+            bool confirmationVisible = pauseConfirmation != PauseConfirmation.None;
+            bool previousEnabled = GUI.enabled;
+            GUI.enabled = previousEnabled && !confirmationVisible;
+            DrawPauseAudioControls(layout.AudioArea, sectionStyle, buttonStyle);
+
+            string feedback = string.IsNullOrWhiteSpace(pauseFeedbackMessage)
+                ? "\uc74c\ud5a5 \uc124\uc815\uc740 \uc989\uc2dc \uc800\uc7a5\ub429\ub2c8\ub2e4."
+                : pauseFeedbackMessage;
+            GUI.Label(layout.FeedbackArea, feedback, feedbackStyle);
+
+            Color previousBackground = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.28f, 0.86f, 0.62f, 1f);
+            if (GUI.Button(layout.ContinueButton, "\uacc4\uc18d\ud558\uae30", buttonStyle))
             {
+                PlayButtonClick();
+                pauseConfirmation = PauseConfirmation.None;
+                pauseFeedbackMessage = string.Empty;
                 pauseController.Resume();
             }
 
-            GUILayout.Space(UIResponsiveLayout.SmallGap);
-            if (GUILayout.Button("전투 재시작", GUILayout.Height(secondaryHeight)))
+            GUI.backgroundColor = new Color(0.92f, 0.62f, 0.20f, 1f);
+            if (GUI.Button(layout.RestartButton, "\uc804\ud22c \uc7ac\uc2dc\uc791", buttonStyle))
             {
-                pauseController.RestartBattle();
+                PlayButtonClick();
+                pauseConfirmation = PauseConfirmation.Restart;
+                pauseFeedbackMessage = string.Empty;
             }
 
-            if (GUILayout.Button("스테이지 선택", GUILayout.Height(secondaryHeight)))
+            GUI.backgroundColor = new Color(0.34f, 0.58f, 0.82f, 1f);
+            if (GUI.Button(layout.StageSelectButton, "\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd", buttonStyle))
             {
-                pauseController.OpenStageSelect();
+                PlayButtonClick();
+                pauseConfirmation = PauseConfirmation.StageSelect;
+                pauseFeedbackMessage = string.Empty;
             }
 
-            GUILayout.EndArea();
+            GUI.backgroundColor = previousBackground;
+            GUI.enabled = previousEnabled;
+
+            if (confirmationVisible)
+            {
+                DrawPauseConfirmation(layout, panelStyle, buttonStyle);
+            }
+        }
+
+        private void DrawPauseSummary(Rect rect, GUIStyle sectionStyle)
+        {
+            float gap = Mathf.Clamp(Mathf.Min(rect.width, rect.height) * 0.05f, 6f, 12f);
+            float cardWidth = Mathf.Max(1f, (rect.width - gap) * 0.5f);
+            float cardHeight = Mathf.Max(1f, (rect.height - gap) * 0.5f);
+            Rect[] cards =
+            {
+                new Rect(rect.x, rect.y, cardWidth, cardHeight),
+                new Rect(rect.x + cardWidth + gap, rect.y, cardWidth, cardHeight),
+                new Rect(rect.x, rect.y + cardHeight + gap, cardWidth, cardHeight),
+                new Rect(rect.x + cardWidth + gap, rect.y + cardHeight + gap, cardWidth, cardHeight)
+            };
+
+            string stageName = battleManager != null && battleManager.ActiveStageData != null
+                ? GameTextMapper.StageName(battleManager.ActiveStageData)
+                : "\uc2a4\ud14c\uc774\uc9c0 \uc815\ubcf4 \uc5c6\uc74c";
+            string waveValue = totalWaves > 0 ? $"{Mathf.Max(1, currentWave)}/{totalWaves}" : "-";
+            string crystalValue = crystalMaxHp > 0 ? $"{crystalCurrentHp}/{crystalMaxHp}" : "-";
+
+            DrawPauseSummaryCard(cards[0], "\ud604\uc7ac \uc804\uc120", stageName, new Color(0.28f, 0.62f, 0.52f, 1f), sectionStyle);
+            DrawPauseSummaryCard(cards[1], "\uc6e8\uc774\ube0c", waveValue, new Color(0.88f, 0.66f, 0.22f, 1f), sectionStyle);
+            DrawPauseSummaryCard(cards[2], "\ud06c\ub9ac\uc2a4\ud0c8", crystalValue, CrystalHealthColor(crystalMaxHp > 0 ? crystalCurrentHp / (float)crystalMaxHp : 0f), sectionStyle);
+            DrawPauseSummaryCard(cards[3], "\uc804\ud22c \uace8\ub4dc", gold.ToString(), new Color(0.94f, 0.76f, 0.30f, 1f), sectionStyle);
+        }
+
+        private static void DrawPauseSummaryCard(Rect rect, string label, string value, Color accent, GUIStyle sectionStyle)
+        {
+            DrawTintedBox(rect, sectionStyle, new Color(accent.r, accent.g, accent.b, 0.48f));
+            float padding = Mathf.Clamp(rect.height * 0.12f, 6f, 12f);
+            GUIStyle labelStyle = CreateLabelStyle(TextAnchor.MiddleLeft, false, 11f);
+            labelStyle.normal.textColor = new Color(0.72f, 0.82f, 0.80f, 1f);
+            GUIStyle valueStyle = CreateLabelStyle(TextAnchor.MiddleRight, true, 14f);
+            valueStyle.wordWrap = true;
+            GUI.Label(new Rect(rect.x + padding, rect.y + padding * 0.4f, rect.width * 0.40f, rect.height - padding), label, labelStyle);
+            GUI.Label(new Rect(rect.x + rect.width * 0.38f, rect.y + padding * 0.4f, rect.width * 0.62f - padding, rect.height - padding), value, valueStyle);
+        }
+
+        private void DrawPauseAudioControls(Rect rect, GUIStyle sectionStyle, GUIStyle buttonStyle)
+        {
+            GUI.Box(rect, GUIContent.none, sectionStyle);
+            float inset = Mathf.Clamp(rect.height * 0.07f, 8f, 16f);
+            float gap = Mathf.Clamp(rect.height * 0.05f, 6f, 12f);
+            float headingHeight = Mathf.Clamp(rect.height * 0.17f, 26f, 38f);
+            Rect heading = new Rect(rect.x + inset, rect.y + inset * 0.5f, rect.width - inset * 2f, headingHeight);
+            GUIStyle headingStyle = CreateLabelStyle(TextAnchor.MiddleLeft, true, 15f);
+            GUI.Label(heading, "\uc74c\ud5a5 \uc124\uc815", headingStyle);
+
+            float rowTop = heading.yMax + gap;
+            float availableHeight = Mathf.Max(1f, rect.yMax - inset - rowTop - gap);
+            float rowHeight = Mathf.Max(1f, availableHeight * 0.5f);
+            Rect bgmRow = new Rect(rect.x + inset, rowTop, rect.width - inset * 2f, rowHeight);
+            Rect sfxRow = new Rect(rect.x + inset, bgmRow.yMax + gap, rect.width - inset * 2f, rowHeight);
+            DrawAudioRow(bgmRow, true, buttonStyle, gap);
+            DrawAudioRow(sfxRow, false, buttonStyle, gap);
+        }
+
+        private void DrawAudioRow(Rect row, bool bgm, GUIStyle buttonStyle, float gap)
+        {
+            float buttonWidth = Mathf.Max(1f, (row.width - gap) * 0.5f);
+            Rect toggleRect = new Rect(row.x, row.y, buttonWidth, row.height);
+            Rect volumeRect = new Rect(toggleRect.xMax + gap, row.y, buttonWidth, row.height);
+            bool enabled = bgm ? AudioManager.BgmEnabled : AudioManager.SfxEnabled;
+            float volume = bgm ? AudioManager.BgmVolume : AudioManager.SfxVolume;
+            string channel = bgm ? "BGM" : "SFX";
+
+            Color previousBackground = GUI.backgroundColor;
+            GUI.backgroundColor = enabled ? new Color(0.32f, 0.76f, 0.58f, 1f) : new Color(0.48f, 0.50f, 0.52f, 1f);
+            if (GUI.Button(toggleRect, $"{channel}  {(enabled ? "\ucf1c\uc9d0" : "\uaebc\uc9d0")}", buttonStyle))
+            {
+                bool nextEnabled = !enabled;
+                if (bgm)
+                {
+                    PlayButtonClick();
+                    AudioManager.SetBgmEnabled(nextEnabled);
+                    pauseFeedbackMessage = nextEnabled ? "\ubc30\uacbd \uc74c\uc545\uc744 \ucf30\uc2b5\ub2c8\ub2e4." : "\ubc30\uacbd \uc74c\uc545\uc744 \uaecf\uc2b5\ub2c8\ub2e4.";
+                }
+                else
+                {
+                    if (!nextEnabled)
+                    {
+                        PlayButtonClick();
+                    }
+
+                    AudioManager.SetSfxEnabled(nextEnabled);
+                    if (nextEnabled)
+                    {
+                        PlayButtonClick();
+                    }
+
+                    pauseFeedbackMessage = nextEnabled ? "\uc804\ud22c \ud6a8\uacfc\uc74c\uc744 \ucf30\uc2b5\ub2c8\ub2e4." : "\uc804\ud22c \ud6a8\uacfc\uc74c\uc744 \uaecf\uc2b5\ub2c8\ub2e4.";
+                }
+            }
+
+            GUI.backgroundColor = new Color(0.38f, 0.60f, 0.78f, 1f);
+            if (GUI.Button(volumeRect, $"{channel}  {Mathf.RoundToInt(volume * 100f)}%", buttonStyle))
+            {
+                float nextVolume = AudioManager.NextVolumeStep(volume);
+                if (bgm)
+                {
+                    AudioManager.SetBgmVolume(nextVolume);
+                }
+                else
+                {
+                    AudioManager.SetSfxVolume(nextVolume);
+                }
+
+                PlayButtonClick();
+                pauseFeedbackMessage = $"{channel} \uc74c\ub7c9\uc744 {Mathf.RoundToInt(nextVolume * 100f)}%\ub85c \uc124\uc815\ud588\uc2b5\ub2c8\ub2e4.";
+            }
+
+            GUI.backgroundColor = previousBackground;
+        }
+
+        private void DrawPauseConfirmation(BattlePauseMenuLayoutRects layout, GUIStyle panelStyle, GUIStyle buttonStyle)
+        {
+            DrawColoredRect(new Rect(0f, 0f, Screen.width, Screen.height), new Color(0f, 0f, 0f, 0.66f));
+            GUI.Box(layout.ConfirmationPanel, GUIContent.none, panelStyle);
+            bool restart = pauseConfirmation == PauseConfirmation.Restart;
+            GUIStyle titleStyle = CreateLabelStyle(TextAnchor.MiddleCenter, true, 21f);
+            titleStyle.wordWrap = true;
+            GUIStyle bodyStyle = CreateLabelStyle(TextAnchor.MiddleCenter, false, 14f);
+            bodyStyle.wordWrap = true;
+            GUI.Label(layout.ConfirmationTitle, PauseConfirmationTitle(restart), titleStyle);
+            GUI.Label(layout.ConfirmationBody, PauseConfirmationMessage(restart), bodyStyle);
+
+            Color previousBackground = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.48f, 0.52f, 0.54f, 1f);
+            if (GUI.Button(layout.ConfirmationCancelButton, "\ucde8\uc18c", buttonStyle))
+            {
+                PlayButtonClick();
+                pauseConfirmation = PauseConfirmation.None;
+            }
+
+            GUI.backgroundColor = restart
+                ? new Color(0.90f, 0.50f, 0.18f, 1f)
+                : new Color(0.30f, 0.66f, 0.82f, 1f);
+            if (GUI.Button(layout.ConfirmationConfirmButton, PauseConfirmationConfirmLabel(restart), buttonStyle))
+            {
+                PlayButtonClick();
+                pauseConfirmation = PauseConfirmation.None;
+                if (restart)
+                {
+                    pauseController.RestartBattle();
+                }
+                else
+                {
+                    pauseController.OpenStageSelect();
+                }
+            }
+
+            GUI.backgroundColor = previousBackground;
+        }
+
+        private static GUIStyle CreatePauseButtonStyle()
+        {
+            GUIStyle style = RuntimePixelGuiUtility.CreateSolidButtonStyle(GUI.skin.button);
+            style.alignment = TextAnchor.MiddleCenter;
+            style.fontStyle = FontStyle.Bold;
+            style.fontSize = Mathf.RoundToInt(15f * UIResponsiveLayout.ReadabilityScale);
+            style.padding = new RectOffset(8, 8, 4, 4);
+            return style;
+        }
+
+        private static void PlayButtonClick()
+        {
+            AudioManager.Play(SfxKey.ButtonClick);
         }
 
         private void DrawHeroSummaryStrip(float headerWidth)
