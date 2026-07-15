@@ -39,6 +39,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Android Portrait 전장 배경 채움, 동적 3라인 분산, RuntimePixel 유닛 가독성 보정
 - Android Portrait 전투 하단 영웅 6인 3x2 스킬 카드 HUD와 HP/쿨다운 상태 표시
 - Android Portrait 전투 상단 Crystal HP/보호막, Wave 진행, 전투 상태 카드 HUD
+- Android Portrait 웨이브 사이 룬 3장 전술 기록 카드와 희귀도/속성 표시
 
 ## 실행 방법
 
@@ -140,6 +141,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/android-portrait-battlefield-composition-v090.md`
 - `docs/android-battle-skill-card-hud-v090.md`
 - `docs/android-battle-status-hud-v090.md`
+- `docs/android-rune-selection-cards-v090.md`
 - `docs/battle-pause-lifecycle-v089.md`
 - `docs/procedural-sfx-v089.md`
 - `docs/scene-bgm-audio-settings-v090.md`

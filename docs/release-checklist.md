@@ -270,6 +270,20 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - SHA-256: `C04B7648DF5ED29B02C746C42417DFA8003F9006A469E3BEFA443105F4894601`
 - Detailed evidence: `docs/android-battle-status-hud-v090.md`
 
+### Android Rune Selection Cards QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-77-rune-selection-cards`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: three tactical rune cards with Korean names, rarity colors, element seals, descriptions, effect values, and full-width actions passed
+- Touch flow: selecting the first rune closed the popup and advanced BattleScene from Wave 1/2 to Wave 2/2
+- Project Validator: passed
+- Progression Smoke Test: passed popup/card bounds, minimum size, overlap, portrait column, rarity color, and element glyph validation
+- Regression: Normal Stage 1~10, 10 upgrades, Hard/Nightmare unlocks, and Grumbar phase/pattern smoke passed
+- APK: `72,074,137 bytes`
+- SHA-256: `BAAA0BB4708EC2C00AB4E57CE41EBC14084FFC12A35F74FCA40CFE850439609B`
+- Detailed evidence: `docs/android-rune-selection-cards-v090.md`
+
 ## Audio QA
 
 - [x] Unity 내장 Audio 모듈 활성화
