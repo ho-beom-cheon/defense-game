@@ -11,6 +11,7 @@ namespace RuneGate
     {
         private const string SmokeArgument = "-runegateSmoke";
         private const string FullChapterSmokeArgument = "-runegateSmokeFullChapter";
+        private const string AllDifficultiesSmokeArgument = "-runegateSmokeAllDifficulties";
         private const string SystemFlowSmokeArgument = "-runegateSmokeSystemFlows";
         private const string SaveWriteSmokeArgument = "-runegateSmokeSaveWrite";
         private const string SaveReadSmokeArgument = "-runegateSmokeSaveRead";
@@ -28,6 +29,7 @@ namespace RuneGate
         private bool battleFinished;
         private bool failed;
         private bool fullChapterMode;
+        private bool allDifficultiesMode;
         private bool systemFlowMode;
         private bool saveWriteMode;
         private bool saveReadMode;
@@ -59,6 +61,7 @@ namespace RuneGate
         {
             bool smokeRequested = HasCommandLineArgument(SmokeArgument) ||
                                   HasCommandLineArgument(FullChapterSmokeArgument) ||
+                                  HasCommandLineArgument(AllDifficultiesSmokeArgument) ||
                                   HasCommandLineArgument(SystemFlowSmokeArgument) ||
                                   HasCommandLineArgument(SaveWriteSmokeArgument) ||
                                   HasCommandLineArgument(SaveReadSmokeArgument) ||
@@ -78,6 +81,7 @@ namespace RuneGate
         {
             Application.runInBackground = true;
             fullChapterMode = HasCommandLineArgument(FullChapterSmokeArgument);
+            allDifficultiesMode = HasCommandLineArgument(AllDifficultiesSmokeArgument);
             systemFlowMode = HasCommandLineArgument(SystemFlowSmokeArgument);
             saveWriteMode = HasCommandLineArgument(SaveWriteSmokeArgument);
             saveReadMode = HasCommandLineArgument(SaveReadSmokeArgument);
@@ -99,7 +103,7 @@ namespace RuneGate
 
         private void Update()
         {
-            if (!fullChapterMode || battleManager == null || battleManager.CurrentState != BattleState.WaveRunning ||
+            if ((!fullChapterMode && !allDifficultiesMode) || battleManager == null || battleManager.CurrentState != BattleState.WaveRunning ||
                 Time.unscaledTime < nextFullChapterSkillCastTime)
             {
                 return;
@@ -203,7 +207,7 @@ namespace RuneGate
             }
 
             Debug.Log("[RuneGateE2E] StageSelectScene verified.");
-            if (fullChapterMode)
+            if (fullChapterMode || allDifficultiesMode)
             {
                 List<StageData> chapterStages = new List<StageData>();
                 for (int i = 0; i < stageSelect.Stages.Count; i++)
@@ -215,7 +219,15 @@ namespace RuneGate
                 }
 
                 PrototypeAssetLoader.SortStagesByStageId(chapterStages);
-                yield return RunFullChapterSmokeTest(chapterStages);
+                if (allDifficultiesMode)
+                {
+                    yield return RunAllDifficultyCampaignSmokeTest(chapterStages);
+                }
+                else
+                {
+                    yield return RunFullChapterSmokeTest(chapterStages);
+                }
+
                 yield break;
             }
 
@@ -952,193 +964,13 @@ namespace RuneGate
 
         private IEnumerator RunFullChapterSmokeTest(IReadOnlyList<StageData> stages)
         {
-            if (!Require(!SaveManager.IsDifficultyUnlocked(DifficultyRules.Hard) &&
-                         !SaveManager.IsDifficultyUnlocked(DifficultyRules.Nightmare),
-                    "Fresh save unexpectedly unlocked Hard or Nightmare."))
+            if (!ValidateFreshDifficultyLock())
             {
                 yield break;
             }
 
-            GameSession.SelectDifficulty(DifficultyRules.Hard);
-            if (!Require(GameSession.SelectedDifficultyId == DifficultyRules.Normal,
-                    "Locked Hard difficulty was selectable before Normal Chapter 1 clear."))
-            {
-                yield break;
-            }
-
-            GameSession.SelectDifficulty("normal");
-            for (int stageNumber = 1; stageNumber <= 10; stageNumber++)
-            {
-                StageData stage = FindStage(stages, stageNumber);
-                if (!Require(stage != null, $"Stage {stageNumber} data is missing."))
-                {
-                    yield break;
-                }
-
-                if (!Require(SaveManager.IsStageUnlocked(stage.StageId), $"Stage {stageNumber} was not unlocked before selection."))
-                {
-                    yield break;
-                }
-
-                string nextStageId = GameSession.ResolveNextStageId(stage.StageId, stages);
-                GameSession.SelectStage(stage, nextStageId);
-                SaveManager.SetLastSelectedStageId(stage.StageId);
-
-                battleFinished = false;
-                runeSelectionPending = false;
-                sawBossThisStage = false;
-                sawBossPhaseTwoThisStage = false;
-                sawBossPhaseThreeThisStage = false;
-                sawBossHudThisStage = false;
-                bossReinforcementsSpawnedThisStage = 0;
-                observedBossPhaseController = null;
-                observedBossPatternController = null;
-                bossPatternsResolvedThisStage = 0;
-                bossPatternHeroesHitThisStage = 0;
-                bossPatternCrystalDamageThisStage = 0;
-                nextFullChapterSkillCastTime = 0f;
-                SceneManager.LoadScene("BattleScene");
-                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
-                if (!Require(waitSucceeded, $"Stage {stageNumber} BattleScene did not load."))
-                {
-                    yield break;
-                }
-
-                yield return WaitForCondition(() =>
-                {
-                    battleManager = FindAnyObjectByType<BattleManager>();
-                    return battleManager != null && battleManager.ActiveStageData != null;
-                }, SceneLoadTimeoutSeconds);
-                if (!Require(waitSucceeded, $"Stage {stageNumber} BattleManager did not initialize."))
-                {
-                    yield break;
-                }
-
-                if (!Require(battleManager.ActiveStageData.StageId == stage.StageId, $"Stage {stageNumber} initialized the wrong StageData."))
-                {
-                    yield break;
-                }
-
-                if (!Require(battleManager.Heroes != null && battleManager.Heroes.Count >= 6, $"Stage {stageNumber} did not build the six-hero formation."))
-                {
-                    yield break;
-                }
-
-                waveManager = FindAnyObjectByType<WaveManager>();
-                BindBattleEvents();
-                Debug.Log($"[RuneGateFullE2E] Running Stage {stageNumber}: {stage.DisplayNameKorean}");
-                yield return WaitForCondition(() => battleFinished || failed, FullChapterBattleTimeoutSeconds);
-                if (failed)
-                {
-                    yield break;
-                }
-
-                if (!waitSucceeded)
-                {
-                    LogBattleTimeoutSnapshot(stageNumber);
-                }
-
-                if (!Require(waitSucceeded,
-                        $"Stage {stageNumber} did not finish within {FullChapterBattleTimeoutSeconds:0} seconds."))
-                {
-                    yield break;
-                }
-
-                if (!Require(battleResult.IsVictory, $"Stage {stageNumber} ended in defeat."))
-                {
-                    yield break;
-                }
-
-                if (!Require(battleResult.WavesCleared == stage.Waves.Count,
-                        $"Stage {stageNumber} reported {battleResult.WavesCleared}/{stage.Waves.Count} cleared waves."))
-                {
-                    yield break;
-                }
-
-                yield return null;
-                yield return null;
-                StageResultUI resultUI = FindAnyObjectByType<StageResultUI>();
-                if (!Require(resultUI != null && resultUI.IsVisible, $"Stage {stageNumber} result UI was not shown."))
-                {
-                    yield break;
-                }
-
-                if (!Require(SaveManager.IsStageCleared(stage.StageId), $"Stage {stageNumber} clear state was not saved."))
-                {
-                    yield break;
-                }
-
-                if (stageNumber < 10 && !Require(!string.IsNullOrWhiteSpace(nextStageId) && SaveManager.IsStageUnlocked(nextStageId),
-                        $"Stage {stageNumber + 1} was not unlocked."))
-                {
-                    yield break;
-                }
-
-                if (stageNumber == 10 && !Require(sawBossThisStage, "Stage 10 completed without spawning a boss monster."))
-                {
-                    yield break;
-                }
-
-                if (stageNumber == 10 && !Require(sawBossPhaseTwoThisStage && sawBossPhaseThreeThisStage,
-                        "Stage 10 boss did not complete all three phases."))
-                {
-                    yield break;
-                }
-
-                if (stageNumber == 10 && !Require(bossReinforcementsSpawnedThisStage >= 5,
-                        $"Stage 10 boss spawned only {bossReinforcementsSpawnedThisStage}/5 reinforcements."))
-                {
-                    yield break;
-                }
-
-                if (stageNumber == 10 && !Require(sawBossHudThisStage,
-                        "Stage 10 boss HUD did not expose the Korean boss name and phase."))
-                {
-                    yield break;
-                }
-
-                if (stageNumber == 10 && !Require(bossPatternsResolvedThisStage > 0 && bossPatternHeroesHitThisStage > 0,
-                        $"Stage 10 boss pattern did not hit heroes. Patterns={bossPatternsResolvedThisStage}, HeroesHit={bossPatternHeroesHitThisStage}."))
-                {
-                    yield break;
-                }
-
-                if (stageNumber == 10 && !Require(SaveManager.IsDifficultyUnlocked(DifficultyRules.Hard) &&
-                                                   resultUI.NewlyUnlockedDifficultyId == DifficultyRules.Hard,
-                        "Normal Chapter 1 clear did not expose the Hard difficulty unlock in save and result UI."))
-                {
-                    yield break;
-                }
-
-                Debug.Log($"[RuneGateFullE2E] Stage {stageNumber} victory verified. Gold={SaveManager.Current.totalGold}");
-                UnbindBattleEvents();
-
-                SceneManager.LoadScene("UpgradeScene");
-                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "UpgradeScene", SceneLoadTimeoutSeconds);
-                if (!Require(waitSucceeded, $"UpgradeScene did not load after Stage {stageNumber}."))
-                {
-                    yield break;
-                }
-
-                yield return null;
-                UpgradeManager upgradeManager = FindAnyObjectByType<UpgradeManager>();
-                if (!Require(upgradeManager != null && CountValidUpgrades(upgradeManager.AvailableUpgrades) >= 4,
-                        $"UpgradeScene is invalid after Stage {stageNumber}."))
-                {
-                    yield break;
-                }
-
-                TryPurchaseOneUpgrade(upgradeManager);
-                SceneManager.LoadScene("StageSelectScene");
-                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene", SceneLoadTimeoutSeconds);
-                if (!Require(waitSucceeded && FindAnyObjectByType<StageSelectUI>() != null,
-                        $"StageSelectScene did not recover after Stage {stageNumber}."))
-                {
-                    yield break;
-                }
-            }
-
-            if (!Require(upgradePurchaseCount > 0, "Full chapter completed without any persisted upgrade purchase."))
+            yield return RunDifficultyChapterSmokeTest(stages, DifficultyRules.Normal, DifficultyRules.Hard);
+            if (failed || !Require(upgradePurchaseCount > 0, "Full chapter completed without any persisted upgrade purchase."))
             {
                 yield break;
             }
@@ -1197,9 +1029,266 @@ namespace RuneGate
             }
 
             Debug.Log($"RUNEGATE_FULL_CHAPTER_E2E_PASSED: upgrades={upgradePurchaseCount}, gold={SaveManager.Current.totalGold}, difficulties=normal|hard|nightmare");
+            CompleteRuntimeSmoke(0);
+        }
+
+        private IEnumerator RunAllDifficultyCampaignSmokeTest(IReadOnlyList<StageData> stages)
+        {
+            if (!ValidateFreshDifficultyLock())
+            {
+                yield break;
+            }
+
+            string[] difficultyIds =
+            {
+                DifficultyRules.Normal,
+                DifficultyRules.Hard,
+                DifficultyRules.Nightmare
+            };
+            string[] expectedUnlockIds =
+            {
+                DifficultyRules.Hard,
+                DifficultyRules.Nightmare,
+                string.Empty
+            };
+
+            for (int i = 0; i < difficultyIds.Length; i++)
+            {
+                string difficultyId = difficultyIds[i];
+                if (!Require(SaveManager.IsDifficultyUnlocked(difficultyId),
+                        $"{difficultyId} was not unlocked before its campaign."))
+                {
+                    yield break;
+                }
+
+                yield return RunDifficultyChapterSmokeTest(stages, difficultyId, expectedUnlockIds[i]);
+                if (failed || !Require(SaveManager.IsDifficultyCompleted(difficultyId),
+                        $"{difficultyId} Chapter 1 completion was not saved."))
+                {
+                    yield break;
+                }
+            }
+
+            int goldBeforeReload = SaveManager.Current.totalGold;
+            int upgradeLevelsBeforeReload = CountPurchasedUpgradeLevels(SaveManager.Current);
+            SaveManager.ReloadFromDiskForDiagnostics();
+            if (!Require(SaveManager.IsDifficultyCompleted(DifficultyRules.Normal) &&
+                         SaveManager.IsDifficultyCompleted(DifficultyRules.Hard) &&
+                         SaveManager.IsDifficultyCompleted(DifficultyRules.Nightmare) &&
+                         SaveManager.Current.totalGold == goldBeforeReload &&
+                         CountPurchasedUpgradeLevels(SaveManager.Current) == upgradeLevelsBeforeReload,
+                    "All-difficulty completion, Gold, or upgrades did not survive a disk reload."))
+            {
+                yield break;
+            }
+
+            Debug.Log($"RUNEGATE_ALL_DIFFICULTIES_E2E_PASSED: stages=30, upgrades={upgradePurchaseCount}, gold={SaveManager.Current.totalGold}");
+            CompleteRuntimeSmoke(0);
+        }
+
+        private IEnumerator RunDifficultyChapterSmokeTest(IReadOnlyList<StageData> stages, string difficultyId, string expectedUnlockDifficultyId)
+        {
+            GameSession.SelectDifficulty(difficultyId);
+            if (!Require(GameSession.SelectedDifficultyId == difficultyId,
+                    $"{difficultyId} difficulty selection did not persist before its campaign."))
+            {
+                yield break;
+            }
+
+            for (int stageNumber = 1; stageNumber <= 10; stageNumber++)
+            {
+                StageData stage = FindStage(stages, stageNumber);
+                if (!Require(stage != null, $"{difficultyId} Stage {stageNumber} data is missing."))
+                {
+                    yield break;
+                }
+
+                if (!Require(SaveManager.IsStageUnlocked(stage.StageId, difficultyId),
+                        $"{difficultyId} Stage {stageNumber} was not unlocked before selection."))
+                {
+                    yield break;
+                }
+
+                string nextStageId = GameSession.ResolveNextStageId(stage.StageId, stages);
+                GameSession.SelectStage(stage, nextStageId);
+                SaveManager.SetLastSelectedStageId(stage.StageId);
+                ResetFullChapterStageObservations();
+                SceneManager.LoadScene("BattleScene");
+                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
+                if (!Require(waitSucceeded, $"{difficultyId} Stage {stageNumber} BattleScene did not load."))
+                {
+                    yield break;
+                }
+
+                yield return WaitForCondition(() =>
+                {
+                    battleManager = FindAnyObjectByType<BattleManager>();
+                    return battleManager != null && battleManager.ActiveStageData != null;
+                }, SceneLoadTimeoutSeconds);
+                if (!Require(waitSucceeded, $"{difficultyId} Stage {stageNumber} BattleManager did not initialize."))
+                {
+                    yield break;
+                }
+
+                if (!Require(battleManager.ActiveStageData.StageId == stage.StageId,
+                        $"{difficultyId} Stage {stageNumber} initialized the wrong StageData.") ||
+                    !Require(battleManager.Heroes != null && battleManager.Heroes.Count >= 6,
+                        $"{difficultyId} Stage {stageNumber} did not build the six-hero formation."))
+                {
+                    yield break;
+                }
+
+                waveManager = FindAnyObjectByType<WaveManager>();
+                BindBattleEvents();
+                Debug.Log($"[RuneGateDifficultyE2E] Running {difficultyId} Stage {stageNumber}: {stage.DisplayNameKorean}");
+                yield return WaitForCondition(() => battleFinished || failed, FullChapterBattleTimeoutSeconds);
+                if (failed)
+                {
+                    yield break;
+                }
+
+                if (!waitSucceeded)
+                {
+                    LogBattleTimeoutSnapshot(stageNumber);
+                }
+
+                if (!Require(waitSucceeded,
+                        $"{difficultyId} Stage {stageNumber} did not finish within {FullChapterBattleTimeoutSeconds:0} seconds.") ||
+                    !Require(battleResult.IsVictory, $"{difficultyId} Stage {stageNumber} ended in defeat.") ||
+                    !Require(battleResult.WavesCleared == stage.Waves.Count,
+                        $"{difficultyId} Stage {stageNumber} reported {battleResult.WavesCleared}/{stage.Waves.Count} cleared waves."))
+                {
+                    yield break;
+                }
+
+                yield return null;
+                yield return null;
+                StageResultUI resultUI = FindAnyObjectByType<StageResultUI>();
+                if (!Require(resultUI != null && resultUI.IsVisible,
+                        $"{difficultyId} Stage {stageNumber} result UI was not shown.") ||
+                    !Require(SaveManager.IsStageCleared(stage.StageId, difficultyId),
+                        $"{difficultyId} Stage {stageNumber} clear state was not saved."))
+                {
+                    yield break;
+                }
+
+                if (stageNumber < 10 && !Require(!string.IsNullOrWhiteSpace(nextStageId) &&
+                                                  SaveManager.IsStageUnlocked(nextStageId, difficultyId),
+                        $"{difficultyId} Stage {stageNumber + 1} was not unlocked."))
+                {
+                    yield break;
+                }
+
+                if (stageNumber == 10 && !ValidateBossStageObservations(difficultyId))
+                {
+                    yield break;
+                }
+
+                if (stageNumber == 10 && !string.IsNullOrWhiteSpace(expectedUnlockDifficultyId) &&
+                    !Require(SaveManager.IsDifficultyUnlocked(expectedUnlockDifficultyId) &&
+                             resultUI.NewlyUnlockedDifficultyId == expectedUnlockDifficultyId,
+                        $"{difficultyId} Chapter 1 did not expose the {expectedUnlockDifficultyId} unlock."))
+                {
+                    yield break;
+                }
+
+                Debug.Log($"[RuneGateDifficultyE2E] {difficultyId} Stage {stageNumber} victory verified. Gold={SaveManager.Current.totalGold}");
+                UnbindBattleEvents();
+                SceneManager.LoadScene("UpgradeScene");
+                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "UpgradeScene", SceneLoadTimeoutSeconds);
+                if (!Require(waitSucceeded, $"UpgradeScene did not load after {difficultyId} Stage {stageNumber}."))
+                {
+                    yield break;
+                }
+
+                yield return null;
+                UpgradeManager upgradeManager = FindAnyObjectByType<UpgradeManager>();
+                if (!Require(upgradeManager != null && CountValidUpgrades(upgradeManager.AvailableUpgrades) >= 4,
+                        $"UpgradeScene is invalid after {difficultyId} Stage {stageNumber}."))
+                {
+                    yield break;
+                }
+
+                TryPurchaseOneUpgrade(upgradeManager);
+                SceneManager.LoadScene("StageSelectScene");
+                yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene", SceneLoadTimeoutSeconds);
+                if (!Require(waitSucceeded && FindAnyObjectByType<StageSelectUI>() != null,
+                        $"StageSelectScene did not recover after {difficultyId} Stage {stageNumber}."))
+                {
+                    yield break;
+                }
+            }
+        }
+
+        private bool ValidateFreshDifficultyLock()
+        {
+            if (!Require(!SaveManager.IsDifficultyUnlocked(DifficultyRules.Hard) &&
+                         !SaveManager.IsDifficultyUnlocked(DifficultyRules.Nightmare),
+                    "Fresh save unexpectedly unlocked Hard or Nightmare."))
+            {
+                return false;
+            }
+
+            GameSession.SelectDifficulty(DifficultyRules.Hard);
+            return Require(GameSession.SelectedDifficultyId == DifficultyRules.Normal,
+                "Locked Hard difficulty was selectable before Normal Chapter 1 clear.");
+        }
+
+        private void ResetFullChapterStageObservations()
+        {
+            battleFinished = false;
+            runeSelectionPending = false;
+            sawBossThisStage = false;
+            sawBossPhaseTwoThisStage = false;
+            sawBossPhaseThreeThisStage = false;
+            sawBossHudThisStage = false;
+            bossReinforcementsSpawnedThisStage = 0;
+            observedBossPhaseController = null;
+            observedBossPatternController = null;
+            bossPatternsResolvedThisStage = 0;
+            bossPatternHeroesHitThisStage = 0;
+            bossPatternCrystalDamageThisStage = 0;
+            nextFullChapterSkillCastTime = 0f;
+        }
+
+        private bool ValidateBossStageObservations(string difficultyId)
+        {
+            return Require(sawBossThisStage, $"{difficultyId} Stage 10 completed without spawning a boss monster.") &&
+                   Require(sawBossPhaseTwoThisStage && sawBossPhaseThreeThisStage,
+                       $"{difficultyId} Stage 10 boss did not complete all three phases.") &&
+                   Require(bossReinforcementsSpawnedThisStage >= 5,
+                       $"{difficultyId} Stage 10 boss spawned only {bossReinforcementsSpawnedThisStage}/5 reinforcements.") &&
+                   Require(sawBossHudThisStage,
+                       $"{difficultyId} Stage 10 boss HUD did not expose the Korean boss name and phase.") &&
+                   Require(bossPatternsResolvedThisStage > 0 && bossPatternHeroesHitThisStage > 0,
+                       $"{difficultyId} Stage 10 boss pattern did not hit heroes. Patterns={bossPatternsResolvedThisStage}, HeroesHit={bossPatternHeroesHitThisStage}.");
+        }
+
+        private void CompleteRuntimeSmoke(int exitCode)
+        {
             CleanupSmokeSave();
             Time.timeScale = previousTimeScale;
-            Application.Quit(0);
+            Application.Quit(exitCode);
+        }
+
+        private static int CountPurchasedUpgradeLevels(SaveData saveData)
+        {
+            int totalLevels = 0;
+            if (saveData == null || saveData.upgradeLevels == null)
+            {
+                return totalLevels;
+            }
+
+            for (int i = 0; i < saveData.upgradeLevels.Count; i++)
+            {
+                SerializableUpgradeLevel entry = saveData.upgradeLevels[i];
+                if (entry != null)
+                {
+                    totalLevels += Mathf.Max(0, entry.level);
+                }
+            }
+
+            return totalLevels;
         }
 
         private void LogBattleTimeoutSnapshot(int stageNumber)
@@ -1863,6 +1952,10 @@ namespace RuneGate
             else if (systemFlowMode)
             {
                 prefix = "RUNEGATE_SYSTEM_FLOWS_E2E_FAILED";
+            }
+            else if (allDifficultiesMode)
+            {
+                prefix = "RUNEGATE_ALL_DIFFICULTIES_E2E_FAILED";
             }
             else if (fullChapterMode)
             {
