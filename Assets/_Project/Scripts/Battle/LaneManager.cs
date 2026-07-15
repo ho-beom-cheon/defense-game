@@ -262,6 +262,14 @@ namespace RuneGate
             float pathCenterX = (spawnX + crystalX) * 0.5f;
             float pathWidth = Mathf.Abs(spawnX - crystalX);
 
+            Bounds cameraBounds = RuntimeSpriteBoundsUtility.GetCameraWorldBounds();
+            Vector2 viewportBackdropSize = new Vector2(
+                Mathf.Max(pathWidth + 1.2f, cameraBounds.size.x + 0.2f),
+                Mathf.Max(height + 0.8f, cameraBounds.size.y + 0.2f));
+            CreateRuntimeVisual("Battlefield Viewport Backdrop", visualRoot.transform,
+                new Vector3(cameraBounds.center.x, cameraBounds.center.y, 0.4f),
+                new Color(0.018f, 0.052f, 0.043f, 1f), viewportBackdropSize, -21);
+
             Sprite backgroundSprite = RuntimePixelAssetLoader.LoadSprite(RuntimePixelAssetLoader.BackgroundGoblinForestLanes);
             if (backgroundSprite != null)
             {

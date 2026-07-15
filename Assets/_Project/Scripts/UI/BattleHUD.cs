@@ -93,6 +93,7 @@ namespace RuneGate
             AutoAssignReferences();
 
             BattleFrameRects battleFrame = GameFrameLayout.BattleFrame();
+            DrawOutsideBattlefieldBackdrop(battleFrame.BattleFieldFrame);
             Rect drawRect = UIResponsiveLayout.ClampToScreen(battleFrame.HeaderArea);
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
             GUILayout.BeginArea(drawRect, panelStyle);
@@ -150,6 +151,32 @@ namespace RuneGate
             {
                 DrawPausePopup();
             }
+        }
+
+        private static void DrawOutsideBattlefieldBackdrop(Rect battlefieldRect)
+        {
+            int previousDepth = GUI.depth;
+            Color previousColor = GUI.color;
+            GUI.depth = 1000;
+            GUI.color = new Color(0.025f, 0.035f, 0.04f, 1f);
+
+            DrawSolidRect(new Rect(0f, 0f, Screen.width, Mathf.Max(0f, battlefieldRect.y)));
+            DrawSolidRect(new Rect(0f, battlefieldRect.yMax, Screen.width, Mathf.Max(0f, Screen.height - battlefieldRect.yMax)));
+            DrawSolidRect(new Rect(0f, battlefieldRect.y, Mathf.Max(0f, battlefieldRect.x), battlefieldRect.height));
+            DrawSolidRect(new Rect(battlefieldRect.xMax, battlefieldRect.y, Mathf.Max(0f, Screen.width - battlefieldRect.xMax), battlefieldRect.height));
+
+            GUI.color = previousColor;
+            GUI.depth = previousDepth;
+        }
+
+        private static void DrawSolidRect(Rect rect)
+        {
+            if (rect.width <= 0f || rect.height <= 0f)
+            {
+                return;
+            }
+
+            GUI.DrawTexture(rect, Texture2D.whiteTexture, ScaleMode.StretchToFill, true);
         }
 
         private void DrawBossStatus(Rect battlefieldRect)
