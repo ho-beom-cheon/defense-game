@@ -420,12 +420,12 @@ namespace RuneGate.Editor
 
         private static ContentBundle CreateV04Content()
         {
-            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "방패 강타", "가까운 적에게 강한 피해를 주고 전선을 밀어냅니다.", 7.5f, 70, 1, 2.1f, TargetingType.Nearest, ElementType.Light, "damage", 1f);
-            SkillData rapidShot = CreateSkill("Rapid Shot", "skill_rapid_shot", "Rapid Shot", "Fires repeated shots into the nearest fast target.", 5.8f, 28, 3, 5f, TargetingType.Nearest, ElementType.Wind, "multi_hit_damage", 1f);
-            SkillData meteor = CreateSkill("Meteor", "skill_meteor", "Meteor", "Drops fire area damage for clustered monsters.", 10.5f, 68, 1, 4.2f, TargetingType.HighestHp, ElementType.Fire, "area_damage", 1.8f);
-            SkillData holyHeal = CreateSkill("Holy Heal", "skill_holy_heal", "Holy Heal", "Restores HP to the Kingdom Crystal.", 8.5f, 45, 1, 3.5f, TargetingType.LowestHp, ElementType.Light, "crystal_heal_flat", 1f);
-            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "임시 포탑", "임시 포탑을 배치하고 적에게 기본 피해를 줍니다.", 11f, 44, 1, 3.2f, TargetingType.First, ElementType.Earth, "turret_placeholder", 1f);
-            SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "Shadow Strike", "High dark damage that prefers named and boss targets.", 10f, 145, 1, 2.4f, TargetingType.Boss, ElementType.Dark, "damage", 1f);
+            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "방패 강타", "가까운 적에게 강한 피해를 주고 전선을 밀어냅니다.", 7.5f, 70, 1, 2.1f, TargetingType.Nearest, ElementType.Light, SkillController.ShieldBashEffect, 1f);
+            SkillData rapidShot = CreateSkill("Rapid Shot", "skill_rapid_shot", "연속 사격", "가까운 빠른 적에게 세 발을 연속으로 발사합니다.", 5.8f, 28, 3, 5f, TargetingType.Nearest, ElementType.Wind, SkillController.RapidShotEffect, 1f);
+            SkillData meteor = CreateSkill("Meteor", "skill_meteor", "운석 낙하", "적이 모인 지점에 화염 범위 피해를 줍니다.", 10.5f, 68, 1, 4.2f, TargetingType.HighestHp, ElementType.Fire, SkillController.MeteorAreaEffect, 1.8f);
+            SkillData holyHeal = CreateSkill("Holy Heal", "skill_holy_heal", "성스러운 회복", "가장 위급한 영웅과 크리스탈의 HP를 회복합니다.", 8.5f, 45, 1, 3.5f, TargetingType.LowestHp, ElementType.Light, SkillController.HolyHealEffect, 1f);
+            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "임시 포탑", "같은 라인의 적을 일정 시간 자동 공격하는 룬포지 포탑을 배치합니다.", 11f, 44, 1, 3.2f, TargetingType.First, ElementType.Earth, SkillController.TemporaryTurretEffect, 1f);
+            SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "그림자 급습", "보스와 빈사 상태의 적에게 더 강한 어둠 피해를 줍니다.", 10f, 145, 1, 2.4f, TargetingType.Boss, ElementType.Dark, SkillController.ShadowStrikeEffect, 1f);
 
             HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", "레온", "균열 방패의 기사", "전열 / 방어 / 빛. 무너진 재문 앞에서 마지막까지 버틴 문지기 기사.", "이번에는, 절대 무너지지 않는다.", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 520, 28, 0.95f, 1.25f, shieldBash);
             HeroData archer = CreateHeroData("Archer", "hero_archer_001", "Archer", "세리아", "바람길을 읽는 궁수", "후열 / 원거리 / 바람. 균열에서 새는 바람의 방향으로 적의 진입로를 읽는다.", "바람은 이미 답을 알고 있어.", HeroRole.RangedDps, HeroPositionType.Back, ElementType.Wind, 190, 32, 1.75f, 4.8f, rapidShot);

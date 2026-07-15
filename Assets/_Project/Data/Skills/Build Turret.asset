@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_build_turret
   displayName: "임시 포탑"
-  description: "임시 포탑을 배치하고 적에게 기본 피해를 줍니다."
+  description: "같은 라인의 적을 일정 시간 자동 공격하는 룬포지 포탑을 배치합니다."
   cooldown: 11
   power: 44
   damageHitCount: 1
   range: 3.2
-  effectKey: turret_placeholder
+  effectKey: temporary_turret
   radius: 1
   targetingType: 0
   element: 4

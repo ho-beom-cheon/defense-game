@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_shield_bash
   displayName: "방패 강타"
-  description: "가까운 적에게 안정적인 빛 피해를 줍니다."
+  description: "가까운 적에게 빛 피해를 주고 전선을 밀어냅니다."
   cooldown: 7.5
   power: 70
   damageHitCount: 1
   range: 2.1
-  effectKey: damage
+  effectKey: shield_bash
   radius: 1
   targetingType: 1
   element: 5

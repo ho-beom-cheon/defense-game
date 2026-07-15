@@ -63,6 +63,16 @@ namespace RuneGate
             SpawnSpriteOrPulse("DeathPuff_Runtime", RuntimePixelAssetLoader.EffectDeathPuff, position, Quaternion.identity, new Color(0.78f, 0.78f, 0.78f, 0.9f), new Vector2(size, size), 0.38f, 15);
         }
 
+        public static void SpawnRapidShotImpact(Vector3 from, Vector3 to)
+        {
+            SpawnSpriteLineOrLine("SkillFx_RapidShotHit", RuntimePixelAssetLoader.EffectRapidShot, from + Vector3.up * 0.18f, to + Vector3.up * 0.18f, new Color(0.35f, 1f, 0.36f, 0.92f), 0.34f, 0.16f, 17);
+        }
+
+        public static void SpawnTurretShot(Vector3 from, Vector3 to)
+        {
+            SpawnSpriteLineOrLine("SkillFx_TurretProjectile", RuntimePixelAssetLoader.EffectTurretShot, from, to, new Color(1f, 0.72f, 0.25f, 0.94f), 0.24f, 0.18f, 17);
+        }
+
         private static string BuildSkillKey(SkillData skillData)
         {
             if (skillData == null)

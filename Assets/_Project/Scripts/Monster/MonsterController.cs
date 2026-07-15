@@ -48,6 +48,7 @@ namespace RuneGate
         private float bossAttackIntervalMultiplier = 1f;
         private float bossAttackDamageMultiplier = 1f;
         private float attackCooldown;
+        private float controlLockRemaining;
         private bool initialized;
         private bool removedFromWave;
         private bool revivedOnce;
@@ -75,6 +76,7 @@ namespace RuneGate
         public SpriteRenderer VisualSpriteRenderer => spriteRenderer;
         public MonsterCombatState CombatState => combatState;
         public float MoveSpeedMultiplier => speedMultiplier;
+        public float ControlLockRemaining => controlLockRemaining;
         public bool IsMovementAttackLocked => movementController != null && movementController.IsAttacking;
         public bool HasActiveAttackRoutine => attackRoutine != null;
         public BossPhaseController BossPhaseController { get; private set; }
@@ -122,6 +124,17 @@ namespace RuneGate
                 attackCooldown -= Time.deltaTime;
             }
 
+            if (controlLockRemaining > 0f)
+            {
+                controlLockRemaining = Mathf.Max(0f, controlLockRemaining - Time.deltaTime);
+                SetCombatState(MonsterCombatState.Hit);
+                movementController?.Stop();
+                visualController?.PlayIdle();
+                AlignVisualToGround(false);
+                UpdateHpBarAnchor();
+                return;
+            }
+
             float speed = ShadowContractService.GetMoveSpeed(monsterData, variantType);
             Vector3 previousPosition = transform.position;
             HeroController blocker = FindBlockingHero();
@@ -141,7 +154,14 @@ namespace RuneGate
 
             if (HasReachedCrystal())
             {
-                DamageCrystalAndRemove();
+                if (IsBoss)
+                {
+                    TryAttackCrystal();
+                }
+                else
+                {
+                    DamageCrystalAndRemove();
+                }
             }
         }
 
@@ -172,6 +192,7 @@ namespace RuneGate
             bossAttackIntervalMultiplier = 1f;
             bossAttackDamageMultiplier = 1f;
             attackCooldown = 0f;
+            controlLockRemaining = 0f;
             removedFromWave = false;
             revivedOnce = false;
             initialized = true;
@@ -286,6 +307,26 @@ namespace RuneGate
         public void ApplySlowPercent(float percent)
         {
             speedMultiplier = Mathf.Clamp(1f - percent, 0.1f, 1f);
+        }
+
+        public void ApplyKnockback(float distance, float controlDuration)
+        {
+            if (!IsAlive)
+            {
+                return;
+            }
+
+            StopAttackRoutine();
+            movementController?.SetAttackState(false);
+            float resolvedDistance = IsBoss ? Mathf.Max(0f, distance) * 0.45f : Mathf.Max(0f, distance);
+            float resolvedDuration = IsBoss ? Mathf.Max(0f, controlDuration) * 0.5f : Mathf.Max(0f, controlDuration);
+            transform.position += Vector3.right * resolvedDistance;
+            laneManager?.ClampUnitInsideBattlefield(transform, spriteRenderer);
+            AlignVisualToGround(false);
+            UpdateHpBarAnchor();
+            controlLockRemaining = Mathf.Max(controlLockRemaining, resolvedDuration);
+            SetCombatState(MonsterCombatState.Hit);
+            CombatFeedbackEvents.RaiseAttackImpacted(transform.position);
         }
 
         public void ApplyBossPhaseModifiers(float moveSpeedMultiplier, float attackIntervalMultiplier, float attackDamageMultiplier)
@@ -527,6 +568,44 @@ namespace RuneGate
 
             attackRoutine = StartCoroutine(AttackHeroRoutine(hero));
             attackCooldown = ResolveAttackCooldown();
+        }
+
+        private void TryAttackCrystal()
+        {
+            movementController?.Stop();
+            SetCombatState(MonsterCombatState.Attack);
+            if (crystalController == null || crystalController.CurrentHp <= 0 || attackCooldown > 0f || attackRoutine != null)
+            {
+                return;
+            }
+
+            attackRoutine = StartCoroutine(AttackCrystalRoutine());
+            attackCooldown = ResolveAttackCooldown();
+        }
+
+        private IEnumerator AttackCrystalRoutine()
+        {
+            movementController?.SetAttackState(true);
+            Vector3 targetPosition = crystalController != null ? crystalController.transform.position : transform.position + Vector3.left;
+            visualController?.FlipToward(targetPosition);
+            visualController?.PlayAttackLunge(targetPosition);
+            CombatFeedbackEvents.RaiseAttackStarted(transform.position);
+            yield return new WaitForSeconds(Mathf.Max(0f, attackWindUp));
+
+            if (IsAlive && crystalController != null && crystalController.CurrentHp > 0)
+            {
+                int baseDamage = ShadowContractService.GetDamageToCrystal(monsterData, variantType);
+                int damage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * bossAttackDamageMultiplier));
+                visualController?.PlayImpactPause();
+                CombatVisualEffectFactory.SpawnHitSpark(crystalController.transform.position, 1.2f);
+                CombatFeedbackEvents.RaiseAttackImpacted(crystalController.transform.position);
+                crystalController.TakeDamage(damage);
+                CombatFeedbackEvents.RaiseCrystalDamaged(transform.position);
+            }
+
+            yield return new WaitForSeconds(Mathf.Max(0f, attackRecovery));
+            movementController?.SetAttackState(false);
+            attackRoutine = null;
         }
 
         private IEnumerator AttackHeroRoutine(HeroController hero)
