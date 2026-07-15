@@ -95,8 +95,10 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `Tools/RuneGate/Build Android APK v1.0`
 - `Tools/RuneGate/Build Current Android APK`
 - `Tools/RuneGate/Build Current Android AAB`
+- `Tools/RuneGate/Build Signed Android APK`
+- `Tools/RuneGate/Build Signed Android AAB`
 
-현재 콘텐츠를 덮어쓰지 않는 Android 빌드는 `Build Current Android APK` 또는 `Build Current Android AAB`를 사용한다. Player 런타임 자동 검증 방법은 `docs/runtime-e2e-smoke-test.md`를 참고한다.
+현재 콘텐츠를 덮어쓰지 않는 개발 빌드는 `Build Current Android APK/AAB`를 사용한다. 릴리스 서명 빌드는 환경 변수 기반 `Build Signed Android APK/AAB`를 사용하며 자세한 비밀 관리와 검증 절차는 `docs/android-release-signing.md`를 참고한다. Player 런타임 자동 검증 방법은 `docs/runtime-e2e-smoke-test.md`를 참고한다.
 
 ## 아트 정책
 
@@ -134,6 +136,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/ui-ux-v08.md`
 - `docs/known-issues.md`
 - `docs/android-build-guide.md`
+- `docs/android-release-signing.md`
 - `docs/android-emulator-qa-v088.md`
 - `docs/android-progression-qa-v088.md`
 - `docs/android-full-chapter-qa-v088.md`

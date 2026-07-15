@@ -72,11 +72,11 @@
 - Rune card layout, rarity/element presentation, selection touch, Wave 2 transition, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device font scaling and repeated-touch endurance remain unverified.
 - Opening/final/boss wave banners, applied-rune feedback, Stage 10 boss warning, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device cutout and long-session banner timing remain unverified.
 - RuntimePixel actor alpha cleanup, Stage 3 wolf, Stage 7 bone soldier, Stage 10 Grumbar rendering, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device GPU/texture compression remains unverified.
-- The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
+- Development APK/AAB builds still use Unity's development signing path. Environment-variable release signing and artifact manifests are implemented and passed with a throwaway QA keystore, but a protected production keystore is still required before store submission.
 - Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.
 - TitleScene now uses the first-pass splash candidate as its Android portrait background. Physical-device cutout coverage and final title art remain unverified.
-- Current-content APK and AAB menu/CLI automation is implemented and build-tested; release keystore signing and Play Console upload remain manual release tasks.
+- Current-content and release-signed APK/AAB menu/CLI automation is build-tested. Production credential provisioning, Play App Signing, and Play Console upload remain manual release tasks.
 - Store submission still needs final target SDK, signing, permissions, Data Safety, and privacy review.
 
 ## Monetization

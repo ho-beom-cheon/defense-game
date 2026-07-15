@@ -122,6 +122,11 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [ ] 긴 세션 플레이 확인
 - [x] AAB 빌드 후보 확인
 - [ ] 릴리스 키스토어로 APK/AAB 서명
+- [x] 환경 변수 기반 서명 APK/AAB 빌드 파이프라인 구현
+- [x] 일회성 QA 키스토어로 AAB 서명 및 `jarsigner` 검증
+- [x] APK/AAB SHA-256 manifest 생성 및 독립 해시 일치 확인
+- [x] 서명 빌드 후 Unity PlayerSettings 무변경 확인
+- [ ] 보호된 운영 키스토어로 최종 AAB 서명 및 Play Console 업로드
 
 ### Latest Build Attempt
 
@@ -357,6 +362,22 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - APK: `72,113,553 bytes`
 - SHA-256: `AF084D719DF5B46CA923DC433DC063CB89EACFFBB9E18CBA5FD3133673E2B471`
 - Detailed evidence: `docs/android-battle-pause-menu-polish-v090.md`
+
+### Android Release Signing Pipeline QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-89-android-release-signing`
+- Missing credential guard: signed AAB failed closed with `missing_keystore_path`
+- Signed AAB: passed with an external throwaway QA keystore
+- AAB: `72,051,968 bytes`
+- SHA-256: `B87F2C88C373A3B323096767C9F248547EF0A26BC0DBC118D8EC6B3B53ABA7A3`
+- Signature: `jarsigner -verify` passed
+- Manifest: independent SHA-256 match, `releaseSigned=true`, no keystore/password/alias fields
+- Settings restoration: `ProjectSettings/ProjectSettings.asset` remained unchanged
+- Unsigned regression APK: `72,113,553 bytes`, manifest SHA-256 match, `releaseSigned=false`
+- Emulator install/launch: Android 15 API 35 passed with no fatal runtime log
+- Remaining: protected production keystore signing, Play App Signing, and Play Console upload
+- Detailed evidence: `docs/android-release-signing.md`
 
 ## Audio QA
 

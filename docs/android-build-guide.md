@@ -161,6 +161,18 @@ AAB 성공 시 `RUNEGATE_ANDROID_AAB_BUILD_PASSED`, 실패 시 `RUNEGATE_ANDROID
 
 성공 시 로그에 `RUNEGATE_ANDROID_BUILD_PASSED`, 실패 시 `RUNEGATE_ANDROID_BUILD_FAILED`가 출력되고 배치 프로세스는 각각 종료 코드 `0` 또는 `1`을 반환한다.
 
+## Release-Signed Build
+
+스토어 후보 APK/AAB는 `Tools/RuneGate/Build Signed Android APK` 또는 `Tools/RuneGate/Build Signed Android AAB`를 사용한다. 키스토어 경로, 비밀번호와 별칭은 프로젝트에 저장하지 않고 환경 변수로만 전달한다.
+
+- 성공 marker: `RUNEGATE_ANDROID_SIGNED_APK_BUILD_PASSED`, `RUNEGATE_ANDROID_SIGNED_AAB_BUILD_PASSED`
+- 실패 marker: `RUNEGATE_ANDROID_SIGNED_APK_BUILD_FAILED`, `RUNEGATE_ANDROID_SIGNED_AAB_BUILD_FAILED`
+- 산출물 metadata: `<artifact>.manifest.json`
+- manifest 검증: 파일 크기, SHA-256, 앱 식별자, 버전, 서명 빌드 여부
+- 설정 복원: 빌드 전 Unity `PlayerSettings`와 `buildAppBundle` 상태를 완료 후 정확히 복원
+
+필수 환경 변수, CLI 예시, 비밀 관리와 2026-07-16 검증 결과는 `docs/android-release-signing.md`를 따른다. QA용 일회성 키스토어 서명은 통과했지만 운영 키스토어와 Play Console 업로드는 아직 별도 승인 및 확인이 필요하다.
+
 ## Common Failure Checks
 
 - Android Build Support가 현재 Unity 버전에 설치되어 있는지 확인
@@ -168,4 +180,6 @@ AAB 성공 시 `RUNEGATE_ANDROID_AAB_BUILD_PASSED`, 실패 시 `RUNEGATE_ANDROID
 - Build Settings의 Scenes In Build 확인
 - Package Name 중복 여부 확인
 - Keystore 서명 설정 확인
+- 서명 빌드 환경 변수 네 개와 키스토어 파일 접근 권한 확인
+- 빌드 후 생성된 manifest의 SHA-256 독립 재계산
 - Unity Editor가 같은 프로젝트를 이미 열고 있는지 확인
