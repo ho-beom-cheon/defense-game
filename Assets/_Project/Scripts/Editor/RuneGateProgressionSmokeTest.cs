@@ -723,6 +723,48 @@ namespace RuneGate.Editor
                     errors.Add($"{label} Title confirmation modal is too small: {FormatRect(title.ModalPanel)}.");
                 }
 
+                BattleFrameRects tutorialBattle = GameFrameLayout.BattleFrameForSize(size.x, size.y);
+                Rect previousTutorialFocus = default;
+                for (int tutorialStep = 0; tutorialStep < 7; tutorialStep++)
+                {
+                    TutorialOverlayLayoutRects tutorial = TutorialOverlayUI.CalculateLayoutForSize(size.x, size.y, tutorialStep);
+                    ValidatePositiveRect($"{label} Tutorial step {tutorialStep + 1} focus", tutorial.FocusArea, errors);
+                    ValidatePositiveRect($"{label} Tutorial step {tutorialStep + 1} card", tutorial.Card, errors);
+                    ValidateRectInside($"{label} Tutorial step {tutorialStep + 1} focus", tutorial.FocusArea, tutorial.SafeArea, errors);
+                    ValidateRectInside($"{label} Tutorial step {tutorialStep + 1} card", tutorial.Card, tutorial.SafeArea, errors);
+                    ValidateRectInside($"{label} Tutorial step {tutorialStep + 1} progress", tutorial.ProgressArea, tutorial.Card, errors);
+                    ValidateRectInside($"{label} Tutorial step {tutorialStep + 1} title", tutorial.TitleArea, tutorial.Card, errors);
+                    ValidateRectInside($"{label} Tutorial step {tutorialStep + 1} body", tutorial.BodyArea, tutorial.Card, errors);
+                    ValidateRectInside($"{label} Tutorial step {tutorialStep + 1} footer", tutorial.FooterArea, tutorial.Card, errors);
+                    if (tutorial.Card.Overlaps(tutorialBattle.SkillPanelArea))
+                    {
+                        errors.Add($"{label} Tutorial step {tutorialStep + 1} card overlaps the battle skill panel.");
+                    }
+
+                    if (tutorial.Card.width < 300f || tutorial.Card.height < 280f || tutorial.FooterArea.width < 240f || tutorial.FooterArea.height < 48f)
+                    {
+                        errors.Add($"{label} Tutorial step {tutorialStep + 1} touch layout is too small: Card {FormatRect(tutorial.Card)}, Footer {FormatRect(tutorial.FooterArea)}.");
+                    }
+
+                    string focusLabel = TutorialOverlayUI.FocusLabel(tutorialStep);
+                    if (string.IsNullOrWhiteSpace(focusLabel) || focusLabel.Contains("stage_") || focusLabel.Contains("hero_"))
+                    {
+                        errors.Add($"Tutorial step {tutorialStep + 1} focus label is invalid: '{focusLabel}'.");
+                    }
+
+                    if (tutorialStep == 1 && tutorial.FocusArea == previousTutorialFocus)
+                    {
+                        errors.Add($"{label} Tutorial crystal and lane steps must use different focus areas.");
+                    }
+
+                    if (tutorialStep == 6 && tutorial.FocusArea.Overlaps(tutorial.Card))
+                    {
+                        errors.Add($"{label} Tutorial upgrade focus must not overlap its guidance card.");
+                    }
+
+                    previousTutorialFocus = tutorial.FocusArea;
+                }
+
                 ValidatePositiveRect($"{label} StageSelect root", stageSelect.FrameRoot, errors);
                 ValidateRectInside($"{label} StageSelect header", stageSelect.HeaderArea, stageSelect.FrameRoot, errors);
                 ValidateRectInside($"{label} StageSelect difficulty", stageSelect.DifficultyArea, stageSelect.FrameRoot, errors);

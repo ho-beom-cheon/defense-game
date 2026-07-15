@@ -668,6 +668,20 @@ namespace RuneGate
                 yield break;
             }
 
+            tutorialManager.Next();
+            yield return null;
+            if (!Require(tutorialManager.CurrentStepNumber == 2, "Tutorial Next did not advance to the second step."))
+            {
+                yield break;
+            }
+
+            tutorialManager.Previous();
+            yield return null;
+            if (!Require(tutorialManager.CurrentStepNumber == 1, "Tutorial Previous did not return to the first step."))
+            {
+                yield break;
+            }
+
             int tutorialGuard = tutorialManager.StepCount + 1;
             while (tutorialManager.IsVisible && tutorialGuard-- > 0)
             {

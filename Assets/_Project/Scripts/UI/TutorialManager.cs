@@ -15,6 +15,7 @@ namespace RuneGate
 
         public bool IsVisible => visible;
         public TutorialStepData CurrentStep => visible && currentStepIndex >= 0 && currentStepIndex < steps.Count ? steps[currentStepIndex] : null;
+        public int CurrentStepIndex => currentStepIndex;
         public int CurrentStepNumber => currentStepIndex + 1;
         public int StepCount => steps.Count;
 
@@ -66,6 +67,16 @@ namespace RuneGate
             {
                 Complete();
             }
+        }
+
+        public void Previous()
+        {
+            if (!visible || currentStepIndex <= 0)
+            {
+                return;
+            }
+
+            currentStepIndex--;
         }
 
         public void Skip()
