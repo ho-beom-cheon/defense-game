@@ -205,6 +205,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/StageResultUI.cs",
             "Assets/_Project/Scripts/UI/TitleUI.cs",
             "Assets/_Project/Scripts/UI/StageSelectUI.cs",
+            "Assets/_Project/Scripts/UI/FormationEditorState.cs",
             "Assets/_Project/Scripts/UI/UpgradeSceneUI.cs",
             "Assets/_Project/Scripts/UI/TutorialStepData.cs",
             "Assets/_Project/Scripts/UI/TutorialManager.cs",

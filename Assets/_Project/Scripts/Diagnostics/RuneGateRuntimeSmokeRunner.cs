@@ -494,6 +494,50 @@ namespace RuneGate
                 yield break;
             }
 
+            if (!Require(stageSelect.FormationHeroes != null && stageSelect.FormationHeroes.Count >= 6,
+                    "Formation editor did not load the six-hero roster."))
+            {
+                yield break;
+            }
+
+            List<FormationSlot> originalFormation = SaveManager.GetFormationSlots();
+            if (!Require(originalFormation.Count >= 2, "Formation editor requires at least two saved heroes."))
+            {
+                yield break;
+            }
+
+            FormationSlot firstFormationSlot = originalFormation[0];
+            FormationSlot secondFormationSlot = originalFormation[1];
+            stageSelect.OpenFormationEditor();
+            if (!Require(stageSelect.IsFormationEditorVisible
+                    && stageSelect.SelectFormationHero(firstFormationSlot.HeroId)
+                    && stageSelect.TryPlaceSelectedHero(secondFormationSlot.LaneIndex, secondFormationSlot.PositionType),
+                    "Formation editor could not swap the first two heroes."))
+            {
+                yield break;
+            }
+
+            List<FormationSlot> editedFormation = SaveManager.GetFormationSlots();
+            if (!Require(HasFormationSlot(editedFormation, firstFormationSlot.HeroId, secondFormationSlot.LaneIndex, secondFormationSlot.PositionType)
+                    && HasFormationSlot(editedFormation, secondFormationSlot.HeroId, firstFormationSlot.LaneIndex, firstFormationSlot.PositionType),
+                    "Formation swap did not preserve both heroes in their exchanged slots."))
+            {
+                yield break;
+            }
+
+            SaveManager.ReloadFromDiskForDiagnostics();
+            List<FormationSlot> persistedFormation = SaveManager.GetFormationSlots();
+            if (!Require(HasFormationSlot(persistedFormation, firstFormationSlot.HeroId, secondFormationSlot.LaneIndex, secondFormationSlot.PositionType)
+                    && HasFormationSlot(persistedFormation, secondFormationSlot.HeroId, firstFormationSlot.LaneIndex, firstFormationSlot.PositionType),
+                    "Formation changes did not survive JSON reload."))
+            {
+                yield break;
+            }
+
+            stageSelect.ReloadFormationFromSave();
+            stageSelect.CloseFormationEditor();
+            Debug.Log($"[RuneGateE2E] Formation editor persisted {persistedFormation.Count} heroes after a slot swap.");
+
             GameSession.SelectDifficulty("normal");
             GameSession.SelectStage(firstStage, secondStage.StageId);
             SceneManager.LoadScene("BattleScene");
@@ -502,6 +546,15 @@ namespace RuneGate
             {
                 yield break;
             }
+
+            yield return WaitForCondition(() => HeroController.ActiveHeroes.Count >= persistedFormation.Count, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded && RuntimeFormationMatches(persistedFormation),
+                    "BattleScene hero placement did not match the saved formation."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateE2E] Saved formation was applied to BattleScene hero placement.");
 
             yield return WaitForCondition(() => FindAnyObjectByType<TutorialManager>() != null, SceneLoadTimeoutSeconds);
             TutorialManager tutorialManager = FindAnyObjectByType<TutorialManager>();
@@ -1107,6 +1160,57 @@ namespace RuneGate
             {
                 Debug.LogWarning($"RuneGate smoke cleanup could not delete {path}: {exception.Message}");
             }
+        }
+
+        private static bool HasFormationSlot(IReadOnlyList<FormationSlot> slots, string heroId, int laneIndex, HeroPositionType positionType)
+        {
+            if (slots == null || string.IsNullOrWhiteSpace(heroId))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < slots.Count; i++)
+            {
+                FormationSlot slot = slots[i];
+                if (slot != null && slot.HeroId == heroId && slot.LaneIndex == laneIndex && slot.PositionType == positionType)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool RuntimeFormationMatches(IReadOnlyList<FormationSlot> slots)
+        {
+            if (slots == null || HeroController.ActiveHeroes.Count != slots.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < slots.Count; i++)
+            {
+                FormationSlot slot = slots[i];
+                bool found = false;
+                for (int heroIndex = 0; heroIndex < HeroController.ActiveHeroes.Count; heroIndex++)
+                {
+                    HeroController hero = HeroController.ActiveHeroes[heroIndex];
+                    if (hero == null || hero.Data == null || hero.Data.HeroId != slot.HeroId)
+                    {
+                        continue;
+                    }
+
+                    found = hero.LaneIndex == slot.LaneIndex && hero.HeroSlotIndex == slot.SlotIndex;
+                    break;
+                }
+
+                if (!found)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static StageData FindStage(IReadOnlyList<StageData> stages, int stageNumber)
