@@ -52,12 +52,17 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Battle status HUD QA: Crystal HP/shield, Wave progress, Korean battle state, pause touch, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 - Battle pause menu QA: state summary, BGM/SFX persistence controls, restart/stage-select confirmations, resume, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 - Upgrade workshop QA: 2x2 card layout, Gold 110 to 30 purchase, Crystal Reinforcement Lv.0 to Lv.1, immediate feedback, and scene re-entry persistence passed on Android 15 API 35 emulator on 2026-07-16
+- Shadow contract QA: seven-pet popup rendering, shard 5 to 0 spending, first-pet auto-equip, unequip/re-equip, and JSON reload persistence passed on Android 15 API 35 emulator on 2026-07-16
+- Post-contract Android full-chapter regression: Stage 1~10 Victory, 10 upgrades, Grumbar phases 2/3, five reinforcements, boss-pattern damage, and final Gold 1,622 passed on 2026-07-16
 
 ## Progression QA
 
 - [x] 새 세이브에서 Stage 1만 해금됨
 - [x] Stage 1 시작 가능
 - [x] Stage 1 클리어 가능
+- [x] 그림자 조각 5개 계약 시 조각이 0으로 차감됨
+- [x] 최초 계약 자동 장착, 장착 해제와 재장착 정상
+- [x] 계약/조각/장착 상태가 JSON 재로드 후 유지됨
 - [x] Stage 2 해금 확인
 - [x] Stage 1~10 목록 표시 확인
 - [x] Stage 10에서 그룸바르 보스 등장 확인

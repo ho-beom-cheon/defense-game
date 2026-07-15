@@ -43,6 +43,8 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Android Portrait 웨이브 사이 룬 3장 전술 기록 카드와 희귀도/속성 표시
 - Android Portrait 첫/최종/보스 웨이브 전환 배너와 선택 룬 적용 피드백
 - Android Portrait 봉문 정비소 2x2 강화 카드, 구매 즉시 피드백, Gold/레벨 저장 재진입 검증
+- StageSelect 헤더에서 여는 그림자 계약서: 적성 7종 조각 진행, 계약, 단일 장착, 해제와 전투 패시브
+- Android 시스템 흐름에서 조각 5개 소비, 최초 자동 장착, 해제·재장착과 JSON 재실행 보존 검증
 
 ## 실행 방법
 
@@ -132,6 +134,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/game-feel-v085.md`
 - `docs/random-monster-system-v086.md`
 - `docs/pet-contract-system-v086.md`
+- `docs/android-pet-contract-screen-v090.md`
 - `docs/combat-lane-ai.md`
 - `docs/motion-sheet-pipeline.md`
 - `docs/ui-ux-v085.md`
