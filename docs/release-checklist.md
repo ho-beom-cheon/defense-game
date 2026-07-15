@@ -49,6 +49,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Stage map presentation QA: Chapter 1 node path, stage status, actual-wave enemy roster, and Stage 1~9 boss reference cleanup passed on Android 15 API 35 emulator on 2026-07-16
 - Portrait battlefield composition QA: camera-bounds background fill, dynamic three-lane spread, larger RuntimePixel units, Rune Selection, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 - Battle skill card HUD QA: 3x2 hero cards, RuntimePixel portraits, HP, skill touch cooldown, Rune Selection disabled state, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
+- Battle status HUD QA: Crystal HP/shield, Wave progress, Korean battle state, pause touch, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 
 ## Progression QA
 
@@ -80,6 +81,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] 냉기 룬이 이후 웨이브 신규 스폰에도 적용
 - [x] 영웅 6인 스킬이 고유 runtime effectKey와 실제 전투 효과 사용
 - [x] Android Portrait 전투 HUD에서 영웅 6인 스킬 카드, HP, 준비/쿨다운/비활성 상태 표시
+- [x] Android Portrait 상단 HUD에서 Crystal HP/보호막, Wave 진행, 전투 상태, Gold 표시
 - [x] 그룸바르가 크리스탈 접촉 시 제거되지 않고 반복 공격
 - [x] 새 세이브에서 Easy/Normal만 선택 가능
 - [x] Normal Stage 10 승리 후 Hard 해금 및 Result 안내
@@ -252,6 +254,21 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - APK: `72,068,337 bytes`
 - SHA-256: `F143BCA159EA025DAA061B883C25E3605829C5C4DDFF7A333077D5848D035780`
 - Detailed evidence: `docs/android-battle-skill-card-hud-v090.md`
+
+### Android Battle Status HUD QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-75-battle-status-hud`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: stage/difficulty, Crystal HP bar, Wave progress, Korean battle state, Gold, and fixed pause button passed
+- Shield flow: Guardian Rune selection displayed `보호막 +35` and a separate blue shield bar
+- Touch flow: pause and resume passed; Rune Selection state rendered without overlap with the 3x2 skill cards
+- Project Validator: passed
+- Progression Smoke Test: passed header bounds, minimum size, overlap, and health color validation
+- Regression: Normal Stage 1~10, 10 upgrades, Hard/Nightmare unlocks, and Grumbar phase/pattern smoke passed
+- APK: `72,071,149 bytes`
+- SHA-256: `C04B7648DF5ED29B02C746C42417DFA8003F9006A469E3BEFA443105F4894601`
+- Detailed evidence: `docs/android-battle-status-hud-v090.md`
 
 ## Audio QA
 
