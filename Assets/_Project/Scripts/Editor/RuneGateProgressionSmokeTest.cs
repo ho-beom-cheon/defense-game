@@ -697,6 +697,32 @@ namespace RuneGate.Editor
                 StageSelectFrameRects stageSelect = GameFrameLayout.StageSelectFrameForSize(size.x, size.y);
                 string label = $"{size.x}x{size.y}";
 
+                TitleMenuLayoutRects title = TitleUI.CalculateLayoutForSize(size.x, size.y, false);
+                TitleMenuLayoutRects titleSettings = TitleUI.CalculateLayoutForSize(size.x, size.y, true);
+                ValidatePositiveRect($"{label} Title brand", title.BrandArea, errors);
+                ValidatePositiveRect($"{label} Title menu", title.MenuPanel, errors);
+                ValidatePositiveRect($"{label} Title modal", title.ModalPanel, errors);
+                ValidateRectInside($"{label} Title brand", title.BrandArea, title.SafeArea, errors);
+                ValidateRectInside($"{label} Title menu", title.MenuPanel, title.SafeArea, errors);
+                ValidateRectInside($"{label} Title menu content", title.MenuContent, title.MenuPanel, errors);
+                ValidateRectInside($"{label} Title modal", title.ModalPanel, title.SafeArea, errors);
+                ValidateRectInside($"{label} Title settings menu", titleSettings.MenuPanel, titleSettings.SafeArea, errors);
+                ValidateRectInside($"{label} Title settings content", titleSettings.MenuContent, titleSettings.MenuPanel, errors);
+                if (title.BrandArea.Overlaps(title.MenuPanel) || titleSettings.BrandArea.Overlaps(titleSettings.MenuPanel))
+                {
+                    errors.Add($"{label} Title brand and command panel overlap.");
+                }
+
+                if (title.MenuPanel.width < 320f || title.MenuPanel.height < 300f)
+                {
+                    errors.Add($"{label} Title command panel is too small: {FormatRect(title.MenuPanel)}.");
+                }
+
+                if (title.ModalPanel.width < 300f || title.ModalPanel.height < 240f)
+                {
+                    errors.Add($"{label} Title confirmation modal is too small: {FormatRect(title.ModalPanel)}.");
+                }
+
                 ValidatePositiveRect($"{label} StageSelect root", stageSelect.FrameRoot, errors);
                 ValidateRectInside($"{label} StageSelect header", stageSelect.HeaderArea, stageSelect.FrameRoot, errors);
                 ValidateRectInside($"{label} StageSelect difficulty", stageSelect.DifficultyArea, stageSelect.FrameRoot, errors);
@@ -949,6 +975,26 @@ namespace RuneGate.Editor
             if (normalWaveColor == finalWaveColor || finalWaveColor == bossWaveColor || normalWaveColor == bossWaveColor)
             {
                 errors.Add("Wave announcement colors must distinguish normal, final, and boss waves.");
+            }
+
+            SaveData titleSave = SaveManager.CreateDefaultSave();
+            titleSave.totalGold = 125;
+            titleSave.selectedDifficultyId = DifficultyRules.Hard;
+            titleSave.clearedStageIds.Add("stage_goblin_forest_01");
+            string progressSummary = TitleUI.BuildProgressSummary(titleSave);
+            if (!progressSummary.Contains("125") || !progressSummary.Contains("1/10") || progressSummary.Contains("stage_"))
+            {
+                errors.Add($"Title progress summary must expose player-facing progress without internal ids. Found '{progressSummary}'.");
+            }
+
+            if (!TitleUI.HasMeaningfulProgress(titleSave) || TitleUI.HasMeaningfulProgress(SaveManager.CreateDefaultSave()))
+            {
+                errors.Add("Title progress detection must distinguish a fresh save from an existing campaign.");
+            }
+
+            if (TitleUI.PrimaryActionLabel(false) == TitleUI.PrimaryActionLabel(true))
+            {
+                errors.Add("Title primary action must distinguish new and continuing campaigns.");
             }
         }
 
