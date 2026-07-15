@@ -187,6 +187,18 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - SHA-256: `5B7F9AF05623335665364D1E61A72642F63CD7A1DD96C2CF191152340B227866`
 - Detailed evidence: `docs/android-battle-camera-framing-v090.md`
 
+### Android Result / Upgrade Layout QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-65-result-upgrade-mobile-layout`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Manual flow: Stage 1 Victory > Result > Upgrade touch navigation passed
+- Layout: Result inner padding/action area and full-width Upgrade cards passed
+- Regression: Normal Stage 1~10, 10 upgrades, and Grumbar phase/pattern smoke passed
+- APK: `72,039,875 bytes`
+- SHA-256: `10A73484097D62AFABB2B9ED709D9AD32687026CD2EB7D0E40255248C777D598`
+- Detailed evidence: `docs/android-result-upgrade-layout-v090.md`
+
 ## Audio QA
 
 - [x] Unity 내장 Audio 모듈 활성화
