@@ -80,6 +80,7 @@ namespace RuneGate
         public bool IsMovementAttackLocked => movementController != null && movementController.IsAttacking;
         public bool HasActiveAttackRoutine => attackRoutine != null;
         public BossPhaseController BossPhaseController { get; private set; }
+        public BossAttackPatternController BossPatternController { get; private set; }
         public static IReadOnlyList<MonsterController> ActiveMonsters => activeMonsters;
 
         private void OnEnable()
@@ -518,6 +519,7 @@ namespace RuneGate
             if (!IsBoss)
             {
                 BossPhaseController = null;
+                BossPatternController = null;
                 return;
             }
 
@@ -528,6 +530,13 @@ namespace RuneGate
             }
 
             BossPhaseController.Configure(this, ownerWaveManager);
+            BossPatternController = GetComponent<BossAttackPatternController>();
+            if (BossPatternController == null)
+            {
+                BossPatternController = gameObject.AddComponent<BossAttackPatternController>();
+            }
+
+            BossPatternController.Configure(this, BossPhaseController, crystalController);
         }
 
         private HeroController FindBlockingHero()
