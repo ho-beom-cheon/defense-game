@@ -72,6 +72,7 @@ namespace RuneGate.Editor
             ValidateRuneRuntimeRules(errors);
             ValidateHeroSkills(catalog, errors);
             ValidateHeroSkillRuntimeRules(errors);
+            ValidateBossPatternRules(errors);
             ValidateFormation(catalog, errors, warnings);
             ValidateDefaultSave(catalog, errors);
             ValidateStageSessionResolution(catalog, errors);
@@ -999,6 +1000,24 @@ namespace RuneGate.Editor
             if (SaveManager.TryPurchaseUpgrade(poorSave, firstUpgrade.UpgradeId, cost, firstUpgrade.MaxLevel))
             {
                 errors.Add($"{firstUpgrade.name} purchase succeeded without enough gold.");
+            }
+        }
+
+        private static void ValidateBossPatternRules(List<string> errors)
+        {
+            int phaseOneDamage = BossAttackPatternController.BaseDamageForPhase(1);
+            int phaseTwoDamage = BossAttackPatternController.BaseDamageForPhase(2);
+            int phaseThreeDamage = BossAttackPatternController.BaseDamageForPhase(3);
+            if (!(phaseOneDamage > 0 && phaseOneDamage < phaseTwoDamage && phaseTwoDamage < phaseThreeDamage))
+            {
+                errors.Add($"Boss pattern hero damage progression is invalid: {phaseOneDamage}/{phaseTwoDamage}/{phaseThreeDamage}.");
+            }
+
+            if (BossAttackPatternController.BaseCrystalDamageForPhase(1) != 0 ||
+                BossAttackPatternController.BaseCrystalDamageForPhase(2) != 0 ||
+                BossAttackPatternController.BaseCrystalDamageForPhase(3) <= 0)
+            {
+                errors.Add("Boss pattern crystal pressure must activate only in phase 3.");
             }
         }
 

@@ -193,6 +193,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Hero/HeroPlacementSlot.cs",
             "Assets/_Project/Scripts/Monster/MonsterController.cs",
             "Assets/_Project/Scripts/Monster/BossPhaseController.cs",
+            "Assets/_Project/Scripts/Monster/BossAttackPatternController.cs",
             "Assets/_Project/Scripts/Battle/ProjectileController.cs",
             "Assets/_Project/Scripts/Wave/WaveManager.cs",
             "Assets/_Project/Scripts/Rune/RuneManager.cs",
@@ -413,6 +414,7 @@ namespace RuneGate.Editor
             "docs/local-save-stability-v088.md",
             "docs/runtime-e2e-smoke-test.md",
             "docs/scene-bgm-audio-settings-v090.md",
+            "docs/grumbar-boss-attack-patterns-v090.md",
             "CHANGELOG.md"
         };
 

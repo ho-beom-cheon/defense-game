@@ -40,6 +40,10 @@ namespace RuneGate
         private bool sawBossHudThisStage;
         private int bossReinforcementsSpawnedThisStage;
         private BossPhaseController observedBossPhaseController;
+        private BossAttackPatternController observedBossPatternController;
+        private int bossPatternsResolvedThisStage;
+        private int bossPatternHeroesHitThisStage;
+        private int bossPatternCrystalDamageThisStage;
         private bool waitSucceeded;
         private int upgradePurchaseCount;
         private float previousTimeScale = 1f;
@@ -974,6 +978,10 @@ namespace RuneGate
                 sawBossHudThisStage = false;
                 bossReinforcementsSpawnedThisStage = 0;
                 observedBossPhaseController = null;
+                observedBossPatternController = null;
+                bossPatternsResolvedThisStage = 0;
+                bossPatternHeroesHitThisStage = 0;
+                bossPatternCrystalDamageThisStage = 0;
                 nextFullChapterSkillCastTime = 0f;
                 SceneManager.LoadScene("BattleScene");
                 yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
@@ -1071,6 +1079,12 @@ namespace RuneGate
 
                 if (stageNumber == 10 && !Require(sawBossHudThisStage,
                         "Stage 10 boss HUD did not expose the Korean boss name and phase."))
+                {
+                    yield break;
+                }
+
+                if (stageNumber == 10 && !Require(bossPatternsResolvedThisStage > 0 && bossPatternHeroesHitThisStage > 0,
+                        $"Stage 10 boss pattern did not hit heroes. Patterns={bossPatternsResolvedThisStage}, HeroesHit={bossPatternHeroesHitThisStage}."))
                 {
                     yield break;
                 }
@@ -1245,6 +1259,14 @@ namespace RuneGate
                 }
 
                 observedBossPhaseController.PhaseChanged += HandleBossPhaseChanged;
+                observedBossPatternController = monster.BossPatternController;
+                if (observedBossPatternController == null)
+                {
+                    Fail("Stage 10 boss spawned without BossAttackPatternController.");
+                    return;
+                }
+
+                observedBossPatternController.PatternResolved += HandleBossPatternResolved;
                 BattleHUD hud = FindAnyObjectByType<BattleHUD>();
                 if (hud != null)
                 {
@@ -1275,12 +1297,27 @@ namespace RuneGate
             Debug.Log($"[RuneGateFullE2E] Boss reinforcement spawned: {reinforcement.Data.DisplayNameKorean}, Lane={reinforcement.LaneIndex}");
         }
 
+        private void HandleBossPatternResolved(int phase, int heroesHit, int crystalDamage)
+        {
+            bossPatternsResolvedThisStage++;
+            bossPatternHeroesHitThisStage += heroesHit;
+            bossPatternCrystalDamageThisStage += crystalDamage;
+            Debug.Log($"[RuneGateFullE2E] Boss pattern verified: phase={phase}, heroes={heroesHit}, crystal={crystalDamage}");
+        }
+
         private void UnbindObservedBossPhaseController()
         {
             if (observedBossPhaseController != null)
             {
                 observedBossPhaseController.PhaseChanged -= HandleBossPhaseChanged;
                 observedBossPhaseController = null;
+            }
+
+
+            if (observedBossPatternController != null)
+            {
+                observedBossPatternController.PatternResolved -= HandleBossPatternResolved;
+                observedBossPatternController = null;
             }
         }
 
