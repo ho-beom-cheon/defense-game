@@ -38,6 +38,9 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Complete rune QA: Android system flow passed on 2026-07-16; seven dedicated rune mechanics, crystal shield HUD, purification healing, and future-spawn frost slow verified
 - Post-rune Android full-chapter regression: Stage 1~10 Victory, 10 upgrades, Grumbar phases 2/3, and five reinforcements passed on 2026-07-16
 
+- Complete hero skill QA: Android system flow passed on 2026-07-16; Shield Bash control, Rapid Shot 3-hit timing, Meteor area damage, Holy Heal, Temporary Turret, and Shadow Strike verified
+- Post-skill Android full-chapter regression: Stage 1~10 Victory, skill-assisted combat, 10 upgrades, Grumbar phases 2/3, five reinforcements, and boss defeat passed on 2026-07-16
+
 ## Progression QA
 
 - [x] 새 세이브에서 Stage 1만 해금됨
@@ -65,6 +68,8 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] 번개/폭발/연쇄/분쇄 전투 보정 적용
 - [x] 수호 보호막 및 정화 회복 적용
 - [x] 냉기 룬이 이후 웨이브 신규 스폰에도 적용
+- [x] 영웅 6인 스킬이 고유 runtime effectKey와 실제 전투 효과 사용
+- [x] 그룸바르가 크리스탈 접촉 시 제거되지 않고 반복 공격
 - [ ] StageSelect 편성 팝업 실기기 터치/텍스트 잘림 수동 확인
 
 ## Korean UI QA
@@ -120,7 +125,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 ### Latest Emulator QA
 
-- Date: 2026-07-12
+- Date: 2026-07-16
 - Branch: `codex/issue-36-android-emulator-qa`
 - Device: `RuneGate_API35_Portrait`, Android 15 / API 35, 1080x2400, density 420
 - APK: `71,892,795 bytes`

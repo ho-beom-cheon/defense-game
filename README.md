@@ -14,6 +14,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Stage 1~10 진행 흐름
 - 영웅 6종, 몬스터 6종, 보스 1종 데이터
 - 실제 전투 효과가 연결된 룬 20장
+- 밀치기, 3연타, 범위 피해, 회복, 임시 포탑, 보스 처형으로 구분되는 영웅 6인 고유 스킬
 - RuntimePixel 영웅/몬스터/보스 표시
 - 전투 배경, 기본 공격/피격/사망 피드백
 - 튜토리얼, StageSelect, Battle, Result, Upgrade, Save 흐름
@@ -30,6 +31,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - 전투 일시정지, 재시작, 스테이지 복귀와 Android 백그라운드 자동 일시정지 지원
 - StageSelect 3라인 x 3슬롯 영웅 편성 편집 및 로컬 JSON 즉시 저장
 - Stage 10 그룸바르 3단계 페이즈, 지원군 소환, 전용 보스 HP HUD
+- 그룸바르 크리스탈 접촉 후 반복 공격 및 실제 처치 Victory 규칙
 - 번개/폭발/수호/정화/분쇄/연쇄 룬 전용 효과와 웨이브 지속 감속
 
 ## 실행 방법
