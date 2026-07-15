@@ -445,6 +445,33 @@ namespace RuneGate
                 yield break;
             }
 
+            AudioManager audioManager = FindAnyObjectByType<AudioManager>();
+            if (!Require(audioManager != null, "Runtime AudioManager was not created."))
+            {
+                yield break;
+            }
+
+            Array sfxKeys = Enum.GetValues(typeof(SfxKey));
+            for (int i = 0; i < sfxKeys.Length; i++)
+            {
+                SfxKey key = (SfxKey)sfxKeys.GetValue(i);
+                if (!Require(audioManager.HasClip(key), $"Runtime audio is missing SFX '{key}'."))
+                {
+                    yield break;
+                }
+            }
+
+            bool originalSfxEnabled = AudioManager.SfxEnabled;
+            AudioManager.SetSfxEnabled(!originalSfxEnabled);
+            if (!Require(AudioManager.SfxEnabled != originalSfxEnabled, "SFX setting did not change."))
+            {
+                AudioManager.SetSfxEnabled(originalSfxEnabled);
+                yield break;
+            }
+
+            AudioManager.SetSfxEnabled(originalSfxEnabled);
+            Debug.Log($"[RuneGateE2E] Runtime audio verified with {audioManager.PlayableClipCount} clips.");
+
             SceneManager.LoadScene("StageSelectScene");
             yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene", SceneLoadTimeoutSeconds);
             if (!Require(waitSucceeded, "StageSelectScene did not load for the system flow test."))

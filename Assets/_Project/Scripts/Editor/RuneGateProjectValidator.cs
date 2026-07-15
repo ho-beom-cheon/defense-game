@@ -221,6 +221,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/KoreanFontManager.cs",
             "Assets/_Project/Scripts/UI/SafeAreaFitter.cs",
             "Assets/_Project/Scripts/Audio/AudioManager.cs",
+            "Assets/_Project/Scripts/Audio/ProceduralSfxFactory.cs",
             "Assets/_Project/Scripts/Audio/SfxKey.cs",
             "Assets/_Project/Editor/UIFrameValidator.cs",
             "Assets/_Project/Scripts/Editor/RuneGateBootstrapper.cs",
