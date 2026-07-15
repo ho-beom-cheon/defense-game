@@ -623,6 +623,14 @@ namespace RuneGate.Editor
             {
                 errors.Add("Default save must not mark tutorial as seen.");
             }
+
+            if (!DifficultyRules.IsUnlocked(saveData, DifficultyRules.Easy) ||
+                !DifficultyRules.IsUnlocked(saveData, DifficultyRules.Normal) ||
+                DifficultyRules.IsUnlocked(saveData, DifficultyRules.Hard) ||
+                DifficultyRules.IsUnlocked(saveData, DifficultyRules.Nightmare))
+            {
+                errors.Add("Default save must unlock Easy/Normal and lock Hard/Nightmare.");
+            }
         }
 
         private static bool FormationSlotsMatch(IReadOnlyList<FormationSlot> saveSlots, IReadOnlyList<FormationSlot> catalogSlots)
@@ -1074,6 +1082,57 @@ namespace RuneGate.Editor
                 !DifficultyRules.UndeadRevives(DifficultyRules.Nightmare))
             {
                 errors.Add("Undead revival must be disabled on Easy/Normal and enabled on Hard/Nightmare.");
+            }
+
+
+            SaveData progressionSave = SaveManager.CreateDefaultSave();
+            progressionSave.unlockedStageIds.Add(DifficultyRules.ChapterOneFinalStageId);
+            bool normalClearApplied = SaveManager.TryApplyBattleResultProgression(
+                progressionSave,
+                "difficulty_normal_final",
+                normalReward,
+                true,
+                DifficultyRules.ChapterOneFinalStageId,
+                string.Empty,
+                DifficultyRules.Normal);
+            if (!normalClearApplied || !DifficultyRules.IsCompleted(progressionSave, DifficultyRules.Normal) ||
+                !DifficultyRules.IsUnlocked(progressionSave, DifficultyRules.Hard) ||
+                DifficultyRules.IsUnlocked(progressionSave, DifficultyRules.Nightmare))
+            {
+                errors.Add("Normal Chapter 1 clear must unlock Hard without unlocking Nightmare.");
+            }
+
+            bool hardClearApplied = true;
+            for (int stageNumber = 1; stageNumber <= 10; stageNumber++)
+            {
+                string stageId = $"stage_goblin_forest_{stageNumber:D2}";
+                string nextStageId = stageNumber < 10 ? $"stage_goblin_forest_{stageNumber + 1:D2}" : string.Empty;
+                if (!SaveManager.IsStageUnlocked(progressionSave, stageId, DifficultyRules.Hard))
+                {
+                    errors.Add($"Hard Stage {stageNumber} must unlock after the previous Hard stage clear.");
+                    hardClearApplied = false;
+                    break;
+                }
+
+                hardClearApplied &= SaveManager.TryApplyBattleResultProgression(
+                    progressionSave,
+                    $"difficulty_hard_stage_{stageNumber}",
+                    hardReward,
+                    true,
+                    stageId,
+                    nextStageId,
+                    DifficultyRules.Hard);
+            }
+
+            if (!hardClearApplied || !DifficultyRules.IsCompleted(progressionSave, DifficultyRules.Hard) ||
+                !DifficultyRules.IsUnlocked(progressionSave, DifficultyRules.Nightmare))
+            {
+                errors.Add("Hard Chapter 1 clear must unlock Nightmare.");
+            }
+
+            if (DifficultyRules.NextSelectableDifficultyId(SaveManager.CreateDefaultSave(), DifficultyRules.Normal) != DifficultyRules.Easy)
+            {
+                errors.Add("Locked difficulties must be skipped when cycling a default save.");
             }
         }
 

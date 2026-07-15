@@ -952,6 +952,20 @@ namespace RuneGate
 
         private IEnumerator RunFullChapterSmokeTest(IReadOnlyList<StageData> stages)
         {
+            if (!Require(!SaveManager.IsDifficultyUnlocked(DifficultyRules.Hard) &&
+                         !SaveManager.IsDifficultyUnlocked(DifficultyRules.Nightmare),
+                    "Fresh save unexpectedly unlocked Hard or Nightmare."))
+            {
+                yield break;
+            }
+
+            GameSession.SelectDifficulty(DifficultyRules.Hard);
+            if (!Require(GameSession.SelectedDifficultyId == DifficultyRules.Normal,
+                    "Locked Hard difficulty was selectable before Normal Chapter 1 clear."))
+            {
+                yield break;
+            }
+
             GameSession.SelectDifficulty("normal");
             for (int stageNumber = 1; stageNumber <= 10; stageNumber++)
             {
@@ -1089,6 +1103,13 @@ namespace RuneGate
                     yield break;
                 }
 
+                if (stageNumber == 10 && !Require(SaveManager.IsDifficultyUnlocked(DifficultyRules.Hard) &&
+                                                   resultUI.NewlyUnlockedDifficultyId == DifficultyRules.Hard,
+                        "Normal Chapter 1 clear did not expose the Hard difficulty unlock in save and result UI."))
+                {
+                    yield break;
+                }
+
                 Debug.Log($"[RuneGateFullE2E] Stage {stageNumber} victory verified. Gold={SaveManager.Current.totalGold}");
                 UnbindBattleEvents();
 
@@ -1122,7 +1143,60 @@ namespace RuneGate
                 yield break;
             }
 
-            Debug.Log($"RUNEGATE_FULL_CHAPTER_E2E_PASSED: upgrades={upgradePurchaseCount}, gold={SaveManager.Current.totalGold}");
+            GameSession.SelectDifficulty(DifficultyRules.Hard);
+            if (!Require(GameSession.SelectedDifficultyId == DifficultyRules.Hard,
+                    "Hard difficulty was not selectable after Normal Chapter 1 clear."))
+            {
+                yield break;
+            }
+
+            StageData finalStage = FindStage(stages, 10);
+            int hardReward = DifficultyRules.ApplyMonsterRewardGold(100, DifficultyRules.Hard);
+            int goldBeforeHardClear = SaveManager.Current.totalGold;
+            bool hardClearApplied = true;
+            for (int stageNumber = 1; stageNumber <= 10; stageNumber++)
+            {
+                StageData hardStage = FindStage(stages, stageNumber);
+                string nextStageId = hardStage != null ? GameSession.ResolveNextStageId(hardStage.StageId, stages) : string.Empty;
+                if (!Require(hardStage != null && SaveManager.IsStageUnlocked(hardStage.StageId, DifficultyRules.Hard),
+                        $"Hard Stage {stageNumber} was not unlocked in sequence."))
+                {
+                    yield break;
+                }
+
+                hardClearApplied &= SaveManager.TryApplyBattleResultProgression(
+                    $"runtime_hard_stage_{stageNumber}",
+                    hardReward,
+                    true,
+                    hardStage.StageId,
+                    nextStageId);
+            }
+
+            if (!Require(hardClearApplied && SaveManager.IsDifficultyUnlocked(DifficultyRules.Nightmare) &&
+                         SaveManager.Current.totalGold == goldBeforeHardClear + hardReward * 10 &&
+                         finalStage != null && SaveManager.IsStageCleared(finalStage.StageId, DifficultyRules.Hard),
+                    "Sequential Hard Chapter 1 results did not persist Nightmare unlock and 1.2x rewards."))
+            {
+                yield break;
+            }
+
+            SaveManager.ReloadFromDiskForDiagnostics();
+            if (!Require(SaveManager.IsDifficultyCompleted(DifficultyRules.Normal) &&
+                         SaveManager.IsDifficultyCompleted(DifficultyRules.Hard) &&
+                         SaveManager.IsDifficultyUnlocked(DifficultyRules.Nightmare),
+                    "Difficulty completion state did not survive a disk reload."))
+            {
+                yield break;
+            }
+
+            GameSession.SelectDifficulty(DifficultyRules.Nightmare);
+            if (!Require(GameSession.SelectedDifficultyId == DifficultyRules.Nightmare,
+                    "Nightmare difficulty was not selectable after Hard Chapter 1 clear."))
+            {
+                yield break;
+            }
+
+            Debug.Log($"RUNEGATE_FULL_CHAPTER_E2E_PASSED: upgrades={upgradePurchaseCount}, gold={SaveManager.Current.totalGold}, difficulties=normal|hard|nightmare");
             CleanupSmokeSave();
             Time.timeScale = previousTimeScale;
             Application.Quit(0);
