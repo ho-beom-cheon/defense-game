@@ -50,6 +50,7 @@
 - 드래그 앤 드롭, 영웅 프리셋, 편성별 추천 표시는 아직 제공하지 않는다.
 - UpgradeScene now recovers its four upgrade assets from RuntimeContentCatalog when serialized scene slots are null. Scene references should still be regenerated before final prefab/Canvas conversion.
 - Upgrade purchase, immediate UI refresh, process-restart persistence, and Stage 2 unlock passed Android emulator QA. Physical-device scroll inertia and rapid repeated taps remain unverified.
+- UpgradeScene의 2x2 Android Portrait 카드, 구매 피드백, 씬 재진입 저장은 1080x2400 에뮬레이터에서 통과했다. 실기기 컷아웃, 시스템 글꼴 확대, 빠른 연속 탭은 아직 검증하지 않았다.
 - Victory Result와 Upgrade 카드 폭은 1080x2400 Android 실제 터치 캡처에서 정규화됐다. Defeat 수동 캡처와 시스템 글꼴 배율 확대는 실기기에서 추가 확인이 필요하다.
 
 - The game uses local JSON save only.

@@ -51,6 +51,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Battle skill card HUD QA: 3x2 hero cards, RuntimePixel portraits, HP, skill touch cooldown, Rune Selection disabled state, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 - Battle status HUD QA: Crystal HP/shield, Wave progress, Korean battle state, pause touch, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 - Battle pause menu QA: state summary, BGM/SFX persistence controls, restart/stage-select confirmations, resume, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
+- Upgrade workshop QA: 2x2 card layout, Gold 110 to 30 purchase, Crystal Reinforcement Lv.0 to Lv.1, immediate feedback, and scene re-entry persistence passed on Android 15 API 35 emulator on 2026-07-16
 
 ## Progression QA
 
@@ -378,6 +379,22 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Emulator install/launch: Android 15 API 35 passed with no fatal runtime log
 - Remaining: protected production keystore signing, Play App Signing, and Play Console upload
 - Detailed evidence: `docs/android-release-signing.md`
+
+### Android Upgrade Screen Polish QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-91-upgrade-screen-polish`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: four Korean upgrade cards, icons, role tags, level progress, current/next effects, costs, and footer navigation passed
+- Touch flow: StageSelect > Upgrade > Crystal Reinforcement purchase > StageSelect > Upgrade passed
+- Persistence: Gold `110 -> 30` and Crystal Reinforcement `Lv.0 -> Lv.1` remained after scene re-entry
+- Project Validator: passed
+- Progression Smoke Test: passed responsive card bounds, overlap, touch-target, and effect formatting checks
+- System Flows E2E: passed tutorial/save/reset/defeat/result navigation and upgrade flow
+- Full Chapter E2E: passed Stage 1-10, 10 upgrades, Grumbar phases 1-3, five reinforcements, and boss patterns
+- APK: `72,121,381 bytes`
+- SHA-256: `F205A1FADCD75E05A04CF08FDEC9E94E9B41C83AA361FFFE8C6238C51C7E0723`
+- Detailed evidence: `docs/android-upgrade-screen-polish-v090.md`
 
 ## Audio QA
 

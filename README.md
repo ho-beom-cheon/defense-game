@@ -42,6 +42,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Android Portrait 전투 상단 Crystal HP/보호막, Wave 진행, 전투 상태 카드 HUD
 - Android Portrait 웨이브 사이 룬 3장 전술 기록 카드와 희귀도/속성 표시
 - Android Portrait 첫/최종/보스 웨이브 전환 배너와 선택 룬 적용 피드백
+- Android Portrait 봉문 정비소 2x2 강화 카드, 구매 즉시 피드백, Gold/레벨 저장 재진입 검증
 
 ## 실행 방법
 
@@ -63,6 +64,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 8. Victory 후 골드 지급, 스테이지 해금, 그림자 조각 보상을 확인한다.
 9. StageSelectScene의 그림자 계약 패널에서 조각 수, 계약, 장착/해제를 확인한다.
 10. UpgradeScene에서 업그레이드를 구매하고 저장되는지 확인한다.
+    - 1080 이상 Portrait에서는 2x2 카드, 720 Portrait에서는 1열 스크롤로 표시되는지 확인한다.
 11. Stage 10에서 그룸바르 보스가 등장하는지 확인한다.
 12. Normal Stage 10 승리 후 `어려움`이 열리고, 어려움에서는 Stage 1부터 순서대로 열리는지 확인한다.
 13. 어려움 Stage 10 승리 후 `악몽`이 열리고 앱 재실행 뒤에도 유지되는지 확인한다.
