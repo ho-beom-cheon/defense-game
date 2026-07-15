@@ -4,6 +4,7 @@
 
 - The main UI is still IMGUI-based. A final mobile release should move core screens to Canvas / RectTransform prefabs.
 - TitleScene now separates new/continuing campaigns, settings, and destructive confirmations in a game-style Android portrait layout. Final logo animation, button art, accessibility font scaling, and physical-device cutout QA remain open.
+- The seven-step first-battle tutorial now uses a dim overlay, per-step focus frames, fixed navigation, and Android portrait-safe guidance cards. Final tutorial-specific animation, accessibility scaling, and physical-device cutout QA remain open.
 - StageSelect, Battle HUD, Rune Selection, and Result passed 1080x2400 Android emulator touch/Safe Area QA. Physical devices with display cutouts still require confirmation.
 - If Unity is already in Play Mode while scripts change, the Game View can keep showing the previous UI. Stop Play Mode, wait for script reload, and enter Play Mode again.
 - `Tools/RuneGate/Validate Game Frame` checks static layout rectangles. Manual Game View QA is still required at 720x1280, 1080x1920, and 1440x2560 portrait.

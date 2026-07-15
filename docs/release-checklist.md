@@ -327,6 +327,21 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - SHA-256: `148066765FF8895A38B2620EFC065C87967725D68213344C2F39FF106FBD7CA2`
 - Detailed evidence: `docs/android-title-menu-polish-v090.md`
 
+### Android Tutorial Overlay Polish QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-85-tutorial-overlay-polish`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: seven-step progress card, dim overlay, per-step focus frame, fixed navigation footer, and final Gold focus passed
+- Touch flow: Previous, Skip, Next, final Battle Start, tutorial completion persistence, and battle resume passed
+- Project Validator: passed
+- Progression Smoke Test: passed all seven tutorial layouts at required portrait sizes
+- System Flows E2E: passed tutorial navigation/persistence and Retry/Upgrade/Stage Select flow
+- Regression: Normal Stage 1~10, 10 upgrades, and Stage 10 Grumbar smoke passed
+- APK: `72,104,809 bytes`
+- SHA-256: `3CFB60A9B6FE4B0F5F17D4BD061BFE57E46C026E6803BBCF0127751F6416ACF7`
+- Detailed evidence: `docs/android-tutorial-overlay-polish-v090.md`
+
 ## Audio QA
 
 - [x] Unity 내장 Audio 모듈 활성화
