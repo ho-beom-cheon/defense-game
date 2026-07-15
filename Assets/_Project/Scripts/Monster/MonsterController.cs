@@ -44,6 +44,9 @@ namespace RuneGate
         private LaneManager laneManager;
         private MonsterVariantType variantType = MonsterVariantType.Normal;
         private float speedMultiplier = 1f;
+        private float bossMoveSpeedMultiplier = 1f;
+        private float bossAttackIntervalMultiplier = 1f;
+        private float bossAttackDamageMultiplier = 1f;
         private float attackCooldown;
         private bool initialized;
         private bool removedFromWave;
@@ -73,6 +76,7 @@ namespace RuneGate
         public MonsterCombatState CombatState => combatState;
         public bool IsMovementAttackLocked => movementController != null && movementController.IsAttacking;
         public bool HasActiveAttackRoutine => attackRoutine != null;
+        public BossPhaseController BossPhaseController { get; private set; }
         public static IReadOnlyList<MonsterController> ActiveMonsters => activeMonsters;
 
         private void OnEnable()
@@ -163,6 +167,9 @@ namespace RuneGate
             maxHp = ShadowContractService.GetMaxHp(data, variantType);
             currentHp = maxHp;
             speedMultiplier = 1f;
+            bossMoveSpeedMultiplier = 1f;
+            bossAttackIntervalMultiplier = 1f;
+            bossAttackDamageMultiplier = 1f;
             attackCooldown = 0f;
             removedFromWave = false;
             revivedOnce = false;
@@ -192,6 +199,7 @@ namespace RuneGate
             EnsureRuntimeHpBar();
             UpdateHpBar();
             PlaySpawnPulse();
+            EnsureBossPhaseController();
             HpChanged?.Invoke(currentHp, maxHp);
         }
 
@@ -257,6 +265,11 @@ namespace RuneGate
                 return;
             }
 
+            if (BossPhaseController != null)
+            {
+                damage = BossPhaseController.ClampIncomingDamageToPhaseGate(currentHp, maxHp, damage);
+            }
+
             PlayHitFeedback(damage);
             SetCombatState(MonsterCombatState.Hit);
             CombatFeedbackEvents.RaiseUnitHit(transform.position);
@@ -272,6 +285,31 @@ namespace RuneGate
         public void ApplySlowPercent(float percent)
         {
             speedMultiplier = Mathf.Clamp(1f - percent, 0.1f, 1f);
+        }
+
+        public void ApplyBossPhaseModifiers(float moveSpeedMultiplier, float attackIntervalMultiplier, float attackDamageMultiplier)
+        {
+            if (!IsBoss)
+            {
+                return;
+            }
+
+            bossMoveSpeedMultiplier = Mathf.Clamp(moveSpeedMultiplier, 0.5f, 2.5f);
+            bossAttackIntervalMultiplier = Mathf.Clamp(attackIntervalMultiplier, 0.35f, 2f);
+            bossAttackDamageMultiplier = Mathf.Clamp(attackDamageMultiplier, 0.5f, 3f);
+        }
+
+        public void PlayBossPhaseFeedback(int phase)
+        {
+            if (!IsBoss || !IsAlive)
+            {
+                return;
+            }
+
+            PlaySpawnPulse();
+            float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData);
+            CombatVisualEffectFactory.SpawnHitSpark(GetEffectPosition(), targetHeight * Mathf.Clamp(0.9f + phase * 0.12f, 1f, 1.4f));
+            CombatFeedbackEvents.RaiseAttackImpacted(transform.position);
         }
 
         private void Die()
@@ -351,7 +389,7 @@ namespace RuneGate
                 movementController.SetAttackState(false);
             }
 
-            movementController.Configure(baseSpeed * speedMultiplier, meleeStopDistance, monsterPersonalSpace, 2f);
+            movementController.Configure(baseSpeed * speedMultiplier * bossMoveSpeedMultiplier, meleeStopDistance, monsterPersonalSpace, 2f);
             float destinationX = ApplyMonsterSeparation(ResolveCrystalContactX());
             float laneY = ResolveLaneY();
             float minX = laneManager != null ? laneManager.GetMinCombatX() : Mathf.Min(crystalTargetPosition.x, transform.position.x) - 0.25f;
@@ -433,6 +471,23 @@ namespace RuneGate
             }
         }
 
+        private void EnsureBossPhaseController()
+        {
+            if (!IsBoss)
+            {
+                BossPhaseController = null;
+                return;
+            }
+
+            BossPhaseController = GetComponent<BossPhaseController>();
+            if (BossPhaseController == null)
+            {
+                BossPhaseController = gameObject.AddComponent<BossPhaseController>();
+            }
+
+            BossPhaseController.Configure(this, ownerWaveManager);
+        }
+
         private HeroController FindBlockingHero()
         {
             IReadOnlyList<HeroController> heroes = HeroController.ActiveHeroes;
@@ -501,7 +556,7 @@ namespace RuneGate
             int crystalDamage = ShadowContractService.GetDamageToCrystal(monsterData, variantType);
             if (monsterData != null && monsterData.IsBoss)
             {
-                return Mathf.Max(8, crystalDamage * 2);
+                return Mathf.Max(8, Mathf.RoundToInt(crystalDamage * 2f * bossAttackDamageMultiplier));
             }
 
             return Mathf.Max(2, crystalDamage * 3);
@@ -516,7 +571,7 @@ namespace RuneGate
 
             if (monsterData != null && monsterData.IsBoss)
             {
-                return Mathf.Max(0.55f, attackCooldownDuration * 1.25f);
+                return Mathf.Max(0.35f, attackCooldownDuration * 1.25f * bossAttackIntervalMultiplier);
             }
 
             return Mathf.Max(0.35f, attackCooldownDuration);

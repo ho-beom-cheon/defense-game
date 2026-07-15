@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RuneGate
@@ -16,10 +17,13 @@ namespace RuneGate
         private string crystalFeedbackText = string.Empty;
         private float crystalFeedbackTimer;
         private int gold;
+        private string bossStatusText = string.Empty;
+        private float bossHealthPercent;
 
         public string CrystalHpText => crystalHpText;
         public string WaveText => waveText;
         public string BattleStateText => battleStateText;
+        public string BossStatusText => bossStatusText;
 
         private void OnEnable()
         {
@@ -59,6 +63,7 @@ namespace RuneGate
 
         private void Update()
         {
+            RefreshBossStatus();
             if (crystalFeedbackTimer <= 0f)
             {
                 return;
@@ -133,11 +138,66 @@ namespace RuneGate
             }
 
             GUILayout.EndArea();
+            DrawBossStatus(battleFrame.BattleFieldFrame);
 
             if (pauseController != null && pauseController.IsPaused)
             {
                 DrawPausePopup();
             }
+        }
+
+        private void DrawBossStatus(Rect battlefieldRect)
+        {
+            if (string.IsNullOrWhiteSpace(bossStatusText))
+            {
+                return;
+            }
+
+            float width = Mathf.Clamp(battlefieldRect.width * 0.72f, 320f, 720f);
+            Rect bossRect = new Rect(
+                battlefieldRect.center.x - width * 0.5f,
+                battlefieldRect.y + UIResponsiveLayout.SmallGap,
+                width,
+                UIResponsiveLayout.TouchHeight(50f));
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUILayout.BeginArea(UIResponsiveLayout.ClampToScreen(bossRect), panelStyle);
+            GUILayout.Label(bossStatusText);
+            Rect barRect = GUILayoutUtility.GetRect(width - 24f, 12f, GUILayout.Height(12f));
+            Color previousColor = GUI.color;
+            GUI.color = new Color(0.12f, 0.05f, 0.06f, 0.96f);
+            GUI.DrawTexture(barRect, Texture2D.whiteTexture);
+            GUI.color = new Color(0.82f, 0.16f, 0.18f, 1f);
+            GUI.DrawTexture(new Rect(barRect.x, barRect.y, barRect.width * Mathf.Clamp01(bossHealthPercent), barRect.height), Texture2D.whiteTexture);
+            GUI.color = previousColor;
+            GUILayout.EndArea();
+        }
+
+        public void RefreshBossStatus()
+        {
+            MonsterController activeBoss = null;
+            IReadOnlyList<MonsterController> monsters = MonsterController.ActiveMonsters;
+            for (int i = 0; i < monsters.Count; i++)
+            {
+                MonsterController monster = monsters[i];
+                if (monster != null && monster.IsAlive && monster.IsBoss)
+                {
+                    activeBoss = monster;
+                    break;
+                }
+            }
+
+            if (activeBoss == null || activeBoss.Data == null)
+            {
+                bossStatusText = string.Empty;
+                bossHealthPercent = 0f;
+                return;
+            }
+
+            BossPhaseController phaseController = activeBoss.BossPhaseController;
+            int currentPhase = phaseController != null ? phaseController.CurrentPhase : 1;
+            int maxPhase = phaseController != null ? phaseController.MaxPhase : 3;
+            bossHealthPercent = activeBoss.MaxHp > 0 ? Mathf.Clamp01((float)activeBoss.CurrentHp / activeBoss.MaxHp) : 0f;
+            bossStatusText = $"{activeBoss.Data.DisplayNameKorean}  HP {activeBoss.CurrentHp}/{activeBoss.MaxHp}  페이즈 {currentPhase}/{maxPhase}";
         }
 
         private void DrawPausePopup()
