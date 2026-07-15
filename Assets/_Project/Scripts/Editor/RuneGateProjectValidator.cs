@@ -1377,6 +1377,13 @@ namespace RuneGate.Editor
             {
                 errors.Add($"DifficultyRules reward scaling is invalid. normal={normalReward}, hard={hardReward}, nightmare={nightmareReward}.");
             }
+            if (DifficultyRules.UndeadRevives(DifficultyRules.Easy) ||
+                DifficultyRules.UndeadRevives(DifficultyRules.Normal) ||
+                !DifficultyRules.UndeadRevives(DifficultyRules.Hard) ||
+                !DifficultyRules.UndeadRevives(DifficultyRules.Nightmare))
+            {
+                errors.Add("Undead revival must be disabled on Easy/Normal and enabled on Hard/Nightmare.");
+            }
         }
 
         private static void ValidateSceneScriptCount(string scenePath, string scriptPath, string label, int expectedCount, List<string> errors)

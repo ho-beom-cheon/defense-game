@@ -20,6 +20,7 @@ namespace RuneGate
         private const float AcceleratedTimeScale = 6f;
         private const float SceneLoadTimeoutSeconds = 15f;
         private const float BattleTimeoutSeconds = 45f;
+        private const float FullChapterBattleTimeoutSeconds = 180f;
 
         private BattleManager battleManager;
         private WaveManager waveManager;
@@ -746,13 +747,19 @@ namespace RuneGate
                 waveManager = FindAnyObjectByType<WaveManager>();
                 BindBattleEvents();
                 Debug.Log($"[RuneGateFullE2E] Running Stage {stageNumber}: {stage.DisplayNameKorean}");
-                yield return WaitForCondition(() => battleFinished || failed, BattleTimeoutSeconds);
+                yield return WaitForCondition(() => battleFinished || failed, FullChapterBattleTimeoutSeconds);
                 if (failed)
                 {
                     yield break;
                 }
 
-                if (!Require(waitSucceeded, $"Stage {stageNumber} did not finish before the timeout."))
+                if (!waitSucceeded)
+                {
+                    LogBattleTimeoutSnapshot(stageNumber);
+                }
+
+                if (!Require(waitSucceeded,
+                        $"Stage {stageNumber} did not finish within {FullChapterBattleTimeoutSeconds:0} seconds."))
                 {
                     yield break;
                 }
@@ -829,6 +836,29 @@ namespace RuneGate
             CleanupSmokeSave();
             Time.timeScale = previousTimeScale;
             Application.Quit(0);
+        }
+
+        private void LogBattleTimeoutSnapshot(int stageNumber)
+        {
+            IReadOnlyList<MonsterController> aliveMonsters = waveManager != null ? waveManager.AliveMonsters : null;
+            int aliveCount = aliveMonsters != null ? aliveMonsters.Count : 0;
+            Debug.LogError($"[RuneGateFullE2E] Stage {stageNumber} timeout snapshot: alive monsters={aliveCount}.");
+
+            int logCount = Mathf.Min(aliveCount, 12);
+            for (int i = 0; i < logCount; i++)
+            {
+                MonsterController monster = aliveMonsters[i];
+                if (monster == null)
+                {
+                    continue;
+                }
+
+                string monsterName = monster.Data != null ? monster.Data.DisplayNameKorean : monster.name;
+                Debug.LogError(
+                    $"[RuneGateFullE2E] Alive {i + 1}/{aliveCount}: {monsterName}, lane={monster.LaneIndex}, " +
+                    $"hp={monster.CurrentHp}/{monster.MaxHp}, x={monster.transform.position.x:0.00}, state={monster.CombatState}, " +
+                    $"moveAttackLocked={monster.IsMovementAttackLocked}, attackRoutine={monster.HasActiveAttackRoutine}.");
+            }
         }
 
         private void TryPurchaseOneUpgrade(UpgradeManager upgradeManager)

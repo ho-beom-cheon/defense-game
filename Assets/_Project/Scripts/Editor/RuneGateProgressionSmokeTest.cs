@@ -912,6 +912,14 @@ namespace RuneGate.Editor
             {
                 errors.Add($"DifficultyRules reward scaling must increase on hard/nightmare. normal={normalReward}, hard={hardReward}, nightmare={nightmareReward}.");
             }
+
+            if (DifficultyRules.UndeadRevives(DifficultyRules.Easy) ||
+                DifficultyRules.UndeadRevives(DifficultyRules.Normal) ||
+                !DifficultyRules.UndeadRevives(DifficultyRules.Hard) ||
+                !DifficultyRules.UndeadRevives(DifficultyRules.Nightmare))
+            {
+                errors.Add("Undead revival must be disabled on Easy/Normal and enabled on Hard/Nightmare.");
+            }
         }
 
         private static void ValidatePositiveRect(string label, Rect rect, List<string> errors)
