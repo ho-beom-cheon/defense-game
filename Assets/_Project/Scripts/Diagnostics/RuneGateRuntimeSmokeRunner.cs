@@ -508,6 +508,36 @@ namespace RuneGate
                 yield break;
             }
 
+            BattlePauseController pauseController = FindAnyObjectByType<BattlePauseController>();
+            if (!Require(pauseController != null && pauseController.CanPause,
+                    "Battle pause controller was not available after the tutorial."))
+            {
+                yield break;
+            }
+
+            if (!Require(pauseController.Pause() && pauseController.IsPaused && Mathf.Approximately(Time.timeScale, 0f),
+                    "Battle pause did not stop scaled time."))
+            {
+                yield break;
+            }
+
+            yield return null;
+            pauseController.Resume();
+            if (!Require(!pauseController.IsPaused && Mathf.Approximately(Time.timeScale, AcceleratedTimeScale),
+                    "Battle resume did not restore the previous time scale."))
+            {
+                yield break;
+            }
+
+            if (!Require(pauseController.PauseForLifecycle() && pauseController.PausedByLifecycle,
+                    "Lifecycle pause did not record its pause reason."))
+            {
+                yield break;
+            }
+
+            pauseController.Resume();
+            Debug.Log("[RuneGateE2E] Battle pause and lifecycle resume verified.");
+
             const string diagnosticUpgradeId = "upgrade_hero_attack";
             SaveManager.AddGold(321);
             SaveManager.SetUpgradeLevel(diagnosticUpgradeId, 2);

@@ -198,6 +198,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Skill/SkillController.cs",
             "Assets/_Project/Scripts/Battle/BattleResult.cs",
             "Assets/_Project/Scripts/UI/BattleHUD.cs",
+            "Assets/_Project/Scripts/UI/BattlePauseController.cs",
             "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
             "Assets/_Project/Scripts/UI/HeroSkillButton.cs",
             "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs",
