@@ -627,6 +627,48 @@ namespace RuneGate
             stageSelect.CloseFormationEditor();
             Debug.Log($"[RuneGateE2E] Formation editor persisted {persistedFormation.Count} heroes after a slot swap.");
 
+            ShadowPetDefinition petDefinition = ShadowContractService.PetDefinitions[0];
+            SaveManager.AddMonsterShards(petDefinition.MonsterId, ShadowContractService.RequiredShardCount);
+            stageSelect.OpenPetContract();
+            if (!Require(stageSelect.IsPetContractVisible && stageSelect.TryContractPet(petDefinition.MonsterId),
+                    "Pet contract popup could not contract an eligible shadow pet."))
+            {
+                yield break;
+            }
+
+            if (!Require(SaveManager.HasContractedPet(petDefinition.MonsterId)
+                    && SaveManager.GetMonsterShardCount(petDefinition.MonsterId) == 0
+                    && SaveManager.Current.equippedPetId == petDefinition.MonsterId,
+                    "Pet contract did not consume shards and auto-equip the first pet."))
+            {
+                yield break;
+            }
+
+            if (!Require(stageSelect.UnequipPet() && string.IsNullOrWhiteSpace(SaveManager.Current.equippedPetId),
+                    "Pet contract popup could not unequip the active pet."))
+            {
+                yield break;
+            }
+
+            if (!Require(stageSelect.EquipPet(petDefinition.MonsterId)
+                    && SaveManager.Current.equippedPetId == petDefinition.MonsterId,
+                    "Pet contract popup could not re-equip a contracted pet."))
+            {
+                yield break;
+            }
+
+            SaveManager.ReloadFromDiskForDiagnostics();
+            if (!Require(SaveManager.HasContractedPet(petDefinition.MonsterId)
+                    && SaveManager.GetMonsterShardCount(petDefinition.MonsterId) == 0
+                    && SaveManager.Current.equippedPetId == petDefinition.MonsterId,
+                    "Pet contract, shard spending, or equipped pet did not survive JSON reload."))
+            {
+                yield break;
+            }
+
+            stageSelect.ClosePetContract();
+            Debug.Log($"[RuneGateE2E] Pet contract consumed shards and persisted {petDefinition.DisplayName} as equipped.");
+
             GameSession.SelectDifficulty("normal");
             GameSession.SelectStage(firstStage, secondStage.StageId);
             SceneManager.LoadScene("BattleScene");

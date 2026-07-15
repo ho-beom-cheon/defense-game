@@ -81,6 +81,7 @@ namespace RuneGate.Editor
             ValidateStagePlayabilityEstimates(catalog, errors, warnings);
             ValidateUpgradePurchaseAfterStageOne(catalog, errors);
             ValidateUpgradeDisplayRules(catalog, errors);
+            ValidatePetContractRules(errors);
             ValidateResponsiveLayouts(errors);
             ValidateAudioRules(errors);
             ValidateAndroidBuildPipelineRules(errors);
@@ -805,6 +806,60 @@ namespace RuneGate.Editor
                     errors.Add($"{label} StageSelect list/detail panels are too narrow. List {stageSelect.StageListPanel.width:0.0}, Detail {stageSelect.StageDetailPanel.width:0.0}.");
                 }
 
+                PetContractScreenLayoutRects petContract = PetContractScreenLayout.CalculateForSize(size.x, size.y);
+                Rect popupSafeRect = GameFrameLayout.SafeRectForSize(size.x, size.y);
+                ValidateRectInside($"{label} Pet contract popup", petContract.Popup, popupSafeRect, errors);
+                ValidateRectInside($"{label} Pet contract header", petContract.Header, petContract.Popup, errors);
+                ValidateRectInside($"{label} Pet contract title", petContract.HeaderTitle, petContract.Header, errors);
+                ValidateRectInside($"{label} Pet contract summary", petContract.HeaderSummary, petContract.Header, errors);
+                ValidateRectInside($"{label} Pet contract close", petContract.CloseButton, petContract.Header, errors);
+                ValidateRectInside($"{label} Pet contract equipped summary", petContract.EquippedSummary, petContract.Popup, errors);
+                ValidateRectInside($"{label} Pet contract viewport", petContract.Viewport, petContract.Popup, errors);
+                ValidateRectInside($"{label} Pet contract feedback", petContract.FooterFeedback, petContract.Popup, errors);
+                ValidateRectInside($"{label} Pet contract unequip", petContract.FooterUnequip, petContract.Popup, errors);
+                int expectedPetColumns = size.y >= size.x && petContract.Popup.width >= 820f && petContract.Popup.height >= 1100f ? 2 : 1;
+                if (petContract.Columns != expectedPetColumns)
+                {
+                    errors.Add($"{label} Pet contract columns were {petContract.Columns}, expected {expectedPetColumns}.");
+                }
+
+                for (int petIndex = 0; petIndex < PetContractScreenLayout.ExpectedPetCount; petIndex++)
+                {
+                    Rect petCard = petContract.CardRect(petIndex);
+                    ValidatePositiveRect($"{label} Pet contract card {petIndex + 1}", petCard, errors);
+                    ValidateRectInside($"{label} Pet contract card {petIndex + 1}", petCard, petContract.Content, errors);
+                    for (int previousPetIndex = 0; previousPetIndex < petIndex; previousPetIndex++)
+                    {
+                        if (petCard.Overlaps(petContract.CardRect(previousPetIndex)))
+                        {
+                            errors.Add($"{label} Pet contract cards {previousPetIndex + 1} and {petIndex + 1} overlap.");
+                        }
+                    }
+
+                    PetContractCardLayoutRects petCardLayout = PetContractScreenLayout.CardLayout(petCard);
+                    Rect[] petSections =
+                    {
+                        petCardLayout.Portrait,
+                        petCardLayout.PassiveIcon,
+                        petCardLayout.Title,
+                        petCardLayout.State,
+                        petCardLayout.Passive,
+                        petCardLayout.ShardBar,
+                        petCardLayout.ShardText,
+                        petCardLayout.Action
+                    };
+                    for (int sectionIndex = 0; sectionIndex < petSections.Length; sectionIndex++)
+                    {
+                        ValidatePositiveRect($"{label} Pet contract card {petIndex + 1} section {sectionIndex + 1}", petSections[sectionIndex], errors);
+                        ValidateRectInside($"{label} Pet contract card {petIndex + 1} section {sectionIndex + 1}", petSections[sectionIndex], petCard, errors);
+                    }
+
+                    if (petCardLayout.Action.width < 120f || petCardLayout.Action.height < 44f)
+                    {
+                        errors.Add($"{label} Pet contract card {petIndex + 1} action is too small: {FormatRect(petCardLayout.Action)}.");
+                    }
+                }
+
                 ScreenFrameRects upgrade = GameFrameLayout.UpgradeFrameForSize(size.x, size.y);
                 ValidatePositiveRect($"{label} Upgrade root", upgrade.FrameRoot, errors);
                 ValidateRectInside($"{label} Upgrade header", upgrade.HeaderArea, upgrade.FrameRoot, errors);
@@ -1430,6 +1485,42 @@ namespace RuneGate.Editor
                 if (upgrade.EffectKey == UpgradeManager.CrystalMaxHpFlat && zeroLevel.Contains("%"))
                 {
                     errors.Add($"{upgrade.name} flat crystal HP is displayed as a percentage at level zero: '{zeroLevel}'.");
+                }
+            }
+        }
+
+        private static void ValidatePetContractRules(List<string> errors)
+        {
+            IReadOnlyList<ShadowPetDefinition> definitions = ShadowContractService.PetDefinitions;
+            if (definitions == null || definitions.Count != PetContractScreenLayout.ExpectedPetCount)
+            {
+                errors.Add($"Expected {PetContractScreenLayout.ExpectedPetCount} shadow pet definitions. Found {definitions?.Count ?? 0}.");
+                return;
+            }
+
+            HashSet<string> monsterIds = new HashSet<string>();
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                ShadowPetDefinition definition = definitions[i];
+                if (string.IsNullOrWhiteSpace(definition.MonsterId) || !monsterIds.Add(definition.MonsterId))
+                {
+                    errors.Add($"Shadow pet definition {i + 1} has an empty or duplicate monster id '{definition.MonsterId}'.");
+                }
+
+                if (string.IsNullOrWhiteSpace(definition.DisplayName) || definition.DisplayName.Contains("monster_") || definition.DisplayName.Contains("boss_"))
+                {
+                    errors.Add($"Shadow pet definition {i + 1} has an invalid user-facing name '{definition.DisplayName}'.");
+                }
+
+                if (definition.PassiveType == ShadowPetPassiveType.None || definition.PassiveValue <= 0f)
+                {
+                    errors.Add($"Shadow pet '{definition.DisplayName}' is missing a positive passive effect.");
+                }
+
+                string passiveDescription = ShadowContractService.GetPassiveDescription(definition);
+                if (string.IsNullOrWhiteSpace(passiveDescription) || passiveDescription.Contains("None") || passiveDescription.Contains("monster_"))
+                {
+                    errors.Add($"Shadow pet '{definition.DisplayName}' has an invalid passive description '{passiveDescription}'.");
                 }
             }
         }

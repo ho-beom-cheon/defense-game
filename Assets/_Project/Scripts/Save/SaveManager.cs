@@ -443,11 +443,29 @@ namespace RuneGate
                 return false;
             }
 
-            if (HasContractedPet(monsterId) || GetMonsterShardCount(monsterId) < requiredShards)
+            if (HasContractedPet(monsterId))
             {
                 return false;
             }
 
+            SerializableMonsterShardCount shardEntry = null;
+            List<SerializableMonsterShardCount> counts = Current.monsterShardCounts;
+            for (int i = 0; i < counts.Count; i++)
+            {
+                SerializableMonsterShardCount entry = counts[i];
+                if (entry != null && entry.monsterId == monsterId)
+                {
+                    shardEntry = entry;
+                    break;
+                }
+            }
+
+            if (shardEntry == null || shardEntry.count < requiredShards)
+            {
+                return false;
+            }
+
+            shardEntry.count = Mathf.Max(0, shardEntry.count - requiredShards);
             AddUnique(Current.contractedPetIds, monsterId);
             if (string.IsNullOrWhiteSpace(Current.equippedPetId))
             {

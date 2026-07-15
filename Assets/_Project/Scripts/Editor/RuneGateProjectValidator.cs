@@ -120,6 +120,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/RuntimePixel/Bosses",
             "Assets/_Project/Art/RuntimePixel/Bosses/Grumbar",
             "Assets/_Project/Art/RuntimePixel/UI",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract",
             "Assets/_Project/Art/Effects/Skills",
             "Assets/_Project/Art/Effects/Hit",
             "Assets/_Project/Art/Effects/Projectiles",
@@ -203,6 +204,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/BattleResult.cs",
             "Assets/_Project/Scripts/UI/BattleHUD.cs",
             "Assets/_Project/Scripts/UI/BattlePauseController.cs",
+            "Assets/_Project/Scripts/UI/PetContractScreenLayout.cs",
             "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
             "Assets/_Project/Scripts/UI/HeroSkillButton.cs",
             "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs",
@@ -370,7 +372,16 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_easy.png",
             "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_normal.png",
             "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_hard.png",
-            "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_nightmare.png"
+            "Assets/_Project/Art/RuntimePixel/UI/Difficulty/badge_nightmare.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_shadow_shard.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_contract_seal.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/ui_pet_slot_empty.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/ui_pet_slot_equipped.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/ui_contract_panel_bg.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_attack_boost.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_gold_boost.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_crystal_guard.png",
+            "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_slow_aura.png"
         };
 
         private const string RequiredCombatVisualCatalogAsset = "Assets/_Project/Resources/RuntimePixelVisualCatalog.asset";
@@ -560,6 +571,7 @@ namespace RuneGate.Editor
             }
 
             ValidateAsset<RuntimePixelVisualCatalog>(RequiredCombatVisualCatalogAsset, "v0.6 combat visual catalog", errors);
+            ValidatePetContractVisualCatalog(errors);
             ValidateAsset<KoreanFontCatalog>(RequiredKoreanFontCatalogAsset, "v0.8 Korean font catalog", errors);
             ValidateAsset<RuntimeContentCatalog>(RequiredRuntimeContentCatalogAsset, "runtime content catalog", errors);
             ValidateRuntimeContentCatalog(errors);
@@ -702,6 +714,36 @@ namespace RuneGate.Editor
             if (AssetDatabase.LoadAssetAtPath<T>(assetPath) == null)
             {
                 errors.Add($"Invalid {label}: {assetPath}");
+            }
+        }
+
+        private static void ValidatePetContractVisualCatalog(List<string> errors)
+        {
+            RuntimePixelVisualCatalog catalog = AssetDatabase.LoadAssetAtPath<RuntimePixelVisualCatalog>(RequiredCombatVisualCatalogAsset);
+            if (catalog == null)
+            {
+                return;
+            }
+
+            string[] assetPaths =
+            {
+                RuntimePixelAssetLoader.UiPetShadowShard,
+                RuntimePixelAssetLoader.UiPetContractSeal,
+                RuntimePixelAssetLoader.UiPetSlotEmpty,
+                RuntimePixelAssetLoader.UiPetSlotEquipped,
+                RuntimePixelAssetLoader.UiPetPanelBg,
+                RuntimePixelAssetLoader.UiPetAttackBoost,
+                RuntimePixelAssetLoader.UiPetGoldBoost,
+                RuntimePixelAssetLoader.UiPetCrystalGuard,
+                RuntimePixelAssetLoader.UiPetSlowAura
+            };
+
+            for (int i = 0; i < assetPaths.Length; i++)
+            {
+                if (catalog.GetSprite(assetPaths[i]) == null)
+                {
+                    errors.Add($"RuntimePixelVisualCatalog is missing pet contract sprite: {assetPaths[i]}");
+                }
             }
         }
 

@@ -67,6 +67,14 @@ namespace RuneGate
             if (!waitSucceeded) yield break;
 
             StageSelectUI stageSelect = FindAnyObjectByType<StageSelectUI>();
+            ShadowPetDefinition capturePet = ShadowContractService.PetDefinitions[0];
+            SaveManager.AddMonsterShards(capturePet.MonsterId, ShadowContractService.RequiredShardCount);
+            stageSelect.OpenPetContract();
+            yield return new WaitForSecondsRealtime(0.25f);
+            yield return Capture("02b-pet-contract");
+            if (!waitSucceeded) yield break;
+            stageSelect.ClosePetContract();
+
             StageData firstStage = FindStage(stageSelect != null ? stageSelect.Stages : null, 1);
             if (!Require(firstStage != null, "Stage 1 data is missing.")) yield break;
 

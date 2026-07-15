@@ -25,16 +25,20 @@ namespace RuneGate
         private Vector2 stageScrollPosition;
         private Vector2 detailScrollPosition;
         private Vector2 formationScrollPosition;
+        private Vector2 petContractScrollPosition;
         private string feedbackMessage = string.Empty;
         private string formationFeedback = string.Empty;
+        private string petContractFeedback = string.Empty;
         private int selectedStageIndex;
         private bool sceneTransitionRequested;
         private bool showFormationEditor;
+        private bool showPetContract;
 
         public IReadOnlyList<StageData> Stages => stages;
         public IReadOnlyList<HeroData> FormationHeroes => heroRoster != null ? heroRoster.Heroes : null;
         public IReadOnlyList<FormationSlot> FormationSlots => formationEditor.Slots;
         public bool IsFormationEditorVisible => showFormationEditor;
+        public bool IsPetContractVisible => showPetContract;
 
         private void OnEnable()
         {
@@ -46,6 +50,7 @@ namespace RuneGate
             selectedStageIndex = FindFirstUnlockedStageIndex();
             sceneTransitionRequested = false;
             showFormationEditor = false;
+            showPetContract = false;
         }
 
         private void OnGUI()
@@ -63,13 +68,17 @@ namespace RuneGate
             GUI.Box(frame.FrameRoot, GUIContent.none, panelStyle);
 
             bool previousEnabled = GUI.enabled;
-            GUI.enabled = !showFormationEditor;
+            GUI.enabled = !showFormationEditor && !showPetContract;
             DrawStageSelectFrame(frame);
             GUI.enabled = previousEnabled;
 
             if (showFormationEditor)
             {
                 DrawFormationEditorPopup();
+            }
+            else if (showPetContract)
+            {
+                DrawPetContractPopup();
             }
         }
 
@@ -95,7 +104,8 @@ namespace RuneGate
             float difficultyButtonHeight = UIResponsiveLayout.TouchHeight(32f);
             float headerY = frame.HeaderArea.y + Mathf.Max(6f, (frame.HeaderArea.height - difficultyButtonHeight) * 0.5f);
             float difficultyButtonWidth = Mathf.Clamp(112f * UIResponsiveLayout.ReadabilityScale, 112f, 176f);
-            float actionWidth = difficultyButtonWidth;
+            float contractButtonWidth = difficultyButtonWidth;
+            float actionWidth = difficultyButtonWidth + contractButtonWidth + 8f;
             float headerContentWidth = Mathf.Max(1f, frame.HeaderArea.width - pad * 2f - actionWidth - 8f);
             float chapterWidth = Mathf.Clamp(headerContentWidth * 0.36f, 88f, 210f);
             float goldWidth = Mathf.Clamp(headerContentWidth * 0.30f, 82f, 170f);
@@ -113,10 +123,16 @@ namespace RuneGate
             string slotText = $"\ud3b8\uc131 {SaveManager.Current.formationSlots.Count}/9";
 
             GUI.Label(new Rect(headerX + chapterWidth + goldWidth + 12f, headerY, slotWidth, headerLineHeight), slotText, headerLabelStyle);
-            float difficultyButtonX = frame.HeaderArea.xMax - actionWidth - pad;
+            float contractButtonX = frame.HeaderArea.xMax - contractButtonWidth - pad;
+            float difficultyButtonX = contractButtonX - difficultyButtonWidth - 8f;
             if (GUI.Button(new Rect(difficultyButtonX, headerY, difficultyButtonWidth, difficultyButtonHeight), $"\ub09c\uc774\ub3c4 {GameTextMapper.Difficulty(SaveManager.Current.selectedDifficultyId)}", buttonStyle))
             {
                 CycleDifficulty();
+            }
+
+            if (GUI.Button(new Rect(contractButtonX, headerY, contractButtonWidth, difficultyButtonHeight), "\uadf8\ub9bc\uc790 \uacc4\uc57d", buttonStyle))
+            {
+                OpenPetContract();
             }
 
             DrawCompactStageListPanel(frame.StageListPanel, buttonStyle);
@@ -528,6 +544,243 @@ namespace RuneGate
             if (closeRequested)
             {
                 CloseFormationEditor();
+            }
+        }
+
+        private void DrawPetContractPopup()
+        {
+            UIPopupGuiUtility.DrawDimOverlay();
+            IReadOnlyList<ShadowPetDefinition> definitions = ShadowContractService.PetDefinitions;
+            Rect popupRect = GameFrameLayout.PopupFrame(960f, 1680f, 0.94f, 0.84f);
+            PetContractScreenLayoutRects layout = PetContractScreenLayout.Calculate(popupRect, Screen.width, Screen.height, definitions.Count);
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPetPanelBg);
+            GUIStyle cardStyle = RuntimePixelGuiUtility.CreateSolidPanelStyle(GUI.skin.box, true);
+            GUIStyle equippedCardStyle = RuntimePixelGuiUtility.CreateSolidPanelStyle(GUI.skin.box);
+            GUIStyle buttonStyle = RuntimePixelGuiUtility.CreateSolidButtonStyle(GUI.skin.button);
+            GUIStyle titleStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 24f);
+            GUIStyle summaryStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, false, 13f);
+            GUIStyle centeredStyle = CreateStageMapLabelStyle(TextAnchor.MiddleCenter, true, 13f);
+
+            GUI.Box(layout.Popup, GUIContent.none, panelStyle);
+            GUI.Label(layout.HeaderTitle, "\uadf8\ub9bc\uc790 \uacc4\uc57d\uc11c", titleStyle);
+            GUI.Label(layout.HeaderSummary, $"\uc801\uc131 \uc870\uac01 {CountAllMonsterShards()}\uac1c  \u00b7  \uacc4\uc57d {SaveManager.Current.contractedPetIds.Count}/{definitions.Count}", summaryStyle);
+            if (GUI.Button(layout.CloseButton, "\ub2eb\uae30", buttonStyle))
+            {
+                ClosePetContract();
+                GUIUtility.ExitGUI();
+            }
+
+            DrawEquippedPetSummary(layout.EquippedSummary);
+            petContractScrollPosition = GUI.BeginScrollView(layout.Viewport, petContractScrollPosition, layout.Content);
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                ShadowPetDefinition definition = definitions[i];
+                bool equipped = SaveManager.Current.equippedPetId == definition.MonsterId;
+                DrawPetContractCard(layout.CardRect(i), definition, equipped ? equippedCardStyle : cardStyle, buttonStyle, centeredStyle);
+            }
+
+            GUI.EndScrollView();
+
+            GUI.Label(layout.FooterFeedback, petContractFeedback, summaryStyle);
+            bool previousEnabled = GUI.enabled;
+            GUI.enabled = previousEnabled && !string.IsNullOrWhiteSpace(SaveManager.Current.equippedPetId);
+            if (GUI.Button(layout.FooterUnequip, "\uc7a5\ucc29 \ud574\uc81c", buttonStyle))
+            {
+                UnequipPet();
+                GUIUtility.ExitGUI();
+            }
+
+            GUI.enabled = previousEnabled;
+        }
+
+        private void DrawEquippedPetSummary(Rect rect)
+        {
+            GUIStyle boxStyle = RuntimePixelGuiUtility.CreateSolidPanelStyle(GUI.skin.box, true);
+            GUIStyle titleStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 16f);
+            GUIStyle summaryStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, false, 12f);
+            GUI.Box(rect, GUIContent.none, boxStyle);
+
+            string equippedPetId = SaveManager.Current.equippedPetId;
+            ShadowPetDefinition equipped = ShadowContractService.GetDefinition(equippedPetId);
+            float iconSize = Mathf.Clamp(rect.height - 16f, 48f, 84f);
+            Rect iconRect = new Rect(rect.x + 10f, rect.y + (rect.height - iconSize) * 0.5f, iconSize, iconSize);
+            DrawTextureIcon(iconRect, string.IsNullOrWhiteSpace(equipped.MonsterId) ? RuntimePixelAssetLoader.UiPetSlotEmpty : RuntimePixelAssetLoader.UiPetContractSeal);
+            float textX = iconRect.xMax + 12f;
+            if (string.IsNullOrWhiteSpace(equipped.MonsterId))
+            {
+                GUI.Label(new Rect(textX, rect.y + 8f, rect.xMax - textX - 10f, rect.height * 0.46f), "\uc7a5\ucc29\ud55c \uadf8\ub9bc\uc790 \uc5c6\uc74c", titleStyle);
+                GUI.Label(new Rect(textX, rect.y + rect.height * 0.48f, rect.xMax - textX - 10f, rect.height * 0.40f), "\uacc4\uc57d\ud55c \uadf8\ub9bc\uc790\ub97c \uc7a5\ucc29\ud558\uba74 \uc804\ud22c \ud328\uc2dc\ube0c\uac00 \uc801\uc6a9\ub429\ub2c8\ub2e4.", summaryStyle);
+                return;
+            }
+
+            GUI.Label(new Rect(textX, rect.y + 8f, rect.xMax - textX - 10f, rect.height * 0.46f), $"\uc7a5\ucc29 \uc911  \u00b7  {equipped.DisplayName}", titleStyle);
+            GUI.Label(new Rect(textX, rect.y + rect.height * 0.48f, rect.xMax - textX - 10f, rect.height * 0.40f), ShadowContractService.GetPassiveDescription(equipped), summaryStyle);
+        }
+
+        private void DrawPetContractCard(Rect rect, ShadowPetDefinition definition, GUIStyle cardStyle, GUIStyle buttonStyle, GUIStyle centeredStyle)
+        {
+            GUI.Box(rect, GUIContent.none, cardStyle);
+            PetContractCardLayoutRects card = PetContractScreenLayout.CardLayout(rect);
+            bool contracted = SaveManager.HasContractedPet(definition.MonsterId);
+            bool equipped = SaveManager.Current.equippedPetId == definition.MonsterId;
+            DrawTextureIcon(card.Portrait, equipped ? RuntimePixelAssetLoader.UiPetSlotEquipped : RuntimePixelAssetLoader.UiPetSlotEmpty);
+            MonsterData monsterData = FindMonsterForPet(definition.MonsterId);
+            if (monsterData != null && monsterData.RuntimeSprite != null)
+            {
+                float portraitInset = Mathf.Clamp(card.Portrait.width * 0.12f, 8f, 14f);
+                Rect actorPortrait = new Rect(
+                    card.Portrait.x + portraitInset,
+                    card.Portrait.y + portraitInset,
+                    card.Portrait.width - portraitInset * 2f,
+                    card.Portrait.height - portraitInset * 2f);
+                GUI.DrawTexture(actorPortrait, monsterData.RuntimeSprite.texture, ScaleMode.ScaleToFit, true);
+            }
+
+            DrawTextureIcon(card.PassiveIcon, GetPassiveIconPath(definition.PassiveType));
+            int shards = SaveManager.GetMonsterShardCount(definition.MonsterId);
+            GUI.Label(card.Title, definition.DisplayName, CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 17f));
+            GUI.Label(card.State, equipped ? "\uc7a5\ucc29 \uc911" : contracted ? "\uacc4\uc57d \uc644\ub8cc" : "\ubd09\ubb38 \ub300\uc0c1", CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 12f));
+            GUI.Label(card.Passive, ShadowContractService.GetPassiveDescription(definition), CreateStageMapLabelStyle(TextAnchor.UpperLeft, false, 12f));
+
+            float progress = contracted ? 1f : Mathf.Clamp01(shards / (float)ShadowContractService.RequiredShardCount);
+            DrawSolidRect(card.ShardBar, new Color(0.08f, 0.10f, 0.12f, 0.95f));
+            DrawSolidRect(new Rect(card.ShardBar.x, card.ShardBar.y, card.ShardBar.width * progress, card.ShardBar.height), contracted ? new Color(0.40f, 0.76f, 0.53f, 1f) : new Color(0.67f, 0.45f, 0.82f, 1f));
+            float shardIconSize = Mathf.Min(card.ShardText.height, 30f);
+            Rect shardIconRect = new Rect(card.ShardText.x, card.ShardText.y + (card.ShardText.height - shardIconSize) * 0.5f, shardIconSize, shardIconSize);
+            DrawTextureIcon(shardIconRect, RuntimePixelAssetLoader.UiPetShadowShard);
+            Rect shardLabelRect = new Rect(shardIconRect.xMax + 4f, card.ShardText.y, Mathf.Max(1f, card.ShardText.xMax - shardIconRect.xMax - 4f), card.ShardText.height);
+            GUI.Label(shardLabelRect, contracted ? "\uacc4\uc57d \uc644\ub8cc" : $"\uc870\uac01 {shards}/{ShadowContractService.RequiredShardCount}", centeredStyle);
+
+            bool previousEnabled = GUI.enabled;
+            GUI.enabled = previousEnabled && (contracted || ShadowContractService.CanContract(definition.MonsterId));
+            string actionLabel = equipped ? "\uc7a5\ucc29 \ud574\uc81c" : contracted ? "\uc7a5\ucc29" : ShadowContractService.CanContract(definition.MonsterId) ? "\uacc4\uc57d" : "\uc870\uac01 \ubd80\uc871";
+            if (GUI.Button(card.Action, actionLabel, buttonStyle))
+            {
+                if (equipped)
+                {
+                    UnequipPet();
+                }
+                else if (contracted)
+                {
+                    EquipPet(definition.MonsterId);
+                }
+                else
+                {
+                    TryContractPet(definition.MonsterId);
+                }
+
+                GUIUtility.ExitGUI();
+            }
+
+            GUI.enabled = previousEnabled;
+        }
+
+        public void OpenPetContract()
+        {
+            showFormationEditor = false;
+            showPetContract = true;
+            petContractScrollPosition = Vector2.zero;
+            petContractFeedback = "\uc801\uc131 \uc870\uac01 5\uac1c\ub85c \uadf8\ub9bc\uc790\uc640 \uacc4\uc57d\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.";
+            if (!SaveManager.HasSeenPetTutorial())
+            {
+                SaveManager.MarkPetTutorialSeen();
+            }
+
+            AudioManager.Play(SfxKey.ButtonClick);
+        }
+
+        public void ClosePetContract()
+        {
+            showPetContract = false;
+            feedbackMessage = "\uadf8\ub9bc\uc790 \uacc4\uc57d\uc11c\ub97c \ub2eb\uc558\uc2b5\ub2c8\ub2e4.";
+            AudioManager.Play(SfxKey.ButtonClick);
+        }
+
+        public bool TryContractPet(string monsterId)
+        {
+            ShadowPetDefinition definition = ShadowContractService.GetDefinition(monsterId);
+            if (string.IsNullOrWhiteSpace(definition.MonsterId) || !ShadowContractService.TryContract(monsterId))
+            {
+                petContractFeedback = "\uacc4\uc57d\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4. \uc870\uac01 \uc218\ub97c \ud655\uc778\ud558\uc138\uc694.";
+                return false;
+            }
+
+            petContractFeedback = $"{definition.DisplayName}\uacfc \uacc4\uc57d\ud588\uc2b5\ub2c8\ub2e4. \uc870\uac01 {ShadowContractService.RequiredShardCount}\uac1c\ub97c \uc18c\ubaa8\ud588\uc2b5\ub2c8\ub2e4.";
+            AudioManager.Play(SfxKey.UpgradePurchase);
+            return true;
+        }
+
+        public bool EquipPet(string monsterId)
+        {
+            if (!SaveManager.HasContractedPet(monsterId))
+            {
+                petContractFeedback = "\uba3c\uc800 \uadf8\ub9bc\uc790\uc640 \uacc4\uc57d\ud574\uc57c \ud569\ub2c8\ub2e4.";
+                return false;
+            }
+
+            ShadowContractService.Equip(monsterId);
+            ShadowPetDefinition definition = ShadowContractService.GetDefinition(monsterId);
+            petContractFeedback = $"{definition.DisplayName}\uc744 \uc7a5\ucc29\ud588\uc2b5\ub2c8\ub2e4.";
+            AudioManager.Play(SfxKey.ButtonClick);
+            return true;
+        }
+
+        public bool UnequipPet()
+        {
+            if (string.IsNullOrWhiteSpace(SaveManager.Current.equippedPetId))
+            {
+                petContractFeedback = "\uc7a5\ucc29 \uc911\uc778 \uadf8\ub9bc\uc790\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.";
+                return false;
+            }
+
+            ShadowContractService.Unequip();
+            petContractFeedback = "\uadf8\ub9bc\uc790 \uc7a5\ucc29\uc744 \ud574\uc81c\ud588\uc2b5\ub2c8\ub2e4.";
+            AudioManager.Play(SfxKey.ButtonClick);
+            return true;
+        }
+
+        private int CountAllMonsterShards()
+        {
+            int total = 0;
+            IReadOnlyList<ShadowPetDefinition> definitions = ShadowContractService.PetDefinitions;
+            for (int i = 0; i < definitions.Count; i++)
+            {
+                total += SaveManager.GetMonsterShardCount(definitions[i].MonsterId);
+            }
+
+            return total;
+        }
+
+        private MonsterData FindMonsterForPet(string monsterId)
+        {
+            for (int stageIndex = 0; stageIndex < stages.Count; stageIndex++)
+            {
+                List<MonsterData> monsters = CollectStageMonsters(stages[stageIndex]);
+                for (int monsterIndex = 0; monsterIndex < monsters.Count; monsterIndex++)
+                {
+                    MonsterData monsterData = monsters[monsterIndex];
+                    if (monsterData != null && monsterData.MonsterId == monsterId)
+                    {
+                        return monsterData;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static string GetPassiveIconPath(ShadowPetPassiveType passiveType)
+        {
+            switch (passiveType)
+            {
+                case ShadowPetPassiveType.GoldRewardPercent:
+                    return RuntimePixelAssetLoader.UiPetGoldBoost;
+                case ShadowPetPassiveType.CrystalMaxHpPercent:
+                    return RuntimePixelAssetLoader.UiPetCrystalGuard;
+                case ShadowPetPassiveType.MonsterSlowPercent:
+                    return RuntimePixelAssetLoader.UiPetSlowAura;
+                default:
+                    return RuntimePixelAssetLoader.UiPetAttackBoost;
             }
         }
 
