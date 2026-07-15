@@ -188,6 +188,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/BattlefieldCameraFitter.cs",
             "Assets/_Project/Scripts/Battle/UnitMovementController.cs",
             "Assets/_Project/Scripts/Hero/HeroController.cs",
+            "Assets/_Project/Scripts/Hero/HeroRuneCombatModifiers.cs",
             "Assets/_Project/Scripts/Hero/HeroPlacementManager.cs",
             "Assets/_Project/Scripts/Hero/HeroPlacementSlot.cs",
             "Assets/_Project/Scripts/Monster/MonsterController.cs",

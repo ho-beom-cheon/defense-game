@@ -31,27 +31,13 @@ namespace RuneGate.Editor
             "boss_damage_percent",
             "mage_area_percent",
             "tank_defense_percent",
-            "turret_attack_percent"
-        };
-
-        private static readonly string[] ImplementedRuntimeRuneEffects =
-        {
-            "hero_attack_percent",
-            "hero_attack_speed_percent",
-            "crystal_heal_flat",
-            "skill_cooldown_percent",
-            "hero_max_hp_percent",
-            "monster_slow_percent",
-            "boss_damage_percent",
-            "mage_area_percent",
-            "tank_defense_percent",
             "turret_attack_percent",
-            "lightning_placeholder",
-            "blast_placeholder",
+            "lightning_chain_percent",
+            "splash_damage_percent",
             "crystal_shield_flat",
-            "purify_placeholder",
-            "crush_placeholder",
-            "ranged_chain_shot_placeholder"
+            "purification_percent",
+            "crush_damage_percent",
+            "ranged_chain_damage_percent"
         };
 
         [MenuItem("Tools/RuneGate/Run Progression Smoke Test")]
@@ -82,6 +68,7 @@ namespace RuneGate.Editor
 
             ValidateStages(catalog, errors, warnings);
             ValidateRunes(catalog, errors, warnings);
+            ValidateRuneRuntimeRules(errors);
             ValidateFormation(catalog, errors, warnings);
             ValidateDefaultSave(catalog, errors);
             ValidateStageSessionResolution(catalog, errors);
@@ -295,6 +282,15 @@ namespace RuneGate.Editor
                 if (!string.IsNullOrWhiteSpace(rune.EffectKey))
                 {
                     effectKeys.Add(rune.EffectKey);
+                    if (rune.EffectKey.IndexOf("placeholder", System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        errors.Add($"{rune.name} still uses placeholder effect key {rune.EffectKey}.");
+                    }
+
+                    if (!RuneEffectApplier.IsImplementedEffectKey(rune.EffectKey))
+                    {
+                        errors.Add($"{rune.name} uses unsupported effect key {rune.EffectKey}.");
+                    }
                 }
             }
 
@@ -306,13 +302,57 @@ namespace RuneGate.Editor
                 }
             }
 
-            HashSet<string> implementedEffectKeys = new HashSet<string>(ImplementedRuntimeRuneEffects);
-            foreach (string effectKey in effectKeys)
+        }
+
+        private static void ValidateRuneRuntimeRules(List<string> errors)
+        {
+            GameObject testObject = new GameObject("RuneRuntimeRulesSmoke");
+            try
             {
-                if (!implementedEffectKeys.Contains(effectKey))
+                HeroRuneCombatModifiers modifiers = testObject.AddComponent<HeroRuneCombatModifiers>();
+                modifiers.AddLightningDamagePercent(0.35f);
+                modifiers.AddSplashDamagePercent(0.3f);
+                modifiers.AddChainDamagePercent(0.45f);
+                modifiers.AddCrushDamagePercent(0.25f);
+                if (!Mathf.Approximately(modifiers.LightningDamagePercent, 0.35f) ||
+                    !Mathf.Approximately(modifiers.SplashDamagePercent, 0.3f) ||
+                    !Mathf.Approximately(modifiers.ChainDamagePercent, 0.45f) ||
+                    !Mathf.Approximately(modifiers.CrushDamagePercent, 0.25f))
                 {
-                    warnings.Add($"Rune catalog contains unsupported effect key: {effectKey}.");
+                    errors.Add("Hero rune combat modifiers did not retain configured values.");
                 }
+
+                int crushedDamage = HeroRuneCombatModifiers.CalculateCrushDamage(100, 0.25f, true);
+                int normalDamage = HeroRuneCombatModifiers.CalculateCrushDamage(100, 0.25f, false);
+                if (crushedDamage != 125 || normalDamage != 100)
+                {
+                    errors.Add($"Crush rune damage rule failed. target={crushedDamage}, normal={normalDamage}.");
+                }
+
+                float stackedSlow = RuneEffectApplier.CombineSlowPercent(0.2f, 0.2f);
+                if (!Mathf.Approximately(stackedSlow, 0.36f))
+                {
+                    errors.Add($"Monster slow stacking rule failed. Expected 0.36, found {stackedSlow:0.###}.");
+                }
+
+                CrystalController crystal = testObject.AddComponent<CrystalController>();
+                crystal.Initialize(100);
+                crystal.AddShield(35);
+                crystal.TakeDamage(20);
+                if (crystal.CurrentHp != 100 || crystal.ShieldHp != 15)
+                {
+                    errors.Add($"Crystal shield did not absorb damage first. HP={crystal.CurrentHp}, shield={crystal.ShieldHp}.");
+                }
+
+                crystal.TakeDamage(25);
+                if (crystal.CurrentHp != 90 || crystal.ShieldHp != 0)
+                {
+                    errors.Add($"Crystal shield overflow damage failed. HP={crystal.CurrentHp}, shield={crystal.ShieldHp}.");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(testObject);
             }
         }
 

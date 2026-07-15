@@ -623,6 +623,25 @@ namespace RuneGate
             pauseController.Resume();
             Debug.Log("[RuneGateE2E] Battle pause and lifecycle resume verified.");
 
+            if (!Require(pauseController.Pause(), "Battle could not pause for rune runtime verification."))
+            {
+                yield break;
+            }
+
+            if (!VerifyRuntimeRuneEffects())
+            {
+                yield break;
+            }
+
+            pauseController.Resume();
+            yield return WaitForCondition(HasSlowedActiveMonster, SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "Frost rune did not apply its accumulated slow to an active or newly spawned monster."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateSystemE2E] All combat rune mechanics verified.");
+
             const string diagnosticUpgradeId = "upgrade_hero_attack";
             SaveManager.AddGold(321);
             SaveManager.SetUpgradeLevel(diagnosticUpgradeId, 2);
@@ -1160,6 +1179,138 @@ namespace RuneGate
 
                 yield return null;
             }
+        }
+
+        private bool VerifyRuntimeRuneEffects()
+        {
+            BattleManager activeBattleManager = FindAnyObjectByType<BattleManager>();
+            RuneEffectApplier applier = FindAnyObjectByType<RuneEffectApplier>();
+            CrystalController crystal = FindAnyObjectByType<CrystalController>();
+            if (!Require(activeBattleManager != null && applier != null && crystal != null,
+                    "Battle rune runtime components are missing."))
+            {
+                return false;
+            }
+
+            HeroController hero = null;
+            for (int i = 0; i < activeBattleManager.Heroes.Count; i++)
+            {
+                if (activeBattleManager.Heroes[i] != null && activeBattleManager.Heroes[i].IsAlive)
+                {
+                    hero = activeBattleManager.Heroes[i];
+                    break;
+                }
+            }
+
+            if (!Require(hero != null, "Rune runtime verification could not find an active hero."))
+            {
+                return false;
+            }
+
+            int initialAppliedRuneCount = applier.AppliedRuneCount;
+            List<RuneData> runes = PrototypeAssetLoader.LoadRunes();
+            string[] requiredRuneIds =
+            {
+                "rune_lightning",
+                "rune_explosion",
+                "rune_guardian",
+                "rune_purification",
+                "rune_shatter",
+                "rune_chain",
+                "rune_frost"
+            };
+
+            Dictionary<string, RuneData> requiredRunes = new Dictionary<string, RuneData>();
+            for (int i = 0; i < requiredRuneIds.Length; i++)
+            {
+                RuneData rune = FindRuneById(runes, requiredRuneIds[i]);
+                if (!Require(rune != null, $"Rune runtime verification is missing {requiredRuneIds[i]}."))
+                {
+                    return false;
+                }
+
+                if (!Require(
+                        rune.EffectKey.IndexOf("placeholder", StringComparison.OrdinalIgnoreCase) < 0 &&
+                        RuneEffectApplier.IsImplementedEffectKey(rune.EffectKey),
+                        $"{rune.DisplayName} still uses an unsupported or placeholder effect key."))
+                {
+                    return false;
+                }
+
+                requiredRunes.Add(requiredRuneIds[i], rune);
+            }
+
+            hero.TakeDamage(Mathf.Min(20, Mathf.Max(1, hero.CurrentHp - 1)));
+            crystal.TakeDamage(Mathf.Min(20, Mathf.Max(1, crystal.CurrentHp - 1)));
+            int heroHpBeforePurify = hero.CurrentHp;
+            int crystalHpBeforePurify = crystal.CurrentHp;
+            applier.ApplyRune(requiredRunes["rune_purification"], activeBattleManager.Heroes, crystal);
+            if (!Require(hero.CurrentHp > heroHpBeforePurify && crystal.CurrentHp > crystalHpBeforePurify,
+                    "Purification rune did not heal both hero and crystal."))
+            {
+                return false;
+            }
+
+            applier.ApplyRune(requiredRunes["rune_lightning"], activeBattleManager.Heroes, crystal);
+            applier.ApplyRune(requiredRunes["rune_explosion"], activeBattleManager.Heroes, crystal);
+            applier.ApplyRune(requiredRunes["rune_shatter"], activeBattleManager.Heroes, crystal);
+            applier.ApplyRune(requiredRunes["rune_chain"], activeBattleManager.Heroes, crystal);
+            applier.ApplyRune(requiredRunes["rune_frost"], activeBattleManager.Heroes, crystal);
+            applier.ApplyRune(requiredRunes["rune_guardian"], activeBattleManager.Heroes, crystal);
+
+            HeroRuneCombatModifiers modifiers = hero.RuneCombatModifiers;
+            if (!Require(modifiers != null &&
+                    modifiers.LightningDamagePercent > 0f &&
+                    modifiers.SplashDamagePercent > 0f &&
+                    modifiers.ChainDamagePercent > 0f &&
+                    modifiers.CrushDamagePercent > 0f,
+                    "Hero rune combat modifiers were not applied."))
+            {
+                return false;
+            }
+
+            BattleHUD hud = FindAnyObjectByType<BattleHUD>();
+            if (!Require(
+                    crystal.ShieldHp == Mathf.RoundToInt(requiredRunes["rune_guardian"].Value) &&
+                    hud != null && hud.CrystalHpText.Contains("보호막"),
+                    "Guardian rune shield or its Korean HUD state was not applied."))
+            {
+                return false;
+            }
+
+            return Require(
+                applier.AppliedRuneCount == initialAppliedRuneCount + requiredRuneIds.Length &&
+                applier.AccumulatedMonsterSlowPercent > 0f,
+                "Rune applier did not retain the selected combat modifiers.");
+        }
+
+        private static RuneData FindRuneById(IReadOnlyList<RuneData> runes, string runeId)
+        {
+            for (int i = 0; runes != null && i < runes.Count; i++)
+            {
+                RuneData rune = runes[i];
+                if (rune != null && string.Equals(rune.RuneId, runeId, StringComparison.Ordinal))
+                {
+                    return rune;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool HasSlowedActiveMonster()
+        {
+            IReadOnlyList<MonsterController> monsters = MonsterController.ActiveMonsters;
+            for (int i = 0; i < monsters.Count; i++)
+            {
+                MonsterController monster = monsters[i];
+                if (monster != null && monster.IsAlive && monster.MoveSpeedMultiplier < 0.999f)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private bool Require(bool condition, string failureMessage)
