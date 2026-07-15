@@ -1560,6 +1560,7 @@ namespace RuneGate.Editor
             {
                 SetInt(serializedObject, "laneCount", 3);
                 SetFloat(serializedObject, "laneSpacing", 2.15f);
+                SetFloat(serializedObject, "portraitLaneSpacingRatio", 0.25f);
                 SetFloat(serializedObject, "spawnX", 5.75f);
                 SetFloat(serializedObject, "crystalX", -5.15f);
                 SetObjectList(serializedObject, "laneSpawnPoints", ToObjectArray(spawnPoints));

@@ -6,79 +6,125 @@ namespace RuneGate
     {
         public static float GetHeroTargetHeight(HeroData heroData)
         {
+            return GetHeroTargetHeight(heroData, GameFrameLayout.IsPortrait);
+        }
+
+        public static float GetHeroTargetHeight(HeroData heroData, bool portrait)
+        {
+            float baseHeight;
             if (heroData == null)
             {
-                return 1.35f;
+                baseHeight = 1.35f;
+                return baseHeight * ResolvePortraitScale(portrait, false);
             }
 
             switch (heroData.Role)
             {
                 case HeroRole.Tank:
-                    return 1.48f;
+                    baseHeight = 1.48f;
+                    break;
                 case HeroRole.Engineer:
-                    return 1.6f;
+                    baseHeight = 1.6f;
+                    break;
                 case HeroRole.Healer:
-                    return 1.4f;
+                    baseHeight = 1.4f;
+                    break;
                 case HeroRole.Assassin:
-                    return 1.38f;
+                    baseHeight = 1.38f;
+                    break;
                 case HeroRole.Mage:
                 case HeroRole.RangedDps:
-                    return 1.35f;
+                    baseHeight = 1.35f;
+                    break;
                 default:
-                    return 1.32f;
+                    baseHeight = 1.32f;
+                    break;
             }
+
+            return baseHeight * ResolvePortraitScale(portrait, false);
         }
 
         public static Vector2 GetMonsterHpBarSize(MonsterData monsterData)
         {
+            Vector2 baseSize;
             if (monsterData == null)
             {
-                return new Vector2(0.72f, 0.07f);
+                baseSize = new Vector2(0.72f, 0.07f);
+                return baseSize * ResolvePortraitScale(GameFrameLayout.IsPortrait, false);
             }
 
             if (monsterData.IsBoss)
             {
-                return new Vector2(1.55f, 0.13f);
+                baseSize = new Vector2(1.55f, 0.13f);
+                return baseSize * ResolvePortraitScale(GameFrameLayout.IsPortrait, true);
             }
 
             switch (monsterData.MonsterType)
             {
                 case MonsterType.Tank:
-                    return new Vector2(0.95f, 0.09f);
+                    baseSize = new Vector2(0.95f, 0.09f);
+                    break;
                 case MonsterType.Fast:
                 case MonsterType.Flying:
-                    return new Vector2(0.64f, 0.07f);
+                    baseSize = new Vector2(0.64f, 0.07f);
+                    break;
                 default:
-                    return new Vector2(0.72f, 0.075f);
+                    baseSize = new Vector2(0.72f, 0.075f);
+                    break;
             }
+
+            return baseSize * ResolvePortraitScale(GameFrameLayout.IsPortrait, false);
         }
 
         public static float GetMonsterTargetHeight(MonsterData monsterData)
         {
+            return GetMonsterTargetHeight(monsterData, GameFrameLayout.IsPortrait);
+        }
+
+        public static float GetMonsterTargetHeight(MonsterData monsterData, bool portrait)
+        {
+            float baseHeight;
             if (monsterData == null)
             {
-                return 1f;
+                return ResolvePortraitScale(portrait, false);
             }
 
             if (monsterData.IsBoss)
             {
-                return 2.55f;
+                return 2.55f * ResolvePortraitScale(portrait, true);
             }
 
             switch (monsterData.MonsterType)
             {
                 case MonsterType.Tank:
-                    return 1.38f;
+                    baseHeight = 1.38f;
+                    break;
                 case MonsterType.Fast:
                 case MonsterType.Flying:
-                    return 0.95f;
+                    baseHeight = 0.95f;
+                    break;
                 case MonsterType.Splitter:
-                    return 1f;
+                    baseHeight = 1f;
+                    break;
                 case MonsterType.Undead:
-                    return 1.08f;
+                    baseHeight = 1.08f;
+                    break;
                 default:
-                    return 1.02f;
+                    baseHeight = 1.02f;
+                    break;
             }
+
+            return baseHeight * ResolvePortraitScale(portrait, false);
+        }
+
+        private static float ResolvePortraitScale(bool portrait, bool boss)
+        {
+            if (!portrait)
+            {
+                return 1f;
+            }
+
+            return boss ? 1.1f : 1.18f;
         }
 
         public static float GetMonsterHpBarYOffset(MonsterData monsterData)

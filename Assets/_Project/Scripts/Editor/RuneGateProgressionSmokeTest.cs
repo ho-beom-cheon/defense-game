@@ -774,6 +774,18 @@ namespace RuneGate.Editor
                     errors.Add($"{label} Battle skill panel is too short: {battle.SkillPanelArea.height:0.0}.");
                 }
 
+                if (size.y >= size.x)
+                {
+                    float viewportAspect = battle.BattleFieldFrame.width / Mathf.Max(1f, battle.BattleFieldFrame.height);
+                    float cameraWorldHeight = Mathf.Max(7.5f, 12.5f / Mathf.Max(0.01f, viewportAspect));
+                    float presentationSpacing = LaneManager.ResolvePresentationLaneSpacing(2.15f, cameraWorldHeight, true);
+                    float threeLaneSpread = presentationSpacing * 2f;
+                    if (threeLaneSpread < cameraWorldHeight * 0.48f)
+                    {
+                        errors.Add($"{label} portrait lane spread is too narrow: {threeLaneSpread:0.00}/{cameraWorldHeight:0.00}.");
+                    }
+                }
+
                 Rect runePopup = GameFrameLayout.PopupFrameForSize(size.x, size.y, 620f, 520f, 0.92f, 0.78f);
                 Rect resultPopup = GameFrameLayout.PopupFrameForSize(size.x, size.y, 620f, 560f, 0.92f, 0.78f);
                 ValidatePositiveRect($"{label} Rune popup", runePopup, errors);
@@ -790,6 +802,15 @@ namespace RuneGate.Editor
                 {
                     errors.Add($"{label} Result popup is too small: {FormatRect(resultPopup)}.");
                 }
+            }
+
+            float landscapeHeroHeight = RuntimeSpritePolicy.GetHeroTargetHeight(null, false);
+            float portraitHeroHeight = RuntimeSpritePolicy.GetHeroTargetHeight(null, true);
+            float landscapeMonsterHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(null, false);
+            float portraitMonsterHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(null, true);
+            if (portraitHeroHeight <= landscapeHeroHeight || portraitMonsterHeight <= landscapeMonsterHeight)
+            {
+                errors.Add("Portrait RuntimePixel presentation scale must improve hero and monster readability.");
             }
         }
 
