@@ -59,6 +59,7 @@
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.
+- TitleScene now uses the first-pass splash candidate as its Android portrait background. Physical-device cutout coverage and final title art remain unverified.
 - Current-content APK and AAB menu/CLI automation is implemented and build-tested; release keystore signing and Play Console upload remain manual release tasks.
 - Store submission still needs final target SDK, signing, permissions, Data Safety, and privacy review.
 
