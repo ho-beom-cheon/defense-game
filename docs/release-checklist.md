@@ -34,6 +34,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Android full-chapter QA: Stage 1~10 Victory, 10 upgrades, and Stage 10 Grumbar spawn passed on 2026-07-15
 - Android pause/lifecycle QA: manual pause, resume, restart, stage-select exit, and background auto-pause passed on 2026-07-15
 - StageSelect formation editor QA: Android system flow passed on 2026-07-16; 6-hero slot swap, JSON disk reload, and BattleScene placement verified
+- Grumbar boss QA: Android full-chapter E2E passed on 2026-07-16; phases 2/3, five reinforcements, boss HUD, and Stage 10 Victory verified
 
 ## Progression QA
 
@@ -43,6 +44,8 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] Stage 2 해금 확인
 - [x] Stage 1~10 목록 표시 확인
 - [x] Stage 10에서 그룸바르 보스 등장 확인
+- [x] 그룸바르 페이즈 2/3 및 지원군 5기 스폰 확인
+- [x] 그룸바르 한국어 HP/페이즈 HUD 확인
 - [x] Victory 결과창 정상 표시
 - [x] Defeat 결과창 정상 표시
 - [x] Result 버튼: 다음 스테이지 / 재시도 / 업그레이드 / 스테이지 선택 정상

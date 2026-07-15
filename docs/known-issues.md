@@ -27,7 +27,7 @@
 - Undead revival is enabled only on Hard and Nightmare; Easy and Normal keep the hook disabled for clear-time stability.
 - Attack, hit, and death feedback is still prototype-level.
 - Some skill effects are RuntimePixel placeholders, not final animation.
-- Boss phase changes, summon patterns, and monster-specific behavior are still mostly hooks.
+- Grumbar now has three HP-based phases, five Gate Imp reinforcements, phase-gated damage, and a dedicated boss HUD. Boss-specific area attacks and additional summon patterns are not implemented yet.
 - Stage 1-10 data is playable-oriented, but long-form balance testing is still required.
 
 ## Progression / Save

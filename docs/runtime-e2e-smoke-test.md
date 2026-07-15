@@ -34,7 +34,7 @@
   -logFile ".utmp/runtime-full-chapter.log"
 ```
 
-이 모드는 Stage 1~10을 순서대로 실제 플레이한다. 각 스테이지에서 Victory와 다음 스테이지 해금을 확인하고, UpgradeScene에서 구매 가능한 강화 하나를 구매한 뒤 다음 스테이지로 진행한다. Stage 10에서는 그룸바르 보스 스폰도 확인한다.
+이 모드는 Stage 1~10을 순서대로 실제 플레이한다. 각 스테이지에서 Victory와 다음 스테이지 해금을 확인하고, UpgradeScene에서 구매 가능한 강화 하나를 구매한 뒤 다음 스테이지로 진행한다. Stage 10에서는 그룸바르 보스 스폰, 페이즈 2·3, 지원군 5기, 한국어 보스 HUD도 확인한다.
 
 성공 기준은 `RUNEGATE_FULL_CHAPTER_E2E_PASSED`와 종료 코드 `0`이다.
 

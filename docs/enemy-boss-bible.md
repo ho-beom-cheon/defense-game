@@ -41,7 +41,7 @@ BattleScene에서는 `Assets/_Project/Art/RuntimePixel/Monsters`와 `Assets/_Pro
 | --- | --- | --- | ---: | ---: | ---: | ---: |
 | `Orc Warlord.asset` | 그룸바르 | 문파괴자 | 1750 | 0.48 | 6 | 360 |
 
-그룸바르는 Stage 10에서 등장하는 첫 보스다. v0.7에서는 높은 HP와 강한 근접 압박을 중심으로 클리어 가능한 보스전으로 구성한다. 몬스터 소환 hook과 phase change hook은 이후 확장 대상으로 남긴다.
+그룸바르는 Stage 10에서 등장하는 첫 보스다. 체력 65%와 30%에서 페이즈가 상승하며 이동 속도, 공격 빈도, 공격 피해가 강화된다. 각 페이즈 전환에는 문틈 도깨비 지원군이 여러 라인에 등장한다. 보스 전용 광역 공격과 추가 소환 패턴은 이후 확장 대상으로 남긴다.
 
 ## Future Codex UI Hooks
 

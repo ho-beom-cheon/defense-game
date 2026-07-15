@@ -29,6 +29,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Android 에뮬레이터에서 Stage 1~10 전체 승리, 강화 10회, Stage 10 그룸바르 스폰 검증
 - 전투 일시정지, 재시작, 스테이지 복귀와 Android 백그라운드 자동 일시정지 지원
 - StageSelect 3라인 x 3슬롯 영웅 편성 편집 및 로컬 JSON 즉시 저장
+- Stage 10 그룸바르 3단계 페이즈, 지원군 소환, 전용 보스 HP HUD
 
 ## 실행 방법
 
@@ -124,6 +125,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/battle-pause-lifecycle-v089.md`
 - `docs/procedural-sfx-v089.md`
 - `docs/formation-editor-v090.md`
+- `docs/grumbar-boss-phases-v090.md`
 - `docs/release-checklist.md`
 - `docs/store-listing-draft.md`
 - `docs/privacy-checklist.md`
