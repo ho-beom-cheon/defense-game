@@ -61,10 +61,11 @@ namespace RuneGate
             else
             {
                 float scrollHeight = Mathf.Max(120f, frame.MainArea.height - 8f);
+                float cardWidth = Mathf.Max(280f, frame.MainArea.width - 44f);
                 scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Height(scrollHeight));
                 for (int i = 0; i < upgradeManager.AvailableUpgrades.Count; i++)
                 {
-                    DrawUpgrade(upgradeManager.AvailableUpgrades[i]);
+                    DrawUpgrade(upgradeManager.AvailableUpgrades[i], cardWidth);
                     GUILayout.Space(UIResponsiveLayout.SmallGap);
                 }
 
@@ -89,7 +90,7 @@ namespace RuneGate
             GUILayout.EndArea();
         }
 
-        private void DrawUpgrade(UpgradeData upgradeData)
+        private void DrawUpgrade(UpgradeData upgradeData, float cardWidth)
         {
             if (upgradeData == null)
             {
@@ -103,9 +104,9 @@ namespace RuneGate
             bool maxed = level >= maxLevel;
             bool canAfford = SaveManager.Current.totalGold >= cost;
 
-            GUILayout.BeginHorizontal(GUI.skin.box);
+            GUILayout.BeginHorizontal(GUI.skin.box, GUILayout.Width(cardWidth));
             RuntimePixelGuiUtility.DrawIcon(GetUpgradeIconPath(upgradeData), 42f);
-            GUILayout.BeginVertical(GUILayout.MinWidth(180f));
+            GUILayout.BeginVertical(GUILayout.Width(Mathf.Max(180f, cardWidth - 74f)));
             string displayName = GameTextMapper.UpgradeName(upgradeData);
             GUILayout.Label($"{displayName}  \ub808\ubca8 {level}/{maxLevel}");
             GUILayout.Label(GameTextMapper.UpgradeDescription(upgradeData));

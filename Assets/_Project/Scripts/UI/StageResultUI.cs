@@ -74,14 +74,22 @@ namespace RuneGate
 
             Rect drawRect = CenteredPanelRect();
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
-            GUILayout.BeginArea(drawRect, panelStyle);
+            GUI.Box(drawRect, GUIContent.none, panelStyle);
+            float horizontalPadding = Application.isMobilePlatform ? 18f : 14f;
+            float verticalPadding = Application.isMobilePlatform ? 16f : 12f;
+            Rect contentRect = new Rect(
+                drawRect.x + horizontalPadding,
+                drawRect.y + verticalPadding,
+                Mathf.Max(1f, drawRect.width - horizontalPadding * 2f),
+                Mathf.Max(1f, drawRect.height - verticalPadding * 2f));
+            GUILayout.BeginArea(contentRect);
             GUI.SetNextControlName("PopupLayer_ResultPopup");
             GUILayout.Label(latestResult.IsVictory ? "\uc2b9\ub9ac!" : "\ud328\ubc30");
             GUILayout.Space(UIResponsiveLayout.SmallGap);
             float primaryButtonHeight = UIResponsiveLayout.TouchHeight(38f);
             float secondaryButtonHeight = UIResponsiveLayout.TouchHeight(34f);
             float reservedActionHeight = primaryButtonHeight + secondaryButtonHeight + 70f;
-            resultScrollPosition = GUILayout.BeginScrollView(resultScrollPosition, GUILayout.Height(Mathf.Max(170f, drawRect.height - reservedActionHeight)));
+            resultScrollPosition = GUILayout.BeginScrollView(resultScrollPosition, GUILayout.Height(Mathf.Max(170f, contentRect.height - reservedActionHeight)));
             GUILayout.Label(ResultMessage);
             GUILayout.Label($"\ud68d\ub4dd \uace8\ub4dc +{goldEarned}");
             if (battleGoldEarned != goldEarned)
@@ -467,7 +475,7 @@ namespace RuneGate
         {
             bool mobilePortrait = Application.isMobilePlatform && GameFrameLayout.IsPortrait;
             float preferredWidth = mobilePortrait ? 760f : 620f;
-            float preferredHeight = mobilePortrait ? 940f : 560f;
+            float preferredHeight = mobilePortrait ? 800f : 560f;
             return GameFrameLayout.PopupFrame(Mathf.Max(panelRect.width, preferredWidth), Mathf.Max(panelRect.height, preferredHeight), 0.92f, 0.78f);
         }
     }
