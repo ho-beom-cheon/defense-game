@@ -46,6 +46,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Grumbar attack-pattern QA: phase 1 hit 2 same-lane heroes, phase 2 hit 3 lane-front heroes, phase 3 hit all 6 heroes and Crystal; Stage 10 Victory passed on 2026-07-16
 - Difficulty progression QA: fresh-save Hard lock, Normal Chapter 1 Hard unlock, sequential Hard Stage 1~10 progression, Nightmare unlock, reward multiplier, and JSON disk reload passed on Android 15 API 35 emulator on 2026-07-16
 - All-difficulty campaign QA: Normal/Hard/Nightmare Stage 1~10 actual battles, 30 victories, 20 upgrades, three complete Grumbar phase/pattern runs, and disk reload passed on Android 15 API 35 emulator on 2026-07-16
+- Stage map presentation QA: Chapter 1 node path, stage status, actual-wave enemy roster, and Stage 1~9 boss reference cleanup passed on Android 15 API 35 emulator on 2026-07-16
 
 ## Progression QA
 
@@ -210,6 +211,18 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - APK: `72,059,881 bytes`
 - SHA-256: `B2EAD6111A76EC0CCC4B862D6A3CBD82A1257F2C9F233C84DB396A026920FA36`
 - Detailed evidence: `docs/android-title-background-v090.md`
+
+### Android Stage Map QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-69-stage-map-presentation`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: alternating Chapter 1 node path, stage numbers, status, detail panel, and actual-wave monster roster passed
+- Data integrity: Stage 1~9 boss references removed; Stage 10 Grumbar ownership enforced by Validator and Smoke Test
+- Regression: Normal Stage 1~10, 10 upgrades, and Grumbar phase/pattern smoke passed
+- APK: `72,063,313 bytes`
+- SHA-256: `330569E721E1088B5BFC6952546F5E335797D5071AE64646787D3186304AD8BB`
+- Detailed evidence: `docs/android-stage-map-qa-v090.md`
 
 ## Audio QA
 

@@ -38,6 +38,8 @@
 
 - StageSelect의 3x3 편성 편집은 Android 자동 시스템 흐름에서 슬롯 교환, JSON 재로드, BattleScene 반영까지 통과했다.
 - StageSelect에서 BattleScene으로 이어지는 Android 일반 실행/터치/캡처는 1080x2400 에뮬레이터에서 통과했다. 편성 팝업의 최종 터치 영역과 텍스트 잘림은 실기기에서 추가 확인이 필요하다.
+- StageSelect의 Chapter 1은 좌우 교차형 10개 노드 지도로 표시되며 Android 1080x2400 화면 QA를 통과했다. 해금 노드 원본 이미지의 숫자 `1`은 런타임 번호 오버레이로 교정하며, 최종 아트에서는 숫자 없는 공용 노드 이미지가 필요하다.
+- Stage 1~9의 잘못된 그룸바르 참조를 제거하고 Stage 10만 보스를 소유하도록 Validator와 Smoke Test를 강화했다. 현재 지도 표현은 Chapter 1에 한정된다.
 - 드래그 앤 드롭, 영웅 프리셋, 편성별 추천 표시는 아직 제공하지 않는다.
 - UpgradeScene now recovers its four upgrade assets from RuntimeContentCatalog when serialized scene slots are null. Scene references should still be regenerated before final prefab/Canvas conversion.
 - Upgrade purchase, immediate UI refresh, process-restart persistence, and Stage 2 unlock passed Android emulator QA. Physical-device scroll inertia and rapid repeated taps remain unverified.
