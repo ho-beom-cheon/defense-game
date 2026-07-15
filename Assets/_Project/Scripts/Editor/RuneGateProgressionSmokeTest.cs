@@ -80,6 +80,7 @@ namespace RuneGate.Editor
             ValidateStagePlayabilityEstimates(catalog, errors, warnings);
             ValidateUpgradePurchaseAfterStageOne(catalog, errors);
             ValidateResponsiveLayouts(errors);
+            ValidateAudioRules(errors);
             ValidateDifficultyRules(errors);
             return errors.Count == 0;
         }
@@ -998,6 +999,26 @@ namespace RuneGate.Editor
             if (SaveManager.TryPurchaseUpgrade(poorSave, firstUpgrade.UpgradeId, cost, firstUpgrade.MaxLevel))
             {
                 errors.Add($"{firstUpgrade.name} purchase succeeded without enough gold.");
+            }
+        }
+
+        private static void ValidateAudioRules(List<string> errors)
+        {
+            float volume = 0.25f;
+            float[] expectedSteps = { 0.5f, 0.75f, 1f, 0.25f };
+            for (int i = 0; i < expectedSteps.Length; i++)
+            {
+                volume = AudioManager.NextVolumeStep(volume);
+                if (!Mathf.Approximately(volume, expectedSteps[i]))
+                {
+                    errors.Add($"Audio volume step {i + 1} was {volume}, expected {expectedSteps[i]}.");
+                    break;
+                }
+            }
+
+            if (!ProceduralBgmFactory.IsAvailable)
+            {
+                errors.Add("Procedural BGM fallback is unavailable.");
             }
         }
 

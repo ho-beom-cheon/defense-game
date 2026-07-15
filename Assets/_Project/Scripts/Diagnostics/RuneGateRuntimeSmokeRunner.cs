@@ -44,6 +44,11 @@ namespace RuneGate
         private int upgradePurchaseCount;
         private float previousTimeScale = 1f;
         private float nextFullChapterSkillCastTime;
+        private bool audioSettingsCaptured;
+        private bool originalBgmEnabled;
+        private bool originalSfxEnabled;
+        private float originalBgmVolume;
+        private float originalSfxVolume;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
@@ -83,6 +88,7 @@ namespace RuneGate
 
         private void OnDestroy()
         {
+            RestoreAudioSettings();
             UnbindBattleEvents();
             Time.timeScale = previousTimeScale;
         }
@@ -409,6 +415,10 @@ namespace RuneGate
             SaveManager.SetLastSelectedStageId(selectedStageId);
             SaveManager.UnlockStage("stage_goblin_forest_02");
             SaveManager.Save();
+            AudioManager.SetBgmEnabled(false);
+            AudioManager.SetBgmVolume(0.75f);
+            AudioManager.SetSfxEnabled(true);
+            AudioManager.SetSfxVolume(0.5f);
 
             if (!Require(File.Exists(SaveManager.SavePath), "Cross-process save writer did not create the JSON file."))
             {
@@ -453,7 +463,19 @@ namespace RuneGate
                 yield break;
             }
 
-            Debug.Log("RUNEGATE_SAVE_READ_PASSED");
+            if (!Require(!AudioManager.BgmEnabled && AudioManager.SfxEnabled &&
+                         Mathf.Approximately(AudioManager.BgmVolume, 0.75f) &&
+                         Mathf.Approximately(AudioManager.SfxVolume, 0.5f),
+                    "Cross-process reader did not restore independent audio settings."))
+            {
+                yield break;
+            }
+
+            AudioManager.SetBgmEnabled(true);
+            AudioManager.SetBgmVolume(0.4f);
+            AudioManager.SetSfxEnabled(true);
+            AudioManager.SetSfxVolume(0.55f);
+            Debug.Log("RUNEGATE_SAVE_READ_PASSED: progression and audio settings restored across processes.");
             CleanupSmokeSave();
             Time.timeScale = previousTimeScale;
             yield return null;
@@ -488,16 +510,34 @@ namespace RuneGate
                 }
             }
 
-            bool originalSfxEnabled = AudioManager.SfxEnabled;
-            AudioManager.SetSfxEnabled(!originalSfxEnabled);
-            if (!Require(AudioManager.SfxEnabled != originalSfxEnabled, "SFX setting did not change."))
+            if (!Require(audioManager.HasMusicClip(BgmTheme.Menu) && audioManager.HasMusicClip(BgmTheme.Battle),
+                    "Runtime audio is missing Menu or Battle BGM."))
             {
-                AudioManager.SetSfxEnabled(originalSfxEnabled);
                 yield break;
             }
 
-            AudioManager.SetSfxEnabled(originalSfxEnabled);
-            Debug.Log($"[RuneGateE2E] Runtime audio verified with {audioManager.PlayableClipCount} clips.");
+            CaptureAudioSettings();
+            AudioManager.SetBgmEnabled(true);
+            AudioManager.SetSfxEnabled(true);
+            AudioManager.SetBgmVolume(0.75f);
+            AudioManager.SetSfxVolume(0.5f);
+            if (!Require(AudioManager.BgmEnabled && AudioManager.SfxEnabled &&
+                    Mathf.Approximately(AudioManager.BgmVolume, 0.75f) &&
+                    Mathf.Approximately(AudioManager.SfxVolume, 0.5f),
+                    "Independent BGM/SFX settings did not persist through PlayerPrefs."))
+            {
+                yield break;
+            }
+
+            yield return WaitForCondition(
+                () => audioManager.CurrentMusicTheme == BgmTheme.Menu && audioManager.IsMusicPlaying,
+                SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "TitleScene did not start the Menu BGM."))
+            {
+                yield break;
+            }
+
+            Debug.Log($"[RuneGateAudioE2E] Menu BGM and {audioManager.PlayableClipCount} SFX clips verified.");
 
             SceneManager.LoadScene("StageSelectScene");
             yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene", SceneLoadTimeoutSeconds);
@@ -517,6 +557,12 @@ namespace RuneGate
             StageData firstStage = FindStage(stageSelect.Stages, 1);
             StageData secondStage = FindStage(stageSelect.Stages, 2);
             if (!Require(firstStage != null && secondStage != null, "Stage 1 or Stage 2 data is missing."))
+            {
+                yield break;
+            }
+
+            if (!Require(audioManager.CurrentMusicTheme == BgmTheme.Menu && audioManager.IsMusicPlaying,
+                    "StageSelectScene did not retain the Menu BGM."))
             {
                 yield break;
             }
@@ -573,6 +619,16 @@ namespace RuneGate
             {
                 yield break;
             }
+
+            yield return WaitForCondition(
+                () => audioManager.CurrentMusicTheme == BgmTheme.Battle && audioManager.IsMusicPlaying,
+                SceneLoadTimeoutSeconds);
+            if (!Require(waitSucceeded, "BattleScene did not switch to the Battle BGM."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateAudioE2E] Battle BGM transition verified.");
 
             yield return WaitForCondition(() => HeroController.ActiveHeroes.Count >= persistedFormation.Count, SceneLoadTimeoutSeconds);
             if (!Require(waitSucceeded && RuntimeFormationMatches(persistedFormation),
@@ -826,6 +882,12 @@ namespace RuneGate
                 yield break;
             }
 
+            if (!Require(audioManager.CurrentMusicTheme == BgmTheme.Menu && audioManager.IsMusicPlaying,
+                    "UpgradeScene did not switch back to the Menu BGM."))
+            {
+                yield break;
+            }
+
             GameSession.SelectStage(firstStage, secondStage.StageId);
             SceneManager.LoadScene("BattleScene");
             yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
@@ -870,6 +932,14 @@ namespace RuneGate
                 yield break;
             }
 
+            if (!Require(audioManager.CurrentMusicTheme == BgmTheme.Menu && audioManager.IsMusicPlaying,
+                    "StageSelectScene did not restore the Menu BGM after result navigation."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateAudioE2E] Scene BGM transitions and independent audio settings verified.");
+            RestoreAudioSettings();
             Debug.Log("RUNEGATE_SYSTEM_FLOWS_E2E_PASSED: Retry, Upgrade, and Stage Select navigation verified.");
             CleanupSmokeSave();
             Time.timeScale = previousTimeScale;
@@ -1212,6 +1282,34 @@ namespace RuneGate
                 observedBossPhaseController.PhaseChanged -= HandleBossPhaseChanged;
                 observedBossPhaseController = null;
             }
+        }
+
+        private void CaptureAudioSettings()
+        {
+            if (audioSettingsCaptured)
+            {
+                return;
+            }
+
+            originalBgmEnabled = AudioManager.BgmEnabled;
+            originalSfxEnabled = AudioManager.SfxEnabled;
+            originalBgmVolume = AudioManager.BgmVolume;
+            originalSfxVolume = AudioManager.SfxVolume;
+            audioSettingsCaptured = true;
+        }
+
+        private void RestoreAudioSettings()
+        {
+            if (!audioSettingsCaptured)
+            {
+                return;
+            }
+
+            AudioManager.SetBgmVolume(originalBgmVolume);
+            AudioManager.SetSfxVolume(originalSfxVolume);
+            AudioManager.SetBgmEnabled(originalBgmEnabled);
+            AudioManager.SetSfxEnabled(originalSfxEnabled);
+            audioSettingsCaptured = false;
         }
 
         private IEnumerator WaitForCondition(Func<bool> condition, float timeoutSeconds)

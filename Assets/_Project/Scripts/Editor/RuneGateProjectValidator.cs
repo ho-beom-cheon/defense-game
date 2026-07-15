@@ -225,6 +225,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/KoreanFontManager.cs",
             "Assets/_Project/Scripts/UI/SafeAreaFitter.cs",
             "Assets/_Project/Scripts/Audio/AudioManager.cs",
+            "Assets/_Project/Scripts/Audio/BgmTheme.cs",
+            "Assets/_Project/Scripts/Audio/ProceduralBgmFactory.cs",
             "Assets/_Project/Scripts/Audio/ProceduralSfxFactory.cs",
             "Assets/_Project/Scripts/Audio/SfxKey.cs",
             "Assets/_Project/Editor/UIFrameValidator.cs",
@@ -410,6 +412,7 @@ namespace RuneGate.Editor
             "docs/battle-ui-stability-v088.md",
             "docs/local-save-stability-v088.md",
             "docs/runtime-e2e-smoke-test.md",
+            "docs/scene-bgm-audio-settings-v090.md",
             "CHANGELOG.md"
         };
 
@@ -1306,6 +1309,7 @@ namespace RuneGate.Editor
             string[] forbiddenSnippets =
             {
                 "Kingdom Crystal defended",
+                "BGM: \\uc900\\ube44 \\uc911",
                 "Missing StageData",
                 "State WaveRunning",
                 "State RuneSelection",
