@@ -837,9 +837,14 @@ namespace RuneGate.Editor
                     }
                 }
 
-                if (PrototypeAssetLoader.GetStageNumber(stage) == 10 && stage.BossMonster == null)
+                int stageNumber = PrototypeAssetLoader.GetStageNumber(stage);
+                if (stageNumber == 10 && stage.BossMonster == null)
                 {
                     errors.Add($"{stageLabel} must reference the Stage 10 boss monster.");
+                }
+                else if (stageNumber > 0 && stageNumber < 10 && stage.BossMonster != null)
+                {
+                    errors.Add($"{stageLabel} must not reference the Chapter 1 boss before Stage 10.");
                 }
             }
 

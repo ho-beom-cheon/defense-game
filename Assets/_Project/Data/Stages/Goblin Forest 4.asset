@@ -22,4 +22,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3638fb4915ace5140a0e3c041db1f818, type: 2}
   - {fileID: 11400000, guid: f8e4c126bf7fd2c4d98dd27c68de8d6e, type: 2}
   - {fileID: 11400000, guid: 2db07dde5685c95479022f898dad0a9a, type: 2}
-  bossMonster: {fileID: 11400000, guid: fb34c19b71f69a6498c3ad009274e8e6, type: 2}
+  bossMonster: {fileID: 0}

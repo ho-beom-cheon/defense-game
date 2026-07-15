@@ -130,6 +130,10 @@ namespace RuneGate.Editor
                 {
                     errors.Add("Stage 10 must reference a boss monster.");
                 }
+                else if (stageNumber > 0 && stageNumber < 10 && stage.BossMonster != null)
+                {
+                    errors.Add($"Stage {stageNumber} must not reference the Chapter 1 boss before Stage 10.");
+                }
             }
 
             if (!stageTenHasBossWave)

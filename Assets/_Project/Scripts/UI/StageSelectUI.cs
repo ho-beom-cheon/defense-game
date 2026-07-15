@@ -127,28 +127,58 @@ namespace RuneGate
 
         private void DrawCompactStageListPanel(Rect area, GUIStyle buttonStyle)
         {
-            float titleHeight = Mathf.Max(24f, 28f * UIResponsiveLayout.ReadabilityScale);
-            GUI.Label(new Rect(area.x + 10f, area.y + 8f, area.width - 20f, titleHeight), "\uc2a4\ud14c\uc774\uc9c0 \ubaa9\ub85d");
+            float titleHeight = Mathf.Max(28f, 30f * UIResponsiveLayout.ReadabilityScale);
+            GUIStyle titleStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 17f);
+            GUIStyle progressStyle = CreateStageMapLabelStyle(TextAnchor.MiddleRight, false, 13f);
+            GUI.Label(new Rect(area.x + 10f, area.y + 8f, area.width - 20f, titleHeight), "\uc81c1\uc7a5 \u00b7 \uc7ac\ubb38 \uc232 \uacbd\ub85c", titleStyle);
+            GUI.Label(new Rect(area.x + 10f, area.y + 8f, area.width - 20f, titleHeight), $"\ud074\ub9ac\uc5b4 {CountClearedStages()}/{stages.Count}", progressStyle);
             Rect viewRect = new Rect(area.x + 10f, area.y + titleHeight + 12f, Mathf.Max(1f, area.width - 20f), Mathf.Max(1f, area.height - titleHeight - 22f));
-            float rowHeight = UIResponsiveLayout.TouchHeight(34f);
-            Rect contentRect = new Rect(0f, 0f, Mathf.Max(1f, viewRect.width - 18f), Mathf.Max(viewRect.height, stages.Count * rowHeight + 6f));
+            float contentWidth = Mathf.Max(1f, viewRect.width - 18f);
+            float nodeSize = Mathf.Clamp(72f * UIResponsiveLayout.ReadabilityScale, 78f, 112f);
+            float stepHeight = Mathf.Clamp((viewRect.height - 16f) / Mathf.Max(1, stages.Count), nodeSize + 16f, nodeSize + 50f);
+            Rect contentRect = new Rect(0f, 0f, contentWidth, Mathf.Max(viewRect.height, stages.Count * stepHeight + 16f));
             stageScrollPosition = GUI.BeginScrollView(viewRect, stageScrollPosition, contentRect);
 
+            DrawStageMapConnectors(contentRect.width, stepHeight, nodeSize);
             for (int i = 0; i < stages.Count; i++)
             {
-                DrawCompactStageButton(i, rowHeight, contentRect.width, buttonStyle);
+                DrawStageMapNode(i, stepHeight, nodeSize, contentRect.width);
             }
 
             GUI.EndScrollView();
         }
 
-        private void DrawCompactStageButton(int index, float rowHeight, float contentWidth, GUIStyle buttonStyle)
+        private void DrawStageMapConnectors(float contentWidth, float stepHeight, float nodeSize)
+        {
+            for (int i = 0; i < stages.Count - 1; i++)
+            {
+                Vector2 from = GetStageNodeCenter(i, contentWidth, stepHeight, nodeSize);
+                Vector2 to = GetStageNodeCenter(i + 1, contentWidth, stepHeight, nodeSize);
+                float middleY = (from.y + to.y) * 0.5f;
+                bool reached = IsStageReached(i + 1);
+                Color pathColor = reached
+                    ? new Color(0.72f, 0.58f, 0.24f, 0.90f)
+                    : new Color(0.24f, 0.29f, 0.30f, 0.72f);
+                DrawSolidRect(new Rect(from.x - 2f, from.y, 4f, Mathf.Max(1f, middleY - from.y)), pathColor);
+                DrawSolidRect(new Rect(Mathf.Min(from.x, to.x), middleY - 2f, Mathf.Abs(to.x - from.x), 4f), pathColor);
+                DrawSolidRect(new Rect(to.x - 2f, middleY, 4f, Mathf.Max(1f, to.y - middleY)), pathColor);
+            }
+        }
+
+        private void DrawStageMapNode(int index, float stepHeight, float nodeSize, float contentWidth)
         {
             StageData stageData = stages[index];
-            float y = index * rowHeight + 2f;
+            float rowY = index * stepHeight + 6f;
+            Rect rowRect = new Rect(4f, rowY, Mathf.Max(1f, contentWidth - 8f), Mathf.Max(1f, stepHeight - 12f));
+            bool selected = index == selectedStageIndex;
+            if (selected)
+            {
+                DrawSolidRect(rowRect, new Color(0.10f, 0.25f, 0.20f, 0.78f));
+            }
+
             if (stageData == null)
             {
-                GUI.Label(new Rect(8f, y, 320f, rowHeight - 4f), $"{index + 1}. \uc2a4\ud14c\uc774\uc9c0 \ub370\uc774\ud130 \uc5c6\uc74c");
+                GUI.Label(rowRect, $"{index + 1}. \uc2a4\ud14c\uc774\uc9c0 \ub370\uc774\ud130 \uc5c6\uc74c");
                 return;
             }
 
@@ -156,19 +186,53 @@ namespace RuneGate
             bool unlocked = SaveManager.IsStageUnlocked(stageData.StageId, selectedDifficultyId);
             bool cleared = SaveManager.IsStageCleared(stageData.StageId, selectedDifficultyId);
             string iconPath = cleared ? RuntimePixelAssetLoader.UiStageNodeCleared : unlocked ? RuntimePixelAssetLoader.UiStageNodeUnlocked : RuntimePixelAssetLoader.UiStageNodeLocked;
-            float iconSize = Mathf.Min(28f, rowHeight - 8f);
-            DrawTextureIcon(new Rect(6f, y + (rowHeight - iconSize) * 0.5f, iconSize, iconSize), iconPath);
-            if (GUI.Button(new Rect(38f, y, Mathf.Max(120f, contentWidth - 46f), rowHeight - 4f), BuildStageButtonLabel(index, stageData, unlocked, cleared), buttonStyle))
+            Vector2 center = GetStageNodeCenter(index, contentWidth, stepHeight, nodeSize);
+            float selectedScale = selected ? 1.08f : 1f;
+            float visualSize = nodeSize * selectedScale;
+            Rect iconRect = new Rect(center.x - visualSize * 0.5f, center.y - visualSize * 0.5f, visualSize, visualSize);
+            DrawTextureIcon(iconRect, iconPath);
+
+            GUIStyle numberStyle = CreateStageMapLabelStyle(TextAnchor.MiddleCenter, true, 13f);
+            if (unlocked && !cleared)
+            {
+                float centerBadgeSize = visualSize * 0.42f;
+                Rect centerBadge = new Rect(center.x - centerBadgeSize * 0.5f, center.y - centerBadgeSize * 0.5f, centerBadgeSize, centerBadgeSize);
+                DrawSolidRect(centerBadge, new Color(0.07f, 0.16f, 0.13f, 0.98f));
+                GUI.Label(centerBadge, (index + 1).ToString(), numberStyle);
+            }
+            else
+            {
+                Rect numberBadge = new Rect(iconRect.xMax - 34f, iconRect.yMax - 28f, 32f, 24f);
+                DrawSolidRect(numberBadge, selected ? new Color(0.78f, 0.58f, 0.18f, 0.96f) : new Color(0.03f, 0.06f, 0.07f, 0.96f));
+                GUI.Label(numberBadge, (index + 1).ToString("00"), numberStyle);
+            }
+
+            float textGap = 10f;
+            bool nodeOnLeft = index % 2 == 0;
+            Rect textRect = nodeOnLeft
+                ? new Rect(iconRect.xMax + textGap, rowRect.y + 10f, Mathf.Max(80f, rowRect.xMax - iconRect.xMax - textGap - 8f), rowRect.height - 20f)
+                : new Rect(rowRect.x + 8f, rowRect.y + 10f, Mathf.Max(80f, iconRect.x - rowRect.x - textGap - 8f), rowRect.height - 20f);
+            TextAnchor textAnchor = nodeOnLeft ? TextAnchor.MiddleLeft : TextAnchor.MiddleRight;
+            GUIStyle stageNameStyle = CreateStageMapLabelStyle(textAnchor, true, 15f);
+            GUIStyle statusStyle = CreateStageMapLabelStyle(textAnchor, false, 12f);
+            float nameHeight = textRect.height * 0.56f;
+            GUI.Label(new Rect(textRect.x, textRect.y, textRect.width, nameHeight), GameTextMapper.StageName(stageData), stageNameStyle);
+            GUI.Label(new Rect(textRect.x, textRect.y + nameHeight - 2f, textRect.width, textRect.height - nameHeight + 2f),
+                $"{GetStageDifficultyLabel(index)} \u00b7 {GetStageStatusLabel(unlocked, cleared)}", statusStyle);
+
+            if (GUI.Button(rowRect, GUIContent.none, GUIStyle.none))
             {
                 selectedStageIndex = index;
+                detailScrollPosition = Vector2.zero;
             }
         }
 
-        private string BuildStageButtonLabel(int index, StageData stageData, bool unlocked, bool cleared)
+        private static Vector2 GetStageNodeCenter(int index, float contentWidth, float stepHeight, float nodeSize)
         {
-            string status = cleared ? "\ud074\ub9ac\uc5b4" : unlocked ? "\ud574\uae08" : "\uc7a0\uae40";
-            string difficulty = GetStageDifficultyLabel(index);
-            return $"{index + 1}. {GameTextMapper.StageName(stageData)} - {difficulty} ({status})";
+            float sideInset = nodeSize * 0.56f + 12f;
+            float x = index % 2 == 0 ? sideInset : Mathf.Max(sideInset, contentWidth - sideInset);
+            float y = index * stepHeight + stepHeight * 0.5f + 6f;
+            return new Vector2(x, y);
         }
 
         private void DrawCompactStageDetailPanel(Rect area, GUIStyle buttonStyle)
@@ -183,37 +247,67 @@ namespace RuneGate
             string selectedDifficultyId = SaveManager.Current.selectedDifficultyId;
             bool unlocked = SaveManager.IsStageUnlocked(selectedStage.StageId, selectedDifficultyId);
             bool cleared = SaveManager.IsStageCleared(selectedStage.StageId, selectedDifficultyId);
-            float actionHeight = UIResponsiveLayout.TouchHeight(34f);
-            Rect contentRect = new Rect(area.x + 12f, area.y + 10f, Mathf.Max(1f, area.width - 24f), Mathf.Max(1f, area.height - actionHeight - 30f));
+            float actionHeight = UIResponsiveLayout.TouchHeight(42f);
+            Rect contentRect = new Rect(area.x + 14f, area.y + 12f, Mathf.Max(1f, area.width - 28f), Mathf.Max(1f, area.height - actionHeight - 38f));
             float lineHeight = Mathf.Max(26f, 28f * UIResponsiveLayout.ReadabilityScale);
             float descriptionHeight = Mathf.Max(lineHeight * 2f, GUI.skin.label.CalcHeight(new GUIContent(string.IsNullOrWhiteSpace(selectedStage.DescriptionKorean) ? "\uade0\uc5f4\uc5d0\uc11c \ubab0\ub824\uc624\ub294 \uc801\uc744 \ub9c9\uc73c\uc138\uc694." : selectedStage.DescriptionKorean), contentRect.width - 18f));
-            float requiredHeight = lineHeight * 8f + descriptionHeight + 24f;
+            List<MonsterData> stageMonsters = CollectStageMonsters(selectedStage);
+            float heroHeaderHeight = Mathf.Max(86f, 92f * UIResponsiveLayout.ReadabilityScale);
+            float enemyRowHeight = Mathf.Max(42f, 46f * UIResponsiveLayout.ReadabilityScale);
+            float enemyHeight = Mathf.Max(lineHeight, stageMonsters.Count * enemyRowHeight);
+            float requiredHeight = heroHeaderHeight + lineHeight * 9f + descriptionHeight + enemyHeight + 52f;
             Rect scrollContent = new Rect(0f, 0f, contentRect.width - 18f, Mathf.Max(contentRect.height, requiredHeight));
             detailScrollPosition = GUI.BeginScrollView(contentRect, detailScrollPosition, scrollContent);
             float y = 0f;
-            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), GameTextMapper.StageName(selectedStage));
-            y += lineHeight;
-            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\ub09c\uc774\ub3c4: {GetStageDifficultyLabel(selectedStageIndex)}");
-            y += lineHeight;
-            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight),
-                $"도전 난이도: {GameTextMapper.Difficulty(selectedDifficultyId)} / 보상 x{DifficultyRules.RewardMultiplier(selectedDifficultyId):0.##}");
-            y += lineHeight;
-            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), cleared ? "\uc0c1\ud0dc: \ud074\ub9ac\uc5b4" : unlocked ? "\uc0c1\ud0dc: \ud574\uae08" : "\uc0c1\ud0dc: \uc7a0\uae40");
-            y += lineHeight;
-            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), string.IsNullOrWhiteSpace(selectedStage.SubtitleKorean) ? "\uade0\uc5f4 \ubc29\uc5b4 \uc804\uc120" : selectedStage.SubtitleKorean);
+            string iconPath = cleared ? RuntimePixelAssetLoader.UiStageNodeCleared : unlocked ? RuntimePixelAssetLoader.UiStageNodeUnlocked : RuntimePixelAssetLoader.UiStageNodeLocked;
+            float headerIconSize = Mathf.Min(80f, heroHeaderHeight - 8f);
+            DrawTextureIcon(new Rect(0f, 4f, headerIconSize, headerIconSize), iconPath);
+            GUIStyle stageTitleStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 20f);
+            GUIStyle stageMetaStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, false, 13f);
+            float headerTextX = headerIconSize + 12f;
+            GUI.Label(new Rect(headerTextX, 4f, scrollContent.width - headerTextX, heroHeaderHeight * 0.54f), GameTextMapper.StageName(selectedStage), stageTitleStyle);
+            GUI.Label(new Rect(headerTextX, heroHeaderHeight * 0.50f, scrollContent.width - headerTextX, heroHeaderHeight * 0.38f),
+                $"{GetStageDifficultyLabel(selectedStageIndex)} \u00b7 {GetStageStatusLabel(unlocked, cleared)}", stageMetaStyle);
+            y += heroHeaderHeight;
+
+            DrawSectionDivider(scrollContent.width, y);
+            y += 12f;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), string.IsNullOrWhiteSpace(selectedStage.SubtitleKorean) ? "\uade0\uc5f4 \ubc29\uc5b4 \uc804\uc120" : selectedStage.SubtitleKorean, CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 15f));
             y += lineHeight;
             GUI.Label(new Rect(0f, y, scrollContent.width, descriptionHeight), string.IsNullOrWhiteSpace(selectedStage.DescriptionKorean) ? "\uade0\uc5f4\uc5d0\uc11c \ubab0\ub824\uc624\ub294 \uc801\uc744 \ub9c9\uc73c\uc138\uc694." : selectedStage.DescriptionKorean);
             y += descriptionHeight;
-            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\ud06c\ub9ac\uc2a4\ud0c8 HP: {selectedStage.CrystalHp}");
+            DrawSectionDivider(scrollContent.width, y);
+            y += 14f;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), "\uc804\ud22c \uae30\ub85d", CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 15f));
             y += lineHeight;
-            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\uc6e8\uc774\ube0c: {(selectedStage.Waves != null ? selectedStage.Waves.Count : 0)}");
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\ud06c\ub9ac\uc2a4\ud0c8 HP {selectedStage.CrystalHp}   \u00b7   \uc6e8\uc774\ube0c {(selectedStage.Waves != null ? selectedStage.Waves.Count : 0)}");
             y += lineHeight;
-            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), BuildDifficultyProgressText());
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), $"\uc608\uc0c1 \uc804\ud22c \uace8\ub4dc {EstimateStageGold(selectedStage)}+   \u00b7   \ubcf4\uc0c1 x{DifficultyRules.RewardMultiplier(selectedDifficultyId):0.##}");
+            y += lineHeight;
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight * 2f), BuildDifficultyProgressText());
+            y += lineHeight * 2f;
+
+            GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), "\ucd9c\ud604 \uc801\uc131 \uae30\ub85d", CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 15f));
+            y += lineHeight;
+            if (stageMonsters.Count == 0)
+            {
+                GUI.Label(new Rect(0f, y, scrollContent.width, lineHeight), "\ucd9c\ud604 \uc801 \uc815\ubcf4 \uc5c6\uc74c");
+            }
+            else
+            {
+                for (int i = 0; i < stageMonsters.Count; i++)
+                {
+                    DrawMonsterRecordRow(new Rect(0f, y, scrollContent.width, enemyRowHeight - 4f), stageMonsters[i]);
+                    y += enemyRowHeight;
+                }
+            }
+
             GUI.EndScrollView();
 
             bool previousEnabled = GUI.enabled;
             GUI.enabled = previousEnabled && unlocked && !sceneTransitionRequested;
-            if (GUI.Button(new Rect(area.x + 12f, area.yMax - actionHeight - 12f, area.width - 24f, actionHeight), "\uc804\ud22c \uc2dc\uc791", buttonStyle))
+            string actionLabel = unlocked ? "\uc120\ud0dd\ud55c \uc804\uc120\uc73c\ub85c \ucd9c\uc804" : "\uc7a0\uae34 \uc804\uc120";
+            if (GUI.Button(new Rect(area.x + 14f, area.yMax - actionHeight - 14f, area.width - 28f, actionHeight), actionLabel, buttonStyle))
             {
                 StartSelectedStage(selectedStage);
             }
@@ -251,6 +345,143 @@ namespace RuneGate
             }
 
             GUI.enabled = previousEnabled;
+        }
+
+        private int CountClearedStages()
+        {
+            int count = 0;
+            string difficultyId = SaveManager.Current.selectedDifficultyId;
+            for (int i = 0; i < stages.Count; i++)
+            {
+                StageData stageData = stages[i];
+                if (stageData != null && SaveManager.IsStageCleared(stageData.StageId, difficultyId))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private bool IsStageReached(int index)
+        {
+            if (index < 0 || index >= stages.Count || stages[index] == null)
+            {
+                return false;
+            }
+
+            return SaveManager.IsStageUnlocked(stages[index].StageId, SaveManager.Current.selectedDifficultyId);
+        }
+
+        private static string GetStageStatusLabel(bool unlocked, bool cleared)
+        {
+            return cleared ? "\ud074\ub9ac\uc5b4" : unlocked ? "\ucd9c\uc804 \uac00\ub2a5" : "\uc7a0\uae40";
+        }
+
+        private static GUIStyle CreateStageMapLabelStyle(TextAnchor alignment, bool bold, float baseFontSize)
+        {
+            GUIStyle style = new GUIStyle(GUI.skin.label)
+            {
+                alignment = alignment,
+                fontStyle = bold ? FontStyle.Bold : FontStyle.Normal,
+                fontSize = Mathf.RoundToInt(baseFontSize * UIResponsiveLayout.ReadabilityScale),
+                wordWrap = true,
+                clipping = TextClipping.Clip
+            };
+            KoreanFontManager.ApplyFont(style);
+            return style;
+        }
+
+        private static void DrawSolidRect(Rect rect, Color color)
+        {
+            Color previousColor = GUI.color;
+            GUI.color = color;
+            GUI.DrawTexture(rect, Texture2D.whiteTexture, ScaleMode.StretchToFill, true);
+            GUI.color = previousColor;
+        }
+
+        private static void DrawSectionDivider(float width, float y)
+        {
+            DrawSolidRect(new Rect(0f, y, width, 2f), new Color(0.33f, 0.48f, 0.50f, 0.60f));
+        }
+
+        private static List<MonsterData> CollectStageMonsters(StageData stageData)
+        {
+            List<MonsterData> monsters = new List<MonsterData>();
+            if (stageData == null || stageData.Waves == null)
+            {
+                return monsters;
+            }
+
+            for (int waveIndex = 0; waveIndex < stageData.Waves.Count; waveIndex++)
+            {
+                WaveData waveData = stageData.Waves[waveIndex];
+                if (waveData == null || waveData.Spawns == null)
+                {
+                    continue;
+                }
+
+                for (int spawnIndex = 0; spawnIndex < waveData.Spawns.Count; spawnIndex++)
+                {
+                    WaveSpawnData spawnData = waveData.Spawns[spawnIndex];
+                    MonsterData monsterData = spawnData != null ? spawnData.MonsterData : null;
+                    if (monsterData != null && !monsters.Contains(monsterData))
+                    {
+                        monsters.Add(monsterData);
+                    }
+                }
+            }
+
+            return monsters;
+        }
+
+        private static int EstimateStageGold(StageData stageData)
+        {
+            int total = 0;
+            if (stageData == null || stageData.Waves == null)
+            {
+                return total;
+            }
+
+            for (int waveIndex = 0; waveIndex < stageData.Waves.Count; waveIndex++)
+            {
+                WaveData waveData = stageData.Waves[waveIndex];
+                if (waveData == null || waveData.Spawns == null)
+                {
+                    continue;
+                }
+
+                for (int spawnIndex = 0; spawnIndex < waveData.Spawns.Count; spawnIndex++)
+                {
+                    WaveSpawnData spawnData = waveData.Spawns[spawnIndex];
+                    if (spawnData != null && spawnData.MonsterData != null)
+                    {
+                        total += Mathf.Max(0, spawnData.MonsterData.RewardGold) * Mathf.Max(0, spawnData.Count);
+                    }
+                }
+            }
+
+            return DifficultyRules.ApplyMonsterRewardGold(total, SaveManager.Current.selectedDifficultyId);
+        }
+
+        private static void DrawMonsterRecordRow(Rect rect, MonsterData monsterData)
+        {
+            DrawSolidRect(rect, new Color(0.05f, 0.10f, 0.10f, 0.78f));
+            float iconSize = Mathf.Min(rect.height - 6f, 46f * UIResponsiveLayout.ReadabilityScale);
+            Rect iconRect = new Rect(rect.x + 6f, rect.y + (rect.height - iconSize) * 0.5f, iconSize, iconSize);
+            if (monsterData != null && monsterData.RuntimeSprite != null)
+            {
+                GUI.DrawTexture(iconRect, monsterData.RuntimeSprite.texture, ScaleMode.ScaleToFit, true);
+            }
+
+            string monsterName = monsterData != null ? monsterData.DisplayNameKorean : "\uc801\uc131 \uae30\ub85d \uc5c6\uc74c";
+            string role = monsterData != null ? monsterData.SubtitleKorean : string.Empty;
+            GUIStyle nameStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, true, 13f);
+            GUIStyle roleStyle = CreateStageMapLabelStyle(TextAnchor.MiddleLeft, false, 11f);
+            float textX = iconRect.xMax + 8f;
+            float textWidth = Mathf.Max(1f, rect.xMax - textX - 6f);
+            GUI.Label(new Rect(textX, rect.y + 2f, textWidth, rect.height * 0.54f), monsterName, nameStyle);
+            GUI.Label(new Rect(textX, rect.y + rect.height * 0.48f, textWidth, rect.height * 0.46f), role, roleStyle);
         }
 
         private void DrawFormationEditorPopup()
