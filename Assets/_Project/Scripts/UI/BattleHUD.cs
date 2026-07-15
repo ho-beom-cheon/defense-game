@@ -6,6 +6,7 @@ namespace RuneGate
     {
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private CrystalController crystalController;
+        [SerializeField] private BattlePauseController pauseController;
         [SerializeField] private bool drawRuntimeGui = true;
         [SerializeField] private Rect panelRect = new Rect(8f, 12f, 248f, 210f);
 
@@ -113,12 +114,62 @@ namespace RuneGate
                 GUILayout.EndVertical();
             }
 
+            GUILayout.FlexibleSpace();
+            bool previousEnabled = GUI.enabled;
+            GUI.enabled = pauseController != null && pauseController.CanPause && !pauseController.IsPaused;
+            if (GUILayout.Button("일시정지", GUILayout.Width(Mathf.Clamp(drawRect.width * 0.13f, 96f, 150f)), GUILayout.Height(UIResponsiveLayout.TouchHeight(32f))))
+            {
+                pauseController.Pause();
+            }
+
+            GUI.enabled = previousEnabled;
+
             GUILayout.EndHorizontal();
 
             bool showHeroSummary = !Application.isMobilePlatform || !GameFrameLayout.IsPortrait;
             if (showHeroSummary && battleManager != null && drawRect.height >= 104f)
             {
                 DrawHeroSummaryStrip(drawRect.width);
+            }
+
+            GUILayout.EndArea();
+
+            if (pauseController != null && pauseController.IsPaused)
+            {
+                DrawPausePopup();
+            }
+        }
+
+        private void DrawPausePopup()
+        {
+            UIPopupGuiUtility.DrawDimOverlay();
+            Rect popupRect = GameFrameLayout.PopupFrame(620f, 520f, 0.88f, 0.54f);
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUILayout.BeginArea(popupRect, panelStyle);
+            GUI.SetNextControlName("PopupLayer_BattlePause");
+            GUILayout.Label("전투 일시정지");
+            GUILayout.Space(UIResponsiveLayout.SmallGap);
+            GUILayout.Label(pauseController.PausedByLifecycle
+                ? "앱이 백그라운드로 전환되어 전투를 멈췄습니다."
+                : "전투가 멈춰 있습니다.");
+            GUILayout.FlexibleSpace();
+
+            float primaryHeight = UIResponsiveLayout.TouchHeight(44f);
+            float secondaryHeight = UIResponsiveLayout.TouchHeight(38f);
+            if (GUILayout.Button("계속하기", GUILayout.Height(primaryHeight)))
+            {
+                pauseController.Resume();
+            }
+
+            GUILayout.Space(UIResponsiveLayout.SmallGap);
+            if (GUILayout.Button("전투 재시작", GUILayout.Height(secondaryHeight)))
+            {
+                pauseController.RestartBattle();
+            }
+
+            if (GUILayout.Button("스테이지 선택", GUILayout.Height(secondaryHeight)))
+            {
+                pauseController.OpenStageSelect();
             }
 
             GUILayout.EndArea();
@@ -166,6 +217,18 @@ namespace RuneGate
             {
                 crystalController = FindAnyObjectByType<CrystalController>();
             }
+
+            if (pauseController == null)
+            {
+                pauseController = FindAnyObjectByType<BattlePauseController>();
+            }
+
+            if (pauseController == null)
+            {
+                pauseController = gameObject.AddComponent<BattlePauseController>();
+            }
+
+            pauseController.Configure(battleManager);
         }
 
         private void HandleCrystalHpChanged(int currentHp, int maxHp)
