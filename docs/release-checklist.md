@@ -313,6 +313,20 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - SHA-256: `0C24E184DFF4B479D2A83620E66F2456DDB2C5C71910817828115341A63F5F75`
 - Detailed evidence: `docs/android-runtime-sprite-alpha-qa-v090.md`
 
+### Android Title Menu Polish QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-83-title-menu-polish`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: Korean brand header, splash background, lower command panel, progress summary, settings panel, and centered dim confirmation modals passed
+- Touch flow: fresh campaign start, StageSelect transition, continue state, new-campaign cancellation, settings, and reset confirmation passed
+- Project Validator: passed
+- Progression Smoke Test: passed title Safe Area, overlap, minimum-size, progress-summary, and campaign-state validation
+- Regression: Normal Stage 1~10, 10 upgrades, Hard/Nightmare unlocks, and Grumbar phase/pattern smoke passed
+- APK: `72,099,993 bytes`
+- SHA-256: `148066765FF8895A38B2620EFC065C87967725D68213344C2F39FF106FBD7CA2`
+- Detailed evidence: `docs/android-title-menu-polish-v090.md`
+
 ## Audio QA
 
 - [x] Unity 내장 Audio 모듈 활성화
