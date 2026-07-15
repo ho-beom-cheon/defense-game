@@ -58,6 +58,8 @@
 - Clean-branch Android APK/AAB builds succeeded on 2026-07-12. APK installation and the Stage 1 core flow passed on an Android 15 API 35 emulator; physical-device installation is not verified yet.
 - Android 15 API 35 emulator full-chapter QA passed on 2026-07-15: Stage 1~10 Victory, 10 upgrade purchases, and the Stage 10 Grumbar spawn were verified at 1080x2400 Portrait.
 - Android BattleScene now fills the portrait battlefield viewport with an explicit runtime backdrop and clears non-camera IMGUI regions, preventing StageSelect UI residue after scene transitions.
+- Portrait BattleScene now spreads three lanes across about half of the camera world height and scales RuntimePixel units for readability. The current landscape background is stretched to the portrait camera bounds, so final portrait or tileable battlefield art is still required.
+- Spawn, crystal target, and hero slot y positions now resolve from the same runtime lane policy. Physical-device cutout and long-session combat readability remain unverified.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.

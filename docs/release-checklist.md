@@ -47,6 +47,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Difficulty progression QA: fresh-save Hard lock, Normal Chapter 1 Hard unlock, sequential Hard Stage 1~10 progression, Nightmare unlock, reward multiplier, and JSON disk reload passed on Android 15 API 35 emulator on 2026-07-16
 - All-difficulty campaign QA: Normal/Hard/Nightmare Stage 1~10 actual battles, 30 victories, 20 upgrades, three complete Grumbar phase/pattern runs, and disk reload passed on Android 15 API 35 emulator on 2026-07-16
 - Stage map presentation QA: Chapter 1 node path, stage status, actual-wave enemy roster, and Stage 1~9 boss reference cleanup passed on Android 15 API 35 emulator on 2026-07-16
+- Portrait battlefield composition QA: camera-bounds background fill, dynamic three-lane spread, larger RuntimePixel units, Rune Selection, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 
 ## Progression QA
 
@@ -223,6 +224,19 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - APK: `72,063,313 bytes`
 - SHA-256: `330569E721E1088B5BFC6952546F5E335797D5071AE64646787D3186304AD8BB`
 - Detailed evidence: `docs/android-stage-map-qa-v090.md`
+
+### Android Portrait Battlefield Composition QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-71-portrait-battlefield-composition`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: camera-bounds background fill, three-lane vertical distribution, RuntimePixel unit and HP Bar readability passed
+- Flow: normal Stage 1 battle and Rune Selection display/selection passed
+- Progression Smoke Test: passed
+- Regression: Normal Stage 1~10, 10 upgrades, and Grumbar phase 1/2/3 patterns passed
+- APK: `72,065,241 bytes`
+- SHA-256: `EBDE5CC635893ABC95A7529989000A7159B9CF2E993371BC9A4545BA071EF6BF`
+- Detailed evidence: `docs/android-portrait-battlefield-composition-v090.md`
 
 ## Audio QA
 
