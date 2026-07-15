@@ -90,6 +90,12 @@ namespace RuneGate
             }
         }
 
+        public static bool UndeadRevives(string difficultyId)
+        {
+            string normalized = Normalize(difficultyId);
+            return normalized == Hard || normalized == Nightmare;
+        }
+
         private static float MonsterHpMultiplier(string difficultyId)
         {
             switch (Normalize(difficultyId))

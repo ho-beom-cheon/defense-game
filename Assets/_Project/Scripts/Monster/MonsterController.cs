@@ -71,6 +71,8 @@ namespace RuneGate
         public int RewardGold => ShadowContractService.GetRewardGold(monsterData, variantType);
         public SpriteRenderer VisualSpriteRenderer => spriteRenderer;
         public MonsterCombatState CombatState => combatState;
+        public bool IsMovementAttackLocked => movementController != null && movementController.IsAttacking;
+        public bool HasActiveAttackRoutine => attackRoutine != null;
         public static IReadOnlyList<MonsterController> ActiveMonsters => activeMonsters;
 
         private void OnEnable()
@@ -132,7 +134,7 @@ namespace RuneGate
                 MoveTowardCrystal(speed, previousPosition);
             }
 
-            if (Vector3.Distance(transform.position, crystalTargetPosition) <= reachDistance)
+            if (HasReachedCrystal())
             {
                 DamageCrystalAndRemove();
             }
@@ -344,8 +346,13 @@ namespace RuneGate
         private void MoveTowardCrystal(float baseSpeed, Vector3 previousPosition)
         {
             EnsureMovementController();
+            if (attackRoutine == null && movementController.IsAttacking)
+            {
+                movementController.SetAttackState(false);
+            }
+
             movementController.Configure(baseSpeed * speedMultiplier, meleeStopDistance, monsterPersonalSpace, 2f);
-            float destinationX = ApplyMonsterSeparation(crystalTargetPosition.x);
+            float destinationX = ApplyMonsterSeparation(ResolveCrystalContactX());
             float laneY = ResolveLaneY();
             float minX = laneManager != null ? laneManager.GetMinCombatX() : Mathf.Min(crystalTargetPosition.x, transform.position.x) - 0.25f;
             float maxX = laneManager != null ? laneManager.GetMaxCombatX() : Mathf.Max(crystalTargetPosition.x, transform.position.x) + 0.25f;
@@ -364,6 +371,17 @@ namespace RuneGate
             {
                 visualController?.PlayIdle();
             }
+        }
+
+        private bool HasReachedCrystal()
+        {
+            float leadingEdgeX = spriteRenderer != null ? spriteRenderer.bounds.min.x : transform.position.x;
+            return leadingEdgeX <= ResolveCrystalContactX() + Mathf.Max(0.01f, reachDistance);
+        }
+
+        private float ResolveCrystalContactX()
+        {
+            return laneManager != null ? laneManager.GetCrystalContactX(laneIndex) : crystalTargetPosition.x;
         }
 
         private void CaptureOriginalSpriteColor()
@@ -700,7 +718,7 @@ namespace RuneGate
             switch (monsterData.MonsterType)
             {
                 case MonsterType.Undead:
-                    if (!revivedOnce)
+                    if (!revivedOnce && DifficultyRules.UndeadRevives(DifficultyRules.CurrentDifficultyId))
                     {
                         revivedOnce = true;
                         currentHp = Mathf.Max(1, maxHp / 2);

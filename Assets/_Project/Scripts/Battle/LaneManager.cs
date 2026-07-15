@@ -117,6 +117,12 @@ namespace RuneGate
             return new Vector3(crystalX, GetLaneY(safeLaneIndex), 0f);
         }
 
+        public float GetCrystalContactX(int laneIndex)
+        {
+            // The raw crystal target can sit behind the UI-safe combat edge on portrait layouts.
+            return Mathf.Max(GetCrystalTargetPosition(laneIndex).x, GetMinCombatX());
+        }
+
         public float GetLaneY(int laneIndex)
         {
             int safeLaneIndex = Mathf.Clamp(laneIndex, 0, LaneCount - 1);
