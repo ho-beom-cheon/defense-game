@@ -82,6 +82,7 @@ namespace RuneGate.Editor
             ValidateUpgradePurchaseAfterStageOne(catalog, errors);
             ValidateResponsiveLayouts(errors);
             ValidateAudioRules(errors);
+            ValidateAndroidBuildPipelineRules(errors);
             ValidateDifficultyRules(errors);
             return errors.Count == 0;
         }
@@ -1362,6 +1363,50 @@ namespace RuneGate.Editor
             if (!ProceduralBgmFactory.IsAvailable)
             {
                 errors.Add("Procedural BGM fallback is unavailable.");
+            }
+        }
+
+        private static void ValidateAndroidBuildPipelineRules(List<string> errors)
+        {
+            string valid = RuneGateCurrentBuildPipeline.ValidateReleaseSigningConfiguration(
+                "release.keystore",
+                "store-password",
+                "release-alias",
+                "alias-password",
+                true);
+            if (!string.IsNullOrEmpty(valid))
+            {
+                errors.Add($"Valid Android release signing values were rejected: {valid}.");
+            }
+
+            string[] actualErrors =
+            {
+                RuneGateCurrentBuildPipeline.ValidateReleaseSigningConfiguration(string.Empty, "store-password", "release-alias", "alias-password", true),
+                RuneGateCurrentBuildPipeline.ValidateReleaseSigningConfiguration("release.keystore", string.Empty, "release-alias", "alias-password", true),
+                RuneGateCurrentBuildPipeline.ValidateReleaseSigningConfiguration("release.keystore", "store-password", string.Empty, "alias-password", true),
+                RuneGateCurrentBuildPipeline.ValidateReleaseSigningConfiguration("release.keystore", "store-password", "release-alias", string.Empty, true),
+                RuneGateCurrentBuildPipeline.ValidateReleaseSigningConfiguration("release.keystore", "store-password", "release-alias", "alias-password", false)
+            };
+            string[] expectedErrors =
+            {
+                "missing_keystore_path",
+                "missing_keystore_password",
+                "missing_key_alias",
+                "missing_key_alias_password",
+                "keystore_file_not_found"
+            };
+            for (int i = 0; i < expectedErrors.Length; i++)
+            {
+                if (actualErrors[i] != expectedErrors[i])
+                {
+                    errors.Add($"Android signing validation {i + 1} returned '{actualErrors[i]}', expected '{expectedErrors[i]}'.");
+                }
+            }
+
+            string manifestPath = RuneGateCurrentBuildPipeline.ArtifactManifestPath("C:/build/RuneGateDefense.aab");
+            if (manifestPath != "C:/build/RuneGateDefense.aab.manifest.json")
+            {
+                errors.Add($"Android artifact manifest path is invalid: '{manifestPath}'.");
             }
         }
 
