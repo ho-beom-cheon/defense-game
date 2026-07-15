@@ -30,7 +30,9 @@ namespace RuneGate
             }
 
             UIResponsiveLayout.ApplyReadableDefaults();
+            DrawTitleBackground();
             ScreenFrameRects frame = GameFrameLayout.TitleFrame(showSettings || confirmReset || confirmNewGame);
+            frame = OffsetMobileTitleFrame(frame, showSettings || confirmReset || confirmNewGame);
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
             GUI.Box(frame.FrameRoot, GUIContent.none, panelStyle);
 
@@ -174,6 +176,46 @@ namespace RuneGate
             GUILayout.BeginArea(frame.FooterArea);
             GUILayout.Label("\ub85c\uceec \uc800\uc7a5 / \uc624\ud504\ub77c\uc778 \ud50c\ub808\uc774");
             GUILayout.EndArea();
+        }
+
+        private static void DrawTitleBackground()
+        {
+            Texture2D background = RuntimePixelGuiUtility.LoadTexture(RuntimePixelAssetLoader.AppSplashBackground);
+            if (background == null)
+            {
+                return;
+            }
+
+            Rect screenRect = new Rect(0f, 0f, Screen.width, Screen.height);
+            Color previousColor = GUI.color;
+            GUI.color = Color.white;
+            GUI.DrawTexture(screenRect, background, ScaleMode.ScaleAndCrop, true);
+            GUI.color = new Color(0f, 0f, 0f, 0.16f);
+            GUI.DrawTexture(screenRect, Texture2D.whiteTexture, ScaleMode.StretchToFill, true);
+            GUI.color = previousColor;
+        }
+
+        private static ScreenFrameRects OffsetMobileTitleFrame(ScreenFrameRects frame, bool expanded)
+        {
+            if (!Application.isMobilePlatform || !GameFrameLayout.IsPortrait)
+            {
+                return frame;
+            }
+
+            Rect safeRect = UIResponsiveLayout.SafeRect();
+            float desiredOffset = Screen.height * (expanded ? 0.08f : 0.14f);
+            float offsetY = Mathf.Clamp(desiredOffset, 0f, Mathf.Max(0f, safeRect.yMax - frame.FrameRoot.yMax));
+            return new ScreenFrameRects(
+                OffsetRect(frame.FrameRoot, offsetY),
+                OffsetRect(frame.HeaderArea, offsetY),
+                OffsetRect(frame.MainArea, offsetY),
+                OffsetRect(frame.FooterArea, offsetY));
+        }
+
+        private static Rect OffsetRect(Rect rect, float offsetY)
+        {
+            rect.y += offsetY;
+            return rect;
         }
 
         private void HandleNewGamePressed()

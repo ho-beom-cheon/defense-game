@@ -5,6 +5,7 @@ namespace RuneGate
 {
     public static class RuntimePixelAssetLoader
     {
+        public const string AppSplashBackground = "Assets/_Project/Art/RuntimePixel/App/splash_background_1080x1920.png";
         public const string BackgroundGoblinForestLanes = "Assets/_Project/Art/RuntimePixel/Backgrounds/bg_goblin_forest_lanes.png";
         public const string EffectShieldBash = "Assets/_Project/Art/RuntimePixel/Effects/fx_shield_bash.png";
         public const string EffectRapidShot = "Assets/_Project/Art/RuntimePixel/Effects/fx_rapid_shot.png";

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5efa50b8b29f4e849016ce272d0bac48, type: 3}
   m_Name: RuntimePixelVisualCatalog
   m_EditorClassIdentifier:
+  appSplashBackground: {fileID: 21300000, guid: 4c76e28b36cc47b4a4f176c654a7d8c2, type: 3}
   bgGoblinForestLanes: {fileID: 21300000, guid: 1335f3cecdb945d6b96e898dd4287454, type: 3}
   fxShieldBash: {fileID: 21300000, guid: cba95defc55a4b5c99980eec1b0cf751, type: 3}
   fxRapidShot: {fileID: 21300000, guid: a1c39ed8858b44bdb96b7ac88d646717, type: 3}

@@ -5,6 +5,7 @@ namespace RuneGate
     [CreateAssetMenu(fileName = "RuntimePixelVisualCatalog", menuName = "RuneGate/Runtime Pixel Visual Catalog")]
     public sealed class RuntimePixelVisualCatalog : ScriptableObject
     {
+        [SerializeField] private Sprite appSplashBackground;
         [SerializeField] private Sprite bgGoblinForestLanes;
         [SerializeField] private Sprite fxShieldBash;
         [SerializeField] private Sprite fxRapidShot;
@@ -38,6 +39,8 @@ namespace RuneGate
         {
             switch (assetPath)
             {
+                case RuntimePixelAssetLoader.AppSplashBackground:
+                    return appSplashBackground;
                 case RuntimePixelAssetLoader.BackgroundGoblinForestLanes:
                     return bgGoblinForestLanes;
                 case RuntimePixelAssetLoader.EffectShieldBash:
