@@ -44,6 +44,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Cross-process audio settings QA: BGM/SFX enabled state and volume restored in an independent Android reader process on 2026-07-16
 - Post-BGM Android full-chapter regression: Stage 1~10 Victory and Grumbar phases 2/3 passed on 2026-07-16
 - Grumbar attack-pattern QA: phase 1 hit 2 same-lane heroes, phase 2 hit 3 lane-front heroes, phase 3 hit all 6 heroes and Crystal; Stage 10 Victory passed on 2026-07-16
+- Difficulty progression QA: fresh-save Hard lock, Normal Chapter 1 Hard unlock, sequential Hard Stage 1~10 progression, Nightmare unlock, reward multiplier, and JSON disk reload passed on Android 15 API 35 emulator on 2026-07-16
 
 ## Progression QA
 
@@ -75,6 +76,11 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] 냉기 룬이 이후 웨이브 신규 스폰에도 적용
 - [x] 영웅 6인 스킬이 고유 runtime effectKey와 실제 전투 효과 사용
 - [x] 그룸바르가 크리스탈 접촉 시 제거되지 않고 반복 공격
+- [x] 새 세이브에서 Easy/Normal만 선택 가능
+- [x] Normal Stage 10 승리 후 Hard 해금 및 Result 안내
+- [x] Hard Stage 1~10 순차 해금 후 Nightmare 해금
+- [x] 난이도 완료/선택 상태 JSON 재로드 유지
+- [x] Hard/Nightmare 보상 배율 적용
 - [ ] StageSelect 편성 팝업 실기기 터치/텍스트 잘림 수동 확인
 
 ## Korean UI QA
@@ -108,6 +114,10 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [ ] 릴리스 키스토어로 APK/AAB 서명
 
 ### Latest Build Attempt
+
+- Difficulty progression APK (2026-07-16): `72,037,083 bytes`
+- SHA-256: `58A8CDA1FE642635DAEE4766B6C5B2446CCF3A945F8C9B508807712D74E903EF`
+- Android full-chapter result: Stage 1~10 Victory, Hard/Nightmare unlock chain, sequential Hard stage progress, and disk reload PASS
 
 - Date: 2026-07-12
 - Command: `RuneGate.Editor.RuneGateCurrentBuildPipeline.BuildCurrentAndroidApkFromCommandLine`

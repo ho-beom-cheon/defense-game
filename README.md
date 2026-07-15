@@ -21,7 +21,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - 로컬 JSON 저장
 - 랜덤 몬스터 변종 MVP
 - 그림자 조각, 그림자 계약, 펫 장착 MVP
-- 난이도별 몬스터/크리스탈/보상 런타임 보정
+- Normal Chapter 1 완료 후 Hard, Hard 완료 후 Nightmare가 열리는 난이도별 순차 진행과 보상 보정
 - NotoSansKR 기반 한글 표시
 - 모바일 Portrait 기준 IMGUI 레이아웃 정규화 1차 적용
 - Safe Area 기반 UI 계산, PetContract 중앙 팝업, 공통 팝업 유틸 1차 적용
@@ -56,6 +56,8 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 8. StageSelectScene의 그림자 계약 패널에서 조각 수, 계약, 장착/해제를 확인한다.
 9. UpgradeScene에서 업그레이드를 구매하고 저장되는지 확인한다.
 10. Stage 10에서 그룸바르 보스가 등장하는지 확인한다.
+11. Normal Stage 10 승리 후 `어려움`이 열리고, 어려움에서는 Stage 1부터 순서대로 열리는지 확인한다.
+12. 어려움 Stage 10 승리 후 `악몽`이 열리고 앱 재실행 뒤에도 유지되는지 확인한다.
 
 ## UI 레이아웃 기준
 
@@ -133,6 +135,8 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/formation-editor-v090.md`
 - `docs/grumbar-boss-phases-v090.md`
 - `docs/grumbar-boss-attack-patterns-v090.md`
+- `docs/difficulty-progression-v090.md`
+- `docs/difficulty-design.md`
 - `docs/complete-rune-effects-v090.md`
 - `docs/release-checklist.md`
 - `docs/store-listing-draft.md`
