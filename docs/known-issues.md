@@ -28,6 +28,7 @@
 - Attack, hit, and death feedback is still prototype-level.
 - Some skill effects are RuntimePixel placeholders, not final animation.
 - Grumbar now has three HP-based phases, five Gate Imp reinforcements, phase-gated damage, and a dedicated boss HUD. Boss-specific area attacks and additional summon patterns are not implemented yet.
+- All 20 RuneData records now use implemented runtime effects. Lightning, splash, and chain feedback still reuses prototype hit sparks, and combination balance needs longer device playtests.
 - Stage 1-10 data is playable-oriented, but long-form balance testing is still required.
 
 ## Progression / Save

@@ -35,6 +35,8 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Android pause/lifecycle QA: manual pause, resume, restart, stage-select exit, and background auto-pause passed on 2026-07-15
 - StageSelect formation editor QA: Android system flow passed on 2026-07-16; 6-hero slot swap, JSON disk reload, and BattleScene placement verified
 - Grumbar boss QA: Android full-chapter E2E passed on 2026-07-16; phases 2/3, five reinforcements, boss HUD, and Stage 10 Victory verified
+- Complete rune QA: Android system flow passed on 2026-07-16; seven dedicated rune mechanics, crystal shield HUD, purification healing, and future-spawn frost slow verified
+- Post-rune Android full-chapter regression: Stage 1~10 Victory, 10 upgrades, Grumbar phases 2/3, and five reinforcements passed on 2026-07-16
 
 ## Progression QA
 
@@ -59,6 +61,10 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] Android 백그라운드 전환 후 자동 일시정지 정상
 - [x] StageSelect 편성 슬롯 교환 및 JSON 저장 정상
 - [x] 저장 편성의 BattleScene 배치 반영 정상
+- [x] 룬 20장 모두 구현된 runtime effectKey 사용
+- [x] 번개/폭발/연쇄/분쇄 전투 보정 적용
+- [x] 수호 보호막 및 정화 회복 적용
+- [x] 냉기 룬이 이후 웨이브 신규 스폰에도 적용
 - [ ] StageSelect 편성 팝업 실기기 터치/텍스트 잘림 수동 확인
 
 ## Korean UI QA

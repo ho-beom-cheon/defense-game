@@ -65,6 +65,8 @@ $adb = "C:\Users\cjs41\AppData\Local\Android\SdkRuneGate\platform-tools\adb.exe"
 
 튜토리얼 완료 직후 전투 일시정지도 검증한다. `Time.timeScale`이 `0`으로 멈추는지, 재개 후 테스트 배속으로 돌아오는지, 생명주기 일시정지 사유가 구분되는지 확인한다.
 
+같은 실행에서 번개, 폭발, 수호, 정화, 분쇄, 연쇄, 냉기 룬을 실제 `RuneEffectApplier`에 적용한다. 영웅 보조 피해 보정, 정화 회복, 크리스탈 보호막과 한국어 HUD, 냉기 룬의 이후 스폰 감속을 확인한 뒤 기존 저장/결과 흐름을 계속 검증한다.
+
 성공 기준은 `RUNEGATE_SYSTEM_FLOWS_E2E_PASSED`와 종료 코드 `0`이다. 반드시 격리된 `-runegateSavePath`를 사용하며 종료 시 JSON, `.tmp`, `.bak` 파일이 모두 정리되어야 한다.
 
 ## 앱 재시작 저장 실행 예시
