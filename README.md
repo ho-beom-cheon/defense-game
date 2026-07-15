@@ -35,6 +35,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - 그룸바르 페이즈별 라인 강타, 전선 충격파, 크리스탈 파괴 파동과 사전 경고 표시
 - 번개/폭발/수호/정화/분쇄/연쇄 룬 전용 효과와 웨이브 지속 감속
 - 메뉴/전투 장면별 절차형 BGM, 교차 페이드, BGM/SFX 독립 음소거와 음량 저장
+- Android 에뮬레이터에서 Normal/Hard/Nightmare Stage 1~10, 총 30전투 연속 승리와 강화 20회 검증
 
 ## 실행 방법
 
@@ -137,6 +138,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/grumbar-boss-attack-patterns-v090.md`
 - `docs/difficulty-progression-v090.md`
 - `docs/difficulty-design.md`
+- `docs/android-all-difficulty-campaign-qa-v090.md`
 - `docs/complete-rune-effects-v090.md`
 - `docs/release-checklist.md`
 - `docs/store-listing-draft.md`

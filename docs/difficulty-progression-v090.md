@@ -31,10 +31,10 @@
 - Size: `72,037,083 bytes`
 - SHA-256: `58A8CDA1FE642635DAEE4766B6C5B2446CCF3A945F8C9B508807712D74E903EF`
 
-Android smoke는 새 세이브에서 Hard 선택이 거부되는지, Normal Stage 1~10 승리 후 Hard가 열리는지, Hard Stage 1~10 순차 결과 후 Nightmare가 열리는지, 디스크 재로드 뒤 완료 상태가 유지되는지 확인했다.
+Android smoke는 새 세이브에서 Hard 선택이 거부되는지, Normal Stage 1~10 승리 후 Hard가 열리는지, Hard Stage 1~10 승리 후 Nightmare가 열리는지, Nightmare Stage 1~10까지 실제 전투로 클리어되는지, 디스크 재로드 뒤 완료 상태가 유지되는지 확인했다.
 
 ## 남은 수동 QA
 
 - 실기기에서 난이도 버튼 연속 탭과 텍스트 가독성 확인
-- Hard/Nightmare 장시간 밸런스와 최종 보상량 조정
-- Nightmare Stage 1~10 실제 전투 완주 테스트
+- Hard/Nightmare 실기기 수동 밸런스와 최종 보상량 조정
+- 자동 스킬 사용이 아닌 사람 플레이 기준 Nightmare 반복 완주 테스트

@@ -6,7 +6,7 @@
 
 ## 실행 조건
 
-`RuneGateRuntimeSmokeRunner`는 일반 실행에서는 생성되지 않는다. Player 실행 인자에 `-runegateSmoke` 또는 `-runegateSmokeFullChapter`가 있을 때만 활성화된다.
+`RuneGateRuntimeSmokeRunner`는 일반 실행에서는 생성되지 않는다. Player 실행 인자에 `-runegateSmoke`, `-runegateSmokeFullChapter`, `-runegateSmokeAllDifficulties` 같은 진단 인자가 있을 때만 활성화된다.
 
 테스트에는 반드시 `-runegateSavePath`로 별도 JSON 경로를 지정해야 한다. 지정된 테스트 저장 파일과 `.tmp`, `.bak`만 정리하며 실제 `runegate_save.json`은 읽거나 변경하지 않는다.
 
@@ -37,6 +37,14 @@
 이 모드는 Stage 1~10을 순서대로 실제 플레이한다. 각 스테이지에서 사용 가능한 영웅 스킬을 주기적으로 발동하고 Victory와 다음 스테이지 해금을 확인하며, UpgradeScene에서 구매 가능한 강화 하나를 구매한 뒤 다음 스테이지로 진행한다. Stage 10에서는 그룸바르 보스 스폰, 페이즈 2·3, 지원군 5기, 한국어 보스 HUD와 실제 보스 처치도 확인한다.
 
 성공 기준은 `RUNEGATE_FULL_CHAPTER_E2E_PASSED`와 종료 코드 `0`이다.
+
+## 전체 난이도 캠페인
+
+`-runegateSmokeAllDifficulties`는 하나의 격리 저장으로 Normal, Hard, Nightmare Stage 1~10을 모두 실제 플레이한다. 각 난이도에서 이전 스테이지 승리 후 다음 스테이지가 열리는지 확인하고, Normal/Hard 완료 후 다음 난이도 해금과 Result 안내를 검증한다.
+
+총 30전투에서 룬 선택, 스킬 자동 사용, Result, Upgrade, StageSelect 복귀를 반복한다. 각 난이도의 Stage 10은 그룸바르 3페이즈, 지원군, 보스 HUD, Phase 1/2/3 공격 패턴을 모두 검증한다. 마지막에는 세 난이도 완료와 업그레이드가 JSON 디스크 재로드 뒤에도 유지되는지 확인한다.
+
+성공 기준은 `RUNEGATE_ALL_DIFFICULTIES_E2E_PASSED`와 종료 코드 `0`이다. 상세 결과는 `docs/android-all-difficulty-campaign-qa-v090.md`를 참고한다.
 
 Android에서는 Unity 실행 인자를 문자열 하나로 전달해야 한다. PowerShell에서는 바깥 따옴표를 이스케이프한 다음과 같은 형식을 사용한다.
 
@@ -149,6 +157,7 @@ Stage 10에서는 그룸바르의 페이즈 2·3과 지원군 5기뿐 아니라 
 - 손상 저장: 기본값 복구와 정상 `.bak` 진행 복원 모두 통과
 - 중단 저장: 유효한 `.tmp` 승격과 손상 `.tmp` 격리 후 `.bak` 복원 통과
 - 저장 복구 변경 후 전체 챕터 회귀: Stage 1~10 Victory, 강화 10회, 그룸바르 스폰 통과
+- 전체 난이도 캠페인: Normal/Hard/Nightmare Stage 1~10, 총 30 Victory와 강화 20회 통과
 
 랜덤 몬스터 변형에 따라 최종 Gold는 달라질 수 있다.
 

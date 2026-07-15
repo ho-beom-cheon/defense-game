@@ -47,7 +47,7 @@
 - Automated Player coverage now verifies tutorial completion persistence, JSON disk reload, full process restart reload, Reset Save defaults, and Defeat progression guards with an isolated save path.
 - Corrupt primary fallback, valid `.bak` restoration, interrupted `.tmp` promotion, and invalid `.tmp` isolation are Player-tested; storage permission failures and real device power loss still need device QA.
 - Reset Save is available, but final release UX should add stronger confirmation polish.
-- Hard/Nightmare unlock, sequential stage progression, reward multipliers, and JSON persistence are implemented and emulator-tested. Long-form physical-device balance and Nightmare full-combat completion still need QA.
+- Normal/Hard/Nightmare 30-stage continuous combat, sequential unlocks, rewards, upgrades, and JSON reload passed Android emulator QA. Physical-device endurance and manual-input balance still need QA.
 
 ## Android / Release
 

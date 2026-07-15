@@ -45,6 +45,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Post-BGM Android full-chapter regression: Stage 1~10 Victory and Grumbar phases 2/3 passed on 2026-07-16
 - Grumbar attack-pattern QA: phase 1 hit 2 same-lane heroes, phase 2 hit 3 lane-front heroes, phase 3 hit all 6 heroes and Crystal; Stage 10 Victory passed on 2026-07-16
 - Difficulty progression QA: fresh-save Hard lock, Normal Chapter 1 Hard unlock, sequential Hard Stage 1~10 progression, Nightmare unlock, reward multiplier, and JSON disk reload passed on Android 15 API 35 emulator on 2026-07-16
+- All-difficulty campaign QA: Normal/Hard/Nightmare Stage 1~10 actual battles, 30 victories, 20 upgrades, three complete Grumbar phase/pattern runs, and disk reload passed on Android 15 API 35 emulator on 2026-07-16
 
 ## Progression QA
 
@@ -81,6 +82,8 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] Hard Stage 1~10 순차 해금 후 Nightmare 해금
 - [x] 난이도 완료/선택 상태 JSON 재로드 유지
 - [x] Hard/Nightmare 보상 배율 적용
+- [x] Normal/Hard/Nightmare 실제 30스테이지 연속 전투 완주
+- [x] 세 난이도 Stage 10 그룸바르 3페이즈/공격 패턴 검증
 - [ ] StageSelect 편성 팝업 실기기 터치/텍스트 잘림 수동 확인
 
 ## Korean UI QA
