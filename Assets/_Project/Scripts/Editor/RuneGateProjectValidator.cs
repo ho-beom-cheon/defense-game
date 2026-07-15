@@ -577,6 +577,7 @@ namespace RuneGate.Editor
             ValidateV05VisualLinks(errors);
             ValidateRuntimeArtPolicy(errors);
             ValidateRuntimePixelImportSettings(errors);
+            ValidateRuntimePixelActorAlpha(errors);
 
             SaveData defaultSave = SaveManager.CreateDefaultSave();
             if (defaultSave == null || defaultSave.unlockedStageIds == null || !defaultSave.unlockedStageIds.Contains(SaveManager.DefaultUnlockedStageId))
@@ -1625,6 +1626,20 @@ namespace RuneGate.Editor
                 if (importer.textureCompression != TextureImporterCompression.Uncompressed && importer.textureCompression != TextureImporterCompression.CompressedLQ)
                 {
                     Debug.LogWarning($"RuntimePixel texture should use None or Low compression: {path}");
+                }
+            }
+        }
+
+        private static void ValidateRuntimePixelActorAlpha(List<string> errors)
+        {
+            string[] actorSpritePaths = RuntimePixelAlphaUtility.ActorSpritePaths;
+            for (int i = 0; i < actorSpritePaths.Length; i++)
+            {
+                string path = actorSpritePaths[i];
+                int opaqueDarkBorderPixels = RuntimePixelAlphaUtility.CountOpaqueDarkBorderPixels(path);
+                if (opaqueDarkBorderPixels > 0)
+                {
+                    errors.Add($"RuntimePixel actor sprite has {opaqueDarkBorderPixels} opaque black border pixel(s): {path}");
                 }
             }
         }
