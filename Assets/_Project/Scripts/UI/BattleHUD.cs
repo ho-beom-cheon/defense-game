@@ -16,6 +16,9 @@ namespace RuneGate
         private string battleStateText = GameTextMapper.BattleStateName(BattleState.None);
         private string crystalFeedbackText = string.Empty;
         private float crystalFeedbackTimer;
+        private int crystalCurrentHp;
+        private int crystalMaxHp;
+        private int crystalShieldHp;
         private int gold;
         private string bossStatusText = string.Empty;
         private float bossHealthPercent;
@@ -40,8 +43,10 @@ namespace RuneGate
             if (crystalController != null)
             {
                 crystalController.HpChanged += HandleCrystalHpChanged;
+                crystalController.ShieldChanged += HandleCrystalShieldChanged;
                 crystalController.Damaged += HandleCrystalDamaged;
                 HandleCrystalHpChanged(crystalController.CurrentHp, crystalController.MaxHp);
+                HandleCrystalShieldChanged(crystalController.ShieldHp);
             }
         }
 
@@ -57,6 +62,7 @@ namespace RuneGate
             if (crystalController != null)
             {
                 crystalController.HpChanged -= HandleCrystalHpChanged;
+                crystalController.ShieldChanged -= HandleCrystalShieldChanged;
                 crystalController.Damaged -= HandleCrystalDamaged;
             }
         }
@@ -293,7 +299,22 @@ namespace RuneGate
 
         private void HandleCrystalHpChanged(int currentHp, int maxHp)
         {
-            crystalHpText = $"\ud06c\ub9ac\uc2a4\ud0c8 HP {currentHp}/{maxHp}";
+            crystalCurrentHp = currentHp;
+            crystalMaxHp = maxHp;
+            RefreshCrystalStatusText();
+        }
+
+        private void HandleCrystalShieldChanged(int shieldHp)
+        {
+            crystalShieldHp = Mathf.Max(0, shieldHp);
+            RefreshCrystalStatusText();
+        }
+
+        private void RefreshCrystalStatusText()
+        {
+            crystalHpText = crystalShieldHp > 0
+                ? $"\ud06c\ub9ac\uc2a4\ud0c8 HP {crystalCurrentHp}/{crystalMaxHp}  \ubcf4\ud638\ub9c9 {crystalShieldHp}"
+                : $"\ud06c\ub9ac\uc2a4\ud0c8 HP {crystalCurrentHp}/{crystalMaxHp}";
         }
 
         private void HandleWaveChanged(int currentWave, int totalWaves)

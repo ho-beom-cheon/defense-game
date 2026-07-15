@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace RuneGate
@@ -10,6 +11,7 @@ namespace RuneGate
 
         private MonsterController target;
         private int damage;
+        private Action<MonsterController, int> impactCallback;
         private bool initialized;
 
         private void Update()
@@ -40,14 +42,24 @@ namespace RuneGate
 
                 CombatFeedbackEvents.RaiseAttackImpacted(target.transform.position);
                 target.TakeDamage(damage);
+                impactCallback?.Invoke(target, damage);
                 Destroy(gameObject);
             }
         }
 
         public void Initialize(MonsterController targetMonster, int projectileDamage)
         {
+            Initialize(targetMonster, projectileDamage, null);
+        }
+
+        public void Initialize(
+            MonsterController targetMonster,
+            int projectileDamage,
+            Action<MonsterController, int> onImpact)
+        {
             target = targetMonster;
             damage = Mathf.Max(0, projectileDamage);
+            impactCallback = onImpact;
             initialized = true;
         }
     }

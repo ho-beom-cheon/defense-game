@@ -12,6 +12,7 @@ namespace RuneGate
         [SerializeField] private CharacterVisualController visualController;
         [SerializeField] private HitFlashController hitFlashController;
         [SerializeField] private UnitMovementController movementController;
+        [SerializeField] private HeroRuneCombatModifiers runeCombatModifiers;
         [SerializeField] private ProjectileController projectilePrefab;
         [SerializeField] private Transform projectileSpawnPoint;
         [SerializeField] private LayerMask monsterLayer = ~0;
@@ -72,6 +73,8 @@ namespace RuneGate
         public int HeroSlotIndex => heroSlotIndex;
         public bool IsAlive => initialized && currentHp > 0;
         public HeroCombatState CombatState => combatState;
+        public bool IsRangedCombatant => attackRange > 2.25f;
+        public HeroRuneCombatModifiers RuneCombatModifiers => runeCombatModifiers;
         public static IReadOnlyList<HeroController> ActiveHeroes => activeHeroes;
 
         private void OnEnable()
@@ -96,6 +99,7 @@ namespace RuneGate
 
             AutoAssignFeedbackReferences();
             EnsureMovementController();
+            EnsureRuneCombatModifiers();
 
             if (initializeOnAwake && heroData != null)
             {
@@ -188,6 +192,8 @@ namespace RuneGate
 
             AutoAssignFeedbackReferences();
             EnsureMovementController();
+            EnsureRuneCombatModifiers();
+            runeCombatModifiers.ResetModifiers();
             movementController.Configure(laneMoveSpeed, attackRange, heroPersonalSpace, ResolveRoleLeashRange());
             movementController.SetMotionTuning(laneMoveAcceleration, laneMoveDeceleration, returnStopDistance);
             visualController?.Initialize(data.BattleSprite, data.AnimatorController);
@@ -304,6 +310,30 @@ namespace RuneGate
             skillController?.ApplyCooldownPercent(percent);
         }
 
+        public void ApplyLightningDamagePercent(float percent)
+        {
+            EnsureRuneCombatModifiers();
+            runeCombatModifiers.AddLightningDamagePercent(percent);
+        }
+
+        public void ApplySplashDamagePercent(float percent)
+        {
+            EnsureRuneCombatModifiers();
+            runeCombatModifiers.AddSplashDamagePercent(percent);
+        }
+
+        public void ApplyChainDamagePercent(float percent)
+        {
+            EnsureRuneCombatModifiers();
+            runeCombatModifiers.AddChainDamagePercent(percent);
+        }
+
+        public void ApplyCrushDamagePercent(float percent)
+        {
+            EnsureRuneCombatModifiers();
+            runeCombatModifiers.AddCrushDamagePercent(percent);
+        }
+
         public void SetLogicalPlacement(int assignedLaneIndex, int assignedSlotIndex)
         {
             laneIndex = assignedLaneIndex;
@@ -346,7 +376,7 @@ namespace RuneGate
             if (projectilePrefab != null)
             {
                 ProjectileController projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-                projectile.Initialize(target, CalculateDamageAgainst(EffectiveAttack, target));
+                projectile.Initialize(target, CalculateDamageAgainst(EffectiveAttack, target), HandleBasicAttackImpact);
                 yield return new WaitForSeconds(Mathf.Max(0f, rangedAttackRecovery));
                 movementController?.SetAttackState(false);
                 attackRoutine = null;
@@ -356,7 +386,7 @@ namespace RuneGate
             if (ShouldUseFallbackProjectile())
             {
                 ProjectileController projectile = CreateFallbackProjectile(spawnPosition);
-                projectile.Initialize(target, CalculateDamageAgainst(EffectiveAttack, target));
+                projectile.Initialize(target, CalculateDamageAgainst(EffectiveAttack, target), HandleBasicAttackImpact);
                 yield return new WaitForSeconds(Mathf.Max(0f, rangedAttackRecovery));
                 movementController?.SetAttackState(false);
                 attackRoutine = null;
@@ -365,7 +395,9 @@ namespace RuneGate
 
             visualController?.PlayImpactPause();
             CombatFeedbackEvents.RaiseAttackImpacted(target.transform.position);
-            target.TakeDamage(CalculateDamageAgainst(EffectiveAttack, target));
+            int damage = CalculateDamageAgainst(EffectiveAttack, target);
+            target.TakeDamage(damage);
+            HandleBasicAttackImpact(target, damage);
             yield return new WaitForSeconds(Mathf.Max(0f, meleeAttackRecovery));
             movementController?.SetAttackState(false);
             attackRoutine = null;
@@ -379,7 +411,15 @@ namespace RuneGate
                 damage *= bossDamageMultiplier;
             }
 
-            return Mathf.Max(0, Mathf.RoundToInt(damage));
+            int resolvedDamage = Mathf.Max(0, Mathf.RoundToInt(damage));
+            return runeCombatModifiers != null
+                ? runeCombatModifiers.ModifyPrimaryDamage(resolvedDamage, target)
+                : resolvedDamage;
+        }
+
+        private void HandleBasicAttackImpact(MonsterController target, int damage)
+        {
+            runeCombatModifiers?.HandleBasicAttackImpact(this, target, damage);
         }
 
         private MonsterController FindTarget(float range, TargetingType targetingType)
@@ -754,6 +794,19 @@ namespace RuneGate
             if (movementController == null)
             {
                 movementController = gameObject.AddComponent<UnitMovementController>();
+            }
+        }
+
+        private void EnsureRuneCombatModifiers()
+        {
+            if (runeCombatModifiers == null)
+            {
+                runeCombatModifiers = GetComponent<HeroRuneCombatModifiers>();
+            }
+
+            if (runeCombatModifiers == null)
+            {
+                runeCombatModifiers = gameObject.AddComponent<HeroRuneCombatModifiers>();
             }
         }
 

@@ -74,6 +74,7 @@ namespace RuneGate
         public int RewardGold => ShadowContractService.GetRewardGold(monsterData, variantType);
         public SpriteRenderer VisualSpriteRenderer => spriteRenderer;
         public MonsterCombatState CombatState => combatState;
+        public float MoveSpeedMultiplier => speedMultiplier;
         public bool IsMovementAttackLocked => movementController != null && movementController.IsAttacking;
         public bool HasActiveAttackRoutine => attackRoutine != null;
         public BossPhaseController BossPhaseController { get; private set; }

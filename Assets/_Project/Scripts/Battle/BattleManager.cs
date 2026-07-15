@@ -110,6 +110,8 @@ namespace RuneGate
                 Debug.LogWarning("BattleManager is missing WaveManager.");
             }
 
+            runeEffectApplier?.ResetForBattle(waveManager);
+
             BuildAndInitializeHeroes();
 
             UpgradeManager.ApplyHeroUpgradeEffects(permanentUpgrades, heroes);

@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_guardian
   displayName: "수호 룬"
-  description: "크리스탈 HP를 25 회복합니다."
+  description: "크리스탈에 피해를 먼저 흡수하는 보호막 35를 부여합니다."
   rarity: 1
   element: 5
   effectKey: crystal_shield_flat
-  value: 25
+  value: 35
   icon: {fileID: 0}

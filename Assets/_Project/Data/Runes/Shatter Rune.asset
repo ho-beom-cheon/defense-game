@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_shatter
   displayName: "분쇄 룬"
-  description: "보스에게 주는 피해가 20% 증가합니다."
+  description: "탱커형 몬스터와 보스에게 주는 피해가 25% 증가합니다."
   rarity: 1
   element: 4
-  effectKey: crush_placeholder
-  value: 0.2
+  effectKey: crush_damage_percent
+  value: 0.25
   icon: {fileID: 0}

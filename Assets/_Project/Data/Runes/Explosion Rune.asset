@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneData
   runeId: rune_explosion
   displayName: "폭발 룬"
-  description: "모든 영웅의 공격력이 16% 증가합니다."
+  description: "기본 공격이 같은 라인의 주변 적에게 30% 범위 피해를 줍니다."
   rarity: 1
   element: 1
-  effectKey: blast_placeholder
-  value: 0.16
+  effectKey: splash_damage_percent
+  value: 0.3
   icon: {fileID: 0}
