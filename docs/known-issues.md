@@ -22,6 +22,8 @@
 ## Combat
 
 - Hero and monster movement is lane-based interpolation, not full pathfinding or physics collision.
+- Portrait safe bounds now use the monster sprite leading edge for crystal contact, preventing the final monster from remaining stalled at the left battlefield boundary.
+- Undead revival is enabled only on Hard and Nightmare; Easy and Normal keep the hook disabled for clear-time stability.
 - Attack, hit, and death feedback is still prototype-level.
 - Some skill effects are RuntimePixel placeholders, not final animation.
 - Boss phase changes, summon patterns, and monster-specific behavior are still mostly hooks.
@@ -42,6 +44,7 @@
 
 - APK/AAB builds require Unity Android Build Support and a clean build environment.
 - Clean-branch Android APK/AAB builds succeeded on 2026-07-12. APK installation and the Stage 1 core flow passed on an Android 15 API 35 emulator; physical-device installation is not verified yet.
+- Android 15 API 35 emulator full-chapter QA passed on 2026-07-15: Stage 1~10 Victory, 10 upgrade purchases, and the Stage 10 Grumbar spawn were verified at 1080x2400 Portrait.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.

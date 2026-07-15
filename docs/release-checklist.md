@@ -31,6 +31,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Screenshot review: Korean HUD, skill grid, StageSelect detail, Defeat Result, and Upgrade labels rendered without internal ids or broken Korean text
 - Android emulator QA: passed at 1080x2400 Portrait on Android 15 / API 35
 - Android progression QA: Upgrade purchase, process restart persistence, Stage 2 unlock/start passed
+- Android full-chapter QA: Stage 1~10 Victory, 10 upgrades, and Stage 10 Grumbar spawn passed on 2026-07-15
 
 ## Progression QA
 
@@ -124,6 +125,16 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Purchase redraw regression: fixed with deferred IMGUI redraw via `GUIUtility.ExitGUI()`
 - APK SHA-256: `CBD20CDB2A5E3707A0E4A30232619D1E64D7E9EB732E61FF8869871CDB1F5379`
 - Detailed evidence: `docs/android-progression-qa-v088.md`
+
+### Android Full Chapter QA
+
+- Date: 2026-07-15
+- Branch: `codex/issue-40-android-full-chapter-qa`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Result: Stage 1~10 Victory, 10 upgrade purchases, Grumbar spawn verified
+- Runtime errors: no fatal exception, null reference, or missing reference found
+- APK SHA-256: `E85A28099C0D731CE75BB2BFE74E9E244577F9E6F5C959DA848AFCCF9E449412`
+- Detailed evidence: `docs/android-full-chapter-qa-v088.md`
 
 ## Policy / Monetization
 

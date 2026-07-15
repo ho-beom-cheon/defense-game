@@ -38,6 +38,18 @@
 
 성공 기준은 `RUNEGATE_FULL_CHAPTER_E2E_PASSED`와 종료 코드 `0`이다.
 
+Android에서는 Unity 실행 인자를 문자열 하나로 전달해야 한다. PowerShell에서는 바깥 따옴표를 이스케이프한 다음과 같은 형식을 사용한다.
+
+```powershell
+$adb = "C:\Users\cjs41\AppData\Local\Android\SdkRuneGate\platform-tools\adb.exe"
+& $adb shell svc power stayon true
+& $adb shell am start -S `
+  -n com.hobeomcheon.runegatedefense/com.unity3d.player.UnityPlayerGameActivity `
+  --es unity '\"-runegateSmokeFullChapter -runegateSavePath /data/user/0/com.hobeomcheon.runegatedefense/files/runegate-full-chapter-qa.json\"'
+```
+
+전체 챕터 모드는 스테이지당 최대 180초를 기다린다. 타임아웃이 발생하면 생존 몬스터의 이름, 라인, HP, x 좌표, 상태, 이동 공격 잠금, 공격 코루틴 여부를 로그에 남긴다.
+
 ## 시스템 흐름 실행 예시
 
 ```powershell
@@ -113,11 +125,12 @@
 
 ## 최근 검증 결과
 
-- 검증일: 2026-07-12
+- 검증일: 2026-07-15
 - Stage 1~10: 모두 Victory
 - 강화 구매: 10회
 - Stage 10: 그룸바르 스폰 확인
-- 최근 격리 저장 최종 Gold: 462
+- Android 15 API 35 에뮬레이터: 1080x2400 Portrait 전체 챕터 통과
+- 최근 격리 저장 최종 Gold: 595
 - 테스트 저장 정리: JSON, `.tmp`, `.bak` 제거 확인
 - 시스템 흐름: 튜토리얼 완료, JSON 재로딩, Reset Save, Defeat Result 통과
 - 결과 이동: 다음 스테이지, 재시도, 업그레이드, 스테이지 선택 통과

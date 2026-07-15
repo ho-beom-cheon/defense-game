@@ -15,6 +15,11 @@ v0.8에서는 난이도 UI와 저장 구조만 준비한다. 실제 난이도별
 
 선택한 난이도는 `SaveData.selectedDifficultyId`에 저장된다. `GameSession.SelectedDifficultyId`는 BattleScene 시작 데이터에 전달할 수 있도록 준비되어 있다.
 
+## 몬스터 규칙
+
+- 망각의 뼈병 부활은 `hard`, `nightmare`에서만 활성화한다.
+- `easy`, `normal`에서는 부활 훅을 비활성화해 기본 진행 시간을 유지한다.
+
 ## 다음 단계
 
 - 난이도별 몬스터 HP/속도/보상 계수 정의
