@@ -27,6 +27,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Android 15 API 35 에뮬레이터에서 1080x2400 Portrait Stage 1 전체 흐름 검증
 - Android 에뮬레이터에서 업그레이드 구매, 재시작 저장 유지, Stage 2 진입 검증
 - Android 에뮬레이터에서 Stage 1~10 전체 승리, 강화 10회, Stage 10 그룸바르 스폰 검증
+- 전투 일시정지, 재시작, 스테이지 복귀와 Android 백그라운드 자동 일시정지 지원
 
 ## 실행 방법
 
@@ -118,6 +119,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/android-emulator-qa-v088.md`
 - `docs/android-progression-qa-v088.md`
 - `docs/android-full-chapter-qa-v088.md`
+- `docs/battle-pause-lifecycle-v089.md`
 - `docs/release-checklist.md`
 - `docs/store-listing-draft.md`
 - `docs/privacy-checklist.md`

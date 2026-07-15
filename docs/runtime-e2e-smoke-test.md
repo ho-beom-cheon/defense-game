@@ -63,6 +63,8 @@ $adb = "C:\Users\cjs41\AppData\Local\Android\SdkRuneGate\platform-tools\adb.exe"
 
 이 모드는 첫 BattleScene의 튜토리얼 7단계를 완료한 뒤 완료 상태를 저장한다. Gold, 업그레이드 레벨, 마지막 선택 스테이지를 저장하고 메모리 캐시를 비운 뒤 실제 JSON에서 다시 읽어 값을 비교한다. 이어서 Reset Save 기본값을 확인하고, BattleScene에서 크리스탈 HP를 0으로 만들어 Defeat와 Result UI를 검증한다. Defeat 결과에서는 재시도, 업그레이드, 스테이지 선택 이동을 실제로 실행한다.
 
+튜토리얼 완료 직후 전투 일시정지도 검증한다. `Time.timeScale`이 `0`으로 멈추는지, 재개 후 테스트 배속으로 돌아오는지, 생명주기 일시정지 사유가 구분되는지 확인한다.
+
 성공 기준은 `RUNEGATE_SYSTEM_FLOWS_E2E_PASSED`와 종료 코드 `0`이다. 반드시 격리된 `-runegateSavePath`를 사용하며 종료 시 JSON, `.tmp`, `.bak` 파일이 모두 정리되어야 한다.
 
 ## 앱 재시작 저장 실행 예시
@@ -133,6 +135,7 @@ $adb = "C:\Users\cjs41\AppData\Local\Android\SdkRuneGate\platform-tools\adb.exe"
 - 최근 격리 저장 최종 Gold: 595
 - 테스트 저장 정리: JSON, `.tmp`, `.bak` 제거 확인
 - 시스템 흐름: 튜토리얼 완료, JSON 재로딩, Reset Save, Defeat Result 통과
+- 전투 일시정지: pause/resume timeScale 복원과 생명주기 일시정지 통과
 - 결과 이동: 다음 스테이지, 재시도, 업그레이드, 스테이지 선택 통과
 - 앱 재시작 저장: 독립 Player 작성/읽기 프로세스 모두 통과
 - 손상 저장: 기본값 복구와 정상 `.bak` 진행 복원 모두 통과

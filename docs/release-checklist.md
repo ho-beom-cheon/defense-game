@@ -32,6 +32,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Android emulator QA: passed at 1080x2400 Portrait on Android 15 / API 35
 - Android progression QA: Upgrade purchase, process restart persistence, Stage 2 unlock/start passed
 - Android full-chapter QA: Stage 1~10 Victory, 10 upgrades, and Stage 10 Grumbar spawn passed on 2026-07-15
+- Android pause/lifecycle QA: manual pause, resume, restart, stage-select exit, and background auto-pause passed on 2026-07-15
 
 ## Progression QA
 
@@ -50,6 +51,8 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] Save/Load 정상
 - [x] Reset Save 정상
 - [x] 튜토리얼 표시/완료 저장 정상
+- [x] 전투 일시정지 / 계속하기 / 재시작 / 스테이지 선택 정상
+- [x] Android 백그라운드 전환 후 자동 일시정지 정상
 
 ## Korean UI QA
 

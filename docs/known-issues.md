@@ -22,6 +22,7 @@
 ## Combat
 
 - Hero and monster movement is lane-based interpolation, not full pathfinding or physics collision.
+- Battle pause, resume, restart, stage-select exit, and Android background auto-pause passed emulator QA. Physical-device phone calls, screen lock, and multi-window transitions remain unverified.
 - Portrait safe bounds now use the monster sprite leading edge for crystal contact, preventing the final monster from remaining stalled at the left battlefield boundary.
 - Undead revival is enabled only on Hard and Nightmare; Easy and Normal keep the hook disabled for clear-time stability.
 - Attack, hit, and death feedback is still prototype-level.
@@ -35,6 +36,7 @@
 - Upgrade purchase, immediate UI refresh, process-restart persistence, and Stage 2 unlock passed Android emulator QA. Physical-device scroll inertia and rapid repeated taps remain unverified.
 
 - The game uses local JSON save only.
+- An OS process kill does not restore an in-progress battle; the next launch resumes from the latest persisted progression state.
 - Automated Player coverage now verifies tutorial completion persistence, JSON disk reload, full process restart reload, Reset Save defaults, and Defeat progression guards with an isolated save path.
 - Corrupt primary fallback, valid `.bak` restoration, interrupted `.tmp` promotion, and invalid `.tmp` isolation are Player-tested; storage permission failures and real device power loss still need device QA.
 - Reset Save is available, but final release UX should add stronger confirmation polish.
