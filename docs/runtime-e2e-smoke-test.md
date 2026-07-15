@@ -71,6 +71,8 @@ $adb = "C:\Users\cjs41\AppData\Local\Android\SdkRuneGate\platform-tools\adb.exe"
 
 성공 기준은 `RUNEGATE_SYSTEM_FLOWS_E2E_PASSED`와 종료 코드 `0`이다. 반드시 격리된 `-runegateSavePath`를 사용하며 종료 시 JSON, `.tmp`, `.bak` 파일이 모두 정리되어야 한다.
 
+시스템 플로우는 오디오도 함께 검증한다. Title/StageSelect/Upgrade의 Menu BGM, Battle의 Battle BGM, 장면 전환 교차 페이드, BGM/SFX 독립 음소거와 음량 저장이 통과하면 `[RuneGateAudioE2E] Scene BGM transitions and independent audio settings verified.`를 기록한다.
+
 ## 앱 재시작 저장 실행 예시
 
 첫 번째 Player가 저장 파일을 작성하고 종료한다.

@@ -31,7 +31,9 @@
 - TitleScene 설정에서 `SFX: 켜짐/꺼짐`을 전환한다.
 - 설정 키는 `RuneGate.SfxEnabled`이며 `PlayerPrefs`에 즉시 저장한다.
 - 앱을 종료하고 다시 실행해도 설정이 유지된다.
-- BGM은 아직 준비 중이며, 동작하지 않는 가짜 볼륨 표시를 노출하지 않는다.
+- BGM과 SFX는 각각 켜기/끄기와 25/50/75/100% 음량 단계를 제공한다.
+- BGM 설정은 `RuneGate.BgmEnabled`, `RuneGate.BgmVolume`, SFX 음량은 `RuneGate.SfxVolume`에 즉시 저장한다.
+- 장면별 BGM 구조는 `docs/scene-bgm-audio-settings-v090.md`를 참고한다.
 
 ## 검증 결과
 
@@ -49,5 +51,5 @@
 
 - 각 키에 맞는 최종 WAV 파일 제작과 음량 정규화
 - 실기기 스피커와 이어폰으로 체감 음량 확인
-- Battle BGM과 Result 징글 제작
-- BGM 볼륨 및 별도 음소거 설정 구현
+- 최종 Battle/Menu 작곡 음원과 Result 징글 제작
+- 실제 음원 기준 BGM/SFX 믹싱과 덕킹 조정

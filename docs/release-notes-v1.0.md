@@ -12,6 +12,7 @@ RuneGate Defense v1.0 is the first public-test Android candidate for the Goblin 
 - Gold rewards and permanent upgrades
 - Local JSON save
 - Tutorial overlay
+- Scene-aware Menu/Battle BGM with independent BGM/SFX settings
 - Knight and Goblin visual pipeline placeholders
 - Android build menu and release checklist
 

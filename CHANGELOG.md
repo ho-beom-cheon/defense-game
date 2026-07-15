@@ -8,6 +8,7 @@
 - Added 6 hero, 6 monster, 1 boss, and 20 rune content checks.
 - Added tutorial overlay and tutorial save state.
 - Added save version field for local JSON saves.
+- Added scene-aware Menu/Battle BGM with cross-fades and independent BGM/SFX settings.
 - Added release notes, release checklist, privacy checklist, store listing draft, and Android build guide.
 
 ## 0.5.0

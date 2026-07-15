@@ -33,6 +33,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Stage 10 그룸바르 3단계 페이즈, 지원군 소환, 전용 보스 HP HUD
 - 그룸바르 크리스탈 접촉 후 반복 공격 및 실제 처치 Victory 규칙
 - 번개/폭발/수호/정화/분쇄/연쇄 룬 전용 효과와 웨이브 지속 감속
+- 메뉴/전투 장면별 절차형 BGM, 교차 페이드, BGM/SFX 독립 음소거와 음량 저장
 
 ## 실행 방법
 
@@ -127,6 +128,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/android-full-chapter-qa-v088.md`
 - `docs/battle-pause-lifecycle-v089.md`
 - `docs/procedural-sfx-v089.md`
+- `docs/scene-bgm-audio-settings-v090.md`
 - `docs/formation-editor-v090.md`
 - `docs/grumbar-boss-phases-v090.md`
 - `docs/complete-rune-effects-v090.md`

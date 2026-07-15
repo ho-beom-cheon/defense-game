@@ -40,6 +40,9 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 - Complete hero skill QA: Android system flow passed on 2026-07-16; Shield Bash control, Rapid Shot 3-hit timing, Meteor area damage, Holy Heal, Temporary Turret, and Shadow Strike verified
 - Post-skill Android full-chapter regression: Stage 1~10 Victory, skill-assisted combat, 10 upgrades, Grumbar phases 2/3, five reinforcements, and boss defeat passed on 2026-07-16
+- Scene BGM Android QA: Menu/Battle theme creation, cross-fade transition, independent BGM/SFX settings, and Menu restoration passed on 2026-07-16
+- Cross-process audio settings QA: BGM/SFX enabled state and volume restored in an independent Android reader process on 2026-07-16
+- Post-BGM Android full-chapter regression: Stage 1~10 Victory and Grumbar phases 2/3 passed on 2026-07-16
 
 ## Progression QA
 
@@ -164,8 +167,10 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] Android 시스템 플로우에서 9개 클립 존재 확인
 - [x] TitleScene SFX 켜기/끄기 동작 확인
 - [x] 앱 재실행 후 SFX 설정 유지 확인
+- [x] Menu/Battle 절차형 BGM 생성 및 장면 전환 확인
+- [x] BGM/SFX 음소거와 음량 설정 독립 저장 확인
 - [ ] 실기기 스피커/이어폰 음량 확인
-- [ ] 최종 WAV 및 BGM 적용
+- [ ] 최종 WAV 및 작곡 BGM 적용
 
 ## Policy / Monetization
 
