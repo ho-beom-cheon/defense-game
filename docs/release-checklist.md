@@ -284,6 +284,21 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - SHA-256: `BAAA0BB4708EC2C00AB4E57CE41EBC14084FFC12A35F74FCA40CFE850439609B`
 - Detailed evidence: `docs/android-rune-selection-cards-v090.md`
 
+### Android Wave Transition Banner QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-79-wave-transition-banner`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: opening, final, and boss wave banners with progress, enemy count, and applied-rune feedback passed
+- Stage 1 touch flow: `전투 개시` followed by Rune Selection and `최종 웨이브 · 사냥 룬 적용` passed
+- Stage 10: Wave 5/5 `봉문 경보 · 보스 출현` and Grumbar boss HUD rendered together without overlap
+- Project Validator: passed
+- Progression Smoke Test: passed banner bounds, minimum size, fixed-HUD overlap, title, subtitle, and accent-color validation
+- Regression: Normal Stage 1~10, 10 upgrades, Hard/Nightmare unlocks, and Grumbar phase/pattern smoke passed
+- APK: `72,078,137 bytes`
+- SHA-256: `BCB10A46FDD46D918B2162CFB62FD86267D9E191DE8CB0FFED4671CF354B5D5F`
+- Detailed evidence: `docs/android-wave-transition-banner-v090.md`
+
 ## Audio QA
 
 - [x] Unity 내장 Audio 모듈 활성화

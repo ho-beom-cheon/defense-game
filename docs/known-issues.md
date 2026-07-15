@@ -31,6 +31,7 @@
 - Android Portrait 전투 스킬 HUD는 3x2 카드, RuntimePixel 영웅 초상, HP, 준비/쿨다운/비활성 상태를 표시한다. 전용 스킬 아이콘과 카드 애니메이션은 아직 최종 아트가 아니다.
 - Android Portrait 상단 HUD는 Crystal HP/보호막, Wave 진행, 한국어 전투 상태를 카드와 진행 바로 표시한다. 전용 HUD 아이콘과 Canvas 전환은 아직 적용하지 않았다.
 - Android Portrait 룬 선택은 3장의 전술 기록 카드, 희귀도 색상, 속성 문양, 설명과 효과 수치를 표시한다. 대부분의 룬은 전용 아이콘 대신 한글 속성 문양 폴백을 사용한다.
+- Android Portrait 전투는 첫/최종/보스 웨이브 배너와 선택 룬 적용 문구를 표시한다. 전용 웨이브 문양, 보스 경보 아이콘과 경보 음원은 아직 적용하지 않았다.
 - Grumbar has three HP-based phases, five Gate Imp reinforcements, phase-gated damage, a dedicated boss HUD, and three telegraphed phase-specific area attacks.
 - Boss attack telegraphs and impacts still use RuntimePixel/colored fallback effects; final attack animation, unique audio, and additional reinforcement types are not implemented.
 - Grumbar remains at the crystal and attacks it repeatedly instead of being removed on contact; final crystal-pressure tuning is still provisional.
@@ -66,6 +67,7 @@
 - Skill card touch, cooldown state, Rune Selection disable state, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device font scaling and repeated-touch endurance remain unverified.
 - Battle status HUD, pause touch, Rune Selection state, crystal shield bar, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device cutout and long-session state refresh remain unverified.
 - Rune card layout, rarity/element presentation, selection touch, Wave 2 transition, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device font scaling and repeated-touch endurance remain unverified.
+- Opening/final/boss wave banners, applied-rune feedback, Stage 10 boss warning, and Normal Stage 1~10 regression passed at 1080x2400 on the Android emulator. Physical-device cutout and long-session banner timing remain unverified.
 - The generated APK is signed with the Android Debug certificate. A protected release keystore is still required before store submission.
 - Physical-device install, display-cutout Safe Area, and long-session performance validation are not complete.
 - App icon, splash, and store graphics are first-pass candidates.
