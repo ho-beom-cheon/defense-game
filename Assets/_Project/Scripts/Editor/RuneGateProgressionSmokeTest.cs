@@ -10,6 +10,7 @@ namespace RuneGate.Editor
         private const int ExpectedStageCount = 10;
         private const int ExpectedRuneCount = 20;
         private const int ExpectedHeroCount = 6;
+        private const int ExpectedSkillCount = 6;
 
         private static readonly Vector2Int[] RequiredLayoutSizes =
         {
@@ -69,6 +70,8 @@ namespace RuneGate.Editor
             ValidateStages(catalog, errors, warnings);
             ValidateRunes(catalog, errors, warnings);
             ValidateRuneRuntimeRules(errors);
+            ValidateHeroSkills(catalog, errors);
+            ValidateHeroSkillRuntimeRules(errors);
             ValidateFormation(catalog, errors, warnings);
             ValidateDefaultSave(catalog, errors);
             ValidateStageSessionResolution(catalog, errors);
@@ -353,6 +356,78 @@ namespace RuneGate.Editor
             finally
             {
                 Object.DestroyImmediate(testObject);
+            }
+        }
+
+        private static void ValidateHeroSkills(RuntimeContentCatalog catalog, List<string> errors)
+        {
+            if (catalog.HeroRoster == null || catalog.HeroRoster.Heroes == null)
+            {
+                errors.Add("RuntimeContentCatalog has no hero roster for skill validation.");
+                return;
+            }
+
+            HashSet<string> skillIds = new HashSet<string>();
+            HashSet<string> effectKeys = new HashSet<string>();
+            int skillCount = 0;
+            for (int i = 0; i < catalog.HeroRoster.Heroes.Count; i++)
+            {
+                HeroData hero = catalog.HeroRoster.Heroes[i];
+                if (hero == null)
+                {
+                    continue;
+                }
+
+                SkillData skill = hero.SkillData;
+                if (skill == null)
+                {
+                    errors.Add($"{hero.name} has no SkillData.");
+                    continue;
+                }
+
+                skillCount++;
+                if (string.IsNullOrWhiteSpace(skill.SkillId) || !skillIds.Add(skill.SkillId))
+                {
+                    errors.Add($"{hero.name} has an empty or duplicate skill id: {skill.SkillId}");
+                }
+
+                if (!SkillController.IsHeroSkillEffectKey(skill.EffectKey))
+                {
+                    errors.Add($"{skill.name} uses unsupported hero skill effect key: {skill.EffectKey}");
+                }
+
+                if (!effectKeys.Add(skill.EffectKey))
+                {
+                    errors.Add($"Hero skills must use unique effect keys. Duplicate: {skill.EffectKey}");
+                }
+
+                if (string.IsNullOrWhiteSpace(skill.DisplayName) || string.IsNullOrWhiteSpace(skill.Description))
+                {
+                    errors.Add($"{skill.name} is missing a user-facing name or description.");
+                }
+            }
+
+            if (skillCount != ExpectedSkillCount || skillIds.Count != ExpectedSkillCount || effectKeys.Count != ExpectedSkillCount)
+            {
+                errors.Add($"Expected {ExpectedSkillCount} unique hero skills. Found skills={skillCount}, ids={skillIds.Count}, effects={effectKeys.Count}.");
+            }
+        }
+
+        private static void ValidateHeroSkillRuntimeRules(List<string> errors)
+        {
+            int bossDamage = SkillController.CalculateShadowStrikeDamage(100, 100, 100, true);
+            int executeDamage = SkillController.CalculateShadowStrikeDamage(100, 35, 100, false);
+            int bossExecuteDamage = SkillController.CalculateShadowStrikeDamage(100, 35, 100, true);
+            if (bossDamage != 130 || executeDamage != 135 || bossExecuteDamage != 165)
+            {
+                errors.Add($"Shadow Strike damage rules failed. boss={bossDamage}, execute={executeDamage}, bossExecute={bossExecuteDamage}.");
+            }
+
+            int heroHeal = SkillController.CalculateHeroHeal(45, 1.2f);
+            int crystalHeal = SkillController.CalculateCrystalHeal(heroHeal);
+            if (heroHeal != 54 || crystalHeal != 30)
+            {
+                errors.Add($"Holy Heal split rules failed. hero={heroHeal}, crystal={crystalHeal}.");
             }
         }
 

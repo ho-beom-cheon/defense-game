@@ -198,6 +198,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Rune/RuneManager.cs",
             "Assets/_Project/Scripts/Rune/RuneEffectApplier.cs",
             "Assets/_Project/Scripts/Skill/SkillController.cs",
+            "Assets/_Project/Scripts/Skill/TemporaryTurretController.cs",
             "Assets/_Project/Scripts/Battle/BattleResult.cs",
             "Assets/_Project/Scripts/UI/BattleHUD.cs",
             "Assets/_Project/Scripts/UI/BattlePauseController.cs",
@@ -508,6 +509,8 @@ namespace RuneGate.Editor
             {
                 ValidateAsset<SkillData>(RequiredSkillAssets[i], "v0.4 skill asset", errors);
             }
+
+            ValidateSkillRuntimeEffects(errors);
 
             for (int i = 0; i < RequiredRuneAssets.Length; i++)
             {
@@ -1626,6 +1629,36 @@ namespace RuneGate.Editor
             if (data == null || data.Icon == null)
             {
                 errors.Add($"{label} image exists but SkillData icon link is missing: {dataPath}");
+            }
+        }
+
+        private static void ValidateSkillRuntimeEffects(List<string> errors)
+        {
+            HashSet<string> effectKeys = new HashSet<string>();
+            for (int i = 0; i < RequiredSkillAssets.Length; i++)
+            {
+                string path = RequiredSkillAssets[i];
+                SkillData skill = AssetDatabase.LoadAssetAtPath<SkillData>(path);
+                if (skill == null)
+                {
+                    continue;
+                }
+
+                string effectKey = skill.EffectKey;
+                if (!SkillController.IsHeroSkillEffectKey(effectKey))
+                {
+                    errors.Add($"SkillData uses an unsupported runtime effect key '{effectKey}': {path}");
+                }
+
+                if (!effectKeys.Add(effectKey))
+                {
+                    errors.Add($"Hero skills must use unique runtime effect keys. Duplicate: {effectKey}");
+                }
+
+                if (effectKey.IndexOf("placeholder", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    errors.Add($"SkillData still uses a placeholder effect key: {path}");
+                }
             }
         }
 

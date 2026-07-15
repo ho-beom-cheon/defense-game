@@ -43,6 +43,7 @@ namespace RuneGate
         private bool waitSucceeded;
         private int upgradePurchaseCount;
         private float previousTimeScale = 1f;
+        private float nextFullChapterSkillCastTime;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Bootstrap()
@@ -84,6 +85,27 @@ namespace RuneGate
         {
             UnbindBattleEvents();
             Time.timeScale = previousTimeScale;
+        }
+
+        private void Update()
+        {
+            if (!fullChapterMode || battleManager == null || battleManager.CurrentState != BattleState.WaveRunning ||
+                Time.unscaledTime < nextFullChapterSkillCastTime)
+            {
+                return;
+            }
+
+            IReadOnlyList<HeroController> heroes = battleManager.Heroes;
+            for (int i = 0; heroes != null && i < heroes.Count; i++)
+            {
+                HeroController hero = heroes[i];
+                if (hero != null && hero.IsAlive && hero.SkillController != null && hero.SkillController.CanUseSkill)
+                {
+                    hero.RequestManualSkill();
+                }
+            }
+
+            nextFullChapterSkillCastTime = Time.unscaledTime + 0.3f;
         }
 
         private IEnumerator RunSmokeTest()
@@ -642,6 +664,32 @@ namespace RuneGate
 
             Debug.Log("[RuneGateSystemE2E] All combat rune mechanics verified.");
 
+            if (!Require(pauseController.Pause(), "Battle could not pause for hero skill runtime verification."))
+            {
+                yield break;
+            }
+
+            HeroSkillSmokeContext skillContext = BeginHeroSkillRuntimeVerification();
+            if (skillContext == null)
+            {
+                yield break;
+            }
+
+            pauseController.Resume();
+            yield return WaitForCondition(
+                () => skillContext.RapidShotController != null &&
+                      skillContext.RapidShotController.ResolvedHitCount >= skillContext.ExpectedRapidShotHits &&
+                      skillContext.Turret != null && skillContext.Turret.ShotsFired > 0,
+                SceneLoadTimeoutSeconds);
+            bool asyncSkillsPassed = waitSucceeded;
+            CleanupHeroSkillDiagnostics(skillContext);
+            if (!Require(asyncSkillsPassed, "Rapid Shot or Temporary Turret did not resolve repeated runtime hits."))
+            {
+                yield break;
+            }
+
+            Debug.Log("[RuneGateSystemE2E] All six hero skill mechanics verified.");
+
             const string diagnosticUpgradeId = "upgrade_hero_attack";
             SaveManager.AddGold(321);
             SaveManager.SetUpgradeLevel(diagnosticUpgradeId, 2);
@@ -856,6 +904,7 @@ namespace RuneGate
                 sawBossHudThisStage = false;
                 bossReinforcementsSpawnedThisStage = 0;
                 observedBossPhaseController = null;
+                nextFullChapterSkillCastTime = 0f;
                 SceneManager.LoadScene("BattleScene");
                 yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "BattleScene", SceneLoadTimeoutSeconds);
                 if (!Require(waitSucceeded, $"Stage {stageNumber} BattleScene did not load."))
@@ -1284,6 +1333,253 @@ namespace RuneGate
                 "Rune applier did not retain the selected combat modifiers.");
         }
 
+        private HeroSkillSmokeContext BeginHeroSkillRuntimeVerification()
+        {
+            BattleManager activeBattleManager = FindAnyObjectByType<BattleManager>();
+            CrystalController crystal = FindAnyObjectByType<CrystalController>();
+            LaneManager lanes = FindAnyObjectByType<LaneManager>();
+            if (!Require(activeBattleManager != null && crystal != null && lanes != null,
+                    "Hero skill runtime verification is missing battle components."))
+            {
+                return null;
+            }
+
+            Dictionary<string, HeroController> heroes = new Dictionary<string, HeroController>();
+            for (int i = 0; i < activeBattleManager.Heroes.Count; i++)
+            {
+                HeroController hero = activeBattleManager.Heroes[i];
+                SkillController controller = hero != null ? hero.SkillController : null;
+                if (hero == null || !hero.IsAlive || controller == null || controller.Data == null)
+                {
+                    continue;
+                }
+
+                string effectKey = controller.Data.EffectKey;
+                if (!Require(SkillController.IsHeroSkillEffectKey(effectKey),
+                        $"Hero skill uses unsupported runtime effect key '{effectKey}'."))
+                {
+                    return null;
+                }
+
+                heroes[effectKey] = hero;
+            }
+
+            string[] requiredEffects =
+            {
+                SkillController.ShieldBashEffect,
+                SkillController.RapidShotEffect,
+                SkillController.MeteorAreaEffect,
+                SkillController.HolyHealEffect,
+                SkillController.TemporaryTurretEffect,
+                SkillController.ShadowStrikeEffect
+            };
+            for (int i = 0; i < requiredEffects.Length; i++)
+            {
+                if (!Require(heroes.ContainsKey(requiredEffects[i]), $"Missing runtime hero for skill effect {requiredEffects[i]}."))
+                {
+                    return null;
+                }
+            }
+
+            ResolveDiagnosticMonsterData(out MonsterData sturdyMonsterData, out MonsterData bossMonsterData);
+            if (!Require(sturdyMonsterData != null && bossMonsterData != null,
+                    "Hero skill runtime verification could not resolve normal and boss MonsterData."))
+            {
+                return null;
+            }
+
+            HeroSkillSmokeContext context = new HeroSkillSmokeContext();
+            HeroController shieldHero = heroes[SkillController.ShieldBashEffect];
+            MonsterController shieldTarget = CreateDiagnosticMonster(context, sturdyMonsterData, shieldHero, crystal, lanes, 0.95f, 0f);
+            int shieldHpBefore = shieldTarget.CurrentHp;
+            float shieldXBefore = shieldTarget.transform.position.x;
+            if (!Require(shieldHero.SkillController.UseSkill(shieldHero, shieldTarget) &&
+                    shieldTarget.CurrentHp < shieldHpBefore &&
+                    shieldTarget.transform.position.x > shieldXBefore &&
+                    shieldTarget.ControlLockRemaining > 0f,
+                    "Shield Bash did not damage, push, and control its target."))
+            {
+                CleanupHeroSkillDiagnostics(context);
+                return null;
+            }
+
+            HeroController rapidHero = heroes[SkillController.RapidShotEffect];
+            MonsterController rapidTarget = CreateDiagnosticMonster(context, sturdyMonsterData, rapidHero, crystal, lanes, 1.05f, 0f);
+            context.RapidShotController = rapidHero.SkillController;
+            context.ExpectedRapidShotHits = context.RapidShotController.ResolvedHitCount + Mathf.Max(1, context.RapidShotController.Data.DamageHitCount);
+            if (!Require(context.RapidShotController.UseSkill(rapidHero, rapidTarget),
+                    "Rapid Shot could not begin its repeated attack."))
+            {
+                CleanupHeroSkillDiagnostics(context);
+                return null;
+            }
+
+            HeroController meteorHero = heroes[SkillController.MeteorAreaEffect];
+            MonsterController meteorCenter = CreateDiagnosticMonster(context, sturdyMonsterData, meteorHero, crystal, lanes, 1.1f, 0f);
+            MonsterController meteorSideA = CreateDiagnosticMonster(context, sturdyMonsterData, meteorHero, crystal, lanes, 1.35f, 0.18f);
+            MonsterController meteorSideB = CreateDiagnosticMonster(context, sturdyMonsterData, meteorHero, crystal, lanes, 0.85f, -0.18f);
+            int meteorCenterHp = meteorCenter.CurrentHp;
+            int meteorSideAHp = meteorSideA.CurrentHp;
+            int meteorSideBHp = meteorSideB.CurrentHp;
+            if (!Require(meteorHero.SkillController.UseSkill(meteorHero, meteorCenter) &&
+                    meteorCenter.CurrentHp < meteorCenterHp &&
+                    meteorSideA.CurrentHp < meteorSideAHp &&
+                    meteorSideB.CurrentHp < meteorSideBHp,
+                    "Meteor did not damage all diagnostic monsters inside its radius."))
+            {
+                CleanupHeroSkillDiagnostics(context);
+                return null;
+            }
+
+            HeroController healHero = heroes[SkillController.HolyHealEffect];
+            HeroController woundedHero = shieldHero != healHero ? shieldHero : rapidHero;
+            woundedHero.TakeDamage(Mathf.Max(1, woundedHero.CurrentHp - 1));
+            crystal.TakeDamage(crystal.ShieldHp + Mathf.Min(20, Mathf.Max(1, crystal.CurrentHp - 1)));
+            int woundedHeroHp = woundedHero.CurrentHp;
+            int crystalHp = crystal.CurrentHp;
+            if (!Require(healHero.SkillController.UseSkill(healHero, null) &&
+                    woundedHero.CurrentHp > woundedHeroHp && crystal.CurrentHp > crystalHp,
+                    "Holy Heal did not restore both a wounded hero and the crystal."))
+            {
+                CleanupHeroSkillDiagnostics(context);
+                return null;
+            }
+
+            HeroController turretHero = heroes[SkillController.TemporaryTurretEffect];
+            CreateDiagnosticMonster(context, sturdyMonsterData, turretHero, crystal, lanes, 1.2f, 0f);
+            int initialTurretCount = TemporaryTurretController.ActiveTurrets.Count;
+            if (!Require(turretHero.SkillController.UseSkill(turretHero, null) &&
+                    TemporaryTurretController.ActiveTurrets.Count == initialTurretCount + 1,
+                    "Temporary Turret was not deployed."))
+            {
+                CleanupHeroSkillDiagnostics(context);
+                return null;
+            }
+
+            context.Turret = FindTurretOwnedBy(turretHero);
+            if (!Require(context.Turret != null, "Temporary Turret owner binding was not retained."))
+            {
+                CleanupHeroSkillDiagnostics(context);
+                return null;
+            }
+
+            HeroController shadowHero = heroes[SkillController.ShadowStrikeEffect];
+            MonsterController shadowTarget = CreateDiagnosticMonster(context, bossMonsterData, shadowHero, crystal, lanes, 1.05f, 0f);
+            int shadowHpBefore = shadowTarget.CurrentHp;
+            if (!Require(shadowHero.SkillController.UseSkill(shadowHero, shadowTarget) && shadowTarget.CurrentHp < shadowHpBefore,
+                    "Shadow Strike did not damage its boss target."))
+            {
+                CleanupHeroSkillDiagnostics(context);
+                return null;
+            }
+
+            return context;
+        }
+
+        private static TemporaryTurretController FindTurretOwnedBy(HeroController owner)
+        {
+            IReadOnlyList<TemporaryTurretController> turrets = TemporaryTurretController.ActiveTurrets;
+            for (int i = 0; i < turrets.Count; i++)
+            {
+                if (turrets[i] != null && turrets[i].Owner == owner)
+                {
+                    return turrets[i];
+                }
+            }
+
+            return null;
+        }
+
+        private static MonsterController CreateDiagnosticMonster(
+            HeroSkillSmokeContext context,
+            MonsterData monsterData,
+            HeroController nearHero,
+            CrystalController crystal,
+            LaneManager lanes,
+            float xOffset,
+            float yOffset)
+        {
+            GameObject targetObject = new GameObject($"SkillDiagnostic_{monsterData.MonsterId}");
+            targetObject.transform.position = new Vector3(
+                Mathf.Clamp(nearHero.transform.position.x + xOffset, lanes.GetMinCombatX() + 0.5f, lanes.GetMaxCombatX() - 0.5f),
+                lanes.GetLaneY(nearHero.LaneIndex) + yOffset,
+                -0.02f);
+            targetObject.AddComponent<SpriteRenderer>();
+            MonsterController monster = targetObject.AddComponent<MonsterController>();
+            monster.Initialize(monsterData, nearHero.LaneIndex, crystal.transform.position, crystal, null);
+            context.DiagnosticObjects.Add(targetObject);
+            return monster;
+        }
+
+        private static void ResolveDiagnosticMonsterData(out MonsterData sturdyMonster, out MonsterData bossMonster)
+        {
+            sturdyMonster = null;
+            bossMonster = null;
+            List<StageData> stages = PrototypeAssetLoader.LoadStages();
+            for (int stageIndex = 0; stageIndex < stages.Count; stageIndex++)
+            {
+                StageData stage = stages[stageIndex];
+                if (stage == null)
+                {
+                    continue;
+                }
+
+                if (stage.BossMonster != null && (bossMonster == null || stage.BossMonster.MaxHp > bossMonster.MaxHp))
+                {
+                    bossMonster = stage.BossMonster;
+                }
+
+                IReadOnlyList<WaveData> waves = stage.Waves;
+                for (int waveIndex = 0; waves != null && waveIndex < waves.Count; waveIndex++)
+                {
+                    WaveData wave = waves[waveIndex];
+                    IReadOnlyList<WaveSpawnData> spawns = wave != null ? wave.Spawns : null;
+                    for (int spawnIndex = 0; spawns != null && spawnIndex < spawns.Count; spawnIndex++)
+                    {
+                        MonsterData candidate = spawns[spawnIndex] != null ? spawns[spawnIndex].MonsterData : null;
+                        if (candidate == null)
+                        {
+                            continue;
+                        }
+
+                        if (candidate.IsBoss)
+                        {
+                            if (bossMonster == null || candidate.MaxHp > bossMonster.MaxHp)
+                            {
+                                bossMonster = candidate;
+                            }
+                        }
+                        else if (sturdyMonster == null || candidate.MaxHp > sturdyMonster.MaxHp)
+                        {
+                            sturdyMonster = candidate;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void CleanupHeroSkillDiagnostics(HeroSkillSmokeContext context)
+        {
+            if (context == null)
+            {
+                return;
+            }
+
+            if (context.Turret != null)
+            {
+                Destroy(context.Turret.gameObject);
+            }
+
+            for (int i = 0; i < context.DiagnosticObjects.Count; i++)
+            {
+                GameObject diagnosticObject = context.DiagnosticObjects[i];
+                if (diagnosticObject != null)
+                {
+                    Destroy(diagnosticObject);
+                }
+            }
+        }
+
         private static RuneData FindRuneById(IReadOnlyList<RuneData> runes, string runeId)
         {
             for (int i = 0; runes != null && i < runes.Count; i++)
@@ -1311,6 +1607,14 @@ namespace RuneGate
             }
 
             return false;
+        }
+
+        private sealed class HeroSkillSmokeContext
+        {
+            public readonly List<GameObject> DiagnosticObjects = new List<GameObject>();
+            public SkillController RapidShotController;
+            public int ExpectedRapidShotHits;
+            public TemporaryTurretController Turret;
         }
 
         private bool Require(bool condition, string failureMessage)
