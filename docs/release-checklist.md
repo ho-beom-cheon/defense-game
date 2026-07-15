@@ -33,6 +33,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Android progression QA: Upgrade purchase, process restart persistence, Stage 2 unlock/start passed
 - Android full-chapter QA: Stage 1~10 Victory, 10 upgrades, and Stage 10 Grumbar spawn passed on 2026-07-15
 - Android pause/lifecycle QA: manual pause, resume, restart, stage-select exit, and background auto-pause passed on 2026-07-15
+- StageSelect formation editor QA: Android system flow passed on 2026-07-16; 6-hero slot swap, JSON disk reload, and BattleScene placement verified
 
 ## Progression QA
 
@@ -53,6 +54,9 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] 튜토리얼 표시/완료 저장 정상
 - [x] 전투 일시정지 / 계속하기 / 재시작 / 스테이지 선택 정상
 - [x] Android 백그라운드 전환 후 자동 일시정지 정상
+- [x] StageSelect 편성 슬롯 교환 및 JSON 저장 정상
+- [x] 저장 편성의 BattleScene 배치 반영 정상
+- [ ] StageSelect 편성 팝업 실기기 터치/텍스트 잘림 수동 확인
 
 ## Korean UI QA
 

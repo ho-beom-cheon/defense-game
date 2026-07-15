@@ -28,6 +28,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Android 에뮬레이터에서 업그레이드 구매, 재시작 저장 유지, Stage 2 진입 검증
 - Android 에뮬레이터에서 Stage 1~10 전체 승리, 강화 10회, Stage 10 그룸바르 스폰 검증
 - 전투 일시정지, 재시작, 스테이지 복귀와 Android 백그라운드 자동 일시정지 지원
+- StageSelect 3라인 x 3슬롯 영웅 편성 편집 및 로컬 JSON 즉시 저장
 
 ## 실행 방법
 
@@ -40,14 +41,15 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 ## 수동 테스트 흐름
 
 1. TitleScene에서 `새 게임 시작` 또는 `이어하기`를 선택한다.
-2. StageSelectScene에서 Stage 1을 선택하고 전투 시작을 누른다.
-3. BattleScene에서 영웅이 라인 안에서 이동/공격하는지 확인한다.
-4. 몬스터가 오른쪽에서 왼쪽으로 진격하고 크리스탈에 도달하면 피해를 주는지 확인한다.
-5. 웨이브 후 룬 선택 UI에서 룬을 선택한다.
-6. Victory 후 골드 지급, 스테이지 해금, 그림자 조각 보상을 확인한다.
-7. StageSelectScene의 그림자 계약 패널에서 조각 수, 계약, 장착/해제를 확인한다.
-8. UpgradeScene에서 업그레이드를 구매하고 저장되는지 확인한다.
-9. Stage 10에서 그룸바르 보스가 등장하는지 확인한다.
+2. StageSelectScene 하단의 `편성`에서 영웅을 선택하고 3라인 x 후열/중열/전열 슬롯을 편집한다.
+3. Stage 1을 선택하고 전투 시작을 누른 뒤 저장한 편성이 적용되는지 확인한다.
+4. BattleScene에서 영웅이 라인 안에서 이동/공격하는지 확인한다.
+5. 몬스터가 오른쪽에서 왼쪽으로 진격하고 크리스탈에 도달하면 피해를 주는지 확인한다.
+6. 웨이브 후 룬 선택 UI에서 룬을 선택한다.
+7. Victory 후 골드 지급, 스테이지 해금, 그림자 조각 보상을 확인한다.
+8. StageSelectScene의 그림자 계약 패널에서 조각 수, 계약, 장착/해제를 확인한다.
+9. UpgradeScene에서 업그레이드를 구매하고 저장되는지 확인한다.
+10. Stage 10에서 그룸바르 보스가 등장하는지 확인한다.
 
 ## UI 레이아웃 기준
 
@@ -121,6 +123,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/android-full-chapter-qa-v088.md`
 - `docs/battle-pause-lifecycle-v089.md`
 - `docs/procedural-sfx-v089.md`
+- `docs/formation-editor-v090.md`
 - `docs/release-checklist.md`
 - `docs/store-listing-draft.md`
 - `docs/privacy-checklist.md`

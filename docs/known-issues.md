@@ -32,6 +32,9 @@
 
 ## Progression / Save
 
+- StageSelect의 3x3 편성 편집은 Android 자동 시스템 흐름에서 슬롯 교환, JSON 재로드, BattleScene 반영까지 통과했다.
+- 편성 팝업은 IMGUI 기반이며 ADB 일반 실행 화면 캡처가 화면 전환 뒤 검은 프레임을 반환해 최종 터치 영역과 텍스트 잘림은 Unity Game View 또는 실기기에서 추가 수동 확인이 필요하다.
+- 드래그 앤 드롭, 영웅 프리셋, 편성별 추천 표시는 아직 제공하지 않는다.
 - UpgradeScene now recovers its four upgrade assets from RuntimeContentCatalog when serialized scene slots are null. Scene references should still be regenerated before final prefab/Canvas conversion.
 - Upgrade purchase, immediate UI refresh, process-restart persistence, and Stage 2 unlock passed Android emulator QA. Physical-device scroll inertia and rapid repeated taps remain unverified.
 
