@@ -8,6 +8,7 @@ RuneGate Defense v1.0 is the first public-test Android candidate for the Goblin 
 - Stage 1-10 progression
 - 6 MVP heroes
 - 6 MVP monsters and Orc Warlord boss
+- Three telegraphed phase-specific attack patterns for Grumbar
 - 20 rune cards
 - Gold rewards and permanent upgrades
 - Local JSON save

@@ -43,6 +43,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Scene BGM Android QA: Menu/Battle theme creation, cross-fade transition, independent BGM/SFX settings, and Menu restoration passed on 2026-07-16
 - Cross-process audio settings QA: BGM/SFX enabled state and volume restored in an independent Android reader process on 2026-07-16
 - Post-BGM Android full-chapter regression: Stage 1~10 Victory and Grumbar phases 2/3 passed on 2026-07-16
+- Grumbar attack-pattern QA: phase 1 hit 2 same-lane heroes, phase 2 hit 3 lane-front heroes, phase 3 hit all 6 heroes and Crystal; Stage 10 Victory passed on 2026-07-16
 
 ## Progression QA
 
@@ -54,6 +55,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] Stage 10에서 그룸바르 보스 등장 확인
 - [x] 그룸바르 페이즈 2/3 및 지원군 5기 스폰 확인
 - [x] 그룸바르 한국어 HP/페이즈 HUD 확인
+- [x] 그룸바르 1·2·3페이즈 전용 공격, 텔레그래프, 실제 피해 확인
 - [x] Victory 결과창 정상 표시
 - [x] Defeat 결과창 정상 표시
 - [x] Result 버튼: 다음 스테이지 / 재시도 / 업그레이드 / 스테이지 선택 정상

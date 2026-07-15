@@ -50,6 +50,8 @@ $adb = "C:\Users\cjs41\AppData\Local\Android\SdkRuneGate\platform-tools\adb.exe"
 
 전체 챕터 모드는 스테이지당 최대 180초를 기다린다. 타임아웃이 발생하면 생존 몬스터의 이름, 라인, HP, x 좌표, 상태, 이동 공격 잠금, 공격 코루틴 여부를 로그에 남긴다.
 
+Stage 10에서는 그룸바르의 페이즈 2·3과 지원군 5기뿐 아니라 보스 전용 패턴이 실제 영웅을 맞혔는지도 검증한다. 페이즈 3 패턴은 전체 영웅과 크리스탈을 압박하며, 성공 로그에는 `[RuneGateFullE2E] Boss pattern verified`가 포함된다.
+
 ## 시스템 흐름 실행 예시
 
 ```powershell

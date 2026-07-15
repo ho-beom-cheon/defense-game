@@ -9,6 +9,7 @@
 - Added tutorial overlay and tutorial save state.
 - Added save version field for local JSON saves.
 - Added scene-aware Menu/Battle BGM with cross-fades and independent BGM/SFX settings.
+- Added telegraphed phase-specific area attacks for the Stage 10 Grumbar boss.
 - Added release notes, release checklist, privacy checklist, store listing draft, and Android build guide.
 
 ## 0.5.0

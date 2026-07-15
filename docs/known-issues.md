@@ -28,7 +28,8 @@
 - Attack, hit, and death feedback is still prototype-level.
 - Some skill effects are RuntimePixel placeholders, not final animation.
 - All six hero skills now have distinct runtime mechanics. Their timing, damage, healing, and turret duration still need long-form physical-device balance testing.
-- Grumbar now has three HP-based phases, five Gate Imp reinforcements, phase-gated damage, and a dedicated boss HUD. Boss-specific area attacks and additional summon patterns are not implemented yet.
+- Grumbar has three HP-based phases, five Gate Imp reinforcements, phase-gated damage, a dedicated boss HUD, and three telegraphed phase-specific area attacks.
+- Boss attack telegraphs and impacts still use RuntimePixel/colored fallback effects; final attack animation, unique audio, and additional reinforcement types are not implemented.
 - Grumbar remains at the crystal and attacks it repeatedly instead of being removed on contact; final crystal-pressure tuning is still provisional.
 - All 20 RuneData records now use implemented runtime effects. Lightning, splash, and chain feedback still reuses prototype hit sparks, and combination balance needs longer device playtests.
 - Stage 1-10 data is playable-oriented, but long-form balance testing is still required.
