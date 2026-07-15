@@ -99,6 +99,45 @@ namespace RuneGate
             }
         }
 
+        public static string HeroRoleName(HeroRole role)
+        {
+            switch (role)
+            {
+                case HeroRole.Tank:
+                    return "방어";
+                case HeroRole.MeleeDps:
+                    return "근접 공격";
+                case HeroRole.RangedDps:
+                    return "원거리 공격";
+                case HeroRole.Mage:
+                    return "광역 마법";
+                case HeroRole.Healer:
+                    return "회복";
+                case HeroRole.Support:
+                    return "지원";
+                case HeroRole.Engineer:
+                    return "설치";
+                case HeroRole.Assassin:
+                    return "암살";
+                default:
+                    return "전투";
+            }
+        }
+
+        public static string HeroPositionName(HeroPositionType positionType)
+        {
+            switch (positionType)
+            {
+                case HeroPositionType.Front:
+                    return "전열";
+                case HeroPositionType.Back:
+                    return "후열";
+                case HeroPositionType.Middle:
+                default:
+                    return "중열";
+            }
+        }
+
         public static string RuneRarityName(RuneRarity rarity)
         {
             switch (rarity)

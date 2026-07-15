@@ -11,22 +11,41 @@ namespace RuneGate
         [SerializeField] private string titleSceneName = "TitleScene";
         [SerializeField] private string battleSceneName = "BattleScene";
         [SerializeField] private string upgradeSceneName = "UpgradeScene";
+        [SerializeField] private HeroRosterData heroRoster;
+        [SerializeField] private FormationData defaultFormation;
 
+        private static readonly HeroPositionType[] FormationColumnOrder =
+        {
+            HeroPositionType.Back,
+            HeroPositionType.Middle,
+            HeroPositionType.Front
+        };
+
+        private readonly FormationEditorState formationEditor = new FormationEditorState();
         private Vector2 stageScrollPosition;
         private Vector2 detailScrollPosition;
+        private Vector2 formationScrollPosition;
         private string feedbackMessage = string.Empty;
+        private string formationFeedback = string.Empty;
         private int selectedStageIndex;
         private bool sceneTransitionRequested;
+        private bool showFormationEditor;
 
         public IReadOnlyList<StageData> Stages => stages;
+        public IReadOnlyList<HeroData> FormationHeroes => heroRoster != null ? heroRoster.Heroes : null;
+        public IReadOnlyList<FormationSlot> FormationSlots => formationEditor.Slots;
+        public bool IsFormationEditorVisible => showFormationEditor;
 
         private void OnEnable()
         {
             SaveManager.LoadOrCreate();
             EnsureStages();
+            EnsureFormationContent();
+            ReloadFormationFromSave();
             GameSession.SelectDifficulty(SaveManager.Current.selectedDifficultyId);
             selectedStageIndex = FindFirstUnlockedStageIndex();
             sceneTransitionRequested = false;
+            showFormationEditor = false;
         }
 
         private void OnGUI()
@@ -43,7 +62,15 @@ namespace RuneGate
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateSolidPanelStyle(GUI.skin.box);
             GUI.Box(frame.FrameRoot, GUIContent.none, panelStyle);
 
+            bool previousEnabled = GUI.enabled;
+            GUI.enabled = !showFormationEditor;
             DrawStageSelectFrame(frame);
+            GUI.enabled = previousEnabled;
+
+            if (showFormationEditor)
+            {
+                DrawFormationEditorPopup();
+            }
         }
 
         private void DrawStageSelectFrame(StageSelectFrameRects frame)
@@ -178,7 +205,7 @@ namespace RuneGate
             GUI.EndScrollView();
 
             bool previousEnabled = GUI.enabled;
-            GUI.enabled = unlocked && !sceneTransitionRequested;
+            GUI.enabled = previousEnabled && unlocked && !sceneTransitionRequested;
             if (GUI.Button(new Rect(area.x + 12f, area.yMax - actionHeight - 12f, area.width - 24f, actionHeight), "\uc804\ud22c \uc2dc\uc791", buttonStyle))
             {
                 StartSelectedStage(selectedStage);
@@ -189,27 +216,300 @@ namespace RuneGate
 
         private void DrawCompactFooter(Rect area, GUIStyle buttonStyle)
         {
-            if (!string.IsNullOrWhiteSpace(feedbackMessage))
-            {
-                GUI.Label(new Rect(area.x + 10f, area.y + 10f, area.width * 0.35f, 24f), feedbackMessage);
-            }
-
-            float buttonWidth = Mathf.Min(240f, (area.width - 36f) * 0.5f);
+            float buttonWidth = Mathf.Min(200f, (area.width - 44f) / 3f);
             float buttonHeight = UIResponsiveLayout.TouchHeight(34f);
             float y = area.y + Mathf.Max(4f, (area.height - buttonHeight) * 0.5f);
+            float buttonStartX = area.xMax - buttonWidth * 3f - 26f;
+            if (!string.IsNullOrWhiteSpace(feedbackMessage))
+            {
+                float feedbackWidth = Mathf.Max(1f, buttonStartX - area.x - 16f);
+                GUI.Label(new Rect(area.x + 10f, area.y + 10f, feedbackWidth, 24f), feedbackMessage);
+            }
+
             bool previousEnabled = GUI.enabled;
-            GUI.enabled = !sceneTransitionRequested;
-            if (GUI.Button(new Rect(area.xMax - buttonWidth * 2f - 18f, y, buttonWidth, buttonHeight), "\uc5c5\uadf8\ub808\uc774\ub4dc", buttonStyle))
+            GUI.enabled = previousEnabled && !sceneTransitionRequested;
+            if (GUI.Button(new Rect(buttonStartX, y, buttonWidth, buttonHeight), "\ud3b8\uc131", buttonStyle))
+            {
+                OpenFormationEditor();
+            }
+
+            if (GUI.Button(new Rect(buttonStartX + buttonWidth + 8f, y, buttonWidth, buttonHeight), "\uc5c5\uadf8\ub808\uc774\ub4dc", buttonStyle))
             {
                 LoadSceneOnce(upgradeSceneName);
             }
 
-            if (GUI.Button(new Rect(area.xMax - buttonWidth - 10f, y, buttonWidth, buttonHeight), "\ud0c0\uc774\ud2c0\ub85c", buttonStyle))
+            if (GUI.Button(new Rect(buttonStartX + (buttonWidth + 8f) * 2f, y, buttonWidth, buttonHeight), "\ud0c0\uc774\ud2c0\ub85c", buttonStyle))
             {
                 LoadSceneOnce(titleSceneName);
             }
 
             GUI.enabled = previousEnabled;
+        }
+
+        private void DrawFormationEditorPopup()
+        {
+            UIPopupGuiUtility.DrawDimOverlay();
+            Rect popupRect = GameFrameLayout.PopupFrame(900f, 1320f, 0.94f, 0.84f);
+            GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
+            GUILayout.BeginArea(popupRect, panelStyle);
+            GUI.SetNextControlName("PopupLayer_FormationEditor");
+            bool closeRequested = UIPopupGuiUtility.DrawHeader("문지기 전술 편성");
+            GUILayout.Label("영웅을 선택한 뒤 3개 라인의 후열·중열·전열 슬롯을 누르세요.");
+            GUILayout.Space(UIResponsiveLayout.SmallGap);
+
+            float actionReserve = UIResponsiveLayout.TouchHeight(42f) + 34f;
+            formationScrollPosition = GUILayout.BeginScrollView(
+                formationScrollPosition,
+                GUILayout.Height(Mathf.Max(280f, popupRect.height - actionReserve - 82f)));
+            DrawFormationRoster();
+            GUILayout.Space(UIResponsiveLayout.Gap);
+            DrawFormationGrid();
+            GUILayout.Space(UIResponsiveLayout.Gap);
+            DrawSelectedHeroSummary();
+            GUILayout.EndScrollView();
+
+            GUILayout.BeginHorizontal();
+            bool previousEnabled = GUI.enabled;
+            GUI.enabled = !string.IsNullOrWhiteSpace(formationEditor.SelectedHeroId)
+                && formationEditor.ContainsHero(formationEditor.SelectedHeroId)
+                && formationEditor.Count > 1;
+            if (GUILayout.Button("선택 영웅 빼기", GUILayout.Height(UIResponsiveLayout.TouchHeight(38f))))
+            {
+                TryRemoveSelectedHero();
+            }
+
+            GUI.enabled = previousEnabled;
+            if (GUILayout.Button("기본 편성 복구", GUILayout.Height(UIResponsiveLayout.TouchHeight(38f))))
+            {
+                ResetFormationToDefault();
+            }
+
+            GUILayout.EndHorizontal();
+            GUILayout.EndArea();
+
+            if (closeRequested)
+            {
+                CloseFormationEditor();
+            }
+        }
+
+        private void DrawFormationRoster()
+        {
+            GUILayout.Label($"영웅 기록 {formationEditor.Count}/9");
+            IReadOnlyList<HeroData> heroes = FormationHeroes;
+            if (heroes == null || heroes.Count == 0)
+            {
+                GUILayout.Label("영웅 기록을 불러오지 못했습니다.");
+                return;
+            }
+
+            for (int i = 0; i < heroes.Count; i += 2)
+            {
+                GUILayout.BeginHorizontal();
+                DrawFormationHeroButton(heroes[i]);
+                if (i + 1 < heroes.Count)
+                {
+                    DrawFormationHeroButton(heroes[i + 1]);
+                }
+                else
+                {
+                    GUILayout.FlexibleSpace();
+                }
+
+                GUILayout.EndHorizontal();
+            }
+        }
+
+        private void DrawFormationHeroButton(HeroData heroData)
+        {
+            if (heroData == null)
+            {
+                GUILayout.Label("영웅 데이터 없음", GUILayout.ExpandWidth(true));
+                return;
+            }
+
+            bool selected = formationEditor.SelectedHeroId == heroData.HeroId;
+            bool placed = formationEditor.ContainsHero(heroData.HeroId);
+            Color previousColor = GUI.backgroundColor;
+            if (selected)
+            {
+                GUI.backgroundColor = new Color(0.42f, 0.78f, 0.52f, 1f);
+            }
+
+            string placement = placed ? "배치됨" : "대기";
+            string label = $"{heroData.DisplayNameKorean}\n{GameTextMapper.HeroRoleName(heroData.Role)} · {placement}";
+            if (GUILayout.Button(label, GUILayout.Height(UIResponsiveLayout.TouchHeight(50f)), GUILayout.ExpandWidth(true)))
+            {
+                SelectFormationHero(heroData.HeroId);
+            }
+
+            GUI.backgroundColor = previousColor;
+        }
+
+        private void DrawFormationGrid()
+        {
+            GUILayout.Label("3라인 전술 슬롯");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(string.Empty, GUILayout.Width(72f));
+            for (int i = 0; i < FormationColumnOrder.Length; i++)
+            {
+                GUILayout.Label(GameTextMapper.HeroPositionName(FormationColumnOrder[i]), GUILayout.ExpandWidth(true));
+            }
+
+            GUILayout.EndHorizontal();
+
+            for (int laneIndex = 0; laneIndex < 3; laneIndex++)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"라인 {laneIndex + 1}", GUILayout.Width(72f), GUILayout.Height(UIResponsiveLayout.TouchHeight(54f)));
+                for (int positionIndex = 0; positionIndex < FormationColumnOrder.Length; positionIndex++)
+                {
+                    HeroPositionType positionType = FormationColumnOrder[positionIndex];
+                    string heroId = formationEditor.HeroIdAt(laneIndex, positionType);
+                    HeroData heroData = FindFormationHero(heroId);
+                    string label = heroData != null ? heroData.DisplayNameKorean : "빈 슬롯";
+                    if (heroId == formationEditor.SelectedHeroId)
+                    {
+                        label = $"선택\n{label}";
+                    }
+
+                    if (GUILayout.Button(label, GUILayout.Height(UIResponsiveLayout.TouchHeight(54f)), GUILayout.ExpandWidth(true)))
+                    {
+                        TryPlaceSelectedHero(laneIndex, positionType);
+                    }
+                }
+
+                GUILayout.EndHorizontal();
+            }
+        }
+
+        private void DrawSelectedHeroSummary()
+        {
+            HeroData selectedHero = FindFormationHero(formationEditor.SelectedHeroId);
+            if (selectedHero == null)
+            {
+                GUILayout.Label("영웅을 선택하면 역할과 권장 위치를 확인할 수 있습니다.");
+            }
+            else
+            {
+                GUILayout.Label($"선택: {selectedHero.DisplayNameKorean} — {selectedHero.SubtitleKorean}");
+                GUILayout.Label($"역할: {GameTextMapper.HeroRoleName(selectedHero.Role)} / 권장 {GameTextMapper.HeroPositionName(selectedHero.PositionType)}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(formationFeedback))
+            {
+                GUILayout.Label(formationFeedback);
+            }
+        }
+
+        public void OpenFormationEditor()
+        {
+            EnsureFormationContent();
+            ReloadFormationFromSave();
+            showFormationEditor = true;
+            formationFeedback = "영웅을 선택하고 배치할 슬롯을 누르세요.";
+            AudioManager.Play(SfxKey.ButtonClick);
+        }
+
+        public void CloseFormationEditor()
+        {
+            showFormationEditor = false;
+            feedbackMessage = $"편성 {formationEditor.Count}/9 저장됨";
+            AudioManager.Play(SfxKey.ButtonClick);
+        }
+
+        public bool SelectFormationHero(string heroId)
+        {
+            HeroData heroData = FindFormationHero(heroId);
+            if (heroData == null || !formationEditor.SelectHero(heroId))
+            {
+                formationFeedback = "선택한 영웅 기록을 찾지 못했습니다.";
+                return false;
+            }
+
+            formationFeedback = $"{heroData.DisplayNameKorean}의 이동할 슬롯을 선택하세요.";
+            AudioManager.Play(SfxKey.ButtonClick);
+            return true;
+        }
+
+        public bool TryPlaceSelectedHero(int laneIndex, HeroPositionType positionType)
+        {
+            bool changed = formationEditor.TryPlaceSelected(laneIndex, positionType, out formationFeedback);
+            if (!changed)
+            {
+                return false;
+            }
+
+            SaveFormation();
+            AudioManager.Play(SfxKey.ButtonClick);
+            return true;
+        }
+
+        public bool TryRemoveSelectedHero()
+        {
+            bool changed = formationEditor.TryRemoveSelected(out formationFeedback);
+            if (!changed)
+            {
+                return false;
+            }
+
+            SaveFormation();
+            return true;
+        }
+
+        public void ResetFormationToDefault()
+        {
+            EnsureFormationContent();
+            IReadOnlyList<FormationSlot> defaults = defaultFormation != null && defaultFormation.Slots != null && defaultFormation.Slots.Count > 0
+                ? defaultFormation.Slots
+                : SaveManager.CreateDefaultFormationSlots();
+            formationEditor.Load(defaults);
+            SelectFirstFormationHero();
+            SaveFormation();
+            formationFeedback = "기본 편성을 복구하고 저장했습니다.";
+            AudioManager.Play(SfxKey.ButtonClick);
+        }
+
+        public void ReloadFormationFromSave()
+        {
+            formationEditor.Load(SaveManager.GetFormationSlots());
+            SelectFirstFormationHero();
+        }
+
+        private void SaveFormation()
+        {
+            if (formationEditor.Count <= 0)
+            {
+                formationFeedback = "전투를 위해 영웅 한 명은 편성해야 합니다.";
+                return;
+            }
+
+            SaveManager.SetFormationSlots(formationEditor.CreateCopy());
+            feedbackMessage = $"편성 {formationEditor.Count}/9 저장됨";
+        }
+
+        private void SelectFirstFormationHero()
+        {
+            IReadOnlyList<HeroData> heroes = FormationHeroes;
+            if (heroes == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < heroes.Count; i++)
+            {
+                HeroData heroData = heroes[i];
+                if (heroData != null)
+                {
+                    formationEditor.SelectHero(heroData.HeroId);
+                    return;
+                }
+            }
+        }
+
+        private HeroData FindFormationHero(string heroId)
+        {
+            return heroRoster != null ? heroRoster.FindHeroById(heroId) : null;
         }
 
         private static void DrawTextureIcon(Rect rect, string spritePath)
@@ -340,6 +640,24 @@ namespace RuneGate
             }
 
             Debug.LogWarning("StageSelectUI could not find stage data. Run Tools/RuneGate/Sync Runtime Content Catalog.");
+        }
+
+        private void EnsureFormationContent()
+        {
+            if (heroRoster == null)
+            {
+                heroRoster = PrototypeAssetLoader.LoadHeroRoster();
+            }
+
+            if (defaultFormation == null)
+            {
+                defaultFormation = PrototypeAssetLoader.LoadDefaultFormation();
+            }
+
+            if (heroRoster == null)
+            {
+                Debug.LogWarning("StageSelectUI could not find the MVP hero roster for formation editing.");
+            }
         }
 
         private void EnsureStageOrder()
