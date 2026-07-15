@@ -29,6 +29,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Android 에뮬레이터에서 업그레이드 구매, 재시작 저장 유지, Stage 2 진입 검증
 - Android 에뮬레이터에서 Stage 1~10 전체 승리, 강화 10회, Stage 10 그룸바르 스폰 검증
 - 전투 일시정지, 재시작, 스테이지 복귀와 Android 백그라운드 자동 일시정지 지원
+- 전투 상태 요약, BGM/SFX 즉시 설정, 재시작/이탈 확인을 갖춘 Android Portrait 일시정지 메뉴
 - StageSelect 3라인 x 3슬롯 영웅 편성 편집 및 로컬 JSON 즉시 저장
 - Stage 10 그룸바르 3단계 페이즈, 지원군 소환, 전용 보스 HP HUD
 - 그룸바르 크리스탈 접촉 후 반복 공격 및 실제 처치 Victory 규칙
@@ -56,14 +57,15 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 2. StageSelectScene 하단의 `편성`에서 영웅을 선택하고 3라인 x 후열/중열/전열 슬롯을 편집한다.
 3. Stage 1을 선택하고 전투 시작을 누른 뒤 저장한 편성이 적용되는지 확인한다.
 4. BattleScene에서 영웅이 라인 안에서 이동/공격하는지 확인한다.
-5. 몬스터가 오른쪽에서 왼쪽으로 진격하고 크리스탈에 도달하면 피해를 주는지 확인한다.
-6. 웨이브 후 룬 선택 UI에서 룬을 선택한다.
-7. Victory 후 골드 지급, 스테이지 해금, 그림자 조각 보상을 확인한다.
-8. StageSelectScene의 그림자 계약 패널에서 조각 수, 계약, 장착/해제를 확인한다.
-9. UpgradeScene에서 업그레이드를 구매하고 저장되는지 확인한다.
-10. Stage 10에서 그룸바르 보스가 등장하는지 확인한다.
-11. Normal Stage 10 승리 후 `어려움`이 열리고, 어려움에서는 Stage 1부터 순서대로 열리는지 확인한다.
-12. 어려움 Stage 10 승리 후 `악몽`이 열리고 앱 재실행 뒤에도 유지되는지 확인한다.
+5. 상단 `일시정지`를 눌러 전투 요약, BGM/SFX 설정, 재시작/스테이지 이탈 확인과 계속하기를 확인한다.
+6. 몬스터가 오른쪽에서 왼쪽으로 진격하고 크리스탈에 도달하면 피해를 주는지 확인한다.
+7. 웨이브 후 룬 선택 UI에서 룬을 선택한다.
+8. Victory 후 골드 지급, 스테이지 해금, 그림자 조각 보상을 확인한다.
+9. StageSelectScene의 그림자 계약 패널에서 조각 수, 계약, 장착/해제를 확인한다.
+10. UpgradeScene에서 업그레이드를 구매하고 저장되는지 확인한다.
+11. Stage 10에서 그룸바르 보스가 등장하는지 확인한다.
+12. Normal Stage 10 승리 후 `어려움`이 열리고, 어려움에서는 Stage 1부터 순서대로 열리는지 확인한다.
+13. 어려움 Stage 10 승리 후 `악몽`이 열리고 앱 재실행 뒤에도 유지되는지 확인한다.
 
 ## UI 레이아웃 기준
 
@@ -147,6 +149,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/android-runtime-sprite-alpha-qa-v090.md`
 - `docs/android-title-menu-polish-v090.md`
 - `docs/android-tutorial-overlay-polish-v090.md`
+- `docs/android-battle-pause-menu-polish-v090.md`
 - `docs/battle-pause-lifecycle-v089.md`
 - `docs/procedural-sfx-v089.md`
 - `docs/scene-bgm-audio-settings-v090.md`

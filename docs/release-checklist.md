@@ -6,7 +6,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 - [x] Unity 컴파일 에러 없음
 - [x] `Tools/RuneGate/Validate Project` 실행
-- [ ] `Tools/RuneGate/Validate v1.0 Release Track` 실행
+- [x] `Tools/RuneGate/Validate v1.0 Release Track` 실행
 - [x] `TitleScene` 실행 가능
 - [x] `StageSelectScene` 실행 가능
 - [x] `BattleScene` 실행 가능
@@ -50,6 +50,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - Portrait battlefield composition QA: camera-bounds background fill, dynamic three-lane spread, larger RuntimePixel units, Rune Selection, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 - Battle skill card HUD QA: 3x2 hero cards, RuntimePixel portraits, HP, skill touch cooldown, Rune Selection disabled state, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 - Battle status HUD QA: Crystal HP/shield, Wave progress, Korean battle state, pause touch, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
+- Battle pause menu QA: state summary, BGM/SFX persistence controls, restart/stage-select confirmations, resume, and Normal Stage 1~10 regression passed on Android 15 API 35 emulator on 2026-07-16
 
 ## Progression QA
 
@@ -128,7 +129,7 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - SHA-256: `58A8CDA1FE642635DAEE4766B6C5B2446CCF3A945F8C9B508807712D74E903EF`
 - Android full-chapter result: Stage 1~10 Victory, Hard/Nightmare unlock chain, sequential Hard stage progress, and disk reload PASS
 
-- Date: 2026-07-12
+- Date: 2026-07-16
 - Command: `RuneGate.Editor.RuneGateCurrentBuildPipeline.BuildCurrentAndroidApkFromCommandLine`
 - Result: Succeeded
 - Clean branch: `codex/issue-34-clean-android-aab`
@@ -341,6 +342,21 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - APK: `72,104,809 bytes`
 - SHA-256: `3CFB60A9B6FE4B0F5F17D4BD061BFE57E46C026E6803BBCF0127751F6416ACF7`
 - Detailed evidence: `docs/android-tutorial-overlay-polish-v090.md`
+
+### Android Battle Pause Menu Polish QA
+
+- Date: 2026-07-16
+- Branch: `codex/issue-87-pause-menu-polish`
+- Device: Android 15 / API 35 emulator, 1080x2400 Portrait
+- Rendering: centered dim panel, battle summary, BGM/SFX controls, primary Continue action, and two confirmation modals passed
+- Touch flow: BGM volume, SFX mute, restart confirmation/cancel, stage-select confirmation/cancel, and battle resume passed
+- Project Validator: passed
+- Progression Smoke Test: passed Safe Area, overlap, touch-target, lifecycle-copy, and confirmation layout checks at five target sizes
+- System Flows E2E: passed tutorial/persistence, battle/lifecycle pause, audio persistence, and Retry/Upgrade/Stage Select flow
+- Regression: Normal Stage 1~10, 10 upgrades, and Stage 10 Grumbar phase/pattern smoke passed
+- APK: `72,113,553 bytes`
+- SHA-256: `AF084D719DF5B46CA923DC433DC063CB89EACFFBB9E18CBA5FD3133673E2B471`
+- Detailed evidence: `docs/android-battle-pause-menu-polish-v090.md`
 
 ## Audio QA
 

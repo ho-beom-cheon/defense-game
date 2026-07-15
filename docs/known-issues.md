@@ -25,7 +25,7 @@
 ## Combat
 
 - Hero and monster movement is lane-based interpolation, not full pathfinding or physics collision.
-- Battle pause, resume, restart, stage-select exit, and Android background auto-pause passed emulator QA. Physical-device phone calls, screen lock, and multi-window transitions remain unverified.
+- Battle pause now includes a state summary, persisted BGM/SFX controls, destructive-action confirmations, resume, restart, stage-select exit, and Android background auto-pause. Android emulator QA passed; physical-device phone calls, screen lock, display cutouts, and multi-window transitions remain unverified.
 - Portrait safe bounds now use the monster sprite leading edge for crystal contact, preventing the final monster from remaining stalled at the left battlefield boundary.
 - Undead revival is enabled only on Hard and Nightmare; Easy and Normal keep the hook disabled for clear-time stability.
 - Attack, hit, and death feedback is still prototype-level.
