@@ -93,7 +93,23 @@ namespace RuneGate
             if (showSettings)
             {
                 RuntimePixelGuiUtility.DrawIcon(RuntimePixelAssetLoader.UiIconSettings, 24f);
-                GUILayout.Label("BGM: \uc900\ube44 \uc911");
+                string bgmLabel = AudioManager.BgmEnabled ? "BGM: \ucf1c\uc9d0" : "BGM: \uaebc\uc9d0";
+                if (GUILayout.Button(bgmLabel, GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
+                {
+                    bool enableBgm = !AudioManager.BgmEnabled;
+                    AudioManager.SetBgmEnabled(enableBgm);
+                    feedbackMessage = enableBgm
+                        ? "\ubc30\uacbd \uc74c\uc545\uc744 \ucf30\uc2b5\ub2c8\ub2e4."
+                        : "\ubc30\uacbd \uc74c\uc545\uc744 \uaecf\uc2b5\ub2c8\ub2e4.";
+                }
+
+                string bgmVolumeLabel = $"BGM \uc74c\ub7c9: {Mathf.RoundToInt(AudioManager.BgmVolume * 100f)}%";
+                if (GUILayout.Button(bgmVolumeLabel, GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
+                {
+                    AudioManager.SetBgmVolume(AudioManager.NextVolumeStep(AudioManager.BgmVolume));
+                    feedbackMessage = $"BGM \uc74c\ub7c9\uc744 {Mathf.RoundToInt(AudioManager.BgmVolume * 100f)}%\ub85c \uc124\uc815\ud588\uc2b5\ub2c8\ub2e4.";
+                }
+
                 string sfxLabel = AudioManager.SfxEnabled ? "SFX: \ucf1c\uc9d0" : "SFX: \uaebc\uc9d0";
                 if (GUILayout.Button(sfxLabel, GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
                 {
@@ -107,6 +123,14 @@ namespace RuneGate
                     feedbackMessage = enableSfx
                         ? "\uc804\ud22c \ud6a8\uacfc\uc74c\uc744 \ucf30\uc2b5\ub2c8\ub2e4."
                         : "\uc804\ud22c \ud6a8\uacfc\uc74c\uc744 \uaecf\uc2b5\ub2c8\ub2e4.";
+                }
+
+                string sfxVolumeLabel = $"SFX \uc74c\ub7c9: {Mathf.RoundToInt(AudioManager.SfxVolume * 100f)}%";
+                if (GUILayout.Button(sfxVolumeLabel, GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
+                {
+                    AudioManager.SetSfxVolume(AudioManager.NextVolumeStep(AudioManager.SfxVolume));
+                    AudioManager.Play(SfxKey.ButtonClick);
+                    feedbackMessage = $"SFX \uc74c\ub7c9\uc744 {Mathf.RoundToInt(AudioManager.SfxVolume * 100f)}%\ub85c \uc124\uc815\ud588\uc2b5\ub2c8\ub2e4.";
                 }
 
                 if (GUILayout.Button("\ub2e4\uc74c \uc804\ud22c\uc5d0\uc11c \ud29c\ud1a0\ub9ac\uc5bc \ub2e4\uc2dc \ubcf4\uae30", GUILayout.Height(UIResponsiveLayout.TouchHeight(34f))))
