@@ -12,6 +12,7 @@ namespace RuneGate
         [SerializeField] private CrystalController crystalController;
         [SerializeField] private MonsterController monsterPrefab;
         [SerializeField] private Transform monsterRoot;
+        [SerializeField] private BattlefieldVisualController battlefieldVisualController;
         [SerializeField] private bool addDefaultColliderToGeneratedMonsters = true;
 
         private readonly List<MonsterController> aliveMonsters = new List<MonsterController>();
@@ -212,6 +213,12 @@ namespace RuneGate
             monster.RefreshBoundsAnchors();
             laneManager.ClampUnitInsideBattlefield(monster.transform, monster.VisualSpriteRenderer);
             monster.RefreshBoundsAnchors();
+            UnitVisualKind visualKind = monster.IsBoss
+                ? UnitVisualKind.Boss
+                : monsterData.MonsterType == MonsterType.Flying
+                    ? UnitVisualKind.FlyingMonster
+                    : UnitVisualKind.Monster;
+            battlefieldVisualController?.CreateUnitShadow(monster.transform, monster.VisualSpriteRenderer, visualKind);
             aliveMonsters.Add(monster);
             MonsterSpawned?.Invoke(monster);
             return monster;

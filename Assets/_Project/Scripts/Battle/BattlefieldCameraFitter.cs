@@ -11,6 +11,7 @@ namespace RuneGate
         [SerializeField] private float minimumWorldHeight = 7.5f;
         [SerializeField] private RectTransform viewport;
         [SerializeField] private Canvas viewportCanvas;
+        [SerializeField] private BattlefieldVisualController battlefieldVisualController;
 
         private Camera targetCamera;
         private Camera backgroundCamera;
@@ -33,6 +34,12 @@ namespace RuneGate
         {
             viewport = targetViewport;
             viewportCanvas = canvas;
+            ApplyLayout();
+        }
+
+        public void ConfigureBattlefieldVisuals(BattlefieldVisualController visualController)
+        {
+            battlefieldVisualController = visualController;
             ApplyLayout();
         }
 
@@ -88,6 +95,7 @@ namespace RuneGate
             lastScreenHeight = Screen.height;
             lastSafeArea = Screen.safeArea;
             lastViewportRect = battlefield;
+            battlefieldVisualController?.RefreshLayout();
         }
 
         private void EnsureBackgroundCamera()

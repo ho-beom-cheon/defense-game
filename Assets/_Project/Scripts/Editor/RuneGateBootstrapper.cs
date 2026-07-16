@@ -43,6 +43,7 @@ namespace RuneGate.Editor
             RootPath + "/Data/Upgrades",
             RootPath + "/Data/Formations",
             RootPath + "/Data/Rosters",
+            RootPath + "/Data/Battlefield",
             RootPath + "/Prefabs/Heroes",
             RootPath + "/Prefabs/Monsters",
             RootPath + "/Prefabs/Projectiles",
@@ -109,6 +110,8 @@ namespace RuneGate.Editor
             RootPath + "/Art/ConceptSheets/Heroes",
             RootPath + "/Art/ConceptSheets/Enemies",
             RootPath + "/Art/RuntimePixel",
+            RootPath + "/Art/RuntimePixel/Battlefield",
+            RootPath + "/Art/RuntimePixel/Battlefield/Stage01",
             RootPath + "/Art/RuntimePixel/Backgrounds",
             RootPath + "/Art/RuntimePixel/Effects",
             RootPath + "/Art/RuntimePixel/Heroes",
@@ -201,6 +204,7 @@ namespace RuneGate.Editor
         {
             EnsureRequiredFolders();
             BattleUiAssetBuilder.BuildAssets();
+            BattlefieldArtAssetBuilder.BuildAssets();
             List<StageData> stages = PrototypeAssetLoader.LoadStages();
             List<RuneData> runes = PrototypeAssetLoader.LoadRunes();
             List<UpgradeData> upgrades = PrototypeAssetLoader.LoadUpgrades();
@@ -428,6 +432,7 @@ namespace RuneGate.Editor
             UpgradeData[] upgrades = CreateSampleUpgrades();
             CreateOrUpdateRuntimeContentCatalog(content, upgrades);
             BattleUiAssetBuilder.BuildAssets();
+            BattlefieldArtAssetBuilder.BuildAssets();
 
             CreateOrUpdateTitleScene();
             CreateOrUpdateStageSelectScene(content.Stages);
@@ -1516,6 +1521,7 @@ namespace RuneGate.Editor
             camera.backgroundColor = new Color(0.06f, 0.08f, 0.1f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             cameraObject.transform.position = new Vector3(0f, 0f, -10f);
+            BattlefieldCameraFitter cameraFitter = cameraObject.AddComponent<BattlefieldCameraFitter>();
 
             GameObject root = new GameObject("RuneGate Battle Root");
             BattleManager battleManager = root.AddComponent<BattleManager>();
@@ -1526,13 +1532,19 @@ namespace RuneGate.Editor
             HeroPlacementManager heroPlacementManager = root.AddComponent<HeroPlacementManager>();
             root.AddComponent<AudioManager>();
 
-            GameObject crystalObject = CreatePlaceholderObject("Kingdom Crystal", null, new Vector3(-5.65f, 0f, 0f), new Color(0.25f, 0.92f, 1f), new Vector2(0.7f, 3.2f), 3);
-            HitFlashController crystalHitFlash = crystalObject.AddComponent<HitFlashController>();
-            CrystalController crystalController = crystalObject.AddComponent<CrystalController>();
-            EditComponent(crystalController, serializedObject =>
+            BattlefieldArtTheme battlefieldArtTheme = AssetDatabase.LoadAssetAtPath<BattlefieldArtTheme>(BattlefieldArtAssetBuilder.ThemePath);
+            if (battlefieldArtTheme == null || !battlefieldArtTheme.HasRequiredAssets)
             {
-                SetObject(serializedObject, "hitFlashController", crystalHitFlash);
-            });
+                throw new InvalidOperationException($"Stage 1 battlefield art theme is missing or incomplete: {BattlefieldArtAssetBuilder.ThemePath}");
+            }
+
+            GameObject battlefieldArtRoot = new GameObject("Battlefield Art Root");
+            battlefieldArtRoot.transform.SetParent(root.transform, false);
+            BattlefieldVisualController battlefieldVisualController = battlefieldArtRoot.AddComponent<BattlefieldVisualController>();
+
+            GameObject crystalObject = new GameObject("Kingdom Crystal");
+            crystalObject.transform.position = new Vector3(-5.65f, 0f, 0f);
+            CrystalController crystalController = crystalObject.AddComponent<CrystalController>();
 
             GameObject laneRoot = new GameObject("Lane Points");
             Transform[] spawnPoints = new Transform[3];
@@ -1541,7 +1553,6 @@ namespace RuneGate.Editor
             for (int laneIndex = 0; laneIndex < 3; laneIndex++)
             {
                 float y = (laneIndex - 1) * 2.15f;
-                CreatePlaceholderObject($"Lane {laneIndex} Path", laneRoot.transform, new Vector3(0.3f, y, 0f), new Color(0.25f, 0.27f, 0.32f), new Vector2(10.9f, 0.08f), 0);
 
                 GameObject spawnPoint = new GameObject($"Lane {laneIndex} Monster Spawn");
                 spawnPoint.transform.SetParent(laneRoot.transform);
@@ -1557,7 +1568,9 @@ namespace RuneGate.Editor
                 {
                     int flatIndex = laneIndex * 3 + slotIndex;
                     float x = -0.55f - slotIndex * 0.95f;
-                    GameObject slotPoint = CreatePlaceholderObject($"Lane {laneIndex} Hero Slot {slotIndex}", laneRoot.transform, new Vector3(x, y, 0f), new Color(0.24f, 0.42f, 0.64f, 0.28f), new Vector2(0.42f, 0.22f), 1);
+                    GameObject slotPoint = new GameObject($"Lane {laneIndex} Hero Slot {slotIndex}");
+                    slotPoint.transform.SetParent(laneRoot.transform);
+                    slotPoint.transform.position = new Vector3(x, y, 0f);
                     HeroPlacementSlot placementSlot = slotPoint.AddComponent<HeroPlacementSlot>();
                     EditComponent(placementSlot, serializedObject =>
                     {
@@ -1607,6 +1620,13 @@ namespace RuneGate.Editor
                 SetObjectList(serializedObject, "heroSlotPoints", ToObjectArray(heroSlotPoints));
             });
 
+            EditComponent(battlefieldVisualController, serializedObject =>
+            {
+                SetObject(serializedObject, "theme", battlefieldArtTheme);
+                SetObject(serializedObject, "laneManager", laneManager);
+                SetObject(serializedObject, "crystalController", crystalController);
+            });
+
             EditComponent(waveManager, serializedObject =>
             {
                 SetObject(serializedObject, "stageData", stageData);
@@ -1614,6 +1634,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "crystalController", crystalController);
                 SetObject(serializedObject, "monsterPrefab", null);
                 SetObject(serializedObject, "monsterRoot", monsterRoot.transform);
+                SetObject(serializedObject, "battlefieldVisualController", battlefieldVisualController);
                 SetBool(serializedObject, "addDefaultColliderToGeneratedMonsters", true);
             });
 
@@ -1628,6 +1649,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "heroRoster", heroRoster);
                 SetObject(serializedObject, "defaultFormation", defaultFormation);
                 SetObject(serializedObject, "heroRoot", heroRoot.transform);
+                SetObject(serializedObject, "battlefieldVisualController", battlefieldVisualController);
                 SetBool(serializedObject, "useSavedFormation", true);
                 SetBool(serializedObject, "writeDefaultFormationToSave", true);
                 SetVector2(serializedObject, "heroPlaceholderSize", new Vector2(1.05f, 1.05f));
@@ -1667,6 +1689,7 @@ namespace RuneGate.Editor
 
             pauseController.Configure(battleManager);
             battleCanvasController.Configure(battleManager, crystalController, pauseController, tutorialManager, runeSelectionUI, stageResultUI);
+            cameraFitter.ConfigureBattlefieldVisuals(battlefieldVisualController);
 
             EditorSceneManager.SaveScene(scene, BattleScenePath);
         }
