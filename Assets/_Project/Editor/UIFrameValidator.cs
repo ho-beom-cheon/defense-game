@@ -27,6 +27,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/Foundation/PopupFrameController.cs",
             "Assets/_Project/Scripts/UI/StageSelectUI.cs",
             "Assets/_Project/Scripts/UI/BattleHUD.cs",
+            "Assets/_Project/Scripts/UI/BattleCanvasController.cs",
+            "Assets/_Project/Scripts/UI/BattleCanvasLayout.cs",
             "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs",
             "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
             "Assets/_Project/Scripts/UI/StageResultUI.cs",
@@ -49,8 +51,6 @@ namespace RuneGate.Editor
         {
             new SceneBinding("Assets/_Project/Scenes/TitleScene.unity", "Assembly-CSharp::RuneGate.TitleUI"),
             new SceneBinding("Assets/_Project/Scenes/StageSelectScene.unity", "Assembly-CSharp::RuneGate.StageSelectUI"),
-            new SceneBinding("Assets/_Project/Scenes/BattleScene.unity", "Assembly-CSharp::RuneGate.BattleHUD"),
-            new SceneBinding("Assets/_Project/Scenes/BattleScene.unity", "Assembly-CSharp::RuneGate.FormationSkillPanelUI"),
             new SceneBinding("Assets/_Project/Scenes/BattleScene.unity", "Assembly-CSharp::RuneGate.RuneSelectionUI"),
             new SceneBinding("Assets/_Project/Scenes/BattleScene.unity", "Assembly-CSharp::RuneGate.StageResultUI"),
             new SceneBinding("Assets/_Project/Scenes/UpgradeScene.unity", "Assembly-CSharp::RuneGate.UpgradeSceneUI")
@@ -67,7 +67,10 @@ namespace RuneGate.Editor
             "ResultPopup",
             "UseCompactStageSelect",
             "UseCompactBattle",
-            "DrawStageSelectFrame"
+            "DrawStageSelectFrame",
+            "BattleCanvasLayout",
+            "BattlefieldViewport",
+            "BattleOverlayState"
         };
 
         private static readonly string[] SuspiciousUserFacingTokens =
@@ -152,6 +155,8 @@ namespace RuneGate.Editor
             {
                 "Assets/_Project/Scripts/UI/StageSelectUI.cs",
                 "Assets/_Project/Scripts/UI/BattleHUD.cs",
+                "Assets/_Project/Scripts/UI/BattleCanvasController.cs",
+                "Assets/_Project/Scripts/UI/BattleCanvasLayout.cs",
                 "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs",
                 "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
                 "Assets/_Project/Scripts/UI/StageResultUI.cs",
@@ -281,30 +286,29 @@ namespace RuneGate.Editor
 
         private static void ValidateBattleLayout(float width, float height, List<string> pass, List<string> failures)
         {
-            BattleFrameRects rects = GameFrameLayout.BattleFrameForSize(width, height);
+            BattleCanvasRects rects = BattleCanvasLayout.Calculate(width, height, new Rect(0f, 0f, width, height));
             string label = $"Battle {width:0}x{height:0}";
             Rect[] verticalAreas =
             {
-                rects.HeaderArea,
-                rects.BattleFieldFrame,
-                rects.SkillPanelArea,
-                rects.FooterArea
+                rects.Hud,
+                rects.Battlefield,
+                rects.Skills
             };
 
-            ValidateInside(label, "HeaderArea", rects.HeaderArea, rects.FrameRoot, failures);
-            ValidateInside(label, "BattleFieldFrame", rects.BattleFieldFrame, rects.FrameRoot, failures);
-            ValidateInside(label, "SkillPanelArea", rects.SkillPanelArea, rects.FrameRoot, failures);
-            ValidateInside(label, "FooterArea", rects.FooterArea, rects.FrameRoot, failures);
+            ValidateInside(label, "Hud", rects.Hud, rects.Root, failures);
+            ValidateInside(label, "BattlefieldViewport", rects.Battlefield, rects.Root, failures);
+            ValidateInside(label, "SkillLayer", rects.Skills, rects.Root, failures);
+            ValidateInside(label, "OverlayLayer", rects.Overlay, rects.Root, failures);
             ValidateNoOverlap(label, verticalAreas, failures);
 
-            if (rects.BattleFieldFrame.height < 140f)
+            if (rects.Battlefield.height < 140f)
             {
-                failures.Add($"{label}: BattleFieldFrame is too short. height={rects.BattleFieldFrame.height:0.#}");
+                failures.Add($"{label}: BattlefieldViewport is too short. height={rects.Battlefield.height:0.#}");
             }
 
-            if (rects.SkillPanelArea.height < 96f)
+            if (rects.Skills.height < 96f)
             {
-                failures.Add($"{label}: SkillPanelArea is too short. height={rects.SkillPanelArea.height:0.#}");
+                failures.Add($"{label}: SkillLayer is too short. height={rects.Skills.height:0.#}");
             }
 
             if (!HasFailureFor(label, failures))
@@ -373,25 +377,28 @@ namespace RuneGate.Editor
                 }
 
                 string text = File.ReadAllText(path);
-                int canvasCount = CountOccurrences(text, "m_Name: Canvas");
+                int canvasCount = scene.EndsWith("BattleScene.unity", StringComparison.Ordinal)
+                    ? CountOccurrences(text, "value: BattleCanvas") + CountOccurrences(text, "m_Name: BattleCanvas")
+                    : CountOccurrences(text, "m_Name: Canvas");
                 int eventSystemCount = CountOccurrences(text, "m_Name: EventSystem");
 
-                if (canvasCount <= 1)
+                bool battleScene = scene.EndsWith("BattleScene.unity", StringComparison.Ordinal);
+                if ((battleScene && canvasCount == 1) || (!battleScene && canvasCount <= 1))
                 {
                     pass.Add($"Canvas duplicate check passed: `{scene}` ({canvasCount})");
                 }
                 else
                 {
-                    warnings.Add($"Canvas duplicate risk: `{scene}` ({canvasCount})");
+                    warnings.Add($"Canvas count is invalid: `{scene}` ({canvasCount})");
                 }
 
-                if (eventSystemCount <= 1)
+                if ((battleScene && eventSystemCount == 1) || (!battleScene && eventSystemCount <= 1))
                 {
                     pass.Add($"EventSystem duplicate check passed: `{scene}` ({eventSystemCount})");
                 }
                 else
                 {
-                    warnings.Add($"EventSystem duplicate risk: `{scene}` ({eventSystemCount})");
+                    warnings.Add($"EventSystem count is invalid: `{scene}` ({eventSystemCount})");
                 }
             }
         }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -85,20 +86,57 @@ namespace RuneGate
             yield return WaitForCondition(() =>
             {
                 BattleManager battle = FindAnyObjectByType<BattleManager>();
-                return SceneManager.GetActiveScene().name == "BattleScene" && battle != null && battle.ActiveStageData != null;
+                BattleCanvasController canvas = FindAnyObjectByType<BattleCanvasController>();
+                return SceneManager.GetActiveScene().name == "BattleScene" && battle != null && battle.ActiveStageData != null && canvas != null && canvas.IsReady;
             });
             if (!Require(waitSucceeded, "BattleScene did not initialize.")) yield break;
 
-            yield return new WaitForSecondsRealtime(0.5f);
+            yield return new WaitForSecondsRealtime(2f);
             yield return Capture("03-battle");
             if (!waitSucceeded) yield break;
 
             TutorialManager tutorial = FindAnyObjectByType<TutorialManager>();
             if (!Require(tutorial != null, "BattleScene is missing TutorialManager.")) yield break;
             tutorial.Show();
-            yield return Capture("04-tutorial");
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("04a-tutorial-1");
+            if (!waitSucceeded) yield break;
+            for (int i = 0; i < 3; i++) tutorial.Next();
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("04b-tutorial-4");
+            if (!waitSucceeded) yield break;
+            for (int i = 0; i < 3; i++) tutorial.Next();
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("04c-tutorial-7");
             if (!waitSucceeded) yield break;
             tutorial.Skip();
+
+            BattlePauseController pauseController = FindAnyObjectByType<BattlePauseController>();
+            if (!Require(pauseController != null, "BattleScene is missing BattlePauseController.")) yield break;
+            pauseController.Pause();
+            yield return WaitForCondition(() => pauseController.IsPaused);
+            if (!Require(waitSucceeded, "Pause UI did not appear.")) yield break;
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("04d-pause");
+            if (!waitSucceeded) yield break;
+            pauseController.Resume();
+
+            RuneManager runeManager = FindAnyObjectByType<RuneManager>();
+            if (!Require(runeManager != null, "BattleScene is missing RuneManager.")) yield break;
+            runeManager.GenerateRuneOptions();
+            yield return WaitForCondition(() =>
+            {
+                RuneSelectionUI runeSelection = FindAnyObjectByType<RuneSelectionUI>();
+                return runeSelection != null && runeSelection.IsVisible;
+            });
+            if (!Require(waitSucceeded, "Rune Selection UI did not appear.")) yield break;
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("04e-rune-selection");
+            if (!waitSucceeded) yield break;
+
+            SceneManager.LoadScene("BattleScene");
+            yield return WaitForBattleCanvas();
+            if (!Require(waitSucceeded, "BattleScene did not reload for result capture.")) yield break;
 
             CrystalController crystal = FindAnyObjectByType<CrystalController>();
             if (!Require(crystal != null, "BattleScene is missing CrystalController.")) yield break;
@@ -109,7 +147,25 @@ namespace RuneGate
                 return result != null && result.IsVisible;
             });
             if (!Require(waitSucceeded, "Defeat Result UI did not appear.")) yield break;
+            yield return new WaitForSecondsRealtime(0.45f);
             yield return Capture("05-defeat-result");
+            if (!waitSucceeded) yield break;
+
+            SceneManager.LoadScene("BattleScene");
+            yield return WaitForBattleCanvas();
+            if (!Require(waitSucceeded, "BattleScene did not reload for victory capture.")) yield break;
+            BattleManager victoryBattle = FindAnyObjectByType<BattleManager>();
+            MethodInfo finishBattle = typeof(BattleManager).GetMethod("FinishBattle", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (!Require(victoryBattle != null && finishBattle != null, "Victory capture could not access BattleManager result flow.")) yield break;
+            finishBattle.Invoke(victoryBattle, new object[] { true, "봉문 기록 갱신. 크리스탈 방어 성공!" });
+            yield return WaitForCondition(() =>
+            {
+                StageResultUI result = FindAnyObjectByType<StageResultUI>();
+                return result != null && result.IsVisible;
+            });
+            if (!Require(waitSucceeded, "Victory Result UI did not appear.")) yield break;
+            yield return new WaitForSecondsRealtime(0.45f);
+            yield return Capture("05b-victory-result");
             if (!waitSucceeded) yield break;
 
             SceneManager.LoadScene("UpgradeScene");
@@ -163,6 +219,16 @@ namespace RuneGate
 
                 yield return null;
             }
+        }
+
+        private IEnumerator WaitForBattleCanvas()
+        {
+            yield return WaitForCondition(() =>
+            {
+                BattleManager battle = FindAnyObjectByType<BattleManager>();
+                BattleCanvasController canvas = FindAnyObjectByType<BattleCanvasController>();
+                return SceneManager.GetActiveScene().name == "BattleScene" && battle != null && battle.ActiveStageData != null && canvas != null && canvas.IsReady;
+            });
         }
 
         private bool Require(bool condition, string message)

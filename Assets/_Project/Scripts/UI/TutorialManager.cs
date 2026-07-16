@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,6 +13,9 @@ namespace RuneGate
         private int currentStepIndex;
         private bool visible;
         private float previousTimeScale = 1f;
+
+        public event Action<bool> VisibilityChanged;
+        public event Action<int, TutorialStepData> StepChanged;
 
         public bool IsVisible => visible;
         public TutorialStepData CurrentStep => visible && currentStepIndex >= 0 && currentStepIndex < steps.Count ? steps[currentStepIndex] : null;
@@ -53,6 +57,9 @@ namespace RuneGate
                 previousTimeScale = Time.timeScale;
                 Time.timeScale = 0f;
             }
+
+            VisibilityChanged?.Invoke(true);
+            StepChanged?.Invoke(currentStepIndex, CurrentStep);
         }
 
         public void Next()
@@ -66,7 +73,10 @@ namespace RuneGate
             if (currentStepIndex >= steps.Count)
             {
                 Complete();
+                return;
             }
+
+            StepChanged?.Invoke(currentStepIndex, CurrentStep);
         }
 
         public void Previous()
@@ -77,6 +87,7 @@ namespace RuneGate
             }
 
             currentStepIndex--;
+            StepChanged?.Invoke(currentStepIndex, CurrentStep);
         }
 
         public void Skip()
@@ -86,9 +97,15 @@ namespace RuneGate
 
         private void Complete()
         {
+            if (!visible)
+            {
+                return;
+            }
+
             visible = false;
             SaveManager.MarkTutorialSeen();
             RestoreTimeScale();
+            VisibilityChanged?.Invoke(false);
         }
 
         private void RestoreTimeScale()

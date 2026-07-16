@@ -190,9 +190,13 @@ namespace RuneGate
                 fitter = spriteRenderer.gameObject.AddComponent<RuntimeSpriteFitter>();
             }
 
-            fitter.TargetHeight = RuntimeSpritePolicy.GetHeroTargetHeight(heroData);
+            float presentationScale = GameFrameLayout.IsPortrait ? 0.86f : 0.96f;
+            fitter.TargetHeight = RuntimeSpritePolicy.GetHeroTargetHeight(heroData) * presentationScale;
             fitter.FitNow();
             RuntimeSpriteBoundsUtility.AlignVisualBottomToGround(spriteRenderer, heroObject.transform, position.y);
+            Vector3 visualPosition = spriteRenderer.transform.localPosition;
+            visualPosition.x += ResolveVisualSlotOffset(slotIndex);
+            spriteRenderer.transform.localPosition = visualPosition;
             activeLaneManager?.ClampUnitInsideBattlefield(heroObject.transform, spriteRenderer);
 
             Animator animator = heroObject.GetComponentInChildren<Animator>();
@@ -237,6 +241,19 @@ namespace RuneGate
             activeLaneManager?.ClampUnitInsideBattlefield(heroObject.transform, spriteRenderer);
 
             return heroController;
+        }
+
+        private static float ResolveVisualSlotOffset(int slotIndex)
+        {
+            switch (slotIndex)
+            {
+                case 0:
+                    return 0.38f;
+                case 2:
+                    return -0.38f;
+                default:
+                    return 0f;
+            }
         }
 
         private void EnsureFallbackContent()
