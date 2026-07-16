@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &289073589
+--- !u!1 &774958302
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,155 +127,67 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 289073590}
-  - component: {fileID: 289073591}
+  - component: {fileID: 774958305}
+  - component: {fileID: 774958304}
+  - component: {fileID: 774958303}
   m_Layer: 0
-  m_Name: Lane 0 Hero Slot 0
+  m_Name: EventSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &289073590
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 289073589}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.55, y: -2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &289073591
+--- !u!114 &774958303
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 289073589}
+  m_GameObject: {fileID: 774958302}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 0
-  positionType: 0
-  currentHero: {fileID: 0}
---- !u!1 &293647264
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 293647265}
-  m_Layer: 0
-  m_Name: Lane 0 Crystal Target
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &293647265
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 293647264}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.15, y: -2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &481219551
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 481219552}
-  - component: {fileID: 481219553}
-  m_Layer: 0
-  m_Name: Lane 2 Hero Slot 0
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &481219552
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 481219551}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.55, y: 2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &481219553
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.StandaloneInputModule
+  m_SendPointerHoverToParent: 1
+  m_HorizontalAxis: Horizontal
+  m_VerticalAxis: Vertical
+  m_SubmitButton: Submit
+  m_CancelButton: Cancel
+  m_InputActionsPerSecond: 10
+  m_RepeatDelay: 0.5
+  m_ForceModuleActive: 0
+--- !u!114 &774958304
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 481219551}
+  m_GameObject: {fileID: 774958302}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
+  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 2
-  positionType: 0
-  currentHero: {fileID: 0}
---- !u!1 &601829443
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 601829444}
-  m_Layer: 0
-  m_Name: Lane 0 Monster Spawn
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &601829444
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
+  m_FirstSelected: {fileID: 0}
+  m_sendNavigationEvents: 1
+  m_DragThreshold: 10
+--- !u!4 &774958305
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 601829443}
+  m_GameObject: {fileID: 774958302}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.75, y: -2.15, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 622596280}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &622596279
+--- !u!1 &955304854
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -283,45 +195,393 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 622596280}
+  - component: {fileID: 955304855}
   m_Layer: 0
-  m_Name: Lane Points
+  m_Name: Monsters
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &622596280
+--- !u!4 &955304855
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 622596279}
+  m_GameObject: {fileID: 955304854}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &962725280
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 962725283}
+  - component: {fileID: 962725282}
+  - component: {fileID: 962725281}
+  m_Layer: 0
+  m_Name: Main Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &962725281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 962725280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f3baf2d8d1a4d4e8a3c2f9917d86a52, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldCameraFitter
+  worldCenter: {x: 0.15, y: 0}
+  minimumWorldWidth: 12.5
+  minimumWorldHeight: 7.5
+  viewport: {fileID: 1743492879}
+  viewportCanvas: {fileID: 1743492880}
+  battlefieldVisualController: {fileID: 1074842827}
+--- !u!20 &962725282
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 962725280}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.06, g: 0.08, b: 0.1, a: 1}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 1
+  orthographic size: 5.8
+  m_Depth: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!4 &962725283
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 962725280}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1074842826
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1074842828}
+  - component: {fileID: 1074842827}
+  m_Layer: 0
+  m_Name: Battlefield Art Root
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1074842827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074842826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94b6a756f3758ee46812f206155aa135, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldVisualController
+  theme: {fileID: 11400000, guid: 62a22cb5dc196d1468d202e5923c1f26, type: 2}
+  battlefieldSpace: {fileID: 1817692003}
+  crystalController: {fileID: 1783596770}
+  waveManager: {fileID: 1177375497}
+  battleManager: {fileID: 1177375493}
+  tutorialManager: {fileID: 1472167488}
+  approachProvider: {fileID: 1817692000}
+--- !u!4 &1074842828
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1074842826}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1177375494}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1177375491
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1177375494}
+  - component: {fileID: 1177375493}
+  - component: {fileID: 1177375498}
+  - component: {fileID: 1177375497}
+  - component: {fileID: 1177375492}
+  - component: {fileID: 1177375496}
+  - component: {fileID: 1177375495}
+  - component: {fileID: 1177375499}
+  m_Layer: 0
+  m_Name: BattlefieldRuntime
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1177375492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177375491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd758aefea6fa7144886575f41ebbcef, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneManager
+  availableRunes:
+  - {fileID: 11400000, guid: 03efdf115ab45844cb6259cbb5045e75, type: 2}
+  - {fileID: 11400000, guid: f988cd6456c6ad745b5c3f3f1df87de0, type: 2}
+  - {fileID: 11400000, guid: 1cdcb557383873846bbc33f4ac43388c, type: 2}
+  - {fileID: 11400000, guid: afded80e2c539a444b4bd9f605bd5ac3, type: 2}
+  - {fileID: 11400000, guid: 73b365c477add334f9407a71a40f643e, type: 2}
+  - {fileID: 11400000, guid: 015824e2fc1c35a45b2c785f2a11c172, type: 2}
+  - {fileID: 11400000, guid: 22553cb8338a0cf41b7c9a3843b88ff2, type: 2}
+  - {fileID: 11400000, guid: f8bad0191fa166d45a18d4d2ac44cc0d, type: 2}
+  - {fileID: 11400000, guid: 3613c9565e4216644a9856b3c67c0a57, type: 2}
+  - {fileID: 11400000, guid: c73ec87f7d747f145af4791336591bcf, type: 2}
+  - {fileID: 11400000, guid: 7cbb33dede2f1db4985b640f1609c97f, type: 2}
+  - {fileID: 11400000, guid: 5c73db4dcc26b8c488202dfab2b749cb, type: 2}
+  - {fileID: 11400000, guid: 26d1108cc11f1c94c8900aa813a5a42b, type: 2}
+  - {fileID: 11400000, guid: db1f3b431c54b8c4a911e26833783379, type: 2}
+  - {fileID: 11400000, guid: ba05893b3639d9742a4eb5d6ba30b32a, type: 2}
+  - {fileID: 11400000, guid: c6ed610eb8b1f5d48a24f8111dc4b55d, type: 2}
+  - {fileID: 11400000, guid: cd12aa14589747941ac75c326d2dee37, type: 2}
+  - {fileID: 11400000, guid: 8d05df34e847eaf4ab88c346136a0820, type: 2}
+  - {fileID: 11400000, guid: 8a5f942e778a4f042beb2e4c376eb6d8, type: 2}
+  - {fileID: 11400000, guid: 0d4394184115d4d41a1c94d64e04ce52, type: 2}
+  optionsPerSelection: 3
+--- !u!114 &1177375493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177375491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc5be997e996f4a4e9c27588b597190f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattleManager
+  initialStageData: {fileID: 11400000, guid: 6557acfd8e45d6c43a1157bbfb7c7043, type: 2}
+  laneManager: {fileID: 1177375498}
+  crystalController: {fileID: 1783596770}
+  waveManager: {fileID: 1177375497}
+  runeManager: {fileID: 1177375492}
+  runeEffectApplier: {fileID: 1177375496}
+  heroPlacementManager: {fileID: 1177375495}
+  battlefieldMode: 1
+  battlefieldSpace: {fileID: 1817692003}
+  battlefieldLayoutCoordinator: {fileID: 1817692002}
+  battlefieldAgentRegistry: {fileID: 1817692001}
+  crystalApproachPointProvider: {fileID: 1817692000}
+  battlefieldVisualController: {fileID: 1074842827}
+  heroes: []
+  permanentUpgrades:
+  - {fileID: 11400000, guid: 83ac64b28985cbd48b23ffedf3464cd0, type: 2}
+  - {fileID: 11400000, guid: 22c5f5aa20e934647bbb30666eeec587, type: 2}
+  - {fileID: 11400000, guid: 9166636a9bb616045b1bf35f45df2a2c, type: 2}
+  - {fileID: 11400000, guid: c1c728568c5b46b4ea66fd48205b03de, type: 2}
+  rebuildHeroesFromFormation: 1
+  autoStartOnStart: 1
+--- !u!4 &1177375494
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177375491}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 601829444}
-  - {fileID: 293647265}
-  - {fileID: 289073590}
-  - {fileID: 1399667715}
-  - {fileID: 1478552922}
-  - {fileID: 809789813}
-  - {fileID: 733415417}
-  - {fileID: 855302387}
-  - {fileID: 1824905729}
-  - {fileID: 736363588}
-  - {fileID: 1471252325}
-  - {fileID: 1956804113}
-  - {fileID: 481219552}
-  - {fileID: 2136225469}
-  - {fileID: 839826707}
+  - {fileID: 1817691999}
+  - {fileID: 1074842828}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &647516653
+--- !u!114 &1177375495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177375491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e63ba26045349d8bcd5e2d9f9a7affa, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementManager
+  heroRoster: {fileID: 11400000, guid: 49134383a92fef84db7e5b2ea94e37a5, type: 2}
+  defaultFormation: {fileID: 11400000, guid: 4e3872ab3ee9f8e4eacc012c5aaf07cc, type: 2}
+  heroRoot: {fileID: 2118135305}
+  battlefieldVisualController: {fileID: 1074842827}
+  useSavedFormation: 1
+  writeDefaultFormationToSave: 1
+  heroPlaceholderSize: {x: 1.05, y: 1.05}
+--- !u!114 &1177375496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177375491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f92a50c2436f7b458a78da2f7b80775, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneEffectApplier
+--- !u!114 &1177375497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177375491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 085081dcce064be41875c4b560d03569, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.WaveManager
+  stageData: {fileID: 11400000, guid: 6557acfd8e45d6c43a1157bbfb7c7043, type: 2}
+  laneManager: {fileID: 1177375498}
+  crystalController: {fileID: 1783596770}
+  monsterPrefab: {fileID: 0}
+  monsterRoot: {fileID: 955304855}
+  battlefieldVisualController: {fileID: 1074842827}
+  battlefieldSpace: {fileID: 1817692003}
+  crystalApproachPointProvider: {fileID: 1817692000}
+  battlefieldAgentRegistry: {fileID: 1817692001}
+  addDefaultColliderToGeneratedMonsters: 1
+--- !u!114 &1177375498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177375491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b870ccc9684de54da4e82f0e9190134, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.LaneManager
+  laneCount: 3
+  laneSpacing: 2.15
+  spawnX: 5.75
+  crystalX: -5.15
+  laneSpawnPoints: []
+  crystalTargetPoints: []
+  heroSlotsPerLane: 3
+  heroFrontSlotX: -0.55
+  heroSlotSpacingX: 0.95
+  heroSlotPoints: []
+  cameraLeftPadding: 2.45
+  cameraRightPadding: 0.55
+  cameraTopPadding: 0.35
+  cameraBottomPadding: 0.35
+  crystalLeftPadding: 0.22
+  laneDepthSpacing: 0.015
+  portraitLaneSpacingRatio: 0.25
+  battlefieldSpace: {fileID: 1817692003}
+--- !u!114 &1177375499
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1177375491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cea644a0e5244ab8b2f2cd879677e9f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.AudioManager
+  sfxEntries: []
+  bgmEntries: []
+  warnWhenClipMissing: 0
+  useProceduralFallback: 1
+  useProceduralBgmFallback: 1
+  sfxVolume: 0.55
+  bgmVolume: 0.4
+  bgmCrossFadeDuration: 0.35
+--- !u!1 &1472167485
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -329,356 +589,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 647516655}
-  - component: {fileID: 647516654}
-  m_Layer: 0
-  m_Name: Kingdom Crystal
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &647516654
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 647516653}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23d8d63e00c012149ac48b3b820444a2, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.CrystalController
-  defaultMaxHp: 100
-  spriteRenderer: {fileID: 0}
-  hitFlashController: {fileID: 0}
-  hitFlashDuration: 0.12
---- !u!4 &647516655
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 647516653}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.65, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &733415416
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 733415417}
-  m_Layer: 0
-  m_Name: Lane 1 Crystal Target
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &733415417
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 733415416}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.15, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &736363587
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 736363588}
-  - component: {fileID: 736363589}
-  m_Layer: 0
-  m_Name: Lane 1 Hero Slot 2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &736363588
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 736363587}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.45, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &736363589
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 736363587}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 1
-  positionType: 2
-  currentHero: {fileID: 0}
---- !u!1 &809789812
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 809789813}
-  m_Layer: 0
-  m_Name: Lane 1 Monster Spawn
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &809789813
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 809789812}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.75, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &839826706
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 839826707}
-  - component: {fileID: 839826708}
-  m_Layer: 0
-  m_Name: Lane 2 Hero Slot 2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &839826707
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 839826706}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.45, y: 2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &839826708
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 839826706}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 2
-  positionType: 2
-  currentHero: {fileID: 0}
---- !u!1 &855302386
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 855302387}
-  - component: {fileID: 855302388}
-  m_Layer: 0
-  m_Name: Lane 1 Hero Slot 0
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &855302387
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 855302386}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.55, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &855302388
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 855302386}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 1
-  positionType: 0
-  currentHero: {fileID: 0}
---- !u!1 &917518768
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 917518769}
-  - component: {fileID: 917518772}
-  - component: {fileID: 917518773}
-  - component: {fileID: 917518771}
-  - component: {fileID: 917518770}
-  m_Layer: 0
-  m_Name: Battlefield Layout
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &917518769
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 917518768}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2009492240}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &917518770
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 917518768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b69732cfb11fff47ad76dc25a1e6af4, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.CrystalApproachPointProvider
-  battlefieldSpace: {fileID: 917518773}
-  config: {fileID: 11400000, guid: c3ddbe7f7cbe1fa4897b9bce033830e9, type: 2}
---- !u!114 &917518771
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 917518768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7463b6e452c0d584c8bb5ced0775d599, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldAgentRegistry
-  space: {fileID: 917518773}
---- !u!114 &917518772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 917518768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26263239609b86741bb64d638ec52d39, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldLayoutCoordinator
-  cameraFitter: {fileID: 1395146057}
-  battlefieldSpace: {fileID: 917518773}
-  agentRegistry: {fileID: 917518771}
-  approachProvider: {fileID: 917518770}
-  battlefieldVisuals: {fileID: 1912742779}
---- !u!114 &917518773
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 917518768}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8a0a32aebd354e45b74fce3159b714f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldSpaceController
-  cameraFitter: {fileID: 1395146057}
-  crystalController: {fileID: 647516654}
-  config: {fileID: 11400000, guid: c3ddbe7f7cbe1fa4897b9bce033830e9, type: 2}
---- !u!1 &936806955
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 936806960}
-  - component: {fileID: 936806957}
-  - component: {fileID: 936806956}
-  - component: {fileID: 936806958}
-  - component: {fileID: 936806959}
+  - component: {fileID: 1472167490}
+  - component: {fileID: 1472167487}
+  - component: {fileID: 1472167486}
+  - component: {fileID: 1472167488}
+  - component: {fileID: 1472167489}
   m_Layer: 0
   m_Name: Battle UI Controllers
   m_TagString: Untagged
@@ -686,19 +601,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &936806956
+--- !u!114 &1472167486
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936806955}
+  m_GameObject: {fileID: 1472167485}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: adcc082965a5f9a4299c7c5b1b7c2d2f, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.StageResultUI
-  battleManager: {fileID: 2009492239}
+  battleManager: {fileID: 1177375493}
   stageSequence:
   - {fileID: 11400000, guid: 6557acfd8e45d6c43a1157bbfb7c7043, type: 2}
   - {fileID: 11400000, guid: 6f7611ee291208947897635f0b88fe62, type: 2}
@@ -720,20 +635,20 @@ MonoBehaviour:
   battleSceneName: BattleScene
   upgradeSceneName: UpgradeScene
   stageSelectSceneName: StageSelectScene
---- !u!114 &936806957
+--- !u!114 &1472167487
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936806955}
+  m_GameObject: {fileID: 1472167485}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fda87b9038edf5a41b69f01c99c27837, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneSelectionUI
-  battleManager: {fileID: 2009492239}
-  runeManager: {fileID: 2009492238}
+  battleManager: {fileID: 1177375493}
+  runeManager: {fileID: 1177375492}
   drawRuntimeGui: 0
   showDebugEffectKey: 0
   panelRect:
@@ -742,13 +657,13 @@ MonoBehaviour:
     y: 78
     width: 520
     height: 360
---- !u!114 &936806958
+--- !u!114 &1472167488
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936806955}
+  m_GameObject: {fileID: 1472167485}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e08f64c317d947948b466f9b7710e5dd, type: 3}
@@ -757,28 +672,28 @@ MonoBehaviour:
   showOnlyOnce: 1
   pauseGameWhileVisible: 1
   steps: []
---- !u!114 &936806959
+--- !u!114 &1472167489
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936806955}
+  m_GameObject: {fileID: 1472167485}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b44bff17d8d40339f8243d58e950730, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlePauseController
-  battleManager: {fileID: 2009492239}
+  battleManager: {fileID: 1177375493}
   stageSelectSceneName: StageSelectScene
   pauseOnMobileFocusLoss: 1
---- !u!4 &936806960
+--- !u!4 &1472167490
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 936806955}
+  m_GameObject: {fileID: 1472167485}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -787,7 +702,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1123600476
+--- !u!1001 &1743492878
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -802,27 +717,27 @@ PrefabInstance:
     - target: {fileID: 3807304336942688005, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
       propertyPath: battleManager
       value:
-      objectReference: {fileID: 2009492239}
+      objectReference: {fileID: 1177375493}
     - target: {fileID: 3807304336942688005, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
       propertyPath: pauseController
       value:
-      objectReference: {fileID: 936806959}
+      objectReference: {fileID: 1472167489}
     - target: {fileID: 3807304336942688005, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
       propertyPath: tutorialManager
       value:
-      objectReference: {fileID: 936806958}
+      objectReference: {fileID: 1472167488}
     - target: {fileID: 3807304336942688005, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
       propertyPath: resultController
       value:
-      objectReference: {fileID: 936806956}
+      objectReference: {fileID: 1472167486}
     - target: {fileID: 3807304336942688005, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
       propertyPath: crystalController
       value:
-      objectReference: {fileID: 647516654}
+      objectReference: {fileID: 1783596770}
     - target: {fileID: 3807304336942688005, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
       propertyPath: runeSelectionController
       value:
-      objectReference: {fileID: 936806957}
+      objectReference: {fileID: 1472167487}
     - target: {fileID: 8564843785882327844, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -908,17 +823,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
---- !u!224 &1123600477 stripped
+--- !u!224 &1743492879 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 3380691001111900724, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
-  m_PrefabInstance: {fileID: 1123600476}
+  m_PrefabInstance: {fileID: 1743492878}
   m_PrefabAsset: {fileID: 0}
---- !u!223 &1123600478 stripped
+--- !u!223 &1743492880 stripped
 Canvas:
   m_CorrespondingSourceObject: {fileID: 5220525580172415003, guid: 565b493ffb2cf30468fc086d0a4f9fc5, type: 3}
-  m_PrefabInstance: {fileID: 1123600476}
+  m_PrefabInstance: {fileID: 1743492878}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1283465957
+--- !u!1 &1783596769
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -926,294 +841,141 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1283465960}
-  - component: {fileID: 1283465959}
-  - component: {fileID: 1283465958}
+  - component: {fileID: 1783596771}
+  - component: {fileID: 1783596770}
   m_Layer: 0
-  m_Name: EventSystem
+  m_Name: Kingdom Crystal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1283465958
+--- !u!114 &1783596770
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1283465957}
+  m_GameObject: {fileID: 1783596769}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
+  m_Script: {fileID: 11500000, guid: 23d8d63e00c012149ac48b3b820444a2, type: 3}
   m_Name:
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.StandaloneInputModule
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
---- !u!114 &1283465959
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1283465957}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.EventSystem
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!4 &1283465960
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.CrystalController
+  defaultMaxHp: 100
+  spriteRenderer: {fileID: 0}
+  hitFlashController: {fileID: 0}
+  hitFlashDuration: 0.12
+--- !u!4 &1783596771
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1283465957}
+  m_GameObject: {fileID: 1783596769}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5.65, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1817691998
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1817691999}
+  - component: {fileID: 1817692002}
+  - component: {fileID: 1817692003}
+  - component: {fileID: 1817692001}
+  - component: {fileID: 1817692000}
+  m_Layer: 0
+  m_Name: Battlefield Layout
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1817691999
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1817691998}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1177375494}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1395146056
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1395146059}
-  - component: {fileID: 1395146058}
-  - component: {fileID: 1395146057}
-  m_Layer: 0
-  m_Name: Main Camera
-  m_TagString: MainCamera
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1395146057
+--- !u!114 &1817692000
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395146056}
+  m_GameObject: {fileID: 1817691998}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f3baf2d8d1a4d4e8a3c2f9917d86a52, type: 3}
+  m_Script: {fileID: 11500000, guid: 9b69732cfb11fff47ad76dc25a1e6af4, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldCameraFitter
-  worldCenter: {x: 0.15, y: 0}
-  minimumWorldWidth: 12.5
-  minimumWorldHeight: 7.5
-  viewport: {fileID: 1123600477}
-  viewportCanvas: {fileID: 1123600478}
-  battlefieldVisualController: {fileID: 1912742779}
---- !u!20 &1395146058
-Camera:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395146056}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.06, g: 0.08, b: 0.1, a: 1}
-  m_projectionMatrixMode: 1
-  m_GateFitMode: 2
-  m_FOVAxisMode: 0
-  m_Iso: 200
-  m_ShutterSpeed: 0.005
-  m_Aperture: 16
-  m_FocusDistance: 10
-  m_FocalLength: 50
-  m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
-  m_BarrelClipping: 0.25
-  m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
-  m_LensShift: {x: 0, y: 0}
-  m_NormalizedViewPortRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
-  orthographic: 1
-  orthographic size: 5.8
-  m_Depth: 0
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingPath: -1
-  m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
-  m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
-  m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
-  m_StereoConvergence: 10
-  m_StereoSeparation: 0.022
---- !u!4 &1395146059
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395146056}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1399667714
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1399667715}
-  - component: {fileID: 1399667716}
-  m_Layer: 0
-  m_Name: Lane 0 Hero Slot 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1399667715
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1399667714}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.5, y: -2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1399667716
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.CrystalApproachPointProvider
+  battlefieldSpace: {fileID: 1817692003}
+  config: {fileID: 11400000, guid: c3ddbe7f7cbe1fa4897b9bce033830e9, type: 2}
+--- !u!114 &1817692001
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1399667714}
+  m_GameObject: {fileID: 1817691998}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
+  m_Script: {fileID: 11500000, guid: 7463b6e452c0d584c8bb5ced0775d599, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 0
-  positionType: 1
-  currentHero: {fileID: 0}
---- !u!1 &1471252324
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1471252325}
-  m_Layer: 0
-  m_Name: Lane 2 Monster Spawn
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1471252325
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1471252324}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5.75, y: 2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1478552921
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1478552922}
-  - component: {fileID: 1478552923}
-  m_Layer: 0
-  m_Name: Lane 0 Hero Slot 2
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1478552922
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1478552921}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.45, y: -2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1478552923
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldAgentRegistry
+  space: {fileID: 1817692003}
+--- !u!114 &1817692002
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1478552921}
+  m_GameObject: {fileID: 1817691998}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
+  m_Script: {fileID: 11500000, guid: 26263239609b86741bb64d638ec52d39, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 0
-  positionType: 2
-  currentHero: {fileID: 0}
---- !u!1 &1820832018
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldLayoutCoordinator
+  cameraFitter: {fileID: 962725281}
+  battlefieldSpace: {fileID: 1817692003}
+  agentRegistry: {fileID: 1817692001}
+  approachProvider: {fileID: 1817692000}
+  battlefieldVisuals: {fileID: 1074842827}
+--- !u!114 &1817692003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1817691998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8a0a32aebd354e45b74fce3159b714f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldSpaceController
+  cameraFitter: {fileID: 962725281}
+  crystalController: {fileID: 1783596770}
+  config: {fileID: 11400000, guid: c3ddbe7f7cbe1fa4897b9bce033830e9, type: 2}
+--- !u!1 &2118135304
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1221,7 +983,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1820832019}
+  - component: {fileID: 2118135305}
   m_Layer: 0
   m_Name: Heroes
   m_TagString: Untagged
@@ -1229,13 +991,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1820832019
+--- !u!4 &2118135305
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1820832018}
+  m_GameObject: {fileID: 2118135304}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1244,444 +1006,15 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1824905728
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1824905729}
-  - component: {fileID: 1824905730}
-  m_Layer: 0
-  m_Name: Lane 1 Hero Slot 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1824905729
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1824905728}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.5, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1824905730
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1824905728}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 1
-  positionType: 1
-  currentHero: {fileID: 0}
---- !u!1 &1912742778
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1912742780}
-  - component: {fileID: 1912742779}
-  m_Layer: 0
-  m_Name: Battlefield Art Root
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1912742779
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1912742778}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94b6a756f3758ee46812f206155aa135, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldVisualController
-  theme: {fileID: 11400000, guid: 62a22cb5dc196d1468d202e5923c1f26, type: 2}
-  laneManager: {fileID: 2009492244}
-  crystalController: {fileID: 647516654}
---- !u!4 &1912742780
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1912742778}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2009492240}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1956804112
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1956804113}
-  m_Layer: 0
-  m_Name: Lane 2 Crystal Target
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1956804113
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1956804112}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5.15, y: 2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2009492237
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2009492240}
-  - component: {fileID: 2009492239}
-  - component: {fileID: 2009492244}
-  - component: {fileID: 2009492243}
-  - component: {fileID: 2009492238}
-  - component: {fileID: 2009492242}
-  - component: {fileID: 2009492241}
-  - component: {fileID: 2009492245}
-  m_Layer: 0
-  m_Name: BattlefieldRuntime
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2009492238
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2009492237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd758aefea6fa7144886575f41ebbcef, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneManager
-  availableRunes:
-  - {fileID: 11400000, guid: 03efdf115ab45844cb6259cbb5045e75, type: 2}
-  - {fileID: 11400000, guid: f988cd6456c6ad745b5c3f3f1df87de0, type: 2}
-  - {fileID: 11400000, guid: 1cdcb557383873846bbc33f4ac43388c, type: 2}
-  - {fileID: 11400000, guid: afded80e2c539a444b4bd9f605bd5ac3, type: 2}
-  - {fileID: 11400000, guid: 73b365c477add334f9407a71a40f643e, type: 2}
-  - {fileID: 11400000, guid: 015824e2fc1c35a45b2c785f2a11c172, type: 2}
-  - {fileID: 11400000, guid: 22553cb8338a0cf41b7c9a3843b88ff2, type: 2}
-  - {fileID: 11400000, guid: f8bad0191fa166d45a18d4d2ac44cc0d, type: 2}
-  - {fileID: 11400000, guid: 3613c9565e4216644a9856b3c67c0a57, type: 2}
-  - {fileID: 11400000, guid: c73ec87f7d747f145af4791336591bcf, type: 2}
-  - {fileID: 11400000, guid: 7cbb33dede2f1db4985b640f1609c97f, type: 2}
-  - {fileID: 11400000, guid: 5c73db4dcc26b8c488202dfab2b749cb, type: 2}
-  - {fileID: 11400000, guid: 26d1108cc11f1c94c8900aa813a5a42b, type: 2}
-  - {fileID: 11400000, guid: db1f3b431c54b8c4a911e26833783379, type: 2}
-  - {fileID: 11400000, guid: ba05893b3639d9742a4eb5d6ba30b32a, type: 2}
-  - {fileID: 11400000, guid: c6ed610eb8b1f5d48a24f8111dc4b55d, type: 2}
-  - {fileID: 11400000, guid: cd12aa14589747941ac75c326d2dee37, type: 2}
-  - {fileID: 11400000, guid: 8d05df34e847eaf4ab88c346136a0820, type: 2}
-  - {fileID: 11400000, guid: 8a5f942e778a4f042beb2e4c376eb6d8, type: 2}
-  - {fileID: 11400000, guid: 0d4394184115d4d41a1c94d64e04ce52, type: 2}
-  optionsPerSelection: 3
---- !u!114 &2009492239
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2009492237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc5be997e996f4a4e9c27588b597190f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattleManager
-  initialStageData: {fileID: 11400000, guid: 6557acfd8e45d6c43a1157bbfb7c7043, type: 2}
-  laneManager: {fileID: 2009492244}
-  crystalController: {fileID: 647516654}
-  waveManager: {fileID: 2009492243}
-  runeManager: {fileID: 2009492238}
-  runeEffectApplier: {fileID: 2009492242}
-  heroPlacementManager: {fileID: 2009492241}
-  battlefieldMode: 1
-  battlefieldSpace: {fileID: 917518773}
-  battlefieldLayoutCoordinator: {fileID: 917518772}
-  battlefieldAgentRegistry: {fileID: 917518771}
-  crystalApproachPointProvider: {fileID: 917518770}
-  battlefieldVisualController: {fileID: 1912742779}
-  heroes: []
-  permanentUpgrades:
-  - {fileID: 11400000, guid: 83ac64b28985cbd48b23ffedf3464cd0, type: 2}
-  - {fileID: 11400000, guid: 22c5f5aa20e934647bbb30666eeec587, type: 2}
-  - {fileID: 11400000, guid: 9166636a9bb616045b1bf35f45df2a2c, type: 2}
-  - {fileID: 11400000, guid: c1c728568c5b46b4ea66fd48205b03de, type: 2}
-  rebuildHeroesFromFormation: 1
-  autoStartOnStart: 1
---- !u!4 &2009492240
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2009492237}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 917518769}
-  - {fileID: 1912742780}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2009492241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2009492237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0e63ba26045349d8bcd5e2d9f9a7affa, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementManager
-  heroRoster: {fileID: 11400000, guid: 49134383a92fef84db7e5b2ea94e37a5, type: 2}
-  defaultFormation: {fileID: 11400000, guid: 4e3872ab3ee9f8e4eacc012c5aaf07cc, type: 2}
-  heroRoot: {fileID: 1820832019}
-  battlefieldVisualController: {fileID: 1912742779}
-  useSavedFormation: 1
-  writeDefaultFormationToSave: 1
-  heroPlaceholderSize: {x: 1.05, y: 1.05}
---- !u!114 &2009492242
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2009492237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f92a50c2436f7b458a78da2f7b80775, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.RuneEffectApplier
---- !u!114 &2009492243
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2009492237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 085081dcce064be41875c4b560d03569, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.WaveManager
-  stageData: {fileID: 11400000, guid: 6557acfd8e45d6c43a1157bbfb7c7043, type: 2}
-  laneManager: {fileID: 2009492244}
-  crystalController: {fileID: 647516654}
-  monsterPrefab: {fileID: 0}
-  monsterRoot: {fileID: 2132507200}
-  battlefieldVisualController: {fileID: 1912742779}
-  battlefieldSpace: {fileID: 917518773}
-  crystalApproachPointProvider: {fileID: 917518770}
-  battlefieldAgentRegistry: {fileID: 917518771}
-  addDefaultColliderToGeneratedMonsters: 1
---- !u!114 &2009492244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2009492237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b870ccc9684de54da4e82f0e9190134, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.LaneManager
-  laneCount: 3
-  laneSpacing: 2.15
-  spawnX: 5.75
-  crystalX: -5.15
-  laneSpawnPoints:
-  - {fileID: 601829444}
-  - {fileID: 809789813}
-  - {fileID: 1471252325}
-  crystalTargetPoints:
-  - {fileID: 293647265}
-  - {fileID: 733415417}
-  - {fileID: 1956804113}
-  heroSlotsPerLane: 3
-  heroFrontSlotX: -0.55
-  heroSlotSpacingX: 0.95
-  heroSlotPoints:
-  - {fileID: 289073590}
-  - {fileID: 1399667715}
-  - {fileID: 1478552922}
-  - {fileID: 855302387}
-  - {fileID: 1824905729}
-  - {fileID: 736363588}
-  - {fileID: 481219552}
-  - {fileID: 2136225469}
-  - {fileID: 839826707}
-  cameraLeftPadding: 2.45
-  cameraRightPadding: 0.55
-  cameraTopPadding: 0.35
-  cameraBottomPadding: 0.35
-  crystalLeftPadding: 0.22
-  laneDepthSpacing: 0.015
-  portraitLaneSpacingRatio: 0.25
-  battlefieldSpace: {fileID: 917518773}
---- !u!114 &2009492245
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2009492237}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cea644a0e5244ab8b2f2cd879677e9f, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.AudioManager
-  sfxEntries: []
-  bgmEntries: []
-  warnWhenClipMissing: 0
-  useProceduralFallback: 1
-  useProceduralBgmFallback: 1
-  sfxVolume: 0.55
-  bgmVolume: 0.4
-  bgmCrossFadeDuration: 0.35
---- !u!1 &2132507199
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2132507200}
-  m_Layer: 0
-  m_Name: Monsters
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2132507200
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2132507199}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2136225468
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2136225469}
-  - component: {fileID: 2136225470}
-  m_Layer: 0
-  m_Name: Lane 2 Hero Slot 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2136225469
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2136225468}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.5, y: 2.15, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 622596280}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2136225470
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2136225468}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ac045ba3d44412084037c537842402b, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RuneGate.HeroPlacementSlot
-  laneIndex: 2
-  positionType: 1
-  currentHero: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1395146059}
-  - {fileID: 2009492240}
-  - {fileID: 647516655}
-  - {fileID: 622596280}
-  - {fileID: 2132507200}
-  - {fileID: 1820832019}
-  - {fileID: 936806960}
-  - {fileID: 1123600476}
-  - {fileID: 1283465960}
+  - {fileID: 962725283}
+  - {fileID: 1177375494}
+  - {fileID: 1783596771}
+  - {fileID: 955304855}
+  - {fileID: 2118135305}
+  - {fileID: 1472167490}
+  - {fileID: 1743492878}
+  - {fileID: 774958305}

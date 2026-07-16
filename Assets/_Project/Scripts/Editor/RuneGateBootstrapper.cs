@@ -1572,41 +1572,6 @@ namespace RuneGate.Editor
             crystalObject.transform.position = new Vector3(-5.65f, 0f, 0f);
             CrystalController crystalController = crystalObject.AddComponent<CrystalController>();
 
-            GameObject laneRoot = new GameObject("Lane Points");
-            Transform[] spawnPoints = new Transform[3];
-            Transform[] targetPoints = new Transform[3];
-            Transform[] heroSlotPoints = new Transform[9];
-            for (int laneIndex = 0; laneIndex < 3; laneIndex++)
-            {
-                float y = (laneIndex - 1) * 2.15f;
-
-                GameObject spawnPoint = new GameObject($"Lane {laneIndex} Monster Spawn");
-                spawnPoint.transform.SetParent(laneRoot.transform);
-                spawnPoint.transform.position = new Vector3(5.75f, y, 0f);
-                spawnPoints[laneIndex] = spawnPoint.transform;
-
-                GameObject targetPoint = new GameObject($"Lane {laneIndex} Crystal Target");
-                targetPoint.transform.SetParent(laneRoot.transform);
-                targetPoint.transform.position = new Vector3(-5.15f, y, 0f);
-                targetPoints[laneIndex] = targetPoint.transform;
-
-                for (int slotIndex = 0; slotIndex < 3; slotIndex++)
-                {
-                    int flatIndex = laneIndex * 3 + slotIndex;
-                    float x = -0.55f - slotIndex * 0.95f;
-                    GameObject slotPoint = new GameObject($"Lane {laneIndex} Hero Slot {slotIndex}");
-                    slotPoint.transform.SetParent(laneRoot.transform);
-                    slotPoint.transform.position = new Vector3(x, y, 0f);
-                    HeroPlacementSlot placementSlot = slotPoint.AddComponent<HeroPlacementSlot>();
-                    EditComponent(placementSlot, serializedObject =>
-                    {
-                        SetInt(serializedObject, "laneIndex", laneIndex);
-                        SetEnum(serializedObject, "positionType", SlotIndexToPositionType(slotIndex));
-                    });
-                    heroSlotPoints[flatIndex] = slotPoint.transform;
-                }
-            }
-
             GameObject monsterRoot = new GameObject("Monsters");
             GameObject heroRoot = new GameObject("Heroes");
 
@@ -1638,12 +1603,12 @@ namespace RuneGate.Editor
                 SetFloat(serializedObject, "portraitLaneSpacingRatio", 0.25f);
                 SetFloat(serializedObject, "spawnX", 5.75f);
                 SetFloat(serializedObject, "crystalX", -5.15f);
-                SetObjectList(serializedObject, "laneSpawnPoints", ToObjectArray(spawnPoints));
-                SetObjectList(serializedObject, "crystalTargetPoints", ToObjectArray(targetPoints));
+                SetObjectList(serializedObject, "laneSpawnPoints", Array.Empty<UnityEngine.Object>());
+                SetObjectList(serializedObject, "crystalTargetPoints", Array.Empty<UnityEngine.Object>());
                 SetInt(serializedObject, "heroSlotsPerLane", 3);
                 SetFloat(serializedObject, "heroFrontSlotX", -0.55f);
                 SetFloat(serializedObject, "heroSlotSpacingX", 0.95f);
-                SetObjectList(serializedObject, "heroSlotPoints", ToObjectArray(heroSlotPoints));
+                SetObjectList(serializedObject, "heroSlotPoints", Array.Empty<UnityEngine.Object>());
                 SetObject(serializedObject, "battlefieldSpace", battlefieldSpace);
             });
 
@@ -1683,8 +1648,12 @@ namespace RuneGate.Editor
             EditComponent(battlefieldVisualController, serializedObject =>
             {
                 SetObject(serializedObject, "theme", battlefieldArtTheme);
-                SetObject(serializedObject, "laneManager", laneManager);
+                SetObject(serializedObject, "battlefieldSpace", battlefieldSpace);
                 SetObject(serializedObject, "crystalController", crystalController);
+                SetObject(serializedObject, "waveManager", waveManager);
+                SetObject(serializedObject, "battleManager", battleManager);
+                SetObject(serializedObject, "tutorialManager", tutorialManager);
+                SetObject(serializedObject, "approachProvider", crystalApproachPointProvider);
             });
 
             EditComponent(waveManager, serializedObject =>

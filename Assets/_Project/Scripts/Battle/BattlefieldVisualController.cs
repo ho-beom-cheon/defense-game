@@ -8,13 +8,17 @@ namespace RuneGate
         private const string ShadowObjectName = "Unit Ground Shadow";
 
         [SerializeField] private BattlefieldArtTheme theme;
-        [SerializeField] private LaneManager laneManager;
+        [SerializeField] private BattlefieldSpaceController battlefieldSpace;
         [SerializeField] private CrystalController crystalController;
+        [SerializeField] private WaveManager waveManager;
+        [SerializeField] private BattleManager battleManager;
+        [SerializeField] private TutorialManager tutorialManager;
+        [SerializeField] private CrystalApproachPointProvider approachProvider;
 
-        private WaveManager waveManager;
         private SpriteRenderer backgroundRenderer;
-        private SpriteRenderer[] laneRenderers;
+        private GroundFieldRenderer groundFieldRenderer;
         private SpriteRenderer[] slotRuneRenderers;
+        private SpriteRenderer[] approachBarrierRenderers;
         private SpriteRenderer crystalRenderer;
         private SpriteRenderer riftRenderer;
         private SpriteRenderer shieldRenderer;
@@ -29,8 +33,19 @@ namespace RuneGate
         private float riftStateStartedAt;
         private float crystalStateStartedAt;
         private bool eventsBound;
+        private bool hierarchyReady;
 
-        public bool IsReady { get; private set; }
+        public bool IsReady => hierarchyReady
+            && battlefieldSpace != null
+            && battlefieldSpace.IsReady
+            && approachProvider != null
+            && approachProvider.IsReady
+            && backgroundRenderer != null
+            && groundFieldRenderer != null
+            && groundFieldRenderer.IsReady
+            && crystalRenderer != null
+            && riftRenderer != null;
+        public BattlefieldArtTheme Theme => theme;
 
         private void Awake()
         {
@@ -65,13 +80,29 @@ namespace RuneGate
             UpdateCrystalMotion();
         }
 
-        public void Configure(BattlefieldArtTheme artTheme, LaneManager lanes, CrystalController crystal)
+        public void Configure(
+            BattlefieldArtTheme artTheme,
+            BattlefieldSpaceController space,
+            CrystalController crystal)
         {
             UnbindEvents();
             theme = artTheme;
-            laneManager = lanes;
+            battlefieldSpace = space;
             crystalController = crystal;
-            IsReady = false;
+            InitializeFromSerializedReferences();
+        }
+
+        public void AssignRuntimeServices(
+            WaveManager waves,
+            BattleManager battle,
+            TutorialManager tutorial,
+            CrystalApproachPointProvider approaches)
+        {
+            UnbindEvents();
+            waveManager = waves;
+            battleManager = battle;
+            tutorialManager = tutorial;
+            approachProvider = approaches;
             InitializeFromSerializedReferences();
         }
 
@@ -84,9 +115,10 @@ namespace RuneGate
 
             Bounds cameraBounds = RuntimeSpriteBoundsUtility.GetCameraWorldBounds(Camera.main);
             ApplyBackgroundCover(cameraBounds);
-            ApplyLaneLayout(cameraBounds);
+            groundFieldRenderer.RefreshLayout(cameraBounds);
             ApplyObjectiveLayout(cameraBounds);
             ApplySlotRuneLayout();
+            ApplyApproachBarrierLayout();
         }
 
         public void SetRiftState(BattlefieldRiftState state)
@@ -187,9 +219,9 @@ namespace RuneGate
 
         private void InitializeFromSerializedReferences()
         {
-            if (theme == null || laneManager == null || crystalController == null)
+            if (theme == null || battlefieldSpace == null || crystalController == null)
             {
-                Debug.LogError("BattlefieldVisualController requires a Stage 1 theme, LaneManager, and CrystalController.", this);
+                Debug.LogError("BattlefieldVisualController requires a Stage 1 theme, BattlefieldSpaceController, and CrystalController.", this);
                 return;
             }
 
@@ -199,10 +231,9 @@ namespace RuneGate
                 return;
             }
 
-            waveManager = laneManager.GetComponent<WaveManager>();
             if (waveManager == null)
             {
-                Debug.LogError("BattlefieldVisualController requires WaveManager on the LaneManager root.", laneManager);
+                Debug.LogError("BattlefieldVisualController requires a direct WaveManager reference.", this);
                 return;
             }
 
@@ -211,12 +242,12 @@ namespace RuneGate
                 BuildHierarchy();
             }
 
-            IsReady = backgroundRenderer != null
-                && laneRenderers != null
-                && laneRenderers.Length == laneManager.LaneCount
+            hierarchyReady = backgroundRenderer != null
+                && groundFieldRenderer != null
+                && groundFieldRenderer.IsReady
                 && crystalRenderer != null
                 && riftRenderer != null;
-            if (!IsReady)
+            if (!hierarchyReady)
             {
                 Debug.LogError("BattlefieldVisualController failed to create the battlefield art hierarchy.", this);
                 return;
@@ -225,6 +256,7 @@ namespace RuneGate
             BindEvents();
             RefreshCrystalState();
             SetRiftState(BattlefieldRiftState.Idle);
+            RefreshRuneVisibility();
             RefreshLayout();
         }
 
@@ -239,23 +271,23 @@ namespace RuneGate
 
             backgroundRenderer = CreateRenderer("Sealed Forest Backdrop", backdropLayer, theme.Background, theme.BackgroundSortingOrder, theme.BackgroundTint);
 
-            laneRenderers = new SpriteRenderer[laneManager.LaneCount];
-            for (int i = 0; i < laneRenderers.Length; i++)
-            {
-                SpriteRenderer renderer = CreateRenderer($"Lane {i} Ground", groundLayer, theme.Lane, theme.LaneSortingOrder, theme.LaneTint);
-                renderer.drawMode = SpriteDrawMode.Tiled;
-                renderer.tileMode = SpriteTileMode.Continuous;
-                laneRenderers[i] = renderer;
-            }
+            GameObject groundFieldObject = new GameObject("Stage 1 Ground Field");
+            groundFieldObject.transform.SetParent(groundLayer, false);
+            groundFieldRenderer = groundFieldObject.AddComponent<GroundFieldRenderer>();
+            groundFieldRenderer.Configure(
+                theme.GroundField,
+                theme.GroundFieldTint,
+                theme.GroundFieldSortingOrder,
+                theme.GroundFieldUniformScale);
 
-            slotRuneRenderers = new SpriteRenderer[laneManager.LaneCount * laneManager.HeroSlotsPerLane];
-            for (int laneIndex = 0; laneIndex < laneManager.LaneCount; laneIndex++)
+            slotRuneRenderers = new SpriteRenderer[9];
+            for (int laneIndex = 0; laneIndex < 3; laneIndex++)
             {
-                for (int slotIndex = 0; slotIndex < laneManager.HeroSlotsPerLane; slotIndex++)
+                for (int slotIndex = 0; slotIndex < 3; slotIndex++)
                 {
-                    int flatIndex = laneIndex * laneManager.HeroSlotsPerLane + slotIndex;
+                    int flatIndex = laneIndex * 3 + slotIndex;
                     SpriteRenderer renderer = CreateRenderer(
-                        $"Lane {laneIndex} Slot {slotIndex} Rune",
+                        $"Formation {laneIndex}-{slotIndex} Rune",
                         decalLayer,
                         theme.HeroSlotRune,
                         theme.DecalSortingOrder,
@@ -263,6 +295,20 @@ namespace RuneGate
                     renderer.gameObject.SetActive(false);
                     slotRuneRenderers[flatIndex] = renderer;
                 }
+            }
+
+            int approachPointCount = battlefieldSpace.Config != null
+                ? battlefieldSpace.Config.ApproachPointCount
+                : 7;
+            approachBarrierRenderers = new SpriteRenderer[Mathf.Max(0, approachPointCount)];
+            for (int i = 0; i < approachBarrierRenderers.Length; i++)
+            {
+                approachBarrierRenderers[i] = CreateRenderer(
+                    $"Crystal Approach Seal {i}",
+                    decalLayer,
+                    theme.HeroSlotRune,
+                    theme.DecalSortingOrder + 1,
+                    theme.ApproachBarrierTint);
             }
 
             crystalVisualRoot = new GameObject("SealCrystalVisual").transform;
@@ -308,18 +354,6 @@ namespace RuneGate
             backgroundRenderer.transform.position = new Vector3(cameraBounds.center.x, cameraBounds.center.y, 0.4f);
         }
 
-        private void ApplyLaneLayout(Bounds cameraBounds)
-        {
-            float laneWidth = cameraBounds.size.x + 0.6f;
-            for (int i = 0; i < laneRenderers.Length; i++)
-            {
-                SpriteRenderer renderer = laneRenderers[i];
-                renderer.transform.localScale = Vector3.one;
-                renderer.size = new Vector2(laneWidth, theme.LaneWorldHeight);
-                renderer.transform.position = new Vector3(cameraBounds.center.x, laneManager.GetLaneY(i), 0.25f);
-            }
-        }
-
         private void ApplyObjectiveLayout(Bounds cameraBounds)
         {
             float screenScale = GameFrameLayout.IsPortrait ? theme.PortraitObjectiveScale : theme.LandscapeObjectiveScale;
@@ -330,39 +364,84 @@ namespace RuneGate
             ApplyUniformHeight(shieldRenderer, crystalRenderer.bounds.size.y * 0.72f);
             ApplyUniformHeight(riftPulseRenderer, riftRenderer.bounds.size.y * 0.68f);
 
-            int centerLane = laneManager.LaneCount / 2;
+            Rect playable = battlefieldSpace.CurrentBounds.PlayableRect;
             float crystalHalfWidth = Mathf.Max(GetWorldHalfWidth(crystalRenderer), GetWorldHalfWidth(shieldRenderer));
             float riftHalfWidth = Mathf.Max(GetWorldHalfWidth(riftRenderer), GetWorldHalfWidth(riftPulseRenderer));
             float crystalX = Mathf.Max(
                 crystalController.transform.position.x,
                 cameraBounds.min.x + crystalHalfWidth + theme.ObjectiveEdgePadding);
+            Vector2 riftAnchor = battlefieldSpace.CurrentBounds.ToWorld(
+                battlefieldSpace.Config.RiftSpawnNormalizedRect.center);
             float riftX = Mathf.Min(
-                laneManager.GetSpawnPosition(centerLane).x,
+                riftAnchor.x,
                 cameraBounds.max.x - riftHalfWidth - theme.ObjectiveEdgePadding);
 
-            crystalVisualRoot.position = new Vector3(crystalX, laneManager.GetLaneY(centerLane), 0.1f);
-            riftVisualRoot.position = new Vector3(riftX, laneManager.GetLaneY(centerLane), 0.1f);
+            crystalVisualRoot.position = new Vector3(crystalX, playable.center.y, 0.1f);
+            riftVisualRoot.position = new Vector3(riftX, playable.center.y, 0.1f);
             riftBaseScale = riftVisualRoot.localScale;
 
             shieldRenderer.transform.position = crystalVisualRoot.position + new Vector3(0f, 0.08f, -0.02f);
             riftPulseRenderer.transform.position = riftVisualRoot.position + new Vector3(0f, 0.02f, -0.02f);
             riftPulseBaseScale = riftPulseRenderer.transform.localScale;
+
+            crystalRenderer.sortingOrder = BattlefieldDepthSorter.CalculateWorldOrder(
+                crystalVisualRoot.position,
+                theme.ObjectiveSortingOrder);
+            shieldRenderer.sortingOrder = crystalRenderer.sortingOrder + 2;
+            riftRenderer.sortingOrder = BattlefieldDepthSorter.CalculateWorldOrder(
+                riftVisualRoot.position,
+                theme.ObjectiveSortingOrder + 1);
+            riftPulseRenderer.sortingOrder = riftRenderer.sortingOrder + 2;
         }
 
         private void ApplySlotRuneLayout()
         {
             float targetWidth = 1.2f;
             float scale = targetWidth / Mathf.Max(0.01f, theme.HeroSlotRune.bounds.size.x);
-            for (int laneIndex = 0; laneIndex < laneManager.LaneCount; laneIndex++)
+            for (int laneIndex = 0; laneIndex < 3; laneIndex++)
             {
-                for (int slotIndex = 0; slotIndex < laneManager.HeroSlotsPerLane; slotIndex++)
+                for (int slotIndex = 0; slotIndex < 3; slotIndex++)
                 {
-                    int flatIndex = laneIndex * laneManager.HeroSlotsPerLane + slotIndex;
+                    int flatIndex = laneIndex * 3 + slotIndex;
                     SpriteRenderer renderer = slotRuneRenderers[flatIndex];
                     renderer.transform.localScale = Vector3.one * scale;
-                    Vector3 position = laneManager.GetHeroSlotPosition(laneIndex, slotIndex);
+                    HeroPositionType positionType = slotIndex == 0
+                        ? HeroPositionType.Front
+                        : slotIndex == 2
+                            ? HeroPositionType.Back
+                            : HeroPositionType.Middle;
+                    Vector3 position = battlefieldSpace.ResolveFormationAnchor(laneIndex, positionType);
                     renderer.transform.position = new Vector3(position.x, position.y + 0.02f, 0.18f);
                 }
+            }
+        }
+
+        private void ApplyApproachBarrierLayout()
+        {
+            if (approachBarrierRenderers == null || approachProvider == null)
+            {
+                return;
+            }
+
+            float scale = theme.ApproachBarrierWorldWidth /
+                Mathf.Max(0.01f, theme.HeroSlotRune.bounds.size.x);
+            for (int i = 0; i < approachBarrierRenderers.Length; i++)
+            {
+                SpriteRenderer renderer = approachBarrierRenderers[i];
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                bool hasPoint = approachProvider.TryGetPoint(i, out Vector2 position);
+                renderer.gameObject.SetActive(hasPoint);
+                if (!hasPoint)
+                {
+                    continue;
+                }
+
+                renderer.transform.localScale = Vector3.one * scale;
+                renderer.transform.position = new Vector3(position.x, position.y + 0.01f, 0.17f);
             }
         }
 
@@ -390,6 +469,16 @@ namespace RuneGate
             crystalController.Destroyed += HandleCrystalDestroyed;
             waveManager.WaveStarted += HandleWaveStarted;
             waveManager.WaveCompleted += HandleWaveCompleted;
+            if (battleManager != null)
+            {
+                battleManager.BattleStateChanged += HandleBattleStateChanged;
+            }
+
+            if (tutorialManager != null)
+            {
+                tutorialManager.VisibilityChanged += HandleTutorialVisibilityChanged;
+            }
+
             eventsBound = true;
         }
 
@@ -412,6 +501,16 @@ namespace RuneGate
             {
                 waveManager.WaveStarted -= HandleWaveStarted;
                 waveManager.WaveCompleted -= HandleWaveCompleted;
+            }
+
+            if (battleManager != null)
+            {
+                battleManager.BattleStateChanged -= HandleBattleStateChanged;
+            }
+
+            if (tutorialManager != null)
+            {
+                tutorialManager.VisibilityChanged -= HandleTutorialVisibilityChanged;
             }
 
             eventsBound = false;
@@ -459,6 +558,23 @@ namespace RuneGate
         private void HandleWaveCompleted(WaveData wave)
         {
             SetRiftState(BattlefieldRiftState.Idle);
+        }
+
+        private void HandleBattleStateChanged(BattleState state)
+        {
+            RefreshRuneVisibility();
+        }
+
+        private void HandleTutorialVisibilityChanged(bool visible)
+        {
+            RefreshRuneVisibility();
+        }
+
+        private void RefreshRuneVisibility()
+        {
+            bool tutorialVisible = tutorialManager != null && tutorialManager.IsVisible;
+            bool preparing = battleManager != null && battleManager.CurrentState == BattleState.Preparing;
+            SetHeroSlotRunesVisible(tutorialVisible || preparing);
         }
 
         private void RefreshCrystalState()

@@ -215,6 +215,6 @@ Animator controllers should support these state names and parameters:
 
 - Primary target: 1080 x 1920 portrait
 - Secondary check: 720 x 1280 portrait
-- Battle view must keep 3 lanes, crystal, heroes, monsters, HUD, skill buttons, rune cards, and result panel visible.
+- Battle view must keep the continuous battlefield, crystal, rift, heroes, monsters, HUD, skill buttons, rune cards, and result panel visible.
 
 Final UI polish should move from IMGUI to a proper Canvas later. The v1.0 release-track prototype keeps IMGUI to avoid adding packages or destabilizing the battle loop.

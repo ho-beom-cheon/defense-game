@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Stage01BattlefieldArtTheme
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.BattlefieldArtTheme
   background: {fileID: 21300000, guid: dfe43e9d15f28e34fadde379958d375c, type: 3}
-  lane: {fileID: 21300000, guid: b394200169a1bb948b52410d22ac944c, type: 3}
+  groundField: {fileID: 21300000, guid: 58f754bc80036d2468b485086b064a7d, type: 3}
   crystal: {fileID: 21300000, guid: d58b9cb2d3f258f40b0768fe1018711f, type: 3}
   rift: {fileID: 21300000, guid: 9768bc747fe1f8847bce10334f385194, type: 3}
   unitShadow: {fileID: 21300000, guid: 58f1919d4a896034ab05acf4c790e838, type: 3}
@@ -21,7 +21,7 @@ MonoBehaviour:
   crystalShieldRing: {fileID: 21300000, guid: 1eaf97792a060384e86a385469edf82f, type: 3}
   riftPulse: {fileID: 21300000, guid: f2193ff1408a94b4cb1ecf06169aeed2, type: 3}
   backgroundTint: {r: 0.82, g: 0.88, b: 0.86, a: 1}
-  laneTint: {r: 0.78, g: 0.8, b: 0.76, a: 1}
+  groundFieldTint: {r: 0.78, g: 0.82, b: 0.76, a: 0.58}
   crystalTint: {r: 0.72, g: 0.8, b: 0.82, a: 1}
   riftTint: {r: 0.68, g: 0.7, b: 0.74, a: 1}
   shadowTint: {r: 0.08, g: 0.17, b: 0.17, a: 1}
@@ -30,13 +30,15 @@ MonoBehaviour:
   riftWarningTint: {r: 0.66, g: 0.4, b: 0.95, a: 0.68}
   riftBossTint: {r: 0.84, g: 0.36, b: 0.55, a: 0.82}
   crystalCriticalTint: {r: 0.84, g: 0.36, b: 0.36, a: 1}
+  approachBarrierTint: {r: 0.27, g: 0.72, b: 0.85, a: 0.13}
   backgroundSortingOrder: -30
-  laneSortingOrder: -20
+  groundFieldSortingOrder: -20
   decalSortingOrder: -10
   objectiveSortingOrder: 2
   unitShadowSortingOrder: 3
   worldEffectSortingOrder: 10
-  laneWorldHeight: 1.05
+  groundFieldUniformScale: 1.1
+  approachBarrierWorldWidth: 0.9
   crystalWorldHeight: 4.8
   riftWorldHeight: 4.9
   portraitObjectiveScale: 0.92

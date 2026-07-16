@@ -105,6 +105,8 @@ namespace RuneGate
             if (!Require(waitSucceeded, "BattleScene did not initialize.")) yield break;
 
             yield return new WaitForSecondsRealtime(2f);
+            float battleCaptureTimeScale = Time.timeScale;
+            Time.timeScale = 0f;
             yield return Capture("03-battle");
             if (!waitSucceeded) yield break;
 
@@ -126,6 +128,7 @@ namespace RuneGate
             yield return Capture("03c-battle-boss-warning");
             if (!waitSucceeded) yield break;
             battlefieldVisuals.SetRiftState(BattlefieldRiftState.Idle);
+            Time.timeScale = battleCaptureTimeScale;
 
             TutorialManager tutorial = FindAnyObjectByType<TutorialManager>();
             if (!Require(tutorial != null, "BattleScene is missing TutorialManager.")) yield break;

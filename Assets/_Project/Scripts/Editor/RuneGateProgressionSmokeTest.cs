@@ -1197,18 +1197,6 @@ namespace RuneGate.Editor
                     errors.Add($"{label} portrait skill cards must use three columns when enough width is available.");
                 }
 
-                if (size.y >= size.x)
-                {
-                    float viewportAspect = battle.BattleFieldFrame.width / Mathf.Max(1f, battle.BattleFieldFrame.height);
-                    float cameraWorldHeight = Mathf.Max(7.5f, 12.5f / Mathf.Max(0.01f, viewportAspect));
-                    float presentationSpacing = LaneManager.ResolvePresentationLaneSpacing(2.15f, cameraWorldHeight, true);
-                    float threeLaneSpread = presentationSpacing * 2f;
-                    if (threeLaneSpread < cameraWorldHeight * 0.48f)
-                    {
-                        errors.Add($"{label} portrait lane spread is too narrow: {threeLaneSpread:0.00}/{cameraWorldHeight:0.00}.");
-                    }
-                }
-
                 bool portraitPopup = size.y >= size.x;
                 float runePreferredWidth = portraitPopup ? 760f : 620f;
                 float runePreferredHeight = portraitPopup ? 760f : 520f;

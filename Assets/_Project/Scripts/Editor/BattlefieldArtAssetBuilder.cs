@@ -12,7 +12,7 @@ namespace RuneGate.Editor
         private static readonly BattlefieldTextureDefinition[] Textures =
         {
             new BattlefieldTextureDefinition("bg_stage01_sealed_forest.png", 1536, 1536, false, false),
-            new BattlefieldTextureDefinition("ground_stage01_lane.png", 1024, 192, true, true),
+            new BattlefieldTextureDefinition("ground_stage01_field.png", 1024, 1024, false, true),
             new BattlefieldTextureDefinition("obj_stage01_seal_crystal.png", 384, 640, true, false),
             new BattlefieldTextureDefinition("obj_stage01_spawn_rift.png", 448, 720, true, false),
             new BattlefieldTextureDefinition("decal_unit_shadow.png", 256, 96, true, false),
@@ -48,7 +48,7 @@ namespace RuneGate.Editor
 
             SerializedObject serializedTheme = new SerializedObject(theme);
             SetSprite(serializedTheme, "background", "bg_stage01_sealed_forest.png");
-            SetSprite(serializedTheme, "lane", "ground_stage01_lane.png");
+            SetSprite(serializedTheme, "groundField", "ground_stage01_field.png");
             SetSprite(serializedTheme, "crystal", "obj_stage01_seal_crystal.png");
             SetSprite(serializedTheme, "rift", "obj_stage01_spawn_rift.png");
             SetSprite(serializedTheme, "unitShadow", "decal_unit_shadow.png");
@@ -74,6 +74,7 @@ namespace RuneGate.Editor
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.spritePixelsPerUnit = 100f;
+            importer.maxTextureSize = Mathf.NextPowerOfTwo(Mathf.Max(definition.Width, definition.Height));
             importer.mipmapEnabled = false;
             importer.filterMode = FilterMode.Point;
             importer.wrapMode = definition.Repeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
@@ -91,7 +92,7 @@ namespace RuneGate.Editor
             TextureImporterPlatformSettings androidSettings = importer.GetPlatformTextureSettings("Android");
             androidSettings.name = "Android";
             androidSettings.overridden = true;
-            androidSettings.maxTextureSize = 2048;
+            androidSettings.maxTextureSize = importer.maxTextureSize;
             androidSettings.format = definition.HasAlpha ? TextureImporterFormat.RGBA32 : TextureImporterFormat.RGB24;
             androidSettings.textureCompression = TextureImporterCompression.Uncompressed;
             importer.SetPlatformTextureSettings(androidSettings);

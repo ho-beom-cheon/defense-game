@@ -193,6 +193,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/BattlefieldCameraFitter.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs",
+            "Assets/_Project/Scripts/Battle/GroundFieldRenderer.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldSpaceTypes.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldSpaceConfig.cs",
@@ -414,7 +415,7 @@ namespace RuneGate.Editor
         private static readonly string[] RequiredStage01BattlefieldAssets =
         {
             "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/bg_stage01_sealed_forest.png",
-            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/ground_stage01_lane.png",
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/ground_stage01_field.png",
             "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/obj_stage01_seal_crystal.png",
             "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/obj_stage01_spawn_rift.png",
             "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/decal_unit_shadow.png",
@@ -1599,7 +1600,7 @@ namespace RuneGate.Editor
         private static void ValidateStage01BattlefieldArt(List<string> errors)
         {
             int[] expectedWidths = { 1536, 1024, 384, 448, 256, 192, 384, 384 };
-            int[] expectedHeights = { 1536, 192, 640, 720, 96, 96, 384, 512 };
+            int[] expectedHeights = { 1536, 1024, 640, 720, 96, 96, 384, 512 };
             for (int i = 0; i < RequiredStage01BattlefieldAssets.Length; i++)
             {
                 string path = RequiredStage01BattlefieldAssets[i];
@@ -1626,7 +1627,7 @@ namespace RuneGate.Editor
                     errors.Add($"Stage 1 battlefield texture has invalid pixel-art import settings: {path}");
                 }
 
-                bool shouldRepeat = path.EndsWith("ground_stage01_lane.png", StringComparison.Ordinal);
+                bool shouldRepeat = path.EndsWith("ground_stage01_field.png", StringComparison.Ordinal);
                 TextureWrapMode expectedWrap = shouldRepeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
                 if (importer.wrapMode != expectedWrap)
                 {
@@ -1653,10 +1654,18 @@ namespace RuneGate.Editor
             string controllerPath = ToProjectPath("Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs");
             string controllerSource = File.Exists(controllerPath) ? File.ReadAllText(controllerPath) : string.Empty;
             if (!controllerSource.Contains("backgroundRenderer.transform.localScale = Vector3.one * uniformScale", StringComparison.Ordinal)
-                || !controllerSource.Contains("renderer.transform.localScale = Vector3.one *", StringComparison.Ordinal)
+                || !controllerSource.Contains("groundFieldRenderer.RefreshLayout(cameraBounds)", StringComparison.Ordinal)
+                || !controllerSource.Contains("renderer.transform.localScale = Vector3.one * scale", StringComparison.Ordinal)
                 || controllerSource.Contains("localScale = new Vector3", StringComparison.Ordinal))
             {
                 errors.Add("Battlefield visuals must preserve sprite aspect ratio with uniform scaling.");
+            }
+
+            if (controllerSource.Contains("laneRenderers", StringComparison.Ordinal)
+                || controllerSource.Contains("Lane {i} Ground", StringComparison.Ordinal)
+                || !controllerSource.Contains("GroundFieldRenderer", StringComparison.Ordinal))
+            {
+                errors.Add("BattlefieldVisualController must use one GroundFieldRenderer and must not create lane ground renderers.");
             }
 
             ValidateSceneScriptCount(
@@ -1691,7 +1700,11 @@ namespace RuneGate.Editor
                 "m_Name: Spawn Rift Zone",
                 "m_Name: Lane 0 Path",
                 "m_Name: Lane 1 Path",
-                "m_Name: Lane 2 Path"
+                "m_Name: Lane 2 Path",
+                "m_Name: Lane Points",
+                "m_Name: Lane 0 Monster Spawn",
+                "m_Name: Lane 0 Crystal Target",
+                "m_Name: Lane 0 Hero Slot 0"
             };
             for (int i = 0; i < forbiddenBattlefieldVisuals.Length; i++)
             {
