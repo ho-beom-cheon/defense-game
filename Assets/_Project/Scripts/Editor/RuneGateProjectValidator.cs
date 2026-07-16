@@ -189,6 +189,9 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/RuntimeSpritePolicy.cs",
             "Assets/_Project/Scripts/Battle/RuntimeSpriteBoundsUtility.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldCameraFitter.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs",
             "Assets/_Project/Scripts/Battle/UnitMovementController.cs",
             "Assets/_Project/Scripts/Hero/HeroController.cs",
             "Assets/_Project/Scripts/Hero/HeroRuneCombatModifiers.cs",
@@ -241,6 +244,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Audio/ProceduralSfxFactory.cs",
             "Assets/_Project/Scripts/Audio/SfxKey.cs",
             "Assets/_Project/Editor/UIFrameValidator.cs",
+            "Assets/_Project/Scripts/Editor/BattlefieldArtAssetBuilder.cs",
             "Assets/_Project/Scripts/Editor/RuneGateBootstrapper.cs",
             "Assets/_Project/Scripts/Editor/RuneGateCurrentBuildPipeline.cs",
             "Assets/_Project/Scripts/Editor/RuneGateProgressionSmokeTest.cs",
@@ -392,11 +396,24 @@ namespace RuneGate.Editor
             "Assets/_Project/Art/RuntimePixel/UI/PetContract/icon_pet_slow_aura.png"
         };
 
+        private static readonly string[] RequiredStage01BattlefieldAssets =
+        {
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/bg_stage01_sealed_forest.png",
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/ground_stage01_lane.png",
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/obj_stage01_seal_crystal.png",
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/obj_stage01_spawn_rift.png",
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/decal_unit_shadow.png",
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/decal_hero_slot_rune.png",
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/fx_crystal_shield_ring.png",
+            "Assets/_Project/Art/RuntimePixel/Battlefield/Stage01/fx_rift_pulse.png"
+        };
+
         private const string RequiredCombatVisualCatalogAsset = "Assets/_Project/Resources/RuntimePixelVisualCatalog.asset";
         private const string RequiredKoreanFontCatalogAsset = "Assets/_Project/Resources/KoreanFontCatalog.asset";
         private const string RequiredRuntimeContentCatalogAsset = "Assets/_Project/Resources/RuntimeContentCatalog.asset";
         private const string RequiredBattleUiThemeAsset = "Assets/_Project/Data/UI/RuneGateUiTheme.asset";
         private const string RequiredBattleCanvasPrefab = "Assets/_Project/Prefabs/UI/Battle/BattleCanvas.prefab";
+        private const string RequiredStage01BattlefieldTheme = "Assets/_Project/Data/Battlefield/Stage01BattlefieldArtTheme.asset";
         private const string RequiredTmpSettingsAsset = "Assets/TextMesh Pro/Resources/TMP Settings.asset";
 
         private static readonly string[] RequiredKoreanFontAssets =
@@ -611,6 +628,7 @@ namespace RuneGate.Editor
             ValidateAsset<RuntimeContentCatalog>(RequiredRuntimeContentCatalogAsset, "runtime content catalog", errors);
             ValidateRuntimeContentCatalog(errors);
             ValidateBattleUiAssets(errors);
+            ValidateStage01BattlefieldArt(errors);
             ValidateProgressionFlowData(errors);
             ValidateSceneFlowComponents(errors);
             ValidateUserFacingTextPolicy(errors);
@@ -1461,6 +1479,112 @@ namespace RuneGate.Editor
             ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_panel_dark.png", new Vector4(24f, 24f, 24f, 24f), errors);
             ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_button_skill.png", new Vector4(12f, 12f, 12f, 12f), errors);
             ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_rune_card_base.png", new Vector4(24f, 24f, 24f, 24f), errors);
+        }
+
+        private static void ValidateStage01BattlefieldArt(List<string> errors)
+        {
+            int[] expectedWidths = { 1536, 1024, 384, 448, 256, 192, 384, 384 };
+            int[] expectedHeights = { 1536, 192, 640, 720, 96, 96, 384, 512 };
+            for (int i = 0; i < RequiredStage01BattlefieldAssets.Length; i++)
+            {
+                string path = RequiredStage01BattlefieldAssets[i];
+                ValidateAsset<Sprite>(path, "Stage 1 battlefield sprite", errors);
+                Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                if (texture != null && (texture.width != expectedWidths[i] || texture.height != expectedHeights[i]))
+                {
+                    errors.Add($"Stage 1 battlefield texture has invalid dimensions: {path} ({texture.width}x{texture.height}).");
+                }
+
+                TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+                if (importer == null)
+                {
+                    continue;
+                }
+
+                if (importer.textureType != TextureImporterType.Sprite
+                    || importer.spriteImportMode != SpriteImportMode.Single
+                    || !Mathf.Approximately(importer.spritePixelsPerUnit, 100f)
+                    || importer.filterMode != FilterMode.Point
+                    || importer.mipmapEnabled
+                    || importer.textureCompression != TextureImporterCompression.Uncompressed)
+                {
+                    errors.Add($"Stage 1 battlefield texture has invalid pixel-art import settings: {path}");
+                }
+
+                bool shouldRepeat = path.EndsWith("ground_stage01_lane.png", StringComparison.Ordinal);
+                TextureWrapMode expectedWrap = shouldRepeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+                if (importer.wrapMode != expectedWrap)
+                {
+                    errors.Add($"Stage 1 battlefield texture has invalid wrap mode: {path} (expected {expectedWrap}).");
+                }
+
+                TextureImporterPlatformSettings android = importer.GetPlatformTextureSettings("Android");
+                if (!android.overridden || android.textureCompression != TextureImporterCompression.Uncompressed)
+                {
+                    errors.Add($"Stage 1 battlefield texture must use uncompressed Android import settings: {path}");
+                }
+            }
+
+            BattlefieldArtTheme theme = AssetDatabase.LoadAssetAtPath<BattlefieldArtTheme>(RequiredStage01BattlefieldTheme);
+            if (theme == null)
+            {
+                errors.Add($"Missing Stage 1 battlefield theme: {RequiredStage01BattlefieldTheme}");
+            }
+            else if (!theme.HasRequiredAssets)
+            {
+                errors.Add("Stage 1 battlefield theme is missing one or more required sprites.");
+            }
+
+            string controllerPath = ToProjectPath("Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs");
+            string controllerSource = File.Exists(controllerPath) ? File.ReadAllText(controllerPath) : string.Empty;
+            if (!controllerSource.Contains("backgroundRenderer.transform.localScale = Vector3.one * uniformScale", StringComparison.Ordinal)
+                || !controllerSource.Contains("renderer.transform.localScale = Vector3.one *", StringComparison.Ordinal)
+                || controllerSource.Contains("localScale = new Vector3", StringComparison.Ordinal))
+            {
+                errors.Add("Battlefield visuals must preserve sprite aspect ratio with uniform scaling.");
+            }
+
+            ValidateSceneScriptCount(
+                "Assets/_Project/Scenes/BattleScene.unity",
+                "Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs",
+                "BattlefieldVisualController",
+                1,
+                errors);
+            ValidateSceneScriptCount(
+                "Assets/_Project/Scenes/BattleScene.unity",
+                "Assets/_Project/Scripts/Battle/PlaceholderSprite.cs",
+                "BattleScene PlaceholderSprite",
+                0,
+                errors);
+
+            string scenePath = ToProjectPath("Assets/_Project/Scenes/BattleScene.unity");
+            if (!File.Exists(scenePath))
+            {
+                return;
+            }
+
+            string sceneText = File.ReadAllText(scenePath);
+            if (CountOccurrences(sceneText, "m_Name: Battlefield Art Root") != 1)
+            {
+                errors.Add("BattleScene must contain exactly one Battlefield Art Root.");
+            }
+
+            string[] forbiddenBattlefieldVisuals =
+            {
+                "m_Name: Runtime Battlefield Visuals",
+                "m_Name: Crystal Ward Zone",
+                "m_Name: Spawn Rift Zone",
+                "m_Name: Lane 0 Path",
+                "m_Name: Lane 1 Path",
+                "m_Name: Lane 2 Path"
+            };
+            for (int i = 0; i < forbiddenBattlefieldVisuals.Length; i++)
+            {
+                if (sceneText.Contains(forbiddenBattlefieldVisuals[i], StringComparison.Ordinal))
+                {
+                    errors.Add($"BattleScene still contains legacy battlefield visual: {forbiddenBattlefieldVisuals[i]}");
+                }
+            }
         }
 
         private static void ValidateSpriteBorder(string path, Vector4 expected, List<string> errors)

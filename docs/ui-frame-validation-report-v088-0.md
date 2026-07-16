@@ -1,8 +1,8 @@
 # UI Frame Validation Report v0.88.0
 
-Generated: 2026-07-16 12:30:43
+Generated: 2026-07-16 15:56:26
 
-Summary: PASS 86, WARNING 0, FAIL 0
+Summary: PASS 92, WARNING 0, FAIL 0
 
 ## Fail
 - None
@@ -23,6 +23,9 @@ Summary: PASS 86, WARNING 0, FAIL 0
 - Required UI Script exists: `Assets/_Project/Scripts/UI/BattleHUD.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/BattleCanvasController.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/BattleCanvasLayout.cs`
+- Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs`
+- Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs`
+- Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/RuneSelectionUI.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/StageResultUI.cs`
@@ -48,6 +51,7 @@ Summary: PASS 86, WARNING 0, FAIL 0
 - Frame term exists: `BattleCanvasLayout`
 - Frame term exists: `BattlefieldViewport`
 - Frame term exists: `BattleOverlayState`
+- Frame term exists: `BattlefieldVisualController`
 - Title normal 720x1280: layout rects fit without overlap
 - Title expanded 720x1280: layout rects fit without overlap
 - StageSelect 720x1280: layout rects fit without overlap
@@ -97,3 +101,5 @@ Summary: PASS 86, WARNING 0, FAIL 0
 - EventSystem duplicate check passed: `Assets/_Project/Scenes/BattleScene.unity` (1)
 - Canvas duplicate check passed: `Assets/_Project/Scenes/UpgradeScene.unity` (0)
 - EventSystem duplicate check passed: `Assets/_Project/Scenes/UpgradeScene.unity` (0)
+- Battlefield art root check passed: `Assets/_Project/Scenes/BattleScene.unity`
+- Legacy battlefield visual check passed: `Assets/_Project/Scenes/BattleScene.unity`

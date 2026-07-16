@@ -95,6 +95,25 @@ namespace RuneGate
             yield return Capture("03-battle");
             if (!waitSucceeded) yield break;
 
+            BattlefieldVisualController battlefieldVisuals = FindAnyObjectByType<BattlefieldVisualController>();
+            if (!Require(battlefieldVisuals != null && battlefieldVisuals.IsReady, "BattleScene is missing ready battlefield visuals.")) yield break;
+            battlefieldVisuals.SetCrystalState(BattlefieldCrystalState.Shielded);
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("03a-battle-shielded");
+            if (!waitSucceeded) yield break;
+            battlefieldVisuals.SetCrystalState(BattlefieldCrystalState.Normal);
+
+            battlefieldVisuals.SetRiftState(BattlefieldRiftState.WaveWarning);
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("03b-battle-wave-warning");
+            if (!waitSucceeded) yield break;
+
+            battlefieldVisuals.SetRiftState(BattlefieldRiftState.BossWarning);
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("03c-battle-boss-warning");
+            if (!waitSucceeded) yield break;
+            battlefieldVisuals.SetRiftState(BattlefieldRiftState.Idle);
+
             TutorialManager tutorial = FindAnyObjectByType<TutorialManager>();
             if (!Require(tutorial != null, "BattleScene is missing TutorialManager.")) yield break;
             tutorial.Show();
