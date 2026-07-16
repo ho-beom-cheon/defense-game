@@ -700,6 +700,26 @@ namespace RuneGate.Editor
                 StageSelectFrameRects stageSelect = GameFrameLayout.StageSelectFrameForSize(size.x, size.y);
                 string label = $"{size.x}x{size.y}";
 
+                BattleCanvasRects battleCanvas = BattleCanvasLayout.Calculate(size.x, size.y, new Rect(0f, 0f, size.x, size.y));
+                ValidatePositiveRect($"{label} BattleCanvas root", battleCanvas.Root, errors);
+                ValidateRectInside($"{label} BattleCanvas HUD", battleCanvas.Hud, battleCanvas.Root, errors);
+                ValidateRectInside($"{label} Battlefield viewport", battleCanvas.Battlefield, battleCanvas.Root, errors);
+                ValidateRectInside($"{label} Battle skill layer", battleCanvas.Skills, battleCanvas.Root, errors);
+                ValidateRectInside($"{label} Battle overlay", battleCanvas.Overlay, battleCanvas.Root, errors);
+                if (battleCanvas.Hud.Overlaps(battleCanvas.Battlefield) ||
+                    battleCanvas.Battlefield.Overlaps(battleCanvas.Skills) ||
+                    battleCanvas.Hud.Overlaps(battleCanvas.Skills))
+                {
+                    errors.Add($"{label} BattleCanvas vertical regions overlap.");
+                }
+
+                float skillGridHeight = Mathf.Max(1f, battleCanvas.Skills.height - 80f);
+                float skillCardHeight = (skillGridHeight - 12f) * 0.5f;
+                if (skillCardHeight < BattleCanvasLayout.MinimumTouchHeight)
+                {
+                    errors.Add($"{label} Battle skill cards are below the {BattleCanvasLayout.MinimumTouchHeight:0}px touch target: {skillCardHeight:0.0}px.");
+                }
+
                 TitleMenuLayoutRects title = TitleUI.CalculateLayoutForSize(size.x, size.y, false);
                 TitleMenuLayoutRects titleSettings = TitleUI.CalculateLayoutForSize(size.x, size.y, true);
                 ValidatePositiveRect($"{label} Title brand", title.BrandArea, errors);

@@ -1494,6 +1494,14 @@ namespace RuneGate
                                           hud.BossStatusText.Contains("페이즈");
                 }
 
+                BattleCanvasController canvas = FindAnyObjectByType<BattleCanvasController>();
+                if (canvas != null)
+                {
+                    canvas.RefreshBossStatus();
+                    sawBossHudThisStage |= canvas.BossStatusText.Contains(monster.Data.DisplayNameKorean) &&
+                                           canvas.BossStatusText.Contains("페이즈");
+                }
+
                 Debug.Log($"[RuneGateFullE2E] Boss spawned: {monster.Data.DisplayNameKorean}");
             }
         }
@@ -1673,9 +1681,12 @@ namespace RuneGate
             }
 
             BattleHUD hud = FindAnyObjectByType<BattleHUD>();
+            BattleCanvasController canvas = FindAnyObjectByType<BattleCanvasController>();
+            bool shieldStateVisible = hud != null && hud.CrystalHpText.Contains("보호막");
+            shieldStateVisible |= canvas != null && canvas.CrystalShieldText.Contains("보호막");
             if (!Require(
                     crystal.ShieldHp == Mathf.RoundToInt(requiredRunes["rune_guardian"].Value) &&
-                    hud != null && hud.CrystalHpText.Contains("보호막"),
+                    shieldStateVisible,
                     "Guardian rune shield or its Korean HUD state was not applied."))
             {
                 return false;

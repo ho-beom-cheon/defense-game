@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,8 +20,16 @@ namespace RuneGate
         private bool selectionRequested;
         private int requestedIndex = -1;
 
+        public event Action<bool> VisibilityChanged;
+        public event Action<IReadOnlyList<RuneData>> OptionsChanged;
+
         public IReadOnlyList<RuneData> DisplayedRunes => displayedRunes;
         public bool IsVisible => isVisible;
+
+        public void SetRuntimeGuiEnabled(bool enabled)
+        {
+            drawRuntimeGui = enabled;
+        }
 
         private void OnEnable()
         {
@@ -333,6 +342,8 @@ namespace RuneGate
             }
 
             isVisible = displayedRunes.Count > 0;
+            OptionsChanged?.Invoke(displayedRunes);
+            VisibilityChanged?.Invoke(isVisible);
         }
 
         private void HandleBattleStateChanged(BattleState battleState)
@@ -345,10 +356,16 @@ namespace RuneGate
 
         private void Hide()
         {
+            bool changed = isVisible || displayedRunes.Count > 0;
             isVisible = false;
             selectionRequested = false;
             requestedIndex = -1;
             displayedRunes.Clear();
+            if (changed)
+            {
+                OptionsChanged?.Invoke(displayedRunes);
+                VisibilityChanged?.Invoke(false);
+            }
         }
 
         private void AutoAssignReferences()

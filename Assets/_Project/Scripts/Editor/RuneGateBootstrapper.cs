@@ -6,6 +6,7 @@ using UnityEditor.Animations;
 using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace RuneGate.Editor
@@ -193,6 +194,27 @@ namespace RuneGate.Editor
             ContentBundle content = BootstrapContentAndScenes(true, "1.0.0", 10);
             Debug.Log("RuneGate v1.0 release-track bootstrap complete. Run Validate Project, open TitleScene, then test Stage 1 through Stage 10.");
             Selection.activeObject = content.Stages != null && content.Stages.Length > 0 ? (UnityEngine.Object)content.Stages[0] : content.DefaultFormation;
+        }
+
+        [MenuItem("Tools/RuneGate/Rebuild BattleScene uGUI")]
+        public static void RebuildBattleSceneUgUi()
+        {
+            EnsureRequiredFolders();
+            BattleUiAssetBuilder.BuildAssets();
+            List<StageData> stages = PrototypeAssetLoader.LoadStages();
+            List<RuneData> runes = PrototypeAssetLoader.LoadRunes();
+            List<UpgradeData> upgrades = PrototypeAssetLoader.LoadUpgrades();
+            HeroRosterData heroRoster = PrototypeAssetLoader.LoadHeroRoster();
+            FormationData defaultFormation = PrototypeAssetLoader.LoadDefaultFormation();
+            if (stages.Count == 0 || heroRoster == null || defaultFormation == null)
+            {
+                throw new InvalidOperationException("BattleScene uGUI rebuild requires existing stage, roster, and formation assets.");
+            }
+
+            CreateOrUpdateBattleScene(stages[0], runes, upgrades, stages, heroRoster, defaultFormation);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("RuneGate BattleScene uGUI rebuild complete.");
         }
 
         [MenuItem("Tools/RuneGate/Apply Initial Art Images")]
@@ -405,6 +427,7 @@ namespace RuneGate.Editor
             ApplyInitialArtImages(content);
             UpgradeData[] upgrades = CreateSampleUpgrades();
             CreateOrUpdateRuntimeContentCatalog(content, upgrades);
+            BattleUiAssetBuilder.BuildAssets();
 
             CreateOrUpdateTitleScene();
             CreateOrUpdateStageSelectScene(content.Stages);
@@ -1548,13 +1571,26 @@ namespace RuneGate.Editor
             GameObject monsterRoot = new GameObject("Monsters");
             GameObject heroRoot = new GameObject("Heroes");
 
-            GameObject uiRoot = new GameObject("Runtime Prototype UI");
-            BattleHUD battleHud = uiRoot.AddComponent<BattleHUD>();
-            RuneSelectionUI runeSelectionUI = uiRoot.AddComponent<RuneSelectionUI>();
-            StageResultUI stageResultUI = uiRoot.AddComponent<StageResultUI>();
-            FormationSkillPanelUI formationSkillPanelUI = uiRoot.AddComponent<FormationSkillPanelUI>();
-            TutorialManager tutorialManager = uiRoot.AddComponent<TutorialManager>();
-            TutorialOverlayUI tutorialOverlayUI = uiRoot.AddComponent<TutorialOverlayUI>();
+            GameObject uiControllerRoot = new GameObject("Battle UI Controllers");
+            RuneSelectionUI runeSelectionUI = uiControllerRoot.AddComponent<RuneSelectionUI>();
+            StageResultUI stageResultUI = uiControllerRoot.AddComponent<StageResultUI>();
+            TutorialManager tutorialManager = uiControllerRoot.AddComponent<TutorialManager>();
+            BattlePauseController pauseController = uiControllerRoot.AddComponent<BattlePauseController>();
+
+            GameObject battleCanvasPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BattleUiAssetBuilder.PrefabPath);
+            if (battleCanvasPrefab == null)
+            {
+                throw new InvalidOperationException($"Battle uGUI prefab is missing: {BattleUiAssetBuilder.PrefabPath}. Run Tools/RuneGate/Build Battle uGUI Assets.");
+            }
+
+            GameObject battleCanvasObject = PrefabUtility.InstantiatePrefab(battleCanvasPrefab, scene) as GameObject;
+            BattleCanvasController battleCanvasController = battleCanvasObject != null ? battleCanvasObject.GetComponent<BattleCanvasController>() : null;
+            if (battleCanvasController == null)
+            {
+                throw new InvalidOperationException("BattleCanvas prefab is missing BattleCanvasController.");
+            }
+
+            GameObject eventSystemObject = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
             EditComponent(laneManager, serializedObject =>
             {
@@ -1612,46 +1648,25 @@ namespace RuneGate.Editor
                 SetBool(serializedObject, "autoStartOnStart", true);
             });
 
-            EditComponent(battleHud, serializedObject =>
-            {
-                SetObject(serializedObject, "battleManager", battleManager);
-                SetObject(serializedObject, "crystalController", crystalController);
-                SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(8f, 12f, 250f, 210f));
-            });
-
             EditComponent(runeSelectionUI, serializedObject =>
             {
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetObject(serializedObject, "runeManager", runeManager);
-                SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(430f, 96f, 420f, 280f));
+                SetBool(serializedObject, "drawRuntimeGui", false);
             });
 
             EditComponent(stageResultUI, serializedObject =>
             {
                 SetObject(serializedObject, "battleManager", battleManager);
                 SetObjectList(serializedObject, "stageSequence", ToObjectArray(stages));
-                SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(300f, 170f, 410f, 230f));
+                SetBool(serializedObject, "drawRuntimeGui", false);
                 SetString(serializedObject, "battleSceneName", "BattleScene");
                 SetString(serializedObject, "upgradeSceneName", "UpgradeScene");
                 SetString(serializedObject, "stageSelectSceneName", "StageSelectScene");
             });
 
-            EditComponent(formationSkillPanelUI, serializedObject =>
-            {
-                SetObject(serializedObject, "battleManager", battleManager);
-                SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(8f, 236f, 248f, 286f));
-            });
-
-            EditComponent(tutorialOverlayUI, serializedObject =>
-            {
-                SetObject(serializedObject, "tutorialManager", tutorialManager);
-                SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(430f, 76f, 460f, 240f));
-            });
+            pauseController.Configure(battleManager);
+            battleCanvasController.Configure(battleManager, crystalController, pauseController, tutorialManager, runeSelectionUI, stageResultUI);
 
             EditorSceneManager.SaveScene(scene, BattleScenePath);
         }

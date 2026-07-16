@@ -35,11 +35,13 @@ namespace RuneGate.Editor
             "Assets/_Project/Data/Upgrades",
             "Assets/_Project/Data/Formations",
             "Assets/_Project/Data/Rosters",
+            "Assets/_Project/Data/UI",
             "Assets/_Project/Prefabs/Heroes",
             "Assets/_Project/Prefabs/Monsters",
             "Assets/_Project/Prefabs/Projectiles",
             "Assets/_Project/Prefabs/Effects",
             "Assets/_Project/Prefabs/UI",
+            "Assets/_Project/Prefabs/UI/Battle",
             "Assets/_Project/Scenes",
             "Assets/_Project/Art/Characters/Heroes/Knight",
             "Assets/_Project/Art/Characters/Heroes/Knight/Sprites",
@@ -203,6 +205,12 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Skill/TemporaryTurretController.cs",
             "Assets/_Project/Scripts/Battle/BattleResult.cs",
             "Assets/_Project/Scripts/UI/BattleHUD.cs",
+            "Assets/_Project/Scripts/UI/BattleCanvasController.cs",
+            "Assets/_Project/Scripts/UI/BattleCanvasLayout.cs",
+            "Assets/_Project/Scripts/UI/BattleResultViewData.cs",
+            "Assets/_Project/Scripts/UI/BattleSkillCardView.cs",
+            "Assets/_Project/Scripts/UI/RuneGateButtonFeedback.cs",
+            "Assets/_Project/Scripts/UI/RuneGateUiTheme.cs",
             "Assets/_Project/Scripts/UI/BattlePauseController.cs",
             "Assets/_Project/Scripts/UI/PetContractScreenLayout.cs",
             "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
@@ -387,6 +395,9 @@ namespace RuneGate.Editor
         private const string RequiredCombatVisualCatalogAsset = "Assets/_Project/Resources/RuntimePixelVisualCatalog.asset";
         private const string RequiredKoreanFontCatalogAsset = "Assets/_Project/Resources/KoreanFontCatalog.asset";
         private const string RequiredRuntimeContentCatalogAsset = "Assets/_Project/Resources/RuntimeContentCatalog.asset";
+        private const string RequiredBattleUiThemeAsset = "Assets/_Project/Data/UI/RuneGateUiTheme.asset";
+        private const string RequiredBattleCanvasPrefab = "Assets/_Project/Prefabs/UI/Battle/BattleCanvas.prefab";
+        private const string RequiredTmpSettingsAsset = "Assets/TextMesh Pro/Resources/TMP Settings.asset";
 
         private static readonly string[] RequiredKoreanFontAssets =
         {
@@ -416,6 +427,7 @@ namespace RuneGate.Editor
             "docs/stage-design.md",
             "docs/rune-design.md",
             "docs/ui-ux-v08.md",
+            "docs/battle-ugui-art-direction-v1.md",
             "docs/tutorial-design.md",
             "docs/save-system.md",
             "docs/difficulty-design.md",
@@ -598,6 +610,7 @@ namespace RuneGate.Editor
             ValidateAsset<KoreanFontCatalog>(RequiredKoreanFontCatalogAsset, "v0.8 Korean font catalog", errors);
             ValidateAsset<RuntimeContentCatalog>(RequiredRuntimeContentCatalogAsset, "runtime content catalog", errors);
             ValidateRuntimeContentCatalog(errors);
+            ValidateBattleUiAssets(errors);
             ValidateProgressionFlowData(errors);
             ValidateSceneFlowComponents(errors);
             ValidateUserFacingTextPolicy(errors);
@@ -1386,11 +1399,85 @@ namespace RuneGate.Editor
             ValidateSceneScriptCount("Assets/_Project/Scenes/UpgradeScene.unity", "Assets/_Project/Scripts/UI/UpgradeSceneUI.cs", "UpgradeSceneUI", 1, errors);
         }
 
+        private static void ValidateBattleUiAssets(List<string> errors)
+        {
+            ValidateAsset<RuneGateUiTheme>(RequiredBattleUiThemeAsset, "Battle uGUI theme", errors);
+            if (!File.Exists(ToProjectPath(RequiredTmpSettingsAsset)))
+            {
+                errors.Add($"Missing TMP Essential Resources settings: {RequiredTmpSettingsAsset}");
+            }
+
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RequiredBattleCanvasPrefab);
+            if (prefab == null)
+            {
+                errors.Add($"Missing BattleCanvas prefab: {RequiredBattleCanvasPrefab}");
+                return;
+            }
+
+            BattleCanvasController controller = prefab.GetComponent<BattleCanvasController>();
+            if (controller == null)
+            {
+                errors.Add("BattleCanvas prefab must contain BattleCanvasController.");
+            }
+
+            if (prefab.GetComponentsInChildren<Canvas>(true).Length != 1)
+            {
+                errors.Add("BattleCanvas prefab must contain exactly one Canvas.");
+            }
+
+            string scenePath = ToProjectPath("Assets/_Project/Scenes/BattleScene.unity");
+            if (File.Exists(scenePath))
+            {
+                string sceneText = File.ReadAllText(scenePath);
+                string prefabGuid = AssetDatabase.AssetPathToGUID(RequiredBattleCanvasPrefab);
+                string sourcePrefabMarker = $"m_SourcePrefab: {{fileID: 100100000, guid: {prefabGuid}";
+                if (CountOccurrences(sceneText, sourcePrefabMarker) != 1)
+                {
+                    errors.Add("BattleScene must contain exactly one BattleCanvas prefab instance.");
+                }
+
+                if (CountOccurrences(sceneText, "m_Name: EventSystem") != 1)
+                {
+                    errors.Add("BattleScene must contain exactly one EventSystem.");
+                }
+
+                if (CountOccurrences(sceneText, "drawRuntimeGui: 1") > 0)
+                {
+                    errors.Add("BattleScene must not contain an active IMGUI UI controller.");
+                }
+
+                ValidateSceneScriptCount("Assets/_Project/Scenes/BattleScene.unity", "Assets/_Project/Scripts/UI/BattleHUD.cs", "active legacy BattleHUD", 0, errors);
+                ValidateSceneScriptCount("Assets/_Project/Scenes/BattleScene.unity", "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs", "active legacy FormationSkillPanelUI", 0, errors);
+                ValidateSceneScriptCount("Assets/_Project/Scenes/BattleScene.unity", "Assets/_Project/Scripts/UI/TutorialOverlayUI.cs", "active legacy TutorialOverlayUI", 0, errors);
+            }
+
+            string manifestPath = ToProjectPath("Packages/manifest.json");
+            string manifest = File.Exists(manifestPath) ? File.ReadAllText(manifestPath) : string.Empty;
+            if (!manifest.Contains("\"com.unity.ugui\": \"2.0.0\"", StringComparison.Ordinal))
+            {
+                errors.Add("Packages/manifest.json must reference com.unity.ugui 2.0.0.");
+            }
+
+            ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_panel_dark.png", new Vector4(24f, 24f, 24f, 24f), errors);
+            ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_button_skill.png", new Vector4(12f, 12f, 12f, 12f), errors);
+            ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_rune_card_base.png", new Vector4(24f, 24f, 24f, 24f), errors);
+        }
+
+        private static void ValidateSpriteBorder(string path, Vector4 expected, List<string> errors)
+        {
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null || importer.spriteBorder != expected)
+            {
+                errors.Add($"Battle UI sprite has an invalid 9-slice border: {path}. Expected {expected}.");
+            }
+        }
+
         private static void ValidateUserFacingTextPolicy(List<string> errors)
         {
             string[] uiFiles =
             {
                 "Assets/_Project/Scripts/UI/BattleHUD.cs",
+                "Assets/_Project/Scripts/UI/BattleCanvasController.cs",
                 "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs",
                 "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
                 "Assets/_Project/Scripts/UI/StageResultUI.cs",

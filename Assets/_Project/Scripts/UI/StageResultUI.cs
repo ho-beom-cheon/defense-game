@@ -1,3 +1,5 @@
+using System;
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
@@ -23,9 +25,18 @@ namespace RuneGate
         private Vector2 resultScrollPosition;
         private bool sceneTransitionRequested;
 
+        public event Action<bool> VisibilityChanged;
+        public event Action<BattleResultViewData> ViewDataChanged;
+
         public bool IsVisible => isVisible;
         public string ResultMessage { get; private set; }
         public string NewlyUnlockedDifficultyId => newlyUnlockedDifficultyId;
+        public BattleResultViewData CurrentViewData { get; private set; }
+
+        public void SetRuntimeGuiEnabled(bool enabled)
+        {
+            drawRuntimeGui = enabled;
+        }
 
         private void OnEnable()
         {
@@ -209,16 +220,78 @@ namespace RuneGate
             {
                 ResultMessage = result.IsVictory ? "\ubd09\ubb38 \uae30\ub85d \uac31\uc2e0. \ud06c\ub9ac\uc2a4\ud0c8 \ubc29\uc5b4 \uc131\uacf5!" : "\ubc29\uc5b4\uc120 \ubd95\uad34. \ub2e4\uc2dc \uc804\uc5f4\uc744 \uc815\ube44\ud558\uc138\uc694.";
             }
+
+            CurrentViewData = BuildViewData(result);
+            ViewDataChanged?.Invoke(CurrentViewData);
+            VisibilityChanged?.Invoke(true);
         }
 
         private void HandleBattleStateChanged(BattleState state)
         {
             if (state == BattleState.Preparing || state == BattleState.WaveRunning || state == BattleState.RuneSelection)
             {
+                bool wasVisible = isVisible;
                 isVisible = false;
                 saveApplied = false;
                 sceneTransitionRequested = false;
+                if (wasVisible)
+                {
+                    VisibilityChanged?.Invoke(false);
+                }
             }
+        }
+
+        private BattleResultViewData BuildViewData(BattleResult result)
+        {
+            bool hasNextStage = HasNextStage(result);
+            string unlock = result.IsVictory ? ResolveNextStageMessage(result) : BuildDefeatHint(result);
+            if (!string.IsNullOrWhiteSpace(newlyUnlockedDifficultyId))
+            {
+                unlock += $"\n새 난이도 해금: {GameTextMapper.Difficulty(newlyUnlockedDifficultyId)}";
+            }
+
+            return new BattleResultViewData(
+                result.IsVictory,
+                result.IsVictory ? "봉문 성공" : "방어선 붕괴",
+                ResultMessage,
+                goldEarned,
+                battleGoldEarned,
+                FormatElapsedTime(result.ElapsedSeconds),
+                $"{result.CrystalHp}/{result.CrystalMaxHp}",
+                result.MonstersKilled.ToString(),
+                $"{result.WavesCleared}/{GetTotalWaves(result)}",
+                $"{GameTextMapper.Difficulty(DifficultyRules.CurrentDifficultyId)} · 보상 x{DifficultyRules.RewardMultiplier(DifficultyRules.CurrentDifficultyId):0.##}",
+                BuildShardRewardsText(),
+                unlock,
+                result.IsVictory && hasNextStage ? "다음 스테이지" : "재시도",
+                hasNextStage);
+        }
+
+        private static string BuildShardRewardsText()
+        {
+            IReadOnlyDictionary<string, int> drops = ShadowContractService.LastBattleDrops;
+            if (drops == null || drops.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            foreach (KeyValuePair<string, int> pair in drops)
+            {
+                if (builder.Length > 0)
+                {
+                    builder.AppendLine();
+                }
+
+                string monsterName = ShadowContractService.GetMonsterDisplayName(pair.Key);
+                builder.Append(monsterName).Append(" 조각 +").Append(pair.Value);
+                if (ShadowContractService.CanContract(pair.Key))
+                {
+                    builder.Append(" · 계약 가능");
+                }
+            }
+
+            return builder.ToString();
         }
 
         private bool ApplyResultToSave(BattleResult result)
