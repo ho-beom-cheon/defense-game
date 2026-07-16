@@ -38,7 +38,7 @@ namespace RuneGate
             ApplySafeArea();
         }
 
-        private void ApplySafeArea()
+        public void ApplySafeArea()
         {
             if (target == null)
             {
@@ -69,6 +69,13 @@ namespace RuneGate
             }
 
             return safeArea;
+        }
+
+        public void SetDebugSafeArea(Rect safeArea, bool enabled)
+        {
+            debugSafeArea = safeArea;
+            useDebugSafeArea = enabled;
+            ApplySafeArea();
         }
     }
 }

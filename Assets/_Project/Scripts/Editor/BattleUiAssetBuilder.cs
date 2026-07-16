@@ -10,6 +10,7 @@ namespace RuneGate.Editor
     {
         public const string ThemePath = "Assets/_Project/Data/UI/RuneGateUiTheme.asset";
         public const string PrefabPath = "Assets/_Project/Prefabs/UI/Battle/BattleCanvas.prefab";
+        public const string TitlePrefabPath = "Assets/_Project/Prefabs/UI/Title/TitleCanvas.prefab";
 
         private const string RegularFontPath = "Assets/_Project/Fonts/NotoSansKR-Regular.ttf";
         private const string SemiboldFontPath = "Assets/_Project/Fonts/NotoSansKR-SemiBold.ttf";
@@ -19,12 +20,27 @@ namespace RuneGate.Editor
         private const string RuneSpritePath = "Assets/_Project/Art/RuntimePixel/UI/ui_rune_card_base.png";
         private const string PauseSpritePath = "Assets/_Project/Art/RuntimePixel/UI/System/ui_icon_settings.png";
 
-        [MenuItem("Tools/RuneGate/Build Battle uGUI Assets")]
+        [MenuItem("Tools/RuneGate/Build uGUI Assets")]
         public static void BuildAssets()
+        {
+            BuildAssetsInternal(true);
+        }
+
+        public static void BuildTitleAssets()
+        {
+            BuildAssetsInternal(false);
+        }
+
+        private static void BuildAssetsInternal(bool includeBattleCanvas)
         {
             EnsureTmpEssentials();
             EnsureFolder("Assets/_Project/Data/UI");
-            EnsureFolder("Assets/_Project/Prefabs/UI/Battle");
+            EnsureFolder("Assets/_Project/Prefabs/UI/Title");
+            if (includeBattleCanvas)
+            {
+                EnsureFolder("Assets/_Project/Prefabs/UI/Battle");
+            }
+
             ConfigureSpriteBorder(PanelSpritePath, new Vector4(24f, 24f, 24f, 24f));
             ConfigureSpriteBorder(ButtonSpritePath, new Vector4(12f, 12f, 12f, 12f));
             ConfigureSpriteBorder(RuneSpritePath, new Vector4(24f, 24f, 24f, 24f));
@@ -47,22 +63,40 @@ namespace RuneGate.Editor
             themeObject.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(theme);
 
-            GameObject root = new GameObject("BattleCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            if (includeBattleCanvas)
+            {
+                GameObject root = new GameObject("BattleCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+                try
+                {
+                    BattleCanvasController controller = root.AddComponent<BattleCanvasController>();
+                    controller.AssignTheme(theme);
+                    controller.RebuildView();
+                    PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+                }
+                finally
+                {
+                    UnityEngine.Object.DestroyImmediate(root);
+                }
+            }
+
+            GameObject titleRoot = new GameObject("TitleCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             try
             {
-                BattleCanvasController controller = root.AddComponent<BattleCanvasController>();
-                controller.AssignTheme(theme);
-                controller.RebuildView();
-                PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
+                TitleUI titleUI = titleRoot.AddComponent<TitleUI>();
+                titleUI.AssignTheme(theme);
+                titleUI.RebuildView();
+                PrefabUtility.SaveAsPrefabAsset(titleRoot, TitlePrefabPath);
             }
             finally
             {
-                UnityEngine.Object.DestroyImmediate(root);
+                UnityEngine.Object.DestroyImmediate(titleRoot);
             }
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"RuneGate Battle uGUI assets built: {ThemePath}, {PrefabPath}");
+            Debug.Log(includeBattleCanvas
+                ? $"RuneGate uGUI assets built: {ThemePath}, {PrefabPath}, {TitlePrefabPath}"
+                : $"RuneGate Title uGUI assets built: {ThemePath}, {TitlePrefabPath}");
         }
 
         private static void EnsureTmpEssentials()
