@@ -7,7 +7,7 @@ namespace RuneGate
     {
         [Header("Stage Art")]
         [SerializeField] private Sprite background;
-        [SerializeField] private Sprite lane;
+        [SerializeField] private Sprite groundField;
         [SerializeField] private Sprite crystal;
         [SerializeField] private Sprite rift;
         [SerializeField] private Sprite unitShadow;
@@ -17,7 +17,7 @@ namespace RuneGate
 
         [Header("Palette")]
         [SerializeField] private Color backgroundTint = new Color(0.82f, 0.88f, 0.86f, 1f);
-        [SerializeField] private Color laneTint = new Color(0.78f, 0.8f, 0.76f, 1f);
+        [SerializeField] private Color groundFieldTint = new Color(0.78f, 0.82f, 0.76f, 0.58f);
         [SerializeField] private Color crystalTint = new Color(0.72f, 0.8f, 0.82f, 1f);
         [SerializeField] private Color riftTint = new Color(0.68f, 0.7f, 0.74f, 1f);
         [SerializeField] private Color shadowTint = new Color(0.08f, 0.17f, 0.17f, 1f);
@@ -26,17 +26,19 @@ namespace RuneGate
         [SerializeField] private Color riftWarningTint = new Color(0.66f, 0.4f, 0.95f, 0.68f);
         [SerializeField] private Color riftBossTint = new Color(0.84f, 0.36f, 0.55f, 0.82f);
         [SerializeField] private Color crystalCriticalTint = new Color(0.84f, 0.36f, 0.36f, 1f);
+        [SerializeField] private Color approachBarrierTint = new Color(0.27f, 0.72f, 0.85f, 0.13f);
 
         [Header("Sorting")]
         [SerializeField] private int backgroundSortingOrder = -30;
-        [SerializeField] private int laneSortingOrder = -20;
+        [SerializeField] private int groundFieldSortingOrder = -20;
         [SerializeField] private int decalSortingOrder = -10;
         [SerializeField] private int objectiveSortingOrder = 2;
         [SerializeField] private int unitShadowSortingOrder = 3;
         [SerializeField] private int worldEffectSortingOrder = 10;
 
         [Header("World Sizing")]
-        [SerializeField] private float laneWorldHeight = 1.05f;
+        [SerializeField] private float groundFieldUniformScale = 1.1f;
+        [SerializeField] private float approachBarrierWorldWidth = 0.9f;
         [SerializeField] private float crystalWorldHeight = 4.8f;
         [SerializeField] private float riftWorldHeight = 4.9f;
         [SerializeField] private float portraitObjectiveScale = 0.92f;
@@ -51,7 +53,7 @@ namespace RuneGate
         [SerializeField] private float crystalCriticalPulseSeconds = 0.65f;
 
         public Sprite Background => background;
-        public Sprite Lane => lane;
+        public Sprite GroundField => groundField;
         public Sprite Crystal => crystal;
         public Sprite Rift => rift;
         public Sprite UnitShadow => unitShadow;
@@ -59,7 +61,7 @@ namespace RuneGate
         public Sprite CrystalShieldRing => crystalShieldRing;
         public Sprite RiftPulse => riftPulse;
         public Color BackgroundTint => backgroundTint;
-        public Color LaneTint => laneTint;
+        public Color GroundFieldTint => groundFieldTint;
         public Color CrystalTint => crystalTint;
         public Color RiftTint => riftTint;
         public Color ShadowTint => shadowTint;
@@ -68,13 +70,15 @@ namespace RuneGate
         public Color RiftWarningTint => riftWarningTint;
         public Color RiftBossTint => riftBossTint;
         public Color CrystalCriticalTint => crystalCriticalTint;
+        public Color ApproachBarrierTint => approachBarrierTint;
         public int BackgroundSortingOrder => backgroundSortingOrder;
-        public int LaneSortingOrder => laneSortingOrder;
+        public int GroundFieldSortingOrder => groundFieldSortingOrder;
         public int DecalSortingOrder => decalSortingOrder;
         public int ObjectiveSortingOrder => objectiveSortingOrder;
         public int UnitShadowSortingOrder => unitShadowSortingOrder;
         public int WorldEffectSortingOrder => worldEffectSortingOrder;
-        public float LaneWorldHeight => Mathf.Max(0.2f, laneWorldHeight);
+        public float GroundFieldUniformScale => Mathf.Max(0.1f, groundFieldUniformScale);
+        public float ApproachBarrierWorldWidth => Mathf.Max(0.1f, approachBarrierWorldWidth);
         public float CrystalWorldHeight => Mathf.Max(0.5f, crystalWorldHeight);
         public float RiftWorldHeight => Mathf.Max(0.5f, riftWorldHeight);
         public float PortraitObjectiveScale => Mathf.Max(0.1f, portraitObjectiveScale);
@@ -87,7 +91,7 @@ namespace RuneGate
         public float CrystalCriticalPulseSeconds => Mathf.Max(0.1f, crystalCriticalPulseSeconds);
 
         public bool HasRequiredAssets => background != null
-            && lane != null
+            && groundField != null
             && crystal != null
             && rift != null
             && unitShadow != null

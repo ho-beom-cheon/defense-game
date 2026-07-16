@@ -136,7 +136,7 @@ namespace RuneGate
                 case 0:
                     return "\uc9c0\ucf1c\uc57c \ud560 \ud06c\ub9ac\uc2a4\ud0c8";
                 case 1:
-                    return "3\uac1c \uc804\ud22c \ub77c\uc778";
+                    return "\uc0c1\ud558\ub85c \uc5f0\uacb0\ub41c \uc804\ud22c \uc804\uc7a5";
                 case 2:
                     return "\uc790\ub3d9 \uc804\ud22c \uc601\uc6c5";
                 case 3:

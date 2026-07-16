@@ -293,6 +293,16 @@ namespace RuneGate
             battlefieldAgentRegistry.Configure(battlefieldSpace);
             crystalApproachPointProvider.Configure(battlefieldSpace, battlefieldSpace.Config);
             laneManager?.ConfigureSpace(battlefieldSpace);
+            TutorialManager tutorialManager = FindAnyObjectByType<TutorialManager>();
+            battlefieldVisualController.Configure(
+                battlefieldVisualController.Theme,
+                battlefieldSpace,
+                crystalController);
+            battlefieldVisualController.AssignRuntimeServices(
+                waveManager,
+                this,
+                tutorialManager,
+                crystalApproachPointProvider);
             battlefieldLayoutCoordinator.Configure(
                 cameraFitter,
                 battlefieldSpace,
