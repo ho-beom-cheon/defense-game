@@ -1,8 +1,8 @@
 # UI Frame Validation Report v0.88.0
 
-Generated: 2026-06-18 23:45:41
+Generated: 2026-07-16 12:30:43
 
-Summary: PASS 82, WARNING 0, FAIL 0
+Summary: PASS 86, WARNING 0, FAIL 0
 
 ## Fail
 - None
@@ -21,6 +21,8 @@ Summary: PASS 82, WARNING 0, FAIL 0
 - Required UI Script exists: `Assets/_Project/Scripts/UI/Foundation/PopupFrameController.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/StageSelectUI.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/BattleHUD.cs`
+- Required UI Script exists: `Assets/_Project/Scripts/UI/BattleCanvasController.cs`
+- Required UI Script exists: `Assets/_Project/Scripts/UI/BattleCanvasLayout.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/RuneSelectionUI.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/StageResultUI.cs`
@@ -43,6 +45,9 @@ Summary: PASS 82, WARNING 0, FAIL 0
 - Frame term exists: `UseCompactStageSelect`
 - Frame term exists: `UseCompactBattle`
 - Frame term exists: `DrawStageSelectFrame`
+- Frame term exists: `BattleCanvasLayout`
+- Frame term exists: `BattlefieldViewport`
+- Frame term exists: `BattleOverlayState`
 - Title normal 720x1280: layout rects fit without overlap
 - Title expanded 720x1280: layout rects fit without overlap
 - StageSelect 720x1280: layout rects fit without overlap
@@ -76,11 +81,10 @@ Summary: PASS 82, WARNING 0, FAIL 0
 - Stage order check passed: Stage 1 through Stage 10 are loaded in numeric order
 - Scene binding exists: `Assets/_Project/Scenes/TitleScene.unity` -> `Assembly-CSharp::RuneGate.TitleUI`
 - Scene binding exists: `Assets/_Project/Scenes/StageSelectScene.unity` -> `Assembly-CSharp::RuneGate.StageSelectUI`
-- Scene binding exists: `Assets/_Project/Scenes/BattleScene.unity` -> `Assembly-CSharp::RuneGate.BattleHUD`
-- Scene binding exists: `Assets/_Project/Scenes/BattleScene.unity` -> `Assembly-CSharp::RuneGate.FormationSkillPanelUI`
 - Scene binding exists: `Assets/_Project/Scenes/BattleScene.unity` -> `Assembly-CSharp::RuneGate.RuneSelectionUI`
 - Scene binding exists: `Assets/_Project/Scenes/BattleScene.unity` -> `Assembly-CSharp::RuneGate.StageResultUI`
 - Scene binding exists: `Assets/_Project/Scenes/UpgradeScene.unity` -> `Assembly-CSharp::RuneGate.UpgradeSceneUI`
+- StageSelect legacy serialized `panelRect` data is absent
 - Build Settings scene enabled: `Assets/_Project/Scenes/TitleScene.unity`
 - Build Settings scene enabled: `Assets/_Project/Scenes/StageSelectScene.unity`
 - Build Settings scene enabled: `Assets/_Project/Scenes/BattleScene.unity`
@@ -89,7 +93,7 @@ Summary: PASS 82, WARNING 0, FAIL 0
 - EventSystem duplicate check passed: `Assets/_Project/Scenes/TitleScene.unity` (0)
 - Canvas duplicate check passed: `Assets/_Project/Scenes/StageSelectScene.unity` (0)
 - EventSystem duplicate check passed: `Assets/_Project/Scenes/StageSelectScene.unity` (0)
-- Canvas duplicate check passed: `Assets/_Project/Scenes/BattleScene.unity` (0)
-- EventSystem duplicate check passed: `Assets/_Project/Scenes/BattleScene.unity` (0)
+- Canvas duplicate check passed: `Assets/_Project/Scenes/BattleScene.unity` (1)
+- EventSystem duplicate check passed: `Assets/_Project/Scenes/BattleScene.unity` (1)
 - Canvas duplicate check passed: `Assets/_Project/Scenes/UpgradeScene.unity` (0)
 - EventSystem duplicate check passed: `Assets/_Project/Scenes/UpgradeScene.unity` (0)
