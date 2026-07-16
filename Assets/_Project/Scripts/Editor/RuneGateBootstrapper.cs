@@ -412,6 +412,17 @@ namespace RuneGate.Editor
             BootstrapPlayablePrototype();
         }
 
+        [MenuItem("Tools/RuneGate/Rebuild Title uGUI Scene")]
+        public static void RebuildTitleUiScene()
+        {
+            EnsureRequiredFolders();
+            BattleUiAssetBuilder.BuildTitleAssets();
+            CreateOrUpdateTitleScene();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("RuneGate Title uGUI scene rebuilt.");
+        }
+
         public static void EnsureRequiredFolders()
         {
             for (int i = 0; i < RequiredFolders.Length; i++)
@@ -1699,14 +1710,24 @@ namespace RuneGate.Editor
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             CreateDefaultCamera(new Color(0.05f, 0.07f, 0.09f));
 
-            GameObject uiRoot = new GameObject("Title UI");
-            TitleUI titleUI = uiRoot.AddComponent<TitleUI>();
+            GameObject titleCanvasPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(BattleUiAssetBuilder.TitlePrefabPath);
+            if (titleCanvasPrefab == null)
+            {
+                throw new InvalidOperationException($"Title uGUI prefab is missing: {BattleUiAssetBuilder.TitlePrefabPath}. Run Tools/RuneGate/Build uGUI Assets.");
+            }
+
+            GameObject titleCanvasObject = PrefabUtility.InstantiatePrefab(titleCanvasPrefab, scene) as GameObject;
+            TitleUI titleUI = titleCanvasObject != null ? titleCanvasObject.GetComponent<TitleUI>() : null;
+            if (titleUI == null)
+            {
+                throw new InvalidOperationException("TitleCanvas prefab is missing TitleUI.");
+            }
+
             EditComponent(titleUI, serializedObject =>
             {
-                SetBool(serializedObject, "drawRuntimeGui", true);
-                SetRect(serializedObject, "panelRect", new Rect(320f, 120f, 360f, 260f));
                 SetString(serializedObject, "stageSelectSceneName", "StageSelectScene");
             });
+            new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
             EditorSceneManager.SaveScene(scene, TitleScenePath);
         }

@@ -1,8 +1,8 @@
 # UI Frame Validation Report v0.88.0
 
-Generated: 2026-07-16 15:56:26
+Generated: 2026-07-16 18:37:42
 
-Summary: PASS 92, WARNING 0, FAIL 0
+Summary: PASS 93, WARNING 0, FAIL 0
 
 ## Fail
 - None
@@ -23,6 +23,8 @@ Summary: PASS 92, WARNING 0, FAIL 0
 - Required UI Script exists: `Assets/_Project/Scripts/UI/BattleHUD.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/BattleCanvasController.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/BattleCanvasLayout.cs`
+- Required UI Script exists: `Assets/_Project/Scripts/UI/UiFrameTokens.cs`
+- Required UI Script exists: `Assets/_Project/Scripts/UI/TitleCanvasLayout.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs`
@@ -83,7 +85,6 @@ Summary: PASS 92, WARNING 0, FAIL 0
 - Battle 1536x768: layout rects fit without overlap
 - Popup 1536x768: popup rects fit inside safe area
 - Stage order check passed: Stage 1 through Stage 10 are loaded in numeric order
-- Scene binding exists: `Assets/_Project/Scenes/TitleScene.unity` -> `Assembly-CSharp::RuneGate.TitleUI`
 - Scene binding exists: `Assets/_Project/Scenes/StageSelectScene.unity` -> `Assembly-CSharp::RuneGate.StageSelectUI`
 - Scene binding exists: `Assets/_Project/Scenes/BattleScene.unity` -> `Assembly-CSharp::RuneGate.RuneSelectionUI`
 - Scene binding exists: `Assets/_Project/Scenes/BattleScene.unity` -> `Assembly-CSharp::RuneGate.StageResultUI`
@@ -94,7 +95,7 @@ Summary: PASS 92, WARNING 0, FAIL 0
 - Build Settings scene enabled: `Assets/_Project/Scenes/BattleScene.unity`
 - Build Settings scene enabled: `Assets/_Project/Scenes/UpgradeScene.unity`
 - Canvas duplicate check passed: `Assets/_Project/Scenes/TitleScene.unity` (0)
-- EventSystem duplicate check passed: `Assets/_Project/Scenes/TitleScene.unity` (0)
+- EventSystem duplicate check passed: `Assets/_Project/Scenes/TitleScene.unity` (1)
 - Canvas duplicate check passed: `Assets/_Project/Scenes/StageSelectScene.unity` (0)
 - EventSystem duplicate check passed: `Assets/_Project/Scenes/StageSelectScene.unity` (0)
 - Canvas duplicate check passed: `Assets/_Project/Scenes/BattleScene.unity` (1)

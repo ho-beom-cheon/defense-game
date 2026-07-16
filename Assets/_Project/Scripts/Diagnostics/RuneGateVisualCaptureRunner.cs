@@ -11,6 +11,7 @@ namespace RuneGate
     public sealed class RuneGateVisualCaptureRunner : MonoBehaviour
     {
         private const string CaptureArgument = "-runegateCaptureUi";
+        private const string TitleOnlyArgument = "-runegateCaptureTitleOnly";
         private const string OutputArgument = "-runegateCapturePath";
         private const string DefaultSaveFileName = "runegate_save.json";
         private const float TimeoutSeconds = 15f;
@@ -58,8 +59,20 @@ namespace RuneGate
                 yield break;
             }
 
+            yield return WaitForCondition(() =>
+            {
+                TitleUI title = FindAnyObjectByType<TitleUI>();
+                return title != null && title.IsReady;
+            });
+            if (!Require(waitSucceeded, "TitleScene did not initialize a ready TitleUI.")) yield break;
+            yield return WaitForTitleLayout();
             yield return Capture("01-title");
             if (!waitSucceeded) yield break;
+            if (HasArgument(TitleOnlyArgument))
+            {
+                yield return CaptureTitleStates();
+                yield break;
+            }
 
             SceneManager.LoadScene("StageSelectScene");
             yield return WaitForCondition(() => SceneManager.GetActiveScene().name == "StageSelectScene" && FindAnyObjectByType<StageSelectUI>() != null);
@@ -222,6 +235,61 @@ namespace RuneGate
             }
 
             Fail($"Screenshot was not written: {path}");
+        }
+
+        private IEnumerator CaptureTitleStates()
+        {
+            TitleUI title = FindAnyObjectByType<TitleUI>();
+            if (!Require(title != null && title.IsReady, "Title-only capture is missing a ready TitleUI."))
+            {
+                yield break;
+            }
+
+            SaveData save = SaveManager.Current;
+            save.totalGold = 2049;
+            save.selectedDifficultyId = "normal";
+            save.clearedStageIds.Clear();
+            for (int i = 1; i <= 5; i++)
+            {
+                save.clearedStageIds.Add($"stage_{i:00}");
+            }
+
+            SaveManager.Save();
+            title.ShowMain();
+            title.Refresh();
+            yield return WaitForTitleLayout();
+            yield return Capture("01b-title-existing");
+            if (!waitSucceeded) yield break;
+
+            title.ShowSettings();
+            yield return WaitForTitleLayout();
+            yield return Capture("01c-title-settings");
+            if (!waitSucceeded) yield break;
+
+            title.ShowMain();
+            title.ShowConfirmation(TitleConfirmAction.NewGame);
+            yield return WaitForTitleLayout();
+            yield return Capture("01d-title-new-game-confirm");
+            if (!waitSucceeded) yield break;
+
+            title.ShowSettings();
+            title.ShowConfirmation(TitleConfirmAction.ResetSave);
+            yield return WaitForTitleLayout();
+            yield return Capture("01e-title-reset-confirm");
+            if (!waitSucceeded) yield break;
+
+            Debug.Log($"RUNEGATE_TITLE_CAPTURE_PASSED: {outputDirectory} ({Screen.width}x{Screen.height})");
+            CleanupTestSave();
+            Time.timeScale = previousTimeScale;
+            Application.Quit(0);
+        }
+
+        private static IEnumerator WaitForTitleLayout()
+        {
+            Canvas.ForceUpdateCanvases();
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            yield return new WaitForEndOfFrame();
         }
 
         private IEnumerator WaitForCondition(Func<bool> condition)

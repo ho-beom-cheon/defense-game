@@ -4,6 +4,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace RuneGate.Editor
 {
@@ -210,6 +211,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/BattleHUD.cs",
             "Assets/_Project/Scripts/UI/BattleCanvasController.cs",
             "Assets/_Project/Scripts/UI/BattleCanvasLayout.cs",
+            "Assets/_Project/Scripts/UI/UiFrameTokens.cs",
+            "Assets/_Project/Scripts/UI/TitleCanvasLayout.cs",
             "Assets/_Project/Scripts/UI/BattleResultViewData.cs",
             "Assets/_Project/Scripts/UI/BattleSkillCardView.cs",
             "Assets/_Project/Scripts/UI/RuneGateButtonFeedback.cs",
@@ -413,6 +416,7 @@ namespace RuneGate.Editor
         private const string RequiredRuntimeContentCatalogAsset = "Assets/_Project/Resources/RuntimeContentCatalog.asset";
         private const string RequiredBattleUiThemeAsset = "Assets/_Project/Data/UI/RuneGateUiTheme.asset";
         private const string RequiredBattleCanvasPrefab = "Assets/_Project/Prefabs/UI/Battle/BattleCanvas.prefab";
+        private const string RequiredTitleCanvasPrefab = "Assets/_Project/Prefabs/UI/Title/TitleCanvas.prefab";
         private const string RequiredStage01BattlefieldTheme = "Assets/_Project/Data/Battlefield/Stage01BattlefieldArtTheme.asset";
         private const string RequiredTmpSettingsAsset = "Assets/TextMesh Pro/Resources/TMP Settings.asset";
 
@@ -628,6 +632,7 @@ namespace RuneGate.Editor
             ValidateAsset<RuntimeContentCatalog>(RequiredRuntimeContentCatalogAsset, "runtime content catalog", errors);
             ValidateRuntimeContentCatalog(errors);
             ValidateBattleUiAssets(errors);
+            ValidateTitleUiAssets(errors);
             ValidateStage01BattlefieldArt(errors);
             ValidateProgressionFlowData(errors);
             ValidateSceneFlowComponents(errors);
@@ -1410,7 +1415,7 @@ namespace RuneGate.Editor
 
         private static void ValidateSceneFlowComponents(List<string> errors)
         {
-            ValidateSceneScriptCount("Assets/_Project/Scenes/TitleScene.unity", "Assets/_Project/Scripts/UI/TitleUI.cs", "TitleUI", 1, errors);
+            ValidateScenePrefabCount("Assets/_Project/Scenes/TitleScene.unity", RequiredTitleCanvasPrefab, "TitleCanvas", 1, errors);
             ValidateSceneScriptCount("Assets/_Project/Scenes/StageSelectScene.unity", "Assets/_Project/Scripts/UI/StageSelectUI.cs", "StageSelectUI", 1, errors);
             ValidateSceneScriptCount("Assets/_Project/Scenes/BattleScene.unity", "Assets/_Project/Scripts/Battle/BattleManager.cs", "BattleManager", 1, errors);
             ValidateSceneScriptCount("Assets/_Project/Scenes/BattleScene.unity", "Assets/_Project/Scripts/UI/StageResultUI.cs", "StageResultUI", 1, errors);
@@ -1479,6 +1484,102 @@ namespace RuneGate.Editor
             ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_panel_dark.png", new Vector4(24f, 24f, 24f, 24f), errors);
             ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_button_skill.png", new Vector4(12f, 12f, 12f, 12f), errors);
             ValidateSpriteBorder("Assets/_Project/Art/RuntimePixel/UI/ui_rune_card_base.png", new Vector4(24f, 24f, 24f, 24f), errors);
+        }
+
+        private static void ValidateScenePrefabCount(string scenePath, string prefabPath, string label, int expectedCount, List<string> errors)
+        {
+            string absoluteScenePath = ToProjectPath(scenePath);
+            if (!File.Exists(absoluteScenePath))
+            {
+                return;
+            }
+
+            string guid = AssetDatabase.AssetPathToGUID(prefabPath);
+            if (string.IsNullOrWhiteSpace(guid))
+            {
+                errors.Add($"Cannot find prefab guid for {label}: {prefabPath}");
+                return;
+            }
+
+            string sceneText = File.ReadAllText(absoluteScenePath);
+            int count = CountOccurrences(sceneText, $"m_SourcePrefab: {{fileID: 100100000, guid: {guid}, type: 3}}");
+            if (count != expectedCount)
+            {
+                errors.Add($"{scenePath} must contain exactly {expectedCount} {label} prefab instance(s). Found {count}.");
+            }
+        }
+
+        private static void ValidateTitleUiAssets(List<string> errors)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(RequiredTitleCanvasPrefab);
+            if (prefab == null)
+            {
+                errors.Add($"Missing TitleCanvas prefab: {RequiredTitleCanvasPrefab}");
+                return;
+            }
+
+            TitleUI title = prefab.GetComponent<TitleUI>();
+            if (title == null)
+            {
+                errors.Add("TitleCanvas prefab must contain TitleUI.");
+            }
+
+            if (prefab.GetComponentsInChildren<Canvas>(true).Length != 1)
+            {
+                errors.Add("TitleCanvas prefab must contain exactly one Canvas.");
+            }
+
+            CanvasScaler scaler = prefab.GetComponent<CanvasScaler>();
+            if (scaler == null ||
+                scaler.uiScaleMode != CanvasScaler.ScaleMode.ScaleWithScreenSize ||
+                scaler.referenceResolution != new Vector2(UiFrameTokens.ReferenceWidth, UiFrameTokens.ReferenceHeight) ||
+                !Mathf.Approximately(scaler.matchWidthOrHeight, UiFrameTokens.CanvasMatch))
+            {
+                errors.Add("TitleCanvas CanvasScaler must use the 1080x1920 reference resolution and match 0.5.");
+            }
+
+            Image menuPanel = FindImage(prefab.transform, "MenuPanel");
+            Image modalPanel = FindImage(prefab.transform, "ModalPanel");
+            if (menuPanel == null || menuPanel.type != Image.Type.Sliced)
+            {
+                errors.Add("TitleCanvas MenuPanel must use a sliced Image.");
+            }
+
+            if (modalPanel == null || modalPanel.type != Image.Type.Sliced)
+            {
+                errors.Add("TitleCanvas ModalPanel must use a sliced Image.");
+            }
+
+            Button[] buttons = prefab.GetComponentsInChildren<Button>(true);
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                Image target = buttons[i].targetGraphic as Image;
+                if (target == null || target.type != Image.Type.Sliced)
+                {
+                    errors.Add($"TitleCanvas button must target a sliced Image: {buttons[i].name}");
+                }
+            }
+
+            string titleScript = File.ReadAllText(ToProjectPath("Assets/_Project/Scripts/UI/TitleUI.cs"));
+            if (titleScript.Contains("OnGUI(", StringComparison.Ordinal) ||
+                titleScript.Contains("drawRuntimeGui", StringComparison.Ordinal))
+            {
+                errors.Add("TitleUI must not contain OnGUI or drawRuntimeGui.");
+            }
+        }
+
+        private static Image FindImage(Transform root, string objectName)
+        {
+            Transform[] children = root.GetComponentsInChildren<Transform>(true);
+            for (int i = 0; i < children.Length; i++)
+            {
+                if (children[i].name == objectName)
+                {
+                    return children[i].GetComponent<Image>();
+                }
+            }
+
+            return null;
         }
 
         private static void ValidateStage01BattlefieldArt(List<string> errors)

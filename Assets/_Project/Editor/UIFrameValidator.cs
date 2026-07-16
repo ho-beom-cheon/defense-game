@@ -29,6 +29,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/BattleHUD.cs",
             "Assets/_Project/Scripts/UI/BattleCanvasController.cs",
             "Assets/_Project/Scripts/UI/BattleCanvasLayout.cs",
+            "Assets/_Project/Scripts/UI/UiFrameTokens.cs",
+            "Assets/_Project/Scripts/UI/TitleCanvasLayout.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs",
@@ -52,7 +54,6 @@ namespace RuneGate.Editor
 
         private static readonly SceneBinding[] RequiredSceneBindings =
         {
-            new SceneBinding("Assets/_Project/Scenes/TitleScene.unity", "Assembly-CSharp::RuneGate.TitleUI"),
             new SceneBinding("Assets/_Project/Scenes/StageSelectScene.unity", "Assembly-CSharp::RuneGate.StageSelectUI"),
             new SceneBinding("Assets/_Project/Scenes/BattleScene.unity", "Assembly-CSharp::RuneGate.RuneSelectionUI"),
             new SceneBinding("Assets/_Project/Scenes/BattleScene.unity", "Assembly-CSharp::RuneGate.StageResultUI"),
@@ -217,19 +218,34 @@ namespace RuneGate.Editor
 
         private static void ValidateTitleLayout(float width, float height, bool expanded, List<string> pass, List<string> failures)
         {
-            ScreenFrameRects rects = GameFrameLayout.TitleFrameForSize(width, height, expanded);
+            TitleCanvasRects rects = TitleCanvasLayout.Calculate(
+                new Vector2(width, height),
+                1f,
+                expanded ? TitleViewMode.Settings : TitleViewMode.Main);
             string label = $"Title {(expanded ? "expanded" : "normal")} {width:0}x{height:0}";
             Rect[] verticalAreas =
             {
                 rects.HeaderArea,
-                rects.MainArea,
-                rects.FooterArea
+                rects.BodyArea,
+                rects.ActionArea
             };
 
-            ValidateInside(label, "HeaderArea", rects.HeaderArea, rects.FrameRoot, failures);
-            ValidateInside(label, "MainArea", rects.MainArea, rects.FrameRoot, failures);
-            ValidateInside(label, "FooterArea", rects.FooterArea, rects.FrameRoot, failures);
+            ValidateInside(label, "BrandArea", rects.BrandArea, rects.FrameRoot, failures);
+            ValidateInside(label, "MenuPanel", rects.MenuPanel, rects.FrameRoot, failures);
+            ValidateInside(label, "HeaderArea", rects.HeaderArea, rects.MenuPanel, failures);
+            ValidateInside(label, "BodyArea", rects.BodyArea, rects.MenuPanel, failures);
+            ValidateInside(label, "ActionArea", rects.ActionArea, rects.MenuPanel, failures);
+            ValidateInside(label, "ModalPanel", rects.ModalPanel, rects.SafeArea, failures);
+            if (rects.FooterVisible)
+            {
+                ValidateInside(label, "StatusFooter", rects.StatusFooter, rects.FrameRoot, failures);
+            }
+
             ValidateNoOverlap(label, verticalAreas, failures);
+            if (Intersects(rects.BrandArea, rects.MenuPanel))
+            {
+                failures.Add($"{label}: BrandArea overlaps MenuPanel");
+            }
 
             if (!HasFailureFor(label, failures))
             {
@@ -389,7 +405,8 @@ namespace RuneGate.Editor
                 int eventSystemCount = CountOccurrences(text, "m_Name: EventSystem");
 
                 bool battleScene = scene.EndsWith("BattleScene.unity", StringComparison.Ordinal);
-                if ((battleScene && canvasCount == 1) || (!battleScene && canvasCount <= 1))
+                bool titleScene = scene.EndsWith("TitleScene.unity", StringComparison.Ordinal);
+                if ((battleScene && canvasCount == 1) || (titleScene && canvasCount == 0) || (!battleScene && !titleScene && canvasCount <= 1))
                 {
                     pass.Add($"Canvas duplicate check passed: `{scene}` ({canvasCount})");
                 }
@@ -398,7 +415,7 @@ namespace RuneGate.Editor
                     warnings.Add($"Canvas count is invalid: `{scene}` ({canvasCount})");
                 }
 
-                if ((battleScene && eventSystemCount == 1) || (!battleScene && eventSystemCount <= 1))
+                if (((battleScene || titleScene) && eventSystemCount == 1) || (!battleScene && !titleScene && eventSystemCount <= 1))
                 {
                     pass.Add($"EventSystem duplicate check passed: `{scene}` ({eventSystemCount})");
                 }
