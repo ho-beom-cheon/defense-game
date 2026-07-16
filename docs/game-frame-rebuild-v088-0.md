@@ -1,5 +1,9 @@
 # v0.88.0 Game Frame Rebuild
 
+> 상태: 이 문서는 v0.88 IMGUI 프레임의 이력 문서다.
+> 신규 화면 프레임과 TitleScene 구현은
+> `docs/ui-frame-and-continuous-battlefield-v2-design.md`의 uGUI 계약을 우선한다.
+
 ## 목적
 
 v0.88 전투 폴리싱 전에 StageSelect, Battle, Rune Selection, Result 화면의 기본 프레임을 다시 잡았다.

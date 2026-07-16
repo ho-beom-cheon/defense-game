@@ -1,5 +1,9 @@
 # BattleField Frame
 
+> 상태: `BattleFieldFrame`의 viewport 분리 원칙은 유지한다.
+> 고정 lane Y, 같은 레인 타기팅, 세 레인 지면 구성은
+> `docs/ui-frame-and-continuous-battlefield-v2-design.md`의 연속형 2D 전장 규칙으로 대체한다.
+
 ## 목적
 
 BattleScene에서 전투 월드, HUD, 스킬 버튼, 팝업이 서로 침범하지 않도록 BattleFrame 기준을 둔다.

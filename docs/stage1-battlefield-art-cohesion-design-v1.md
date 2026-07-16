@@ -1,5 +1,9 @@
 # Stage 1 전장 아트 일관성 설계 v1
 
+> 상태: 팔레트, 조명, 수정체·균열·접지 그림자 화풍은 계속 유효하다.
+> 세 레인 렌더러와 고정 전투 좌표, `ground_stage01_lane.png`의 최종 사용 방식은
+> `docs/ui-frame-and-continuous-battlefield-v2-design.md`가 우선한다.
+
 ## 1. 결정 요약
 
 Stage 1 전장의 시각 기준은 배경이 아니라 현재 영웅·몬스터 캐릭터 자산으로 삼는다.
