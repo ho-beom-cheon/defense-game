@@ -37,6 +37,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Data/Formations",
             "Assets/_Project/Data/Rosters",
             "Assets/_Project/Data/UI",
+            "Assets/_Project/Data/Battlefield",
             "Assets/_Project/Prefabs/Heroes",
             "Assets/_Project/Prefabs/Monsters",
             "Assets/_Project/Prefabs/Projectiles",
@@ -193,6 +194,13 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldSpaceTypes.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldSpaceConfig.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldSpaceController.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldLayoutCoordinator.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldAgent.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldAgentRegistry.cs",
+            "Assets/_Project/Scripts/Battle/CrystalApproachPointProvider.cs",
             "Assets/_Project/Scripts/Battle/UnitMovementController.cs",
             "Assets/_Project/Scripts/Hero/HeroController.cs",
             "Assets/_Project/Scripts/Hero/HeroRuneCombatModifiers.cs",
@@ -418,6 +426,7 @@ namespace RuneGate.Editor
         private const string RequiredBattleCanvasPrefab = "Assets/_Project/Prefabs/UI/Battle/BattleCanvas.prefab";
         private const string RequiredTitleCanvasPrefab = "Assets/_Project/Prefabs/UI/Title/TitleCanvas.prefab";
         private const string RequiredStage01BattlefieldTheme = "Assets/_Project/Data/Battlefield/Stage01BattlefieldArtTheme.asset";
+        private const string RequiredBattlefieldSpaceConfig = "Assets/_Project/Data/Battlefield/DefaultBattlefieldSpaceConfig.asset";
         private const string RequiredTmpSettingsAsset = "Assets/TextMesh Pro/Resources/TMP Settings.asset";
 
         private static readonly string[] RequiredKoreanFontAssets =
@@ -634,6 +643,7 @@ namespace RuneGate.Editor
             ValidateBattleUiAssets(errors);
             ValidateTitleUiAssets(errors);
             ValidateStage01BattlefieldArt(errors);
+            ValidateBattlefieldSpace(errors);
             ValidateProgressionFlowData(errors);
             ValidateSceneFlowComponents(errors);
             ValidateUserFacingTextPolicy(errors);
@@ -1694,6 +1704,96 @@ namespace RuneGate.Editor
             if (importer == null || importer.spriteBorder != expected)
             {
                 errors.Add($"Battle UI sprite has an invalid 9-slice border: {path}. Expected {expected}.");
+            }
+        }
+
+        private static void ValidateBattlefieldSpace(List<string> errors)
+        {
+            BattlefieldSpaceConfig config = AssetDatabase.LoadAssetAtPath<BattlefieldSpaceConfig>(RequiredBattlefieldSpaceConfig);
+            if (config == null)
+            {
+                errors.Add($"Missing battlefield space config: {RequiredBattlefieldSpaceConfig}");
+                return;
+            }
+
+            if (!config.HasValidLayout())
+            {
+                errors.Add("Battlefield space config must define three unique formation rows, three spawn bands, and seven approach points.");
+            }
+
+            HashSet<string> anchors = new HashSet<string>();
+            HeroPositionType[] positions =
+            {
+                HeroPositionType.Back,
+                HeroPositionType.Middle,
+                HeroPositionType.Front
+            };
+            for (int row = 0; row < 3; row++)
+            {
+                for (int column = 0; column < positions.Length; column++)
+                {
+                    string key = $"{config.GetFormationU(positions[column]):F3}:{config.GetFormationRowV(row):F3}";
+                    anchors.Add(key);
+                }
+            }
+
+            if (anchors.Count != 9)
+            {
+                errors.Add($"Battlefield space config must map the formation to nine unique anchors. Found {anchors.Count}.");
+            }
+
+            if (config.ApproachPointCount != 7)
+            {
+                errors.Add($"Battlefield space config must expose seven crystal approach points. Found {config.ApproachPointCount}.");
+            }
+
+            ValidateSceneScriptCount(
+                "Assets/_Project/Scenes/BattleScene.unity",
+                "Assets/_Project/Scripts/Battle/BattlefieldSpaceController.cs",
+                "BattlefieldSpaceController",
+                1,
+                errors);
+            ValidateSceneScriptCount(
+                "Assets/_Project/Scenes/BattleScene.unity",
+                "Assets/_Project/Scripts/Battle/BattlefieldLayoutCoordinator.cs",
+                "BattlefieldLayoutCoordinator",
+                1,
+                errors);
+            ValidateSceneScriptCount(
+                "Assets/_Project/Scenes/BattleScene.unity",
+                "Assets/_Project/Scripts/Battle/BattlefieldAgentRegistry.cs",
+                "BattlefieldAgentRegistry",
+                1,
+                errors);
+            ValidateSceneScriptCount(
+                "Assets/_Project/Scenes/BattleScene.unity",
+                "Assets/_Project/Scripts/Battle/CrystalApproachPointProvider.cs",
+                "CrystalApproachPointProvider",
+                1,
+                errors);
+
+            string scenePath = ToProjectPath("Assets/_Project/Scenes/BattleScene.unity");
+            if (!File.Exists(scenePath))
+            {
+                return;
+            }
+
+            string sceneText = File.ReadAllText(scenePath);
+            string configGuid = AssetDatabase.AssetPathToGUID(RequiredBattlefieldSpaceConfig);
+            if (CountOccurrences(sceneText, $"guid: {configGuid}") < 2)
+            {
+                errors.Add("BattleScene must reference the battlefield space config from SpaceController and ApproachProvider.");
+            }
+
+            if (CountOccurrences(sceneText, "m_Name: BattlefieldRuntime") != 1 ||
+                CountOccurrences(sceneText, "m_Name: Battlefield Layout") != 1)
+            {
+                errors.Add("BattleScene must contain one BattlefieldRuntime root and one Battlefield Layout service root.");
+            }
+
+            if (!sceneText.Contains("battlefieldMode: 0", StringComparison.Ordinal))
+            {
+                errors.Add("Spatial foundation phase must keep BattleManager in LegacyLanes mode.");
             }
         }
 

@@ -839,7 +839,7 @@ namespace RuneGate
 
         private void DrawFormationGrid()
         {
-            GUILayout.Label("3라인 전술 슬롯");
+            GUILayout.Label("3구역 전술 배치");
             GUILayout.BeginHorizontal();
             GUILayout.Label(string.Empty, GUILayout.Width(72f));
             for (int i = 0; i < FormationColumnOrder.Length; i++)
@@ -852,7 +852,8 @@ namespace RuneGate
             for (int laneIndex = 0; laneIndex < 3; laneIndex++)
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label($"라인 {laneIndex + 1}", GUILayout.Width(72f), GUILayout.Height(UIResponsiveLayout.TouchHeight(54f)));
+                string rowLabel = laneIndex == 0 ? "하단" : laneIndex == 1 ? "중앙" : "상단";
+                GUILayout.Label(rowLabel, GUILayout.Width(72f), GUILayout.Height(UIResponsiveLayout.TouchHeight(54f)));
                 for (int positionIndex = 0; positionIndex < FormationColumnOrder.Length; positionIndex++)
                 {
                     HeroPositionType positionType = FormationColumnOrder[positionIndex];

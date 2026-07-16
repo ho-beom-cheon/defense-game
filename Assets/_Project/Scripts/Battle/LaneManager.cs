@@ -51,13 +51,23 @@ namespace RuneGate
         [SerializeField] private float laneDepthSpacing = 0.015f;
         [Header("Presentation")]
         [SerializeField, Range(0.18f, 0.32f)] private float portraitLaneSpacingRatio = 0.25f;
+        [Header("Continuous Battlefield Compatibility")]
+        [SerializeField] private BattlefieldSpaceController battlefieldSpace;
 
         public int LaneCount => Mathf.Max(1, laneCount);
         public int HeroSlotsPerLane => Mathf.Max(1, heroSlotsPerLane);
 
         private void Awake()
         {
-            EnsureBattlefieldCameraLayout();
+            if (battlefieldSpace == null || !battlefieldSpace.IsReady)
+            {
+                EnsureBattlefieldCameraLayout();
+            }
+        }
+
+        public void ConfigureSpace(BattlefieldSpaceController space)
+        {
+            battlefieldSpace = space;
         }
 
         private void EnsureBattlefieldCameraLayout()
@@ -93,6 +103,12 @@ namespace RuneGate
         public Vector3 GetSpawnPosition(int laneIndex)
         {
             int safeLaneIndex = ClampLaneIndex(laneIndex, "spawn");
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                Vector2 position = battlefieldSpace.ResolveEnemySpawn(safeLaneIndex, 1, 0, 0, Vector2.zero);
+                return new Vector3(position.x, position.y, 0f);
+            }
+
             if (laneSpawnPoints != null && safeLaneIndex < laneSpawnPoints.Length && laneSpawnPoints[safeLaneIndex] != null)
             {
                 Vector3 point = laneSpawnPoints[safeLaneIndex].position;
@@ -106,6 +122,14 @@ namespace RuneGate
         public Vector3 GetCrystalTargetPosition(int laneIndex)
         {
             int safeLaneIndex = ClampLaneIndex(laneIndex, "crystal target");
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                Vector2 position = battlefieldSpace.CurrentBounds.ToWorld(new Vector2(
+                    battlefieldSpace.Config.GetApproachPointU(safeLaneIndex * 3),
+                    battlefieldSpace.Config.GetFormationRowV(safeLaneIndex)));
+                return new Vector3(position.x, position.y, 0f);
+            }
+
             if (crystalTargetPoints != null && safeLaneIndex < crystalTargetPoints.Length && crystalTargetPoints[safeLaneIndex] != null)
             {
                 Vector3 point = crystalTargetPoints[safeLaneIndex].position;
@@ -125,6 +149,11 @@ namespace RuneGate
         public float GetLaneY(int laneIndex)
         {
             int safeLaneIndex = Mathf.Clamp(laneIndex, 0, LaneCount - 1);
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                return battlefieldSpace.ResolveFormationAnchor(safeLaneIndex, HeroPositionType.Middle).y;
+            }
+
             float centerOffset = (LaneCount - 1) * 0.5f;
             return (safeLaneIndex - centerOffset) * GetEffectiveLaneSpacing();
         }
@@ -133,6 +162,17 @@ namespace RuneGate
         {
             int safeLaneIndex = ClampLaneIndex(laneIndex, "hero slot");
             int safeSlotIndex = ClampHeroSlotIndex(slotIndex);
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                HeroPositionType positionType = safeSlotIndex == 0
+                    ? HeroPositionType.Front
+                    : safeSlotIndex == 2
+                        ? HeroPositionType.Back
+                        : HeroPositionType.Middle;
+                Vector2 position = battlefieldSpace.ResolveFormationAnchor(safeLaneIndex, positionType);
+                return new Vector3(position.x, position.y, 0f);
+            }
+
             int flatIndex = safeLaneIndex * HeroSlotsPerLane + safeSlotIndex;
             if (heroSlotPoints != null && flatIndex < heroSlotPoints.Length && heroSlotPoints[flatIndex] != null)
             {
@@ -200,6 +240,16 @@ namespace RuneGate
 
         public Bounds GetBattlefieldSafeBounds()
         {
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                Rect playable = battlefieldSpace.CurrentBounds.PlayableRect;
+                Bounds bounds = new Bounds();
+                bounds.SetMinMax(
+                    new Vector3(playable.xMin, playable.yMin, -0.5f),
+                    new Vector3(playable.xMax, playable.yMax, 0.5f));
+                return bounds;
+            }
+
             Bounds cameraBounds = RuntimeSpriteBoundsUtility.GetCameraWorldBounds();
             float minX = Mathf.Max(cameraBounds.min.x + Mathf.Max(0f, cameraLeftPadding), crystalX - Mathf.Max(0f, crystalLeftPadding));
             float maxX = cameraBounds.max.x - Mathf.Max(0f, cameraRightPadding);

@@ -12,14 +12,16 @@ namespace RuneGate
         [SerializeField] private float personalSpace = 0.42f;
         [SerializeField] private float leashRange = 1.5f;
 
-        private float currentVelocity;
-        private float desiredX;
+        private Vector2 currentVelocity;
+        private Vector2 desiredPosition;
         private bool isMoving;
         private bool isAttacking;
         private bool isDead;
 
-        public float CurrentVelocity => currentVelocity;
-        public float DesiredX => desiredX;
+        public float CurrentVelocity => currentVelocity.magnitude;
+        public Vector2 CurrentVelocity2D => currentVelocity;
+        public Vector2 DesiredPosition => desiredPosition;
+        public float DesiredX => desiredPosition.x;
         public float MoveSpeed => moveSpeed;
         public float Acceleration => acceleration;
         public float Deceleration => deceleration;
@@ -72,35 +74,77 @@ namespace RuneGate
                 return false;
             }
 
-            desiredX = Mathf.Clamp(targetX, Mathf.Min(minX, maxX), Mathf.Max(minX, maxX));
-            float deltaX = desiredX - transform.position.x;
+            desiredPosition = new Vector2(
+                Mathf.Clamp(targetX, Mathf.Min(minX, maxX), Mathf.Max(minX, maxX)),
+                laneY);
+            float deltaX = desiredPosition.x - transform.position.x;
             if (Mathf.Abs(deltaX) <= stoppingDistance)
             {
                 Stop();
-                transform.position = new Vector3(desiredX, laneY, transform.position.z);
+                transform.position = new Vector3(desiredPosition.x, laneY, transform.position.z);
                 return false;
             }
 
             float targetVelocity = Mathf.Sign(deltaX) * moveSpeed;
-            float rate = Mathf.Abs(targetVelocity) > Mathf.Abs(currentVelocity) ? acceleration : deceleration;
-            currentVelocity = Mathf.MoveTowards(currentVelocity, targetVelocity, rate * Time.deltaTime);
+            float rate = Mathf.Abs(targetVelocity) > Mathf.Abs(currentVelocity.x) ? acceleration : deceleration;
+            currentVelocity.x = Mathf.MoveTowards(currentVelocity.x, targetVelocity, rate * Time.deltaTime);
+            currentVelocity.y = Mathf.MoveTowards(currentVelocity.y, 0f, deceleration * Time.deltaTime);
 
-            float nextX = transform.position.x + currentVelocity * Time.deltaTime;
-            if (Mathf.Sign(desiredX - nextX) != Mathf.Sign(deltaX))
+            float nextX = transform.position.x + currentVelocity.x * Time.deltaTime;
+            if (Mathf.Sign(desiredPosition.x - nextX) != Mathf.Sign(deltaX))
             {
-                nextX = desiredX;
-                currentVelocity = 0f;
+                nextX = desiredPosition.x;
+                currentVelocity.x = 0f;
             }
 
             transform.position = new Vector3(Mathf.Clamp(nextX, minX, maxX), laneY, transform.position.z);
-            isMoving = Mathf.Abs(currentVelocity) > 0.01f;
+            isMoving = currentVelocity.sqrMagnitude > 0.0001f;
+            return isMoving;
+        }
+
+        public bool MoveTo(
+            Vector2 target,
+            BattlefieldBounds bounds,
+            Vector2 halfExtents,
+            Vector2 steeringOffset)
+        {
+            if (isDead || isAttacking || !bounds.IsValid)
+            {
+                Stop();
+                return false;
+            }
+
+            desiredPosition = bounds.Clamp(target + steeringOffset, halfExtents);
+            Vector2 delta = desiredPosition - (Vector2)transform.position;
+            if (delta.sqrMagnitude <= stoppingDistance * stoppingDistance)
+            {
+                Stop();
+                Vector2 snapped = bounds.Clamp(desiredPosition, halfExtents);
+                transform.position = new Vector3(snapped.x, snapped.y, transform.position.z);
+                return false;
+            }
+
+            Vector2 targetVelocity = delta.normalized * moveSpeed;
+            float rate = targetVelocity.sqrMagnitude > currentVelocity.sqrMagnitude ? acceleration : deceleration;
+            currentVelocity = Vector2.MoveTowards(currentVelocity, targetVelocity, rate * Time.deltaTime);
+
+            Vector2 nextPosition = (Vector2)transform.position + currentVelocity * Time.deltaTime;
+            if (Vector2.Dot(desiredPosition - nextPosition, delta) <= 0f)
+            {
+                nextPosition = desiredPosition;
+                currentVelocity = Vector2.zero;
+            }
+
+            nextPosition = bounds.Clamp(nextPosition, halfExtents);
+            transform.position = new Vector3(nextPosition.x, nextPosition.y, transform.position.z);
+            isMoving = currentVelocity.sqrMagnitude > 0.0001f;
             return isMoving;
         }
 
         public void Stop()
         {
-            currentVelocity = Mathf.MoveTowards(currentVelocity, 0f, deceleration * Time.deltaTime);
-            isMoving = Mathf.Abs(currentVelocity) > 0.01f;
+            currentVelocity = Vector2.MoveTowards(currentVelocity, Vector2.zero, deceleration * Time.deltaTime);
+            isMoving = currentVelocity.sqrMagnitude > 0.0001f;
         }
 
         public void SnapLaneY(float laneY)

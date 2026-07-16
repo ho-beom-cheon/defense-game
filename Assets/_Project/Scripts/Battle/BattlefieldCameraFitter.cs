@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace RuneGate
@@ -19,8 +20,12 @@ namespace RuneGate
         private int lastScreenHeight = -1;
         private Rect lastSafeArea;
         private Rect lastViewportRect;
+        private Bounds currentWorldBounds;
 
         public Rect CurrentViewportScreenRect => lastViewportRect;
+        public Bounds CurrentWorldBounds => currentWorldBounds;
+
+        public event Action<Bounds> WorldBoundsChanged;
 
         public void Configure(Vector2 center, float worldWidth, float worldHeight)
         {
@@ -40,6 +45,11 @@ namespace RuneGate
         public void ConfigureBattlefieldVisuals(BattlefieldVisualController visualController)
         {
             battlefieldVisualController = visualController;
+            ApplyLayout();
+        }
+
+        public void RefreshLayout()
+        {
             ApplyLayout();
         }
 
@@ -95,6 +105,17 @@ namespace RuneGate
             lastScreenHeight = Screen.height;
             lastSafeArea = Screen.safeArea;
             lastViewportRect = battlefield;
+            float worldHeight = targetCamera.orthographicSize * 2f;
+            float worldWidth = worldHeight * viewportAspect;
+            Bounds nextWorldBounds = new Bounds(
+                new Vector3(worldCenter.x, worldCenter.y, 0f),
+                new Vector3(worldWidth, worldHeight, 1f));
+            if (BoundsChanged(currentWorldBounds, nextWorldBounds))
+            {
+                currentWorldBounds = nextWorldBounds;
+                WorldBoundsChanged?.Invoke(currentWorldBounds);
+            }
+
             battlefieldVisualController?.RefreshLayout();
         }
 
@@ -144,6 +165,12 @@ namespace RuneGate
             float yMax = Mathf.Clamp(Mathf.Max(bottomLeft.y, topRight.y), 0f, Screen.height);
             screenRect = Rect.MinMaxRect(xMin, yMin, xMax, yMax);
             return screenRect.width > 1f && screenRect.height > 1f;
+        }
+
+        private static bool BoundsChanged(Bounds a, Bounds b)
+        {
+            return (a.center - b.center).sqrMagnitude > 0.000001f ||
+                (a.size - b.size).sqrMagnitude > 0.000001f;
         }
     }
 }

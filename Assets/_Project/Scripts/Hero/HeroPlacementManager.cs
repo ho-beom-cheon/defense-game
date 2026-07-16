@@ -15,6 +15,8 @@ namespace RuneGate
 
         private readonly List<HeroController> spawnedHeroes = new List<HeroController>();
         private LaneManager activeLaneManager;
+        private BattlefieldSpaceController activeBattlefieldSpace;
+        private BattlefieldAgentRegistry activeAgentRegistry;
 
         public HeroRosterData HeroRoster => heroRoster;
         public FormationData DefaultFormation => defaultFormation;
@@ -22,6 +24,8 @@ namespace RuneGate
 
         public IReadOnlyList<HeroController> BuildRuntimeFormation(LaneManager laneManager)
         {
+            activeBattlefieldSpace = null;
+            activeAgentRegistry = null;
             ClearSpawnedHeroes();
             EnsureFallbackContent();
 
@@ -75,6 +79,60 @@ namespace RuneGate
             return spawnedHeroes;
         }
 
+        public IReadOnlyList<HeroController> BuildRuntimeFormation(
+            BattlefieldSpaceController battlefieldSpace,
+            BattlefieldAgentRegistry agentRegistry)
+        {
+            ClearSpawnedHeroes();
+            EnsureFallbackContent();
+
+            if (battlefieldSpace == null || !battlefieldSpace.IsReady || agentRegistry == null || !agentRegistry.IsReady)
+            {
+                Debug.LogWarning("HeroPlacementManager cannot build a spatial formation because battlefield services are not ready.");
+                return spawnedHeroes;
+            }
+
+            EnsureHeroRoot();
+            activeBattlefieldSpace = battlefieldSpace;
+            activeAgentRegistry = agentRegistry;
+            activeLaneManager = battlefieldSpace.GetComponentInParent<LaneManager>();
+            IReadOnlyList<FormationSlot> formationSlots = ResolveFormationSlots();
+            HashSet<string> occupiedSlots = new HashSet<string>();
+            HashSet<string> placedHeroes = new HashSet<string>();
+
+            for (int i = 0; i < formationSlots.Count; i++)
+            {
+                FormationSlot slot = formationSlots[i];
+                if (slot == null || string.IsNullOrWhiteSpace(slot.HeroId))
+                {
+                    continue;
+                }
+
+                string slotKey = $"{slot.LaneIndex}:{slot.PositionType}";
+                if (occupiedSlots.Contains(slotKey) || placedHeroes.Contains(slot.HeroId))
+                {
+                    Debug.LogWarning($"HeroPlacementManager skipped duplicate formation entry {slot.HeroId} at {slotKey}.");
+                    continue;
+                }
+
+                HeroData heroData = heroRoster != null ? heroRoster.FindHeroById(slot.HeroId) : null;
+                if (heroData == null)
+                {
+                    Debug.LogWarning($"HeroPlacementManager could not find HeroData for id '{slot.HeroId}'.");
+                    continue;
+                }
+
+                Vector2 position = battlefieldSpace.ResolveFormationAnchor(slot);
+                HeroController heroController = CreateRuntimeHero(heroData, position, slot.LaneIndex, slot.SlotIndex);
+                AttachBattlefieldAgent(heroController, heroData, position);
+                spawnedHeroes.Add(heroController);
+                occupiedSlots.Add(slotKey);
+                placedHeroes.Add(slot.HeroId);
+            }
+
+            return spawnedHeroes;
+        }
+
         public void ClearSpawnedHeroes()
         {
             for (int i = spawnedHeroes.Count - 1; i >= 0; i--)
@@ -82,6 +140,8 @@ namespace RuneGate
                 HeroController hero = spawnedHeroes[i];
                 if (hero != null)
                 {
+                    BattlefieldAgent agent = hero.GetComponent<BattlefieldAgent>();
+                    activeAgentRegistry?.Unregister(agent);
                     Destroy(hero.gameObject);
                 }
             }
@@ -243,6 +303,59 @@ namespace RuneGate
             battlefieldVisualController?.CreateUnitShadow(heroObject.transform, spriteRenderer, UnitVisualKind.Hero);
 
             return heroController;
+        }
+
+        private void AttachBattlefieldAgent(HeroController heroController, HeroData heroData, Vector2 anchor)
+        {
+            if (heroController == null || heroData == null || activeBattlefieldSpace == null || activeAgentRegistry == null)
+            {
+                return;
+            }
+
+            SpriteRenderer spriteRenderer = heroController.GetComponentInChildren<SpriteRenderer>();
+            Vector2 halfExtents = spriteRenderer != null
+                ? new Vector2(spriteRenderer.bounds.extents.x, spriteRenderer.bounds.extents.y)
+                : heroPlaceholderSize * 0.5f;
+            Vector3 leash = activeBattlefieldSpace.Config.GetRoleLeash(heroData.Role);
+            Rect playable = activeBattlefieldSpace.CurrentBounds.PlayableRect;
+            Rect leashRect = Rect.MinMaxRect(
+                Mathf.Max(playable.xMin, anchor.x - playable.width * leash.y),
+                Mathf.Max(playable.yMin, anchor.y - playable.height * leash.z),
+                Mathf.Min(playable.xMax, anchor.x + playable.width * leash.x),
+                Mathf.Min(playable.yMax, anchor.y + playable.height * leash.z));
+
+            BattlefieldAgent agent = heroController.GetComponent<BattlefieldAgent>();
+            if (agent == null)
+            {
+                agent = heroController.gameObject.AddComponent<BattlefieldAgent>();
+            }
+
+            agent.Configure(
+                BattlefieldAgentKind.Hero,
+                BattlefieldFaction.Hero,
+                StableHash(heroData.HeroId),
+                Mathf.Max(0.2f, halfExtents.x * 0.7f),
+                halfExtents,
+                anchor,
+                leashRect);
+            agent.AttachRegistry(activeAgentRegistry);
+        }
+
+        private static int StableHash(string value)
+        {
+            unchecked
+            {
+                uint hash = 2166136261;
+                string source = value ?? string.Empty;
+                for (int i = 0; i < source.Length; i++)
+                {
+                    hash ^= source[i];
+                    hash *= 16777619;
+                }
+
+                int result = (int)(hash & 0x7fffffff);
+                return result == 0 ? 1 : result;
+            }
         }
 
         private static float ResolveVisualSlotOffset(int slotIndex)

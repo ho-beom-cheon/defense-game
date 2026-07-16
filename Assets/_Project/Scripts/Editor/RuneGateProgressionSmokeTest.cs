@@ -7,6 +7,7 @@ namespace RuneGate.Editor
     public static class RuneGateProgressionSmokeTest
     {
         private const string RuntimeContentCatalogPath = "Assets/_Project/Resources/RuntimeContentCatalog.asset";
+        private const string BattlefieldSpaceConfigPath = "Assets/_Project/Data/Battlefield/DefaultBattlefieldSpaceConfig.asset";
         private const int ExpectedStageCount = 10;
         private const int ExpectedRuneCount = 20;
         private const int ExpectedHeroCount = 6;
@@ -74,6 +75,7 @@ namespace RuneGate.Editor
             ValidateHeroSkillRuntimeRules(errors);
             ValidateBossPatternRules(errors);
             ValidateFormation(catalog, errors, warnings);
+            ValidateBattlefieldSpace(errors);
             ValidateDefaultSave(catalog, errors);
             ValidateStageSessionResolution(catalog, errors);
             ValidateBattleResultProgression(catalog, errors);
@@ -147,6 +149,60 @@ namespace RuneGate.Editor
             if (catalog.Stages.Count > ExpectedStageCount)
             {
                 warnings.Add($"RuntimeContentCatalog has extra stages beyond Stage {ExpectedStageCount}: {catalog.Stages.Count} total.");
+            }
+        }
+
+        private static void ValidateBattlefieldSpace(List<string> errors)
+        {
+            BattlefieldSpaceConfig config = AssetDatabase.LoadAssetAtPath<BattlefieldSpaceConfig>(BattlefieldSpaceConfigPath);
+            if (config == null)
+            {
+                errors.Add($"Missing battlefield space config: {BattlefieldSpaceConfigPath}");
+                return;
+            }
+
+            if (!config.HasValidLayout())
+            {
+                errors.Add("Battlefield space config layout is invalid.");
+                return;
+            }
+
+            HashSet<string> uniqueAnchors = new HashSet<string>();
+            HeroPositionType[] positionTypes =
+            {
+                HeroPositionType.Back,
+                HeroPositionType.Middle,
+                HeroPositionType.Front
+            };
+            for (int row = 0; row < 3; row++)
+            {
+                for (int column = 0; column < positionTypes.Length; column++)
+                {
+                    uniqueAnchors.Add($"{config.GetFormationU(positionTypes[column]):F3}:{config.GetFormationRowV(row):F3}");
+                }
+            }
+
+            if (uniqueAnchors.Count != 9)
+            {
+                errors.Add($"Formation mapping must resolve to nine unique spatial anchors. Found {uniqueAnchors.Count}.");
+            }
+
+            if (config.ApproachPointCount != 7)
+            {
+                errors.Add($"Crystal approach provider requires seven configured points. Found {config.ApproachPointCount}.");
+            }
+
+            float previousV = -1f;
+            for (int i = 0; i < config.ApproachPointCount; i++)
+            {
+                float currentV = config.GetApproachPointV(i);
+                if (currentV <= previousV)
+                {
+                    errors.Add("Crystal approach points must be ordered from bottom to top.");
+                    break;
+                }
+
+                previousV = currentV;
             }
         }
 
