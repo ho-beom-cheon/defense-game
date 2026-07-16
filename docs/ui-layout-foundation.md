@@ -1,5 +1,9 @@
 # UI Layout Foundation
 
+> 상태: 화면 프레임의 최종 uGUI 구조와 TitleScene 기준은
+> `docs/ui-frame-and-continuous-battlefield-v2-design.md`가 우선한다.
+> 이 문서의 IMGUI Rect 유지 전제는 레거시 화면 참고용이다.
+
 ## 기준
 
 - 기준 해상도: 1080 x 1920 Portrait
