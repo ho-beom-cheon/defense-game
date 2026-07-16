@@ -1,8 +1,8 @@
 # UI Frame Validation Report v0.88.0
 
-Generated: 2026-07-16 18:37:42
+Generated: 2026-07-16 19:46:21
 
-Summary: PASS 93, WARNING 0, FAIL 0
+Summary: PASS 94, WARNING 0, FAIL 0
 
 ## Fail
 - None
@@ -27,6 +27,7 @@ Summary: PASS 93, WARNING 0, FAIL 0
 - Required UI Script exists: `Assets/_Project/Scripts/UI/TitleCanvasLayout.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs`
+- Required UI Script exists: `Assets/_Project/Scripts/Battle/GroundFieldRenderer.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs`
 - Required UI Script exists: `Assets/_Project/Scripts/UI/RuneSelectionUI.cs`
