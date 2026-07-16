@@ -13,6 +13,9 @@ namespace RuneGate
         [SerializeField] private MonsterController monsterPrefab;
         [SerializeField] private Transform monsterRoot;
         [SerializeField] private BattlefieldVisualController battlefieldVisualController;
+        [SerializeField] private BattlefieldSpaceController battlefieldSpace;
+        [SerializeField] private CrystalApproachPointProvider crystalApproachPointProvider;
+        [SerializeField] private BattlefieldAgentRegistry battlefieldAgentRegistry;
         [SerializeField] private bool addDefaultColliderToGeneratedMonsters = true;
 
         private readonly List<MonsterController> aliveMonsters = new List<MonsterController>();
@@ -37,6 +40,24 @@ namespace RuneGate
             crystalController = crystal;
         }
 
+        public void Initialize(
+            StageData data,
+            BattlefieldSpaceController space,
+            CrystalApproachPointProvider approachProvider,
+            BattlefieldAgentRegistry agentRegistry,
+            CrystalController crystal)
+        {
+            stageData = data;
+            battlefieldSpace = space;
+            crystalApproachPointProvider = approachProvider;
+            battlefieldAgentRegistry = agentRegistry;
+            crystalController = crystal;
+            if (laneManager == null && space != null)
+            {
+                laneManager = space.GetComponentInParent<LaneManager>();
+            }
+        }
+
         public void StartWave(WaveData waveData)
         {
             if (waveData == null)
@@ -52,6 +73,12 @@ namespace RuneGate
             }
 
             StopAllCoroutines();
+            if (crystalApproachPointProvider != null && crystalApproachPointProvider.ActiveReservationCount != 0)
+            {
+                Debug.LogError("WaveManager found stale crystal approach reservations before a new wave and cleared them.", crystalApproachPointProvider);
+                crystalApproachPointProvider.ResetReservations();
+            }
+
             aliveMonsters.Clear();
             activeWave = waveData;
             pendingSpawns = CountPendingSpawns(waveData);
@@ -141,6 +168,7 @@ namespace RuneGate
             }
 
             aliveMonsters.Clear();
+            crystalApproachPointProvider?.ResetReservations();
         }
 
         private IEnumerator SpawnRoutine(WaveSpawnData spawnData)

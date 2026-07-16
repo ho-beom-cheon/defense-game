@@ -13,6 +13,13 @@ namespace RuneGate
         [SerializeField] private RuneManager runeManager;
         [SerializeField] private RuneEffectApplier runeEffectApplier;
         [SerializeField] private HeroPlacementManager heroPlacementManager;
+        [Header("Battlefield Space")]
+        [SerializeField] private BattlefieldMode battlefieldMode = BattlefieldMode.LegacyLanes;
+        [SerializeField] private BattlefieldSpaceController battlefieldSpace;
+        [SerializeField] private BattlefieldLayoutCoordinator battlefieldLayoutCoordinator;
+        [SerializeField] private BattlefieldAgentRegistry battlefieldAgentRegistry;
+        [SerializeField] private CrystalApproachPointProvider crystalApproachPointProvider;
+        [SerializeField] private BattlefieldVisualController battlefieldVisualController;
         [SerializeField] private List<HeroController> heroes = new List<HeroController>();
         [SerializeField] private List<UpgradeData> permanentUpgrades = new List<UpgradeData>();
         [SerializeField] private bool rebuildHeroesFromFormation = true;
@@ -39,6 +46,7 @@ namespace RuneGate
         public StageData ActiveStageData => activeStageData;
         public IReadOnlyList<HeroController> Heroes => heroes;
         public IReadOnlyList<UpgradeData> PermanentUpgrades => permanentUpgrades;
+        public BattlefieldMode BattlefieldMode => battlefieldMode;
 
         private void Awake()
         {
@@ -55,6 +63,12 @@ namespace RuneGate
         private void Start()
         {
             EnsureFallbackContent();
+            if (!PrepareBattlefieldServices())
+            {
+                Debug.LogError("BattleManager did not start because the battlefield spatial services are incomplete.", this);
+                return;
+            }
+
             StageData selectedStageData = GameSession.ResolveStageForBattle(initialStageData);
             if (autoStartOnStart && selectedStageData != null)
             {
@@ -83,6 +97,11 @@ namespace RuneGate
 
             AutoAssignReferences();
             BindEvents();
+            if (!PrepareBattlefieldServices())
+            {
+                Debug.LogError("BattleManager cannot initialize until Space, Registry, ApproachProvider, Visual, and Coordinator are ready.", this);
+                return;
+            }
 
             activeStageData = stageData;
             currentWaveIndex = -1;
@@ -103,7 +122,12 @@ namespace RuneGate
 
             if (waveManager != null)
             {
-                waveManager.Initialize(stageData, laneManager, crystalController);
+                waveManager.Initialize(
+                    stageData,
+                    battlefieldSpace,
+                    crystalApproachPointProvider,
+                    battlefieldAgentRegistry,
+                    crystalController);
             }
             else
             {
@@ -184,6 +208,7 @@ namespace RuneGate
             }
 
             waveManager?.StopCurrentWave(true);
+            crystalApproachPointProvider?.ResetReservations();
             InitializeStage(stageToRestart);
             StartNextWave();
         }
@@ -219,6 +244,66 @@ namespace RuneGate
             {
                 heroPlacementManager = FindAnyObjectByType<HeroPlacementManager>();
             }
+
+            if (battlefieldSpace == null)
+            {
+                battlefieldSpace = FindAnyObjectByType<BattlefieldSpaceController>();
+            }
+
+            if (battlefieldLayoutCoordinator == null)
+            {
+                battlefieldLayoutCoordinator = FindAnyObjectByType<BattlefieldLayoutCoordinator>();
+            }
+
+            if (battlefieldAgentRegistry == null)
+            {
+                battlefieldAgentRegistry = FindAnyObjectByType<BattlefieldAgentRegistry>();
+            }
+
+            if (crystalApproachPointProvider == null)
+            {
+                crystalApproachPointProvider = FindAnyObjectByType<CrystalApproachPointProvider>();
+            }
+
+            if (battlefieldVisualController == null)
+            {
+                battlefieldVisualController = FindAnyObjectByType<BattlefieldVisualController>();
+            }
+        }
+
+        private bool PrepareBattlefieldServices()
+        {
+            AutoAssignReferences();
+            BattlefieldCameraFitter cameraFitter = Camera.main != null
+                ? Camera.main.GetComponent<BattlefieldCameraFitter>()
+                : null;
+            if (cameraFitter == null ||
+                battlefieldSpace == null ||
+                battlefieldSpace.Config == null ||
+                battlefieldLayoutCoordinator == null ||
+                battlefieldAgentRegistry == null ||
+                crystalApproachPointProvider == null ||
+                battlefieldVisualController == null ||
+                crystalController == null)
+            {
+                return false;
+            }
+
+            battlefieldSpace.Configure(cameraFitter, crystalController, battlefieldSpace.Config);
+            battlefieldAgentRegistry.Configure(battlefieldSpace);
+            crystalApproachPointProvider.Configure(battlefieldSpace, battlefieldSpace.Config);
+            laneManager?.ConfigureSpace(battlefieldSpace);
+            battlefieldLayoutCoordinator.Configure(
+                cameraFitter,
+                battlefieldSpace,
+                battlefieldAgentRegistry,
+                crystalApproachPointProvider,
+                battlefieldVisualController);
+            return battlefieldSpace.IsReady &&
+                battlefieldAgentRegistry.IsReady &&
+                crystalApproachPointProvider.IsReady &&
+                battlefieldVisualController.IsReady &&
+                battlefieldLayoutCoordinator.IsReady;
         }
 
         private void EnsureFallbackContent()
@@ -251,7 +336,9 @@ namespace RuneGate
         {
             if (rebuildHeroesFromFormation && heroPlacementManager != null)
             {
-                IReadOnlyList<HeroController> runtimeHeroes = heroPlacementManager.BuildRuntimeFormation(laneManager);
+                IReadOnlyList<HeroController> runtimeHeroes = heroPlacementManager.BuildRuntimeFormation(
+                    battlefieldSpace,
+                    battlefieldAgentRegistry);
                 heroes.Clear();
                 for (int i = 0; i < runtimeHeroes.Count; i++)
                 {
@@ -407,6 +494,7 @@ namespace RuneGate
             }
 
             waveManager?.StopCurrentWave(!victory);
+            crystalApproachPointProvider?.ResetReservations();
             SetState(victory ? BattleState.Victory : BattleState.Defeat);
             if (victory)
             {

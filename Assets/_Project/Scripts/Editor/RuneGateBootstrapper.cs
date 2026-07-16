@@ -205,6 +205,7 @@ namespace RuneGate.Editor
             EnsureRequiredFolders();
             BattleUiAssetBuilder.BuildAssets();
             BattlefieldArtAssetBuilder.BuildAssets();
+            BattlefieldSpaceAssetBuilder.BuildAssets();
             List<StageData> stages = PrototypeAssetLoader.LoadStages();
             List<RuneData> runes = PrototypeAssetLoader.LoadRunes();
             List<UpgradeData> upgrades = PrototypeAssetLoader.LoadUpgrades();
@@ -444,6 +445,7 @@ namespace RuneGate.Editor
             CreateOrUpdateRuntimeContentCatalog(content, upgrades);
             BattleUiAssetBuilder.BuildAssets();
             BattlefieldArtAssetBuilder.BuildAssets();
+            BattlefieldSpaceAssetBuilder.BuildAssets();
 
             CreateOrUpdateTitleScene();
             CreateOrUpdateStageSelectScene(content.Stages);
@@ -1534,7 +1536,7 @@ namespace RuneGate.Editor
             cameraObject.transform.position = new Vector3(0f, 0f, -10f);
             BattlefieldCameraFitter cameraFitter = cameraObject.AddComponent<BattlefieldCameraFitter>();
 
-            GameObject root = new GameObject("RuneGate Battle Root");
+            GameObject root = new GameObject("BattlefieldRuntime");
             BattleManager battleManager = root.AddComponent<BattleManager>();
             LaneManager laneManager = root.AddComponent<LaneManager>();
             WaveManager waveManager = root.AddComponent<WaveManager>();
@@ -1542,6 +1544,19 @@ namespace RuneGate.Editor
             RuneEffectApplier runeEffectApplier = root.AddComponent<RuneEffectApplier>();
             HeroPlacementManager heroPlacementManager = root.AddComponent<HeroPlacementManager>();
             root.AddComponent<AudioManager>();
+
+            BattlefieldSpaceConfig battlefieldSpaceConfig = AssetDatabase.LoadAssetAtPath<BattlefieldSpaceConfig>(BattlefieldSpaceAssetBuilder.ConfigPath);
+            if (battlefieldSpaceConfig == null || !battlefieldSpaceConfig.HasValidLayout())
+            {
+                throw new InvalidOperationException($"Battlefield space config is missing or invalid: {BattlefieldSpaceAssetBuilder.ConfigPath}");
+            }
+
+            GameObject layoutRoot = new GameObject("Battlefield Layout");
+            layoutRoot.transform.SetParent(root.transform, false);
+            BattlefieldLayoutCoordinator battlefieldLayoutCoordinator = layoutRoot.AddComponent<BattlefieldLayoutCoordinator>();
+            BattlefieldSpaceController battlefieldSpace = layoutRoot.AddComponent<BattlefieldSpaceController>();
+            BattlefieldAgentRegistry battlefieldAgentRegistry = layoutRoot.AddComponent<BattlefieldAgentRegistry>();
+            CrystalApproachPointProvider crystalApproachPointProvider = layoutRoot.AddComponent<CrystalApproachPointProvider>();
 
             BattlefieldArtTheme battlefieldArtTheme = AssetDatabase.LoadAssetAtPath<BattlefieldArtTheme>(BattlefieldArtAssetBuilder.ThemePath);
             if (battlefieldArtTheme == null || !battlefieldArtTheme.HasRequiredAssets)
@@ -1629,6 +1644,40 @@ namespace RuneGate.Editor
                 SetFloat(serializedObject, "heroFrontSlotX", -0.55f);
                 SetFloat(serializedObject, "heroSlotSpacingX", 0.95f);
                 SetObjectList(serializedObject, "heroSlotPoints", ToObjectArray(heroSlotPoints));
+                SetObject(serializedObject, "battlefieldSpace", battlefieldSpace);
+            });
+
+            EditComponent(cameraFitter, serializedObject =>
+            {
+                SetFloat(serializedObject, "minimumWorldWidth", battlefieldSpaceConfig.MinimumWorldWidth);
+                SetFloat(serializedObject, "minimumWorldHeight", battlefieldSpaceConfig.MinimumWorldHeight);
+            });
+
+            EditComponent(battlefieldSpace, serializedObject =>
+            {
+                SetObject(serializedObject, "cameraFitter", cameraFitter);
+                SetObject(serializedObject, "crystalController", crystalController);
+                SetObject(serializedObject, "config", battlefieldSpaceConfig);
+            });
+
+            EditComponent(battlefieldAgentRegistry, serializedObject =>
+            {
+                SetObject(serializedObject, "space", battlefieldSpace);
+            });
+
+            EditComponent(crystalApproachPointProvider, serializedObject =>
+            {
+                SetObject(serializedObject, "battlefieldSpace", battlefieldSpace);
+                SetObject(serializedObject, "config", battlefieldSpaceConfig);
+            });
+
+            EditComponent(battlefieldLayoutCoordinator, serializedObject =>
+            {
+                SetObject(serializedObject, "cameraFitter", cameraFitter);
+                SetObject(serializedObject, "battlefieldSpace", battlefieldSpace);
+                SetObject(serializedObject, "agentRegistry", battlefieldAgentRegistry);
+                SetObject(serializedObject, "approachProvider", crystalApproachPointProvider);
+                SetObject(serializedObject, "battlefieldVisuals", battlefieldVisualController);
             });
 
             EditComponent(battlefieldVisualController, serializedObject =>
@@ -1646,6 +1695,9 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "monsterPrefab", null);
                 SetObject(serializedObject, "monsterRoot", monsterRoot.transform);
                 SetObject(serializedObject, "battlefieldVisualController", battlefieldVisualController);
+                SetObject(serializedObject, "battlefieldSpace", battlefieldSpace);
+                SetObject(serializedObject, "crystalApproachPointProvider", crystalApproachPointProvider);
+                SetObject(serializedObject, "battlefieldAgentRegistry", battlefieldAgentRegistry);
                 SetBool(serializedObject, "addDefaultColliderToGeneratedMonsters", true);
             });
 
@@ -1675,6 +1727,12 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "runeManager", runeManager);
                 SetObject(serializedObject, "runeEffectApplier", runeEffectApplier);
                 SetObject(serializedObject, "heroPlacementManager", heroPlacementManager);
+                SetEnum(serializedObject, "battlefieldMode", BattlefieldMode.LegacyLanes);
+                SetObject(serializedObject, "battlefieldSpace", battlefieldSpace);
+                SetObject(serializedObject, "battlefieldLayoutCoordinator", battlefieldLayoutCoordinator);
+                SetObject(serializedObject, "battlefieldAgentRegistry", battlefieldAgentRegistry);
+                SetObject(serializedObject, "crystalApproachPointProvider", crystalApproachPointProvider);
+                SetObject(serializedObject, "battlefieldVisualController", battlefieldVisualController);
                 SetObjectList(serializedObject, "heroes", Array.Empty<UnityEngine.Object>());
                 SetObjectList(serializedObject, "permanentUpgrades", ToObjectArray(upgrades));
                 SetBool(serializedObject, "rebuildHeroesFromFormation", true);
