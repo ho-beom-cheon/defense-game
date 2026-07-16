@@ -10,6 +10,20 @@ namespace RuneGate
         public static float Margin => Mathf.Clamp(Mathf.Min(Screen.width, Screen.height) * 0.025f, 8f, 28f);
         public static float SmallGap => Mathf.Clamp(Margin * 0.5f, 4f, 12f);
         public static float Gap => Mathf.Clamp(Margin * 0.75f, 8f, 18f);
+        public static float ReadabilityScale
+        {
+            get
+            {
+                if (!Application.isMobilePlatform)
+                {
+                    return 1f;
+                }
+
+                float dpiScale = Screen.dpi > 0f ? Screen.dpi / 280f : 0f;
+                float resolutionScale = Mathf.Min(Screen.width, Screen.height) / 720f;
+                return Mathf.Clamp(Mathf.Max(dpiScale, resolutionScale), 1f, 1.5f);
+            }
+        }
 
         public static Rect SafeRect()
         {
@@ -77,6 +91,16 @@ namespace RuneGate
             ApplyButtonDefaults(GUI.skin.button);
         }
 
+        public static float TouchHeight(float baseHeight)
+        {
+            if (!Application.isMobilePlatform)
+            {
+                return baseHeight;
+            }
+
+            return Mathf.Max(48f, baseHeight * ReadabilityScale);
+        }
+
         private static void ApplyLabelDefaults(GUIStyle style)
         {
             if (style == null)
@@ -86,6 +110,7 @@ namespace RuneGate
 
             style.wordWrap = true;
             style.clipping = TextClipping.Clip;
+            style.fontSize = Mathf.Max(style.fontSize, Mathf.RoundToInt(14f * ReadabilityScale));
         }
 
         private static void ApplyButtonDefaults(GUIStyle style)
@@ -97,6 +122,7 @@ namespace RuneGate
 
             style.wordWrap = true;
             style.clipping = TextClipping.Clip;
+            style.fontSize = Mathf.Max(style.fontSize, Mathf.RoundToInt(14f * ReadabilityScale));
         }
     }
 }

@@ -5,6 +5,7 @@ namespace RuneGate
     [CreateAssetMenu(fileName = "RuntimePixelVisualCatalog", menuName = "RuneGate/Runtime Pixel Visual Catalog")]
     public sealed class RuntimePixelVisualCatalog : ScriptableObject
     {
+        [SerializeField] private Sprite appSplashBackground;
         [SerializeField] private Sprite bgGoblinForestLanes;
         [SerializeField] private Sprite fxShieldBash;
         [SerializeField] private Sprite fxRapidShot;
@@ -33,11 +34,22 @@ namespace RuneGate
         [SerializeField] private Sprite uiBadgeNormal;
         [SerializeField] private Sprite uiBadgeHard;
         [SerializeField] private Sprite uiBadgeNightmare;
+        [SerializeField] private Sprite uiPetShadowShard;
+        [SerializeField] private Sprite uiPetContractSeal;
+        [SerializeField] private Sprite uiPetSlotEmpty;
+        [SerializeField] private Sprite uiPetSlotEquipped;
+        [SerializeField] private Sprite uiPetPanelBg;
+        [SerializeField] private Sprite uiPetAttackBoost;
+        [SerializeField] private Sprite uiPetGoldBoost;
+        [SerializeField] private Sprite uiPetCrystalGuard;
+        [SerializeField] private Sprite uiPetSlowAura;
 
         public Sprite GetSprite(string assetPath)
         {
             switch (assetPath)
             {
+                case RuntimePixelAssetLoader.AppSplashBackground:
+                    return appSplashBackground;
                 case RuntimePixelAssetLoader.BackgroundGoblinForestLanes:
                     return bgGoblinForestLanes;
                 case RuntimePixelAssetLoader.EffectShieldBash:
@@ -94,6 +106,24 @@ namespace RuneGate
                     return uiBadgeHard;
                 case RuntimePixelAssetLoader.UiBadgeNightmare:
                     return uiBadgeNightmare;
+                case RuntimePixelAssetLoader.UiPetShadowShard:
+                    return uiPetShadowShard;
+                case RuntimePixelAssetLoader.UiPetContractSeal:
+                    return uiPetContractSeal;
+                case RuntimePixelAssetLoader.UiPetSlotEmpty:
+                    return uiPetSlotEmpty;
+                case RuntimePixelAssetLoader.UiPetSlotEquipped:
+                    return uiPetSlotEquipped;
+                case RuntimePixelAssetLoader.UiPetPanelBg:
+                    return uiPetPanelBg;
+                case RuntimePixelAssetLoader.UiPetAttackBoost:
+                    return uiPetAttackBoost;
+                case RuntimePixelAssetLoader.UiPetGoldBoost:
+                    return uiPetGoldBoost;
+                case RuntimePixelAssetLoader.UiPetCrystalGuard:
+                    return uiPetCrystalGuard;
+                case RuntimePixelAssetLoader.UiPetSlowAura:
+                    return uiPetSlowAura;
                 default:
                     return null;
             }

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5efa50b8b29f4e849016ce272d0bac48, type: 3}
   m_Name: RuntimePixelVisualCatalog
   m_EditorClassIdentifier:
+  appSplashBackground: {fileID: 21300000, guid: 4c76e28b36cc47b4a4f176c654a7d8c2, type: 3}
   bgGoblinForestLanes: {fileID: 21300000, guid: 1335f3cecdb945d6b96e898dd4287454, type: 3}
   fxShieldBash: {fileID: 21300000, guid: cba95defc55a4b5c99980eec1b0cf751, type: 3}
   fxRapidShot: {fileID: 21300000, guid: a1c39ed8858b44bdb96b7ac88d646717, type: 3}
@@ -40,3 +41,12 @@ MonoBehaviour:
   uiBadgeNormal: {fileID: 21300000, guid: b37a86fbe5184dbab989605c7e9315bd, type: 3}
   uiBadgeHard: {fileID: 21300000, guid: 0ba54f45eba04ab4be461b8336a0b0b6, type: 3}
   uiBadgeNightmare: {fileID: 21300000, guid: 11758c29d0c44b1b946fbe6873b9259b, type: 3}
+  uiPetShadowShard: {fileID: 21300000, guid: 8a4f2e2ae43943bf9d8f91515e94ffd7, type: 3}
+  uiPetContractSeal: {fileID: 21300000, guid: a6592ee8de7e4a63b88ed9f7df9e33b2, type: 3}
+  uiPetSlotEmpty: {fileID: 21300000, guid: 80d7f1768e1b431fb6fc25e0105e5cae, type: 3}
+  uiPetSlotEquipped: {fileID: 21300000, guid: 26e7b094bfe742cc80fcc504f873c97e, type: 3}
+  uiPetPanelBg: {fileID: 21300000, guid: c40a0e10a34243b18d8ac07e34e402f9, type: 3}
+  uiPetAttackBoost: {fileID: 21300000, guid: f28f7c19545b4175aadd0ef5ab1412fe, type: 3}
+  uiPetGoldBoost: {fileID: 21300000, guid: 18a8c6ca27ad4bfe9b89655a40014d01, type: 3}
+  uiPetCrystalGuard: {fileID: 21300000, guid: 044578ec068642e783752db5ba23c3aa, type: 3}
+  uiPetSlowAura: {fileID: 21300000, guid: 4075cc1133364d1ab259476e8c70f1d0, type: 3}

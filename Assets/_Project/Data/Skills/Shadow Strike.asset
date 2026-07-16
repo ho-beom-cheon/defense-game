@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_shadow_strike
   displayName: "그림자 급습"
-  description: "네임드와 보스 대상을 우선하는 강한 어둠 피해를 줍니다."
+  description: "보스와 빈사 상태의 적에게 더 강한 어둠 피해를 줍니다."
   cooldown: 10
   power: 145
   damageHitCount: 1
   range: 2.4
-  effectKey: damage
+  effectKey: shadow_strike
   radius: 1
   targetingType: 4
   element: 6

@@ -9,40 +9,51 @@ namespace RuneGate
         [SerializeField] private BattleManager battleManager;
         [SerializeField] private List<StageData> stageSequence = new List<StageData>();
         [SerializeField] private bool drawRuntimeGui = true;
-        [SerializeField] private Rect panelRect = new Rect(342f, 112f, 460f, 360f);
+        [SerializeField] private Rect panelRect = new Rect(310f, 90f, 520f, 410f);
         [SerializeField] private string battleSceneName = "BattleScene";
         [SerializeField] private string upgradeSceneName = "UpgradeScene";
         [SerializeField] private string stageSelectSceneName = "StageSelectScene";
 
         private bool isVisible;
         private bool saveApplied;
-        private string resultTitle;
-        private string resultMessage;
-        private string stageStatusMessage;
-        private string nextStageMessage;
-        private string waveMessage;
-        private string hintMessage;
+        private BattleResult latestResult;
         private int battleGoldEarned;
         private int goldEarned;
+        private string newlyUnlockedDifficultyId = string.Empty;
+        private Vector2 resultScrollPosition;
+        private bool sceneTransitionRequested;
 
         public bool IsVisible => isVisible;
-        public string ResultMessage => resultMessage;
+        public string ResultMessage { get; private set; }
+        public string NewlyUnlockedDifficultyId => newlyUnlockedDifficultyId;
 
         private void OnEnable()
         {
+            BindBattleManager();
+        }
+
+        private void OnDisable()
+        {
+            UnbindBattleManager();
+        }
+
+        private void BindBattleManager()
+        {
             if (battleManager == null)
             {
-                battleManager = FindFirstObjectByType<BattleManager>();
+                battleManager = FindAnyObjectByType<BattleManager>();
             }
 
             if (battleManager != null)
             {
+                battleManager.BattleEnded -= ShowResult;
+                battleManager.BattleStateChanged -= HandleBattleStateChanged;
                 battleManager.BattleEnded += ShowResult;
                 battleManager.BattleStateChanged += HandleBattleStateChanged;
             }
         }
 
-        private void OnDisable()
+        private void UnbindBattleManager()
         {
             if (battleManager != null)
             {
@@ -58,80 +69,146 @@ namespace RuneGate
                 return;
             }
 
-            KoreanFontManager.ApplyToGuiSkin();
-            DrawDimOverlay();
+            UIResponsiveLayout.ApplyReadableDefaults();
+            UIPopupGuiUtility.DrawDimOverlay();
 
             Rect drawRect = CenteredPanelRect();
             GUIStyle panelStyle = RuntimePixelGuiUtility.CreateBoxStyle(GUI.skin.box, RuntimePixelAssetLoader.UiPanelDark);
-            GUILayout.BeginArea(drawRect, panelStyle);
-            GUILayout.Label(resultTitle);
-            GUILayout.Space(8f);
-            GUILayout.Label(resultMessage);
-            GUILayout.Label($"획득 골드: {goldEarned}");
+            GUI.Box(drawRect, GUIContent.none, panelStyle);
+            float horizontalPadding = Application.isMobilePlatform ? 18f : 14f;
+            float verticalPadding = Application.isMobilePlatform ? 16f : 12f;
+            Rect contentRect = new Rect(
+                drawRect.x + horizontalPadding,
+                drawRect.y + verticalPadding,
+                Mathf.Max(1f, drawRect.width - horizontalPadding * 2f),
+                Mathf.Max(1f, drawRect.height - verticalPadding * 2f));
+            GUILayout.BeginArea(contentRect);
+            GUI.SetNextControlName("PopupLayer_ResultPopup");
+            GUILayout.Label(latestResult.IsVictory ? "\uc2b9\ub9ac!" : "\ud328\ubc30");
+            GUILayout.Space(UIResponsiveLayout.SmallGap);
+            float primaryButtonHeight = UIResponsiveLayout.TouchHeight(38f);
+            float secondaryButtonHeight = UIResponsiveLayout.TouchHeight(34f);
+            float reservedActionHeight = primaryButtonHeight + secondaryButtonHeight + 70f;
+            resultScrollPosition = GUILayout.BeginScrollView(resultScrollPosition, GUILayout.Height(Mathf.Max(170f, contentRect.height - reservedActionHeight)));
+            GUILayout.Label(ResultMessage);
+            GUILayout.Label($"\ud68d\ub4dd \uace8\ub4dc +{goldEarned}");
             if (battleGoldEarned != goldEarned)
             {
-                GUILayout.Label($"전투 골드: {battleGoldEarned}");
+                GUILayout.Label($"\uc804\ud22c \uace8\ub4dc: {battleGoldEarned}");
             }
 
-            if (!string.IsNullOrWhiteSpace(stageStatusMessage))
+            GUILayout.Label($"\ud074\ub9ac\uc5b4 \uc2dc\uac04 {FormatElapsedTime(latestResult.ElapsedSeconds)}");
+            GUILayout.Label($"\ud06c\ub9ac\uc2a4\ud0c8 HP {latestResult.CrystalHp}/{latestResult.CrystalMaxHp}");
+            GUILayout.Label($"\ucc98\uce58 \uc801 {latestResult.MonstersKilled}");
+            GUILayout.Label($"\ud074\ub9ac\uc5b4 \uc6e8\uc774\ube0c {latestResult.WavesCleared}/{GetTotalWaves(latestResult)}");
+            GUILayout.Label($"\ub09c\uc774\ub3c4 {GameTextMapper.Difficulty(DifficultyRules.CurrentDifficultyId)} / \ubcf4\uc0c1 x{DifficultyRules.RewardMultiplier(DifficultyRules.CurrentDifficultyId):0.##}");
+            if (!string.IsNullOrWhiteSpace(newlyUnlockedDifficultyId))
             {
-                GUILayout.Label(stageStatusMessage);
+                GUILayout.Label($"새 난이도 해금: {GameTextMapper.Difficulty(newlyUnlockedDifficultyId)}");
             }
 
-            if (!string.IsNullOrWhiteSpace(nextStageMessage))
+            DrawShardRewards();
+            if (latestResult.IsVictory)
             {
-                GUILayout.Label(nextStageMessage);
+                GUILayout.Label($"\uc2a4\ud14c\uc774\uc9c0 \ud074\ub9ac\uc5b4: {GameTextMapper.StageName(latestResult.StageData)}");
+                GUILayout.Label(ResolveNextStageMessage(latestResult));
+            }
+            else
+            {
+                GUILayout.Label("\ud06c\ub9ac\uc2a4\ud0c8\uc774 \ud30c\uad34\ub418\uc5c8\uc2b5\ub2c8\ub2e4.");
+                GUILayout.Label(BuildDefeatHint(latestResult));
             }
 
-            if (!string.IsNullOrWhiteSpace(waveMessage))
+            GUILayout.EndScrollView();
+            GUILayout.Space(UIResponsiveLayout.SmallGap);
+            bool previousEnabled = GUI.enabled;
+            GUI.enabled = !sceneTransitionRequested;
+            if (latestResult.IsVictory && HasNextStage(latestResult))
             {
-                GUILayout.Label(waveMessage);
-            }
-
-            GUILayout.Space(8f);
-            if (!string.IsNullOrWhiteSpace(hintMessage))
-            {
-                GUILayout.Label(hintMessage);
-            }
-
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("재시도", GUILayout.Height(36f)))
-            {
-                if (battleManager != null)
+                if (GUILayout.Button("\ub2e4\uc74c \uc2a4\ud14c\uc774\uc9c0", GUILayout.Height(primaryButtonHeight)))
                 {
-                    battleManager.RestartBattle();
-                }
-                else
-                {
-                    SceneManager.LoadScene(battleSceneName);
+                    ContinueToNextStage();
                 }
             }
-
-            if (GUILayout.Button("업그레이드", GUILayout.Height(34f)))
+            else if (GUILayout.Button("\uc7ac\uc2dc\ub3c4", GUILayout.Height(primaryButtonHeight)))
             {
-                SceneManager.LoadScene(upgradeSceneName);
+                RetryBattle();
             }
 
-            if (GUILayout.Button("스테이지 선택", GUILayout.Height(34f)))
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("\uc5c5\uadf8\ub808\uc774\ub4dc", GUILayout.Height(secondaryButtonHeight)))
             {
-                SceneManager.LoadScene(stageSelectSceneName);
+                OpenUpgrade();
             }
 
+            if (GUILayout.Button("\uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd", GUILayout.Height(secondaryButtonHeight)))
+            {
+                OpenStageSelect();
+            }
+
+            GUILayout.EndHorizontal();
+            GUI.enabled = previousEnabled;
             GUILayout.EndArea();
+        }
+
+        public void ContinueToNextStage()
+        {
+            if (!isVisible || !latestResult.IsVictory)
+            {
+                return;
+            }
+
+            LoadNextStage(latestResult);
+        }
+
+        public void RetryBattle()
+        {
+            if (!isVisible)
+            {
+                return;
+            }
+
+            RestartBattle();
+        }
+
+        public void OpenUpgrade()
+        {
+            if (!isVisible)
+            {
+                return;
+            }
+
+            LoadSceneOnce(upgradeSceneName);
+        }
+
+        public void OpenStageSelect()
+        {
+            if (!isVisible)
+            {
+                return;
+            }
+
+            LoadSceneOnce(stageSelectSceneName);
         }
 
         private void ShowResult(BattleResult result)
         {
+            latestResult = result;
             isVisible = true;
-            resultTitle = result.IsVictory ? "승리" : "패배";
-            resultMessage = result.IsVictory ? "크리스탈 방어 성공!" : "크리스탈이 파괴되었습니다.";
+            sceneTransitionRequested = false;
             battleGoldEarned = result.GoldEarned;
             goldEarned = CalculateGoldAward(result);
-            ApplyResultToSave(result);
-            stageStatusMessage = result.IsVictory ? "스테이지 클리어: 예" : "스테이지 클리어: 아니오";
-            nextStageMessage = ResolveNextStageMessage(result);
-            waveMessage = BuildWaveMessage(result);
-            hintMessage = result.IsVictory ? "어려운 스테이지 전에 골드로 업그레이드하세요." : BuildDefeatHint(result);
+            newlyUnlockedDifficultyId = string.Empty;
+            bool progressApplied = ApplyResultToSave(result);
+            if (!progressApplied && SaveManager.HasProcessedBattleRun(result.BattleRunId))
+            {
+                goldEarned = 0;
+                ResultMessage = "\uc774\ubbf8 \uc800\uc7a5\ub41c \uc804\ud22c \uacb0\uacfc\uc785\ub2c8\ub2e4.";
+            }
+            else
+            {
+                ResultMessage = result.IsVictory ? "\ubd09\ubb38 \uae30\ub85d \uac31\uc2e0. \ud06c\ub9ac\uc2a4\ud0c8 \ubc29\uc5b4 \uc131\uacf5!" : "\ubc29\uc5b4\uc120 \ubd95\uad34. \ub2e4\uc2dc \uc804\uc5f4\uc744 \uc815\ube44\ud558\uc138\uc694.";
+            }
         }
 
         private void HandleBattleStateChanged(BattleState state)
@@ -140,32 +217,39 @@ namespace RuneGate
             {
                 isVisible = false;
                 saveApplied = false;
+                sceneTransitionRequested = false;
             }
         }
 
-        private void ApplyResultToSave(BattleResult result)
+        private bool ApplyResultToSave(BattleResult result)
         {
             GameSession.SetLastBattleResult(result);
             if (saveApplied)
             {
-                return;
+                return false;
             }
 
-            SaveManager.AddGold(CalculateGoldAward(result));
-
+            string clearedStageId = result.IsVictory ? ResolveStageId(result) : string.Empty;
+            string nextStageId = result.IsVictory ? ResolveNextStageId(clearedStageId) : string.Empty;
+            string nextLockedDifficultyId = DifficultyRules.NextLockedDifficultyId(SaveManager.Current);
+            bool applied;
             if (result.IsVictory)
             {
-                string clearedStageId = ResolveStageId(result);
-                SaveManager.MarkStageCleared(clearedStageId);
+                applied = SaveManager.TryApplyBattleResultProgression(result.BattleRunId, CalculateGoldAward(result), true, clearedStageId, nextStageId);
+            }
+            else
+            {
+                applied = SaveManager.TryApplyBattleResultProgression(result.BattleRunId, CalculateGoldAward(result), false, string.Empty, string.Empty);
+            }
 
-                string nextStageId = ResolveNextStageId(clearedStageId);
-                if (!string.IsNullOrWhiteSpace(nextStageId))
-                {
-                    SaveManager.UnlockStage(nextStageId);
-                }
+            if (applied && result.IsVictory && !string.IsNullOrWhiteSpace(nextLockedDifficultyId) &&
+                SaveManager.IsDifficultyUnlocked(nextLockedDifficultyId))
+            {
+                newlyUnlockedDifficultyId = nextLockedDifficultyId;
             }
 
             saveApplied = true;
+            return applied;
         }
 
         private string ResolveStageId(BattleResult result)
@@ -186,17 +270,22 @@ namespace RuneGate
             }
 
             EnsureStageSequence();
-            for (int i = 0; i < stageSequence.Count - 1; i++)
+            return GameSession.ResolveNextStageId(currentStageId, stageSequence);
+        }
+
+        private StageData ResolveStageData(string stageId)
+        {
+            EnsureStageSequence();
+            for (int i = 0; i < stageSequence.Count; i++)
             {
                 StageData stageData = stageSequence[i];
-                if (stageData != null && stageData.StageId == currentStageId)
+                if (stageData != null && stageData.StageId == stageId)
                 {
-                    StageData nextStageData = stageSequence[i + 1];
-                    return nextStageData != null ? nextStageData.StageId : string.Empty;
+                    return stageData;
                 }
             }
 
-            return string.Empty;
+            return null;
         }
 
         private void EnsureStageSequence()
@@ -219,83 +308,175 @@ namespace RuneGate
         private int CalculateGoldAward(BattleResult result)
         {
             int safeGold = Mathf.Max(0, result.GoldEarned);
+            if (result.IsVictory)
+            {
+                safeGold = Mathf.RoundToInt(safeGold * ShadowContractService.GetGoldRewardMultiplier());
+                int minimumGold = DifficultyRules.ApplyMonsterRewardGold(ResolveEarlyStageMinimumGold(result));
+                safeGold = Mathf.Max(safeGold, minimumGold);
+            }
+
             return result.IsVictory ? safeGold : Mathf.FloorToInt(safeGold * 0.5f);
+        }
+
+        private static int ResolveEarlyStageMinimumGold(BattleResult result)
+        {
+            string stageId = result.StageData != null ? result.StageData.StageId : string.Empty;
+            if (stageId.EndsWith("01"))
+            {
+                return 110;
+            }
+
+            if (stageId.EndsWith("02"))
+            {
+                return 140;
+            }
+
+            if (stageId.EndsWith("03"))
+            {
+                return 170;
+            }
+
+            return 0;
+        }
+
+        private static void DrawShardRewards()
+        {
+            IReadOnlyDictionary<string, int> drops = ShadowContractService.LastBattleDrops;
+            if (drops == null || drops.Count == 0)
+            {
+                return;
+            }
+
+            GUILayout.Space(6f);
+            GUILayout.Label("\uadf8\ub9bc\uc790 \uc870\uac01 \ud68d\ub4dd");
+            foreach (KeyValuePair<string, int> pair in drops)
+            {
+                string monsterName = ShadowContractService.GetMonsterDisplayName(pair.Key);
+                GUILayout.Label($"{monsterName} \uc870\uac01 +{pair.Value}");
+                if (ShadowContractService.CanContract(pair.Key))
+                {
+                    GUILayout.Label($"{monsterName} \uadf8\ub9bc\uc790 \uacc4\uc57d \uac00\ub2a5");
+                }
+            }
         }
 
         private string ResolveNextStageMessage(BattleResult result)
         {
-            if (!result.IsVictory)
+            string nextStageId = ResolveNextStageId(ResolveStageId(result));
+            if (string.IsNullOrWhiteSpace(nextStageId))
             {
-                return "다음 스테이지 해금: 아니오";
+                return $"{GameTextMapper.Difficulty(DifficultyRules.CurrentDifficultyId)} Chapter 1 클리어";
             }
 
-            string clearedStageId = ResolveStageId(result);
-            string nextStageId = ResolveNextStageId(clearedStageId);
-            return string.IsNullOrWhiteSpace(nextStageId) ? "챕터 1 보통 난이도 클리어!" : $"다음 스테이지 해금: {ResolveStageDisplayName(nextStageId)}";
+            StageData nextStage = ResolveStageData(nextStageId);
+            string nextStageName = nextStage != null ? GameTextMapper.StageName(nextStage) : GameTextMapper.StageName(nextStageId);
+            return $"\ub2e4\uc74c \uc2a4\ud14c\uc774\uc9c0 \ud574\uae08: {nextStageName}";
         }
 
-        private string ResolveStageDisplayName(string stageId)
+        private bool HasNextStage(BattleResult result)
         {
-            EnsureStageSequence();
-            for (int i = 0; i < stageSequence.Count; i++)
+            return result.IsVictory && !string.IsNullOrWhiteSpace(ResolveNextStageId(ResolveStageId(result)));
+        }
+
+        private void LoadNextStage(BattleResult result)
+        {
+            if (sceneTransitionRequested)
             {
-                StageData stageData = stageSequence[i];
-                if (stageData != null && stageData.StageId == stageId)
-                {
-                    return GameTextMapper.StageName(stageData);
-                }
+                return;
             }
 
-            return GameTextMapper.StageName(stageId);
+            sceneTransitionRequested = true;
+            string nextStageId = ResolveNextStageId(ResolveStageId(result));
+            StageData nextStage = ResolveStageData(nextStageId);
+            if (nextStage == null)
+            {
+                SceneManager.LoadScene(stageSelectSceneName);
+                return;
+            }
+
+            GameSession.SelectStage(nextStage, ResolveNextStageId(nextStage.StageId));
+            SceneManager.LoadScene(battleSceneName);
         }
 
-        private static string BuildWaveMessage(BattleResult result)
+        private void RestartBattle()
         {
-            int totalWaves = result.StageData != null && result.StageData.Waves != null ? result.StageData.Waves.Count : result.WavesCleared;
-            return $"클리어 웨이브: {result.WavesCleared}/{Mathf.Max(1, totalWaves)}";
+            if (sceneTransitionRequested)
+            {
+                return;
+            }
+
+            sceneTransitionRequested = true;
+            if (battleManager != null)
+            {
+                battleManager.RestartBattle();
+            }
+            else
+            {
+                SceneManager.LoadScene(battleSceneName);
+            }
+        }
+
+        private void LoadSceneOnce(string sceneName)
+        {
+            if (sceneTransitionRequested)
+            {
+                return;
+            }
+
+            sceneTransitionRequested = true;
+            SceneManager.LoadScene(sceneName);
+        }
+
+        private static int GetTotalWaves(BattleResult result)
+        {
+            return result.StageData != null && result.StageData.Waves != null ? Mathf.Max(1, result.StageData.Waves.Count) : Mathf.Max(1, result.WavesCleared);
         }
 
         private static string BuildDefeatHint(BattleResult result)
         {
-            if (result.StageData == null)
-            {
-                return "힌트: 골드로 업그레이드하거나 조합에 맞는 룬을 선택하세요.";
-            }
-
-            string stageId = result.StageData.StageId ?? string.Empty;
+            string stageId = result.StageData != null ? result.StageData.StageId : string.Empty;
             if (stageId.EndsWith("03") || stageId.EndsWith("04"))
             {
-                return "힌트: 빠른 적이 많다면 세리아 또는 속도 룬을 활용하세요.";
+                return "\ud78c\ud2b8: \ube60\ub978 \uc801\uc774 \ub9ce\uc2b5\ub2c8\ub2e4. \uc138\ub9ac\uc544\uc758 \uc5f0\uc18d \uc0ac\uaca9\uacfc \ub2c9\uc2a4\uc758 \uadf8\ub9bc\uc790 \uae09\uc2b5\uc744 \ud65c\uc6a9\ud558\uc138\uc694.";
+            }
+
+            if (stageId.EndsWith("02"))
+            {
+                return "\ud78c\ud2b8: \uc7ac\uac11 \ub3cc\uaca9\ubcd1\uc740 \ub290\ub9ac\uc9c0\ub9cc \ubc84\ud2f0\ub294 \uc801\uc785\ub2c8\ub2e4. \ub808\uc628\uc744 \uc804\uc5f4\uc5d0 \ub450\uace0 \uc6d0\uac70\ub9ac \uc601\uc6c5\uc73c\ub85c \ubcf4\uc870\ud558\uc138\uc694.";
+            }
+
+            if (stageId.EndsWith("01"))
+            {
+                return "\ud78c\ud2b8: \ub808\uc628\uc774 \uc55e\uc5d0\uc11c \ub9c9\uace0 \uc138\ub9ac\uc544\uac00 \ub4a4\uc5d0\uc11c \uc9c0\uc6d0\ud558\ub294 \uae30\ubcf8 \ud750\ub984\uc744 \uc720\uc9c0\ud558\uc138\uc694.";
             }
 
             if (stageId.EndsWith("06") || stageId.EndsWith("08"))
             {
-                return "힌트: 몰려오는 라인은 카엘, 브롬, 화염 룬, 포탑 룬이 좋습니다.";
+                return "\ud78c\ud2b8: \ubab0\ub824\uc624\ub294 \ub77c\uc778\uc740 \uce74\uc5d8, \ube0c\ub86c, \uad11\uc5ed \ub8ec\uc73c\ub85c \uc815\ub9ac\ud558\uc138\uc694.";
             }
 
             if (stageId.EndsWith("10"))
             {
-                return "힌트: 그룸바르는 닉스, 공격 룬, 보스 사냥 룬으로 상대하세요.";
+                return "\ud78c\ud2b8: \uadf8\ub8f8\ubc14\ub974 \uc804\ud22c\ub294 \ubcf4\uc2a4 \uc0ac\ub0e5 \ub8ec\uc73c\ub85c \uc9d1\uc911 \uacf5\uaca9\ud558\uc138\uc694.";
             }
 
-            return "힌트: 크리스탈이 무너지면 미레아, 치유 룬, 크리스탈 업그레이드를 챙겨보세요.";
+            return "\ud78c\ud2b8: \ud06c\ub9ac\uc2a4\ud0c8 \uac15\ud654\uc640 \uc601\uc6c5 \ud6c8\ub828\uc744 \uba3c\uc800 \uad6c\ub9e4\ud574\ubcf4\uc138\uc694.";
+        }
+
+        private static string FormatElapsedTime(float elapsedSeconds)
+        {
+            int totalSeconds = Mathf.Max(0, Mathf.RoundToInt(elapsedSeconds));
+            int minutes = totalSeconds / 60;
+            int seconds = totalSeconds % 60;
+            return $"{minutes:0}:{seconds:00}";
         }
 
         private Rect CenteredPanelRect()
         {
-            float width = Mathf.Max(panelRect.width, 460f);
-            float height = Mathf.Max(panelRect.height, 360f);
-            float x = Mathf.Max(12f, (Screen.width - width) * 0.5f);
-            float y = Mathf.Max(12f, (Screen.height - height) * 0.5f);
-            return new Rect(x, y, width, height);
-        }
-
-        private static void DrawDimOverlay()
-        {
-            Color previousColor = GUI.color;
-            GUI.color = new Color(0f, 0f, 0f, 0.58f);
-            GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
-            GUI.color = previousColor;
+            bool mobilePortrait = Application.isMobilePlatform && GameFrameLayout.IsPortrait;
+            float preferredWidth = mobilePortrait ? 760f : 620f;
+            float preferredHeight = mobilePortrait ? 800f : 560f;
+            return GameFrameLayout.PopupFrame(Mathf.Max(panelRect.width, preferredWidth), Mathf.Max(panelRect.height, preferredHeight), 0.92f, 0.78f);
         }
     }
 }

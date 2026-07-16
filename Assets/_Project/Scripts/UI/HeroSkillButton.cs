@@ -22,7 +22,7 @@ namespace RuneGate
         {
             if (battleManager == null)
             {
-                battleManager = FindFirstObjectByType<BattleManager>();
+                battleManager = FindAnyObjectByType<BattleManager>();
             }
 
             if (battleManager != null)
@@ -55,8 +55,8 @@ namespace RuneGate
             }
 
             KoreanFontManager.ApplyToGuiSkin();
-            string heroName = heroController.Data != null ? heroController.Data.DisplayNameKorean : "영웅";
-            string skillName = heroController.SkillController != null ? GameTextMapper.SkillName(heroController.SkillController.Data) : "스킬";
+            string heroName = heroController.Data != null ? heroController.Data.DisplayNameKorean : "\uc601\uc6c5";
+            string skillName = heroController.SkillController != null ? GameTextMapper.SkillName(heroController.SkillController.Data) : "\uc2a4\ud0ac";
             string status = GameTextMapper.SkillStatus(battleState, cooldownRemaining, heroController.SkillController != null);
             string label = $"{heroName}: {skillName}\n{status}";
 

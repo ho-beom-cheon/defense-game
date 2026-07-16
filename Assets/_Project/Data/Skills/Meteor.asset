@@ -19,7 +19,7 @@ MonoBehaviour:
   power: 68
   damageHitCount: 1
   range: 4.2
-  effectKey: area_damage
+  effectKey: meteor_area
   radius: 1.8
   targetingType: 2
   element: 1

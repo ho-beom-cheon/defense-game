@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_rapid_shot
   displayName: "연속 사격"
-  description: "가장 가까운 빠른 적에게 여러 번 사격합니다."
+  description: "가장 가까운 빠른 적에게 세 발을 연속으로 사격합니다."
   cooldown: 5.8
   power: 28
   damageHitCount: 3
   range: 5
-  effectKey: multi_hit_damage
+  effectKey: rapid_shot
   radius: 1
   targetingType: 1
   element: 8

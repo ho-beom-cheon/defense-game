@@ -18,13 +18,16 @@ namespace RuneGate
         private WaveData activeWave;
         private int pendingSpawns;
         private int activeSpawnRoutines;
+        private int bossReinforcementSpawnCount;
 
         public event Action<WaveData> WaveStarted;
         public event Action<WaveData> WaveCompleted;
         public event Action<MonsterController> MonsterSpawned;
         public event Action<MonsterController> MonsterKilled;
+        public event Action<MonsterController> BossReinforcementSpawned;
 
         public IReadOnlyList<MonsterController> AliveMonsters => aliveMonsters;
+        public int BossReinforcementSpawnCount => bossReinforcementSpawnCount;
 
         public void Initialize(StageData data, LaneManager lanes, CrystalController crystal)
         {
@@ -52,6 +55,7 @@ namespace RuneGate
             activeWave = waveData;
             pendingSpawns = CountPendingSpawns(waveData);
             activeSpawnRoutines = 0;
+            bossReinforcementSpawnCount = 0;
 
             WaveStarted?.Invoke(waveData);
             Debug.Log($"Wave {waveData.WaveNo} started with {pendingSpawns} pending monsters.");
@@ -90,6 +94,32 @@ namespace RuneGate
             CheckWaveComplete();
         }
 
+        public int RequestBossReinforcements(MonsterController boss, int count)
+        {
+            if (activeWave == null || boss == null || !boss.IsAlive || !boss.IsBoss || laneManager == null)
+            {
+                return 0;
+            }
+
+            MonsterData reinforcementData = ResolveBossReinforcementData();
+            if (reinforcementData == null)
+            {
+                Debug.LogWarning("Boss reinforcement request was skipped because no non-boss MonsterData exists in the stage.");
+                return 0;
+            }
+
+            int safeCount = Mathf.Clamp(count, 0, 6);
+            if (safeCount <= 0)
+            {
+                return 0;
+            }
+
+            pendingSpawns += safeCount;
+            activeSpawnRoutines++;
+            StartCoroutine(SpawnBossReinforcementsRoutine(reinforcementData, boss.LaneIndex, safeCount));
+            return safeCount;
+        }
+
         public void StopCurrentWave(bool destroyAliveMonsters)
         {
             StopAllCoroutines();
@@ -121,7 +151,7 @@ namespace RuneGate
 
             for (int i = 0; i < spawnData.Count; i++)
             {
-                SpawnMonster(spawnData);
+                SpawnMonster(spawnData.MonsterData, spawnData.LaneIndex);
                 pendingSpawns = Mathf.Max(0, pendingSpawns - 1);
 
                 if (i < spawnData.Count - 1 && spawnData.SpawnInterval > 0f)
@@ -134,27 +164,122 @@ namespace RuneGate
             CheckWaveComplete();
         }
 
-        private void SpawnMonster(WaveSpawnData spawnData)
+        private IEnumerator SpawnBossReinforcementsRoutine(MonsterData reinforcementData, int bossLaneIndex, int count)
         {
-            if (spawnData.MonsterData == null)
+            for (int i = 0; i < count; i++)
             {
-                Debug.LogWarning("WaveManager skipped a spawn because MonsterData is missing.");
-                return;
+                int laneCount = Mathf.Max(1, laneManager.LaneCount);
+                int laneIndex = (Mathf.Clamp(bossLaneIndex, 0, laneCount - 1) + i + 1) % laneCount;
+                MonsterController reinforcement = SpawnMonster(reinforcementData, laneIndex);
+                pendingSpawns = Mathf.Max(0, pendingSpawns - 1);
+                if (reinforcement != null)
+                {
+                    bossReinforcementSpawnCount++;
+                    BossReinforcementSpawned?.Invoke(reinforcement);
+                }
+
+                if (i < count - 1)
+                {
+                    yield return new WaitForSeconds(0.18f);
+                }
             }
 
-            int laneIndex = spawnData.LaneIndex;
+            activeSpawnRoutines = Mathf.Max(0, activeSpawnRoutines - 1);
+            CheckWaveComplete();
+        }
+
+        private MonsterController SpawnMonster(MonsterData monsterData, int requestedLaneIndex)
+        {
+            if (monsterData == null)
+            {
+                Debug.LogWarning("WaveManager skipped a spawn because MonsterData is missing.");
+                return null;
+            }
+
+            int laneIndex = requestedLaneIndex;
             if (!laneManager.IsValidLaneIndex(laneIndex))
             {
                 Debug.LogWarning($"WaveManager clamped invalid lane index {laneIndex}.");
                 laneIndex = Mathf.Clamp(laneIndex, 0, laneManager.LaneCount - 1);
             }
 
-            Vector3 spawnPosition = laneManager.GetSpawnPosition(laneIndex);
+            float estimatedHalfWidth = RuntimeSpritePolicy.GetMonsterEstimatedHalfWidth(monsterData);
+            Vector3 spawnPosition = laneManager.GetSafeSpawnPosition(laneIndex, estimatedHalfWidth);
             Vector3 targetPosition = laneManager.GetCrystalTargetPosition(laneIndex);
-            MonsterController monster = CreateMonsterInstance(spawnData.MonsterData, spawnPosition);
-            monster.Initialize(spawnData.MonsterData, laneIndex, targetPosition, crystalController, this);
+            MonsterController monster = CreateMonsterInstance(monsterData, spawnPosition);
+            MonsterVariantType variantType = ShadowContractService.RollVariant(monsterData, stageData, activeWave);
+            monster.Initialize(monsterData, laneIndex, targetPosition, crystalController, this, variantType);
+            monster.RefreshBoundsAnchors();
+            laneManager.ClampUnitInsideBattlefield(monster.transform, monster.VisualSpriteRenderer);
+            monster.RefreshBoundsAnchors();
             aliveMonsters.Add(monster);
             MonsterSpawned?.Invoke(monster);
+            return monster;
+        }
+
+        private MonsterData ResolveBossReinforcementData()
+        {
+            MonsterData fallback = FindNonBossMonster(activeWave, true);
+            if (fallback != null && fallback.MonsterType == MonsterType.Normal)
+            {
+                return fallback;
+            }
+
+            if (stageData == null || stageData.Waves == null)
+            {
+                return fallback;
+            }
+
+            for (int i = 0; i < stageData.Waves.Count; i++)
+            {
+                MonsterData candidate = FindNonBossMonster(stageData.Waves[i], false);
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                if (candidate.MonsterType == MonsterType.Normal)
+                {
+                    return candidate;
+                }
+
+                if (fallback == null)
+                {
+                    fallback = candidate;
+                }
+            }
+
+            return fallback;
+        }
+
+        private static MonsterData FindNonBossMonster(WaveData wave, bool preferNormal)
+        {
+            if (wave == null || wave.Spawns == null)
+            {
+                return null;
+            }
+
+            MonsterData fallback = null;
+            for (int i = 0; i < wave.Spawns.Count; i++)
+            {
+                MonsterData candidate = wave.Spawns[i] != null ? wave.Spawns[i].MonsterData : null;
+                if (candidate == null || candidate.IsBoss)
+                {
+                    continue;
+                }
+
+                if (!preferNormal || candidate.MonsterType == MonsterType.Normal)
+                {
+                    return candidate;
+                }
+
+                if (fallback == null)
+                {
+                    fallback = candidate;
+                }
+            }
+
+            return fallback;
         }
 
         private MonsterController CreateMonsterInstance(MonsterData data, Vector3 spawnPosition)
@@ -180,11 +305,14 @@ namespace RuneGate
             GameObject monsterObject = new GameObject($"Monster_{data.DisplayName}");
             monsterObject.transform.SetParent(monsterRoot);
             monsterObject.transform.position = spawnPosition;
-            monsterObject.AddComponent<SpriteRenderer>();
-            PlaceholderSprite placeholder = monsterObject.AddComponent<PlaceholderSprite>();
+            GameObject visualObject = new GameObject("Visual");
+            visualObject.transform.SetParent(monsterObject.transform);
+            visualObject.transform.localPosition = Vector3.zero;
+            visualObject.AddComponent<SpriteRenderer>();
+            PlaceholderSprite placeholder = visualObject.AddComponent<PlaceholderSprite>();
             float targetHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(data);
             placeholder.Configure(RuntimeSpritePolicy.GetMonsterColor(data), new Vector2(targetHeight, targetHeight), 5);
-            RuntimeSpriteFitter fitter = monsterObject.AddComponent<RuntimeSpriteFitter>();
+            RuntimeSpriteFitter fitter = visualObject.AddComponent<RuntimeSpriteFitter>();
             fitter.TargetHeight = targetHeight;
             monsterObject.AddComponent<CharacterVisualController>();
             monsterObject.AddComponent<HitFlashController>();

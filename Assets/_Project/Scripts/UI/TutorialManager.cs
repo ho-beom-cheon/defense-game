@@ -15,6 +15,7 @@ namespace RuneGate
 
         public bool IsVisible => visible;
         public TutorialStepData CurrentStep => visible && currentStepIndex >= 0 && currentStepIndex < steps.Count ? steps[currentStepIndex] : null;
+        public int CurrentStepIndex => currentStepIndex;
         public int CurrentStepNumber => currentStepIndex + 1;
         public int StepCount => steps.Count;
 
@@ -68,6 +69,16 @@ namespace RuneGate
             }
         }
 
+        public void Previous()
+        {
+            if (!visible || currentStepIndex <= 0)
+            {
+                return;
+            }
+
+            currentStepIndex--;
+        }
+
         public void Skip()
         {
             Complete();
@@ -95,13 +106,13 @@ namespace RuneGate
                 return;
             }
 
-            steps.Add(new TutorialStepData("크리스탈 방어", "몬스터가 왼쪽 크리스탈에 도달하면 피해를 줍니다. 크리스탈 HP가 0이 되면 패배합니다."));
-            steps.Add(new TutorialStepData("라인 확인", "몬스터는 세 개의 라인을 따라 이동합니다. 편성된 영웅이 각 라인을 자동으로 방어합니다."));
-            steps.Add(new TutorialStepData("자동 공격", "레온, 세리아, 카엘, 미레아, 브롬, 닉스는 별도 입력 없이 자동 공격합니다."));
-            steps.Add(new TutorialStepData("스킬 사용", "스킬 버튼은 재사용 대기시간이 끝나면 사용할 수 있습니다. 위기 라인에 맞춰 누르세요."));
-            steps.Add(new TutorialStepData("룬 선택", "보스가 아닌 웨이브가 끝나면 세 개의 룬 중 하나를 선택해 이번 전투를 강화합니다."));
-            steps.Add(new TutorialStepData("승리와 해금", "승리하면 골드를 얻고 다음 스테이지가 해금됩니다."));
-            steps.Add(new TutorialStepData("업그레이드", "골드로 영구 업그레이드를 구매한 뒤 스테이지 선택으로 돌아가세요."));
+            steps.Add(new TutorialStepData("\ud06c\ub9ac\uc2a4\ud0c8 \ubc29\uc5b4", "\ubaac\uc2a4\ud130\uac00 \uc67c\ucabd \ud06c\ub9ac\uc2a4\ud0c8\uc5d0 \ub3c4\ub2ec\ud558\uba74 \ud53c\ud574\ub97c \uc90d\ub2c8\ub2e4. \ud06c\ub9ac\uc2a4\ud0c8 HP\uac00 0\uc774 \ub418\uba74 \ud328\ubc30\ud569\ub2c8\ub2e4."));
+            steps.Add(new TutorialStepData("\ub77c\uc778 \ud655\uc778", "\ubaac\uc2a4\ud130\ub294 \uc138 \uac1c\uc758 \ub77c\uc778\uc744 \ub530\ub77c \uc774\ub3d9\ud569\ub2c8\ub2e4. \ud3b8\uc131\ub41c \uc601\uc6c5\uc774 \uac01 \ub77c\uc778\uc744 \uc790\ub3d9\uc73c\ub85c \ubc29\uc5b4\ud569\ub2c8\ub2e4."));
+            steps.Add(new TutorialStepData("\uc790\ub3d9 \uacf5\uaca9", "\ub808\uc628, \uc138\ub9ac\uc544, \uce74\uc5d8, \ubbf8\ub808\uc544, \ube0c\ub86c, \ub2c9\uc2a4\ub294 \ubcc4\ub3c4 \uc785\ub825 \uc5c6\uc774 \uc790\ub3d9\uc73c\ub85c \uacf5\uaca9\ud569\ub2c8\ub2e4."));
+            steps.Add(new TutorialStepData("\uc2a4\ud0ac \uc0ac\uc6a9", "\uc2a4\ud0ac \ubc84\ud2bc\uc740 \uc7ac\uc0ac\uc6a9 \ub300\uae30\uc2dc\uac04\uc774 \ub05d\ub098\uba74 \uc0ac\uc6a9\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4. \uc704\uae30 \ub77c\uc778\uc5d0 \ub9de\ucdb0 \ub204\ub974\uc138\uc694."));
+            steps.Add(new TutorialStepData("\ub8ec \uc120\ud0dd", "\ubcf4\uc2a4\uac00 \uc544\ub2cc \uc6e8\uc774\ube0c\uac00 \ub05d\ub098\uba74 \uc138 \uac1c\uc758 \ub8ec \uc911 \ud558\ub098\ub97c \uc120\ud0dd\ud574 \uc774\ubc88 \uc804\ud22c\ub97c \uac15\ud654\ud569\ub2c8\ub2e4."));
+            steps.Add(new TutorialStepData("\uc2b9\ub9ac\uc640 \ud574\uae08", "\uc2b9\ub9ac\ud558\uba74 \uace8\ub4dc\ub97c \uc5bb\uace0 \ub2e4\uc74c \uc2a4\ud14c\uc774\uc9c0\uac00 \ud574\uae08\ub429\ub2c8\ub2e4."));
+            steps.Add(new TutorialStepData("\uc5c5\uadf8\ub808\uc774\ub4dc", "\uace8\ub4dc\ub85c \uc601\uad6c \uc5c5\uadf8\ub808\uc774\ub4dc\ub97c \uad6c\ub9e4\ud55c \ub4a4 \uc2a4\ud14c\uc774\uc9c0 \uc120\ud0dd\uc73c\ub85c \ub3cc\uc544\uac00\uc138\uc694."));
         }
     }
 }

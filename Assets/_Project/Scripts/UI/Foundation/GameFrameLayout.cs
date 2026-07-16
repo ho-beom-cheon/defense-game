@@ -194,8 +194,9 @@ namespace RuneGate
 
         private static ScreenFrameRects TitleFrameForSafeRect(Rect safeRect, bool compact, bool expanded)
         {
-            float maxWidth = compact ? 680f : 720f;
-            float maxHeight = compact ? (expanded ? 520f : 390f) : (expanded ? 760f : 560f);
+            bool largePortrait = !compact && safeRect.width >= 900f && safeRect.height >= 1600f;
+            float maxWidth = largePortrait ? safeRect.width * 0.92f : compact ? 680f : 720f;
+            float maxHeight = largePortrait ? (expanded ? 1050f : 820f) : compact ? (expanded ? 520f : 390f) : (expanded ? 760f : 560f);
             Rect frameRoot = FrameRootForSafeRect(safeRect, maxWidth, maxHeight);
             float gap = compact ? SmallGapForSize(safeRect.width, safeRect.height) : GapForSize(safeRect.width, safeRect.height);
             float headerHeight = compact ? Mathf.Clamp(frameRoot.height * 0.18f, 58f, 86f) : Mathf.Clamp(frameRoot.height * 0.18f, 82f, 122f);
@@ -211,7 +212,7 @@ namespace RuneGate
             Rect frameRoot = FrameRootForSafeRect(safeRect, compact ? 980f : 920f, compact ? 720f : 1700f);
             float gap = compact ? SmallGapForSize(safeRect.width, safeRect.height) : GapForSize(safeRect.width, safeRect.height);
             float headerHeight = compact ? Mathf.Clamp(frameRoot.height * 0.13f, 70f, 96f) : Mathf.Clamp(frameRoot.height * 0.12f, 110f, 160f);
-            float footerHeight = compact ? Mathf.Clamp(frameRoot.height * 0.08f, 44f, 58f) : Mathf.Clamp(frameRoot.height * 0.06f, 54f, 78f);
+            float footerHeight = compact ? Mathf.Clamp(frameRoot.height * 0.10f, 58f, 78f) : Mathf.Clamp(frameRoot.height * 0.07f, 88f, 118f);
             Rect header = new Rect(frameRoot.x + gap, frameRoot.y + gap, frameRoot.width - gap * 2f, headerHeight);
             Rect footer = new Rect(header.x, frameRoot.yMax - footerHeight - gap, header.width, footerHeight);
             Rect main = new Rect(header.x, header.yMax + gap, header.width, Mathf.Max(160f, footer.y - header.yMax - gap));

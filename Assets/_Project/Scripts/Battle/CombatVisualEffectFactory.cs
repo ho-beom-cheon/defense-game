@@ -63,6 +63,38 @@ namespace RuneGate
             SpawnSpriteOrPulse("DeathPuff_Runtime", RuntimePixelAssetLoader.EffectDeathPuff, position, Quaternion.identity, new Color(0.78f, 0.78f, 0.78f, 0.9f), new Vector2(size, size), 0.38f, 15);
         }
 
+        public static void SpawnRapidShotImpact(Vector3 from, Vector3 to)
+        {
+            SpawnSpriteLineOrLine("SkillFx_RapidShotHit", RuntimePixelAssetLoader.EffectRapidShot, from + Vector3.up * 0.18f, to + Vector3.up * 0.18f, new Color(0.35f, 1f, 0.36f, 0.92f), 0.34f, 0.16f, 17);
+        }
+
+        public static void SpawnTurretShot(Vector3 from, Vector3 to)
+        {
+            SpawnSpriteLineOrLine("SkillFx_TurretProjectile", RuntimePixelAssetLoader.EffectTurretShot, from, to, new Color(1f, 0.72f, 0.25f, 0.94f), 0.24f, 0.18f, 17);
+        }
+
+        public static void SpawnBossTelegraph(Vector3 position, int phase, float duration)
+        {
+            Color color = phase >= 3
+                ? new Color(0.82f, 0.16f, 0.28f, 0.54f)
+                : phase == 2
+                    ? new Color(0.66f, 0.24f, 0.92f, 0.5f)
+                    : new Color(1f, 0.42f, 0.14f, 0.46f);
+            float size = phase >= 3 ? 1.18f : phase == 2 ? 0.96f : 0.82f;
+            SpawnPulse($"BossPatternTelegraph_P{phase}", position + Vector3.up * 0.08f, color, new Vector2(size, size * 0.34f), Mathf.Max(0.1f, duration), 14);
+        }
+
+        public static void SpawnBossPatternImpact(Vector3 position, int phase)
+        {
+            Color color = phase >= 3
+                ? new Color(0.9f, 0.16f, 0.26f, 0.95f)
+                : phase == 2
+                    ? new Color(0.72f, 0.34f, 1f, 0.92f)
+                    : new Color(1f, 0.56f, 0.18f, 0.92f);
+            float size = phase >= 3 ? 1.08f : 0.82f;
+            SpawnSpriteOrPulse($"BossPatternImpact_P{phase}", RuntimePixelAssetLoader.EffectMeteorImpact, position + Vector3.up * 0.12f, Quaternion.identity, color, new Vector2(size, size), 0.34f, 18);
+        }
+
         private static string BuildSkillKey(SkillData skillData)
         {
             if (skillData == null)

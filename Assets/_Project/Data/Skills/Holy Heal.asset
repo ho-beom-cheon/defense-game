@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuneGate.SkillData
   skillId: skill_holy_heal
   displayName: "성스러운 회복"
-  description: "왕국 크리스탈 HP를 회복합니다."
+  description: "가장 위급한 영웅과 크리스탈의 HP를 회복합니다."
   cooldown: 8.5
   power: 45
   damageHitCount: 1
   range: 3.5
-  effectKey: crystal_heal_flat
+  effectKey: holy_heal
   radius: 1
   targetingType: 3
   element: 5

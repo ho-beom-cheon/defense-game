@@ -184,7 +184,7 @@ namespace RuneGate.Editor
         {
             ContentBundle content = BootstrapContentAndScenes(true);
             Debug.Log("RuneGate v0.5 art prototype bootstrap complete. Open Assets/_Project/Scenes/TitleScene.unity and press Play.");
-            Selection.activeObject = content.Heroes != null && content.Heroes.Length > 0 ? content.Heroes[0] : content.DefaultFormation;
+            Selection.activeObject = content.Heroes != null && content.Heroes.Length > 0 ? (UnityEngine.Object)content.Heroes[0] : content.DefaultFormation;
         }
 
         [MenuItem("Tools/RuneGate/Bootstrap v1.0 Release Track")]
@@ -192,7 +192,7 @@ namespace RuneGate.Editor
         {
             ContentBundle content = BootstrapContentAndScenes(true, "1.0.0", 10);
             Debug.Log("RuneGate v1.0 release-track bootstrap complete. Run Validate Project, open TitleScene, then test Stage 1 through Stage 10.");
-            Selection.activeObject = content.Stages != null && content.Stages.Length > 0 ? content.Stages[0] : content.DefaultFormation;
+            Selection.activeObject = content.Stages != null && content.Stages.Length > 0 ? (UnityEngine.Object)content.Stages[0] : content.DefaultFormation;
         }
 
         [MenuItem("Tools/RuneGate/Apply Initial Art Images")]
@@ -208,6 +208,82 @@ namespace RuneGate.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("RuneGate initial art image links applied. Missing images keep their placeholder fallback.");
+        }
+
+        [MenuItem("Tools/RuneGate/Sync Runtime Content Catalog")]
+        public static void SyncRuntimeContentCatalogMenu()
+        {
+            EnsureRequiredFolders();
+            ContentBundle content = LoadExistingContentBundle();
+            if (content == null || !HasAny(content.Stages) || !HasAny(content.Runes) || content.HeroRoster == null || content.DefaultFormation == null)
+            {
+                content = CreateV04Content();
+            }
+
+            UpgradeData[] upgrades = LoadExistingUpgrades();
+            if (!HasAny(upgrades))
+            {
+                upgrades = CreateSampleUpgrades();
+            }
+
+            RuntimeContentCatalog catalog = CreateOrUpdateRuntimeContentCatalog(content, upgrades);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Selection.activeObject = catalog;
+            Debug.Log("RuneGate runtime content catalog synced for Player builds.");
+        }
+
+        [MenuItem("Tools/RuneGate/Start Stage 1 Test")]
+        public static void StartStage1Test()
+        {
+            StartCombatTestStage(0);
+        }
+
+        [MenuItem("Tools/RuneGate/Playtest Stage 1")]
+        public static void PlaytestStage1()
+        {
+            StartCombatTestStage(0);
+        }
+
+        [MenuItem("Tools/RuneGate/Start Stage 2 Test")]
+        public static void StartStage2Test()
+        {
+            StartCombatTestStage(1);
+        }
+
+        [MenuItem("Tools/RuneGate/Playtest Stage 2")]
+        public static void PlaytestStage2()
+        {
+            StartCombatTestStage(1);
+        }
+
+        [MenuItem("Tools/RuneGate/Start Stage 3 Test")]
+        public static void StartStage3Test()
+        {
+            StartCombatTestStage(2);
+        }
+
+        [MenuItem("Tools/RuneGate/Playtest Stage 3")]
+        public static void PlaytestStage3()
+        {
+            StartCombatTestStage(2);
+        }
+
+        [MenuItem("Tools/RuneGate/Grant Test Gold")]
+        public static void GrantTestGold()
+        {
+            SaveManager.LoadOrCreate();
+            SaveManager.AddGold(500);
+            Debug.Log("RuneGate test gold granted: +500.");
+        }
+
+        [MenuItem("Tools/RuneGate/Reset Combat Test Save")]
+        public static void ResetCombatTestSave()
+        {
+            SaveManager.ResetSave();
+            GameSession.ClearSelectedStage();
+            GameSession.ClearLastBattleResult();
+            Debug.Log("RuneGate combat test save reset.");
         }
 
         [MenuItem("Tools/RuneGate/Configure Android Release Settings")]
@@ -238,6 +314,32 @@ namespace RuneGate.Editor
         public static void BuildAndroidApkV10()
         {
             BuildAndroidApk("1.0.0", 10);
+        }
+
+        private static void StartCombatTestStage(int stageIndex)
+        {
+            List<StageData> stages = PrototypeAssetLoader.LoadStages();
+            if (stages == null || stages.Count == 0)
+            {
+                Debug.LogWarning("RuneGate combat test cannot start because StageData assets are missing. Run Bootstrap first.");
+                return;
+            }
+
+            int safeIndex = Mathf.Clamp(stageIndex, 0, stages.Count - 1);
+            StageData selectedStage = stages[safeIndex];
+            if (selectedStage == null)
+            {
+                Debug.LogWarning($"RuneGate combat test found a missing StageData at index {safeIndex}.");
+                return;
+            }
+
+            string nextStageId = safeIndex + 1 < stages.Count && stages[safeIndex + 1] != null ? stages[safeIndex + 1].StageId : string.Empty;
+            SaveManager.LoadOrCreate();
+            SaveManager.UnlockStage(selectedStage.StageId);
+            GameSession.SelectStage(selectedStage, nextStageId);
+            EditorSceneManager.OpenScene(BattleScenePath);
+            Selection.activeObject = selectedStage;
+            Debug.Log($"RuneGate combat test ready: {selectedStage.DisplayNameKorean}. Press Play in BattleScene.");
         }
 
         private static void BuildAndroidApk(string version, int versionCode)
@@ -302,6 +404,7 @@ namespace RuneGate.Editor
             ArtPrototypeBundle artPrototype = includeArtPrototype ? CreateV05ArtPrototypeAssets(content) : null;
             ApplyInitialArtImages(content);
             UpgradeData[] upgrades = CreateSampleUpgrades();
+            CreateOrUpdateRuntimeContentCatalog(content, upgrades);
 
             CreateOrUpdateTitleScene();
             CreateOrUpdateStageSelectScene(content.Stages);
@@ -317,12 +420,12 @@ namespace RuneGate.Editor
 
         private static ContentBundle CreateV04Content()
         {
-            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "Shield Bash", "Stuns the line briefly in a later hook and deals reliable close damage.", 7.5f, 70, 1, 2.1f, TargetingType.Nearest, ElementType.Light, "damage", 1f);
-            SkillData rapidShot = CreateSkill("Rapid Shot", "skill_rapid_shot", "Rapid Shot", "Fires repeated shots into the nearest fast target.", 5.8f, 28, 3, 5f, TargetingType.Nearest, ElementType.Wind, "multi_hit_damage", 1f);
-            SkillData meteor = CreateSkill("Meteor", "skill_meteor", "Meteor", "Drops fire area damage for clustered monsters.", 10.5f, 68, 1, 4.2f, TargetingType.HighestHp, ElementType.Fire, "area_damage", 1.8f);
-            SkillData holyHeal = CreateSkill("Holy Heal", "skill_holy_heal", "Holy Heal", "Restores HP to the Kingdom Crystal.", 8.5f, 45, 1, 3.5f, TargetingType.LowestHp, ElementType.Light, "crystal_heal_flat", 1f);
-            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "Temporary Turret", "Deploys a temporary turret hook with fallback damage.", 11f, 44, 1, 3.2f, TargetingType.First, ElementType.Earth, "turret_placeholder", 1f);
-            SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "Shadow Strike", "High dark damage that prefers named and boss targets.", 10f, 145, 1, 2.4f, TargetingType.Boss, ElementType.Dark, "damage", 1f);
+            SkillData shieldBash = CreateSkill("Shield Bash", "skill_shield_bash", "방패 강타", "가까운 적에게 강한 피해를 주고 전선을 밀어냅니다.", 7.5f, 70, 1, 2.1f, TargetingType.Nearest, ElementType.Light, SkillController.ShieldBashEffect, 1f);
+            SkillData rapidShot = CreateSkill("Rapid Shot", "skill_rapid_shot", "연속 사격", "가까운 빠른 적에게 세 발을 연속으로 발사합니다.", 5.8f, 28, 3, 5f, TargetingType.Nearest, ElementType.Wind, SkillController.RapidShotEffect, 1f);
+            SkillData meteor = CreateSkill("Meteor", "skill_meteor", "운석 낙하", "적이 모인 지점에 화염 범위 피해를 줍니다.", 10.5f, 68, 1, 4.2f, TargetingType.HighestHp, ElementType.Fire, SkillController.MeteorAreaEffect, 1.8f);
+            SkillData holyHeal = CreateSkill("Holy Heal", "skill_holy_heal", "성스러운 회복", "가장 위급한 영웅과 크리스탈의 HP를 회복합니다.", 8.5f, 45, 1, 3.5f, TargetingType.LowestHp, ElementType.Light, SkillController.HolyHealEffect, 1f);
+            SkillData buildTurret = CreateSkill("Build Turret", "skill_build_turret", "임시 포탑", "같은 라인의 적을 일정 시간 자동 공격하는 룬포지 포탑을 배치합니다.", 11f, 44, 1, 3.2f, TargetingType.First, ElementType.Earth, SkillController.TemporaryTurretEffect, 1f);
+            SkillData shadowStrike = CreateSkill("Shadow Strike", "skill_shadow_strike", "그림자 급습", "보스와 빈사 상태의 적에게 더 강한 어둠 피해를 줍니다.", 10f, 145, 1, 2.4f, TargetingType.Boss, ElementType.Dark, SkillController.ShadowStrikeEffect, 1f);
 
             HeroData knight = CreateHeroData("Knight", "hero_knight_001", "Knight", "레온", "균열 방패의 기사", "전열 / 방어 / 빛. 무너진 재문 앞에서 마지막까지 버틴 문지기 기사.", "이번에는, 절대 무너지지 않는다.", HeroRole.Tank, HeroPositionType.Front, ElementType.Light, 520, 28, 0.95f, 1.25f, shieldBash);
             HeroData archer = CreateHeroData("Archer", "hero_archer_001", "Archer", "세리아", "바람길을 읽는 궁수", "후열 / 원거리 / 바람. 균열에서 새는 바람의 방향으로 적의 진입로를 읽는다.", "바람은 이미 답을 알고 있어.", HeroRole.RangedDps, HeroPositionType.Back, ElementType.Wind, 190, 32, 1.75f, 4.8f, rapidShot);
@@ -336,8 +439,8 @@ namespace RuneGate.Editor
             MonsterData wolf = CreateMonsterData("Wolf", "monster_wolf_001", "Wolf", "부식 늑대", "속도형 / 빠른 라인 돌파", "봉문 결계를 갉아먹는 부식 기운을 두른 빠른 추적체.", MonsterType.Fast, ElementType.Wind, 72, 2.05f, 1, 7);
             MonsterData orc = CreateMonsterData("Orc", "monster_orc_001", "Orc", "재갑 돌격병", "탱커형 / 높은 HP", "재문 갑각을 두르고 봉문을 정면으로 밀어붙이는 중형 돌격 적성.", MonsterType.Tank, ElementType.None, 255, 0.78f, 2, 14);
             MonsterData bat = CreateMonsterData("Bat", "monster_bat_001", "Bat", "균열 까마귀", "비행/침투형 / 빠른 이동", "균열 위를 낮게 날며 문지기 진형을 흔드는 작은 날개 적성체.", MonsterType.Flying, ElementType.Wind, 64, 2.15f, 1, 8);
-            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", "룬핵 점액", "분열형 / 사망 hook", "닫힌 문 주변에 남은 룬핵 찌꺼기가 뭉쳐 움직이는 점액형 적성.", MonsterType.Splitter, ElementType.Earth, 155, 0.82f, 1, 11);
-            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", "망각의 뼈병", "언데드형 / 부활 hook", "오래된 전장의 기록이 균열에 오염되어 걸어 나온 뼈 병사.", MonsterType.Undead, ElementType.Dark, 135, 1.05f, 1, 12);
+            MonsterData slime = CreateMonsterData("Slime", "monster_slime_001", "Slime", "룬핵 점액", "분열형 / 사망 시 증식", "닫힌 문 주변에 남은 룬핵 찌꺼기가 뭉쳐 움직이는 점액형 적성.", MonsterType.Splitter, ElementType.Earth, 155, 0.82f, 1, 11);
+            MonsterData skeleton = CreateMonsterData("Skeleton", "monster_skeleton_001", "Skeleton", "망각의 뼈병", "언데드형 / 재기동 가능성", "오래된 전장의 기록이 균열에 오염되어 걸어 나온 뼈 병사.", MonsterType.Undead, ElementType.Dark, 135, 1.05f, 1, 12);
             MonsterData boss = CreateMonsterData("Orc Warlord", "boss_orc_warlord_001", "Orc Warlord", "그룸바르", "문파괴자", "봉문 위험 기록 최상위 개체. 재문을 직접 찢고 진입하는 대형 파쇄 적성.", MonsterType.Boss, ElementType.Dark, 1750, 0.48f, 6, 360);
 
             RuneData[] runes = CreateV04Runes();
@@ -554,6 +657,20 @@ namespace RuneGate.Editor
                 LoadAsset<RuneData>($"{RootPath}/Data/Runes/Turret Rune.asset")
             };
 
+            StageData[] stages =
+            {
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 1.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 2.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 3.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 4.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 5.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 6.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 7.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 8.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 9.asset"),
+                LoadAsset<StageData>($"{RootPath}/Data/Stages/Goblin Forest 10.asset")
+            };
+
             if (!HasAny(heroes) && !HasAny(monsters) && !HasAny(skills) && !HasAny(runes))
             {
                 return null;
@@ -565,7 +682,21 @@ namespace RuneGate.Editor
                 Heroes = heroes,
                 Monsters = monsters,
                 Boss = LoadAsset<MonsterData>($"{RootPath}/Data/Monsters/Orc Warlord.asset"),
-                Runes = runes
+                Runes = runes,
+                Stages = stages,
+                HeroRoster = LoadAsset<HeroRosterData>($"{RootPath}/Data/Rosters/MVP Hero Roster.asset"),
+                DefaultFormation = LoadAsset<FormationData>($"{RootPath}/Data/Formations/Default Formation.asset")
+            };
+        }
+
+        private static UpgradeData[] LoadExistingUpgrades()
+        {
+            return new[]
+            {
+                LoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/Crystal Reinforcement.asset"),
+                LoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/Hero Training.asset"),
+                LoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/Battle Rhythm.asset"),
+                LoadAsset<UpgradeData>($"{RootPath}/Data/Upgrades/Skill Practice.asset")
             };
         }
 
@@ -604,16 +735,16 @@ namespace RuneGate.Editor
                 CreateRune("Healing Rune", "rune_healing", "치유 룬", "크리스탈 HP를 즉시 회복한다.", RuneRarity.Common, ElementType.Light, "crystal_heal_flat", 45f),
                 CreateRune("Fire Rune", "rune_fire", "화염 룬", "카엘과 광역 피해 선택의 가치가 증가한다.", RuneRarity.Common, ElementType.Fire, "mage_area_percent", 0.18f),
                 CreateRune("Frost Rune", "rune_frost", "냉기 룬", "현재 전장에 있는 몬스터 이동 속도를 늦춘다.", RuneRarity.Rare, ElementType.Ice, "monster_slow_percent", 0.2f),
-                CreateRune("Lightning Rune", "rune_lightning", "번개 룬", "연쇄 번개 효과 예약 hook.", RuneRarity.Rare, ElementType.Lightning, "lightning_placeholder", 1f),
+                CreateRune("Lightning Rune", "rune_lightning", "번개 룬", "세 번째 기본 공격이 주변 적 최대 2명에게 35% 연쇄 피해를 줍니다.", RuneRarity.Rare, ElementType.Lightning, "lightning_chain_percent", 0.35f),
                 CreateRune("Earth Rune", "rune_earth", "대지 룬", "영웅 최대 HP가 증가한다.", RuneRarity.Common, ElementType.Earth, "hero_max_hp_percent", 0.12f),
                 CreateRune("Sacrifice Rune", "rune_shadow", "그림자 룬", "닉스와 폭딜 조합을 보조하는 공격 보너스.", RuneRarity.Rare, ElementType.Dark, "hero_attack_percent", 0.2f),
                 CreateRune("Hunter Rune", "rune_hunt", "사냥 룬", "네임드와 보스에게 주는 피해가 증가한다.", RuneRarity.Rare, ElementType.None, "boss_damage_percent", 0.18f),
                 CreateRune("Focus Rune", "rune_focus", "집중 룬", "스킬 재사용 대기시간이 감소한다.", RuneRarity.Common, ElementType.None, "skill_cooldown_percent", 0.1f),
-                CreateRune("Explosion Rune", "rune_explosion", "폭발 룬", "폭발 피해 효과 예약 hook.", RuneRarity.Rare, ElementType.Fire, "blast_placeholder", 1f),
-                CreateRune("Guardian Rune", "rune_guardian", "수호 룬", "크리스탈 보호막 효과 예약 hook.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 25f),
-                CreateRune("Purification Rune", "rune_purification", "정화 룬", "오염/언데드 정화 효과 예약 hook.", RuneRarity.Common, ElementType.Light, "purify_placeholder", 1f),
-                CreateRune("Shatter Rune", "rune_shatter", "분쇄 룬", "장갑 파괴 효과 예약 hook.", RuneRarity.Rare, ElementType.Earth, "crush_placeholder", 1f),
-                CreateRune("Chain Rune", "rune_chain", "연쇄 룬", "원거리 연쇄 사격의 임시 공격 속도 보너스.", RuneRarity.Rare, ElementType.Lightning, "ranged_chain_shot_placeholder", 0.14f),
+                CreateRune("Explosion Rune", "rune_explosion", "폭발 룬", "기본 공격이 같은 라인의 주변 적에게 30% 범위 피해를 줍니다.", RuneRarity.Rare, ElementType.Fire, "splash_damage_percent", 0.3f),
+                CreateRune("Guardian Rune", "rune_guardian", "수호 룬", "크리스탈에 피해를 먼저 흡수하는 보호막 35를 부여합니다.", RuneRarity.Rare, ElementType.Light, "crystal_shield_flat", 35f),
+                CreateRune("Purification Rune", "rune_purification", "정화 룬", "모든 영웅과 크리스탈을 최대 HP의 20% 회복하고 회복 효율을 높입니다.", RuneRarity.Common, ElementType.Light, "purification_percent", 0.2f),
+                CreateRune("Shatter Rune", "rune_shatter", "분쇄 룬", "탱커형 몬스터와 보스에게 주는 피해가 25% 증가합니다.", RuneRarity.Rare, ElementType.Earth, "crush_damage_percent", 0.25f),
+                CreateRune("Chain Rune", "rune_chain", "연쇄 룬", "원거리 영웅의 기본 공격이 같은 라인의 다른 적에게 45% 연쇄 피해를 줍니다.", RuneRarity.Rare, ElementType.Lightning, "ranged_chain_damage_percent", 0.45f),
                 CreateRune("Turret Rune", "rune_turret", "포탑 룬", "브롬의 임시 포탑 계열 피해가 증가한다.", RuneRarity.Epic, ElementType.Earth, "turret_attack_percent", 0.18f),
                 CreateRune("Mana Rune", "rune_boss_hunt", "보스 사냥 룬", "그룸바르 같은 보스에게 주는 피해가 크게 증가한다.", RuneRarity.Epic, ElementType.Dark, "boss_damage_percent", 0.32f)
             };
@@ -623,42 +754,42 @@ namespace RuneGate.Editor
         {
             return new[]
             {
-                CreateStageFromPlan(1, "Goblin Forest 1", "재문 숲 1", "문틈 정찰", "문틈 도깨비가 처음 새어 나오는 재문 숲 입구.", 180, boss,
+                CreateStageFromPlan(1, "Goblin Forest 1", "재문 숲 1", "문틈 정찰", "문틈 도깨비가 처음 새어 나오는 재문 숲 입구.", 180, null,
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.25f, 0.48f), Spawn(goblin, 1, 5, 0.45f, 0.48f)),
                     new WavePlan(false, Spawn(goblin, 0, 6, 0.25f, 0.42f), Spawn(goblin, 2, 6, 0.45f, 0.42f))),
-                CreateStageFromPlan(2, "Goblin Forest 2", "재문 숲 2", "재갑 돌격", "문틈 도깨비 사이로 재갑 돌격병이 처음 섞이는 구간.", 185, boss,
+                CreateStageFromPlan(2, "Goblin Forest 2", "재문 숲 2", "재갑 돌격", "문틈 도깨비 사이로 재갑 돌격병이 처음 섞이는 구간.", 185, null,
                     new WavePlan(false, Spawn(goblin, 0, 4, 0.3f, 0.55f), Spawn(orc, 1, 1, 1f, 1f)),
                     new WavePlan(false, Spawn(goblin, 1, 5, 0.35f, 0.5f), Spawn(orc, 2, 1, 0.9f, 1f)),
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.35f, 0.48f), Spawn(orc, 1, 2, 0.75f, 0.9f), Spawn(goblin, 2, 4, 0.9f, 0.48f))),
-                CreateStageFromPlan(3, "Goblin Forest 3", "재문 숲 3", "부식 늑대", "빠른 부식 늑대가 라인 돌파를 시도한다.", 190, boss,
+                CreateStageFromPlan(3, "Goblin Forest 3", "재문 숲 3", "부식 늑대", "빠른 부식 늑대가 라인 돌파를 시도한다.", 190, null,
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.3f, 0.52f), Spawn(wolf, 2, 3, 0.7f, 0.62f)),
                     new WavePlan(false, Spawn(wolf, 0, 4, 0.45f, 0.58f), Spawn(goblin, 1, 6, 0.7f, 0.5f), Spawn(wolf, 2, 3, 1f, 0.58f)),
                     new WavePlan(false, Spawn(wolf, 0, 5, 0.35f, 0.55f), Spawn(goblin, 1, 6, 0.75f, 0.48f), Spawn(wolf, 2, 4, 1.1f, 0.55f))),
-                CreateStageFromPlan(4, "Goblin Forest 4", "재문 숲 4", "낮은 비행로", "균열 꼬마귀가 라인 사이를 흔드는 구간.", 195, boss,
+                CreateStageFromPlan(4, "Goblin Forest 4", "재문 숲 4", "낮은 비행로", "균열 꼬마귀가 라인 사이를 흔드는 구간.", 195, null,
                     new WavePlan(false, Spawn(bat, 0, 3, 0.4f, 0.65f), Spawn(goblin, 1, 4, 0.8f, 0.65f)),
                     new WavePlan(false, Spawn(wolf, 1, 4, 0.3f, 0.65f), Spawn(bat, 2, 4, 0.7f, 0.65f)),
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.4f, 0.55f), Spawn(bat, 1, 4, 0.8f, 0.6f), Spawn(wolf, 2, 3, 1.1f, 0.65f))),
-                CreateStageFromPlan(5, "Goblin Forest 5", "재문 숲 5", "봉문 충격", "중형 파쇄 적성이 본격적으로 문을 두드린다.", 205, boss,
+                CreateStageFromPlan(5, "Goblin Forest 5", "재문 숲 5", "봉문 충격", "중형 파쇄 적성이 본격적으로 문을 두드린다.", 205, null,
                     new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 1f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
                     new WavePlan(false, Spawn(goblin, 0, 5, 0.3f, 0.55f), Spawn(orc, 1, 2, 0.7f, 1f), Spawn(goblin, 2, 5, 1f, 0.55f)),
                     new WavePlan(false, Spawn(orc, 0, 2, 0.4f, 0.9f), Spawn(orc, 2, 2, 0.8f, 0.9f)),
                     new WavePlan(false, Spawn(goblin, 0, 6, 0.4f, 0.5f), Spawn(orc, 1, 3, 0.6f, 0.9f), Spawn(wolf, 2, 4, 1f, 0.6f))),
-                CreateStageFromPlan(6, "Goblin Forest 6", "재문 숲 6", "잔류 점액", "재문 주변의 잔류 균열 찌꺼기가 응집한다.", 210, boss,
+                CreateStageFromPlan(6, "Goblin Forest 6", "재문 숲 6", "잔류 점액", "재문 주변의 잔류 균열 찌꺼기가 응집한다.", 210, null,
                     new WavePlan(false, Spawn(slime, 0, 2, 0.4f, 1f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
                     new WavePlan(false, Spawn(slime, 1, 3, 0.5f, 0.9f), Spawn(wolf, 2, 4, 0.9f, 0.6f)),
                     new WavePlan(false, Spawn(goblin, 0, 6, 0.3f, 0.5f), Spawn(slime, 1, 3, 0.8f, 0.9f), Spawn(bat, 2, 4, 1f, 0.6f)),
                     new WavePlan(false, Spawn(slime, 0, 3, 0.5f, 0.85f), Spawn(orc, 1, 2, 0.8f, 1f), Spawn(slime, 2, 3, 1.1f, 0.85f))),
-                CreateStageFromPlan(7, "Goblin Forest 7", "재문 숲 7", "오염 기록", "균열에 오염된 전장 기록이 잔해병으로 되살아난다.", 215, boss,
+                CreateStageFromPlan(7, "Goblin Forest 7", "재문 숲 7", "오염 기록", "균열에 오염된 전장 기록이 잔해병으로 되살아난다.", 215, null,
                     new WavePlan(false, Spawn(skeleton, 0, 3, 0.4f, 0.75f), Spawn(goblin, 1, 5, 0.8f, 0.55f)),
                     new WavePlan(false, Spawn(wolf, 0, 4, 0.3f, 0.6f), Spawn(skeleton, 2, 4, 0.8f, 0.75f)),
                     new WavePlan(false, Spawn(skeleton, 0, 4, 0.5f, 0.7f), Spawn(bat, 1, 4, 0.8f, 0.6f), Spawn(goblin, 2, 5, 1f, 0.5f)),
                     new WavePlan(false, Spawn(orc, 0, 2, 0.5f, 1f), Spawn(skeleton, 1, 5, 0.8f, 0.65f), Spawn(orc, 2, 2, 1.1f, 1f))),
-                CreateStageFromPlan(8, "Goblin Forest 8", "재문 숲 8", "혼합 적성", "여러 균열 적성이 함께 밀려오는 전술 기록 구간.", 220, boss,
+                CreateStageFromPlan(8, "Goblin Forest 8", "재문 숲 8", "혼합 적성", "여러 균열 적성이 함께 밀려오는 전술 기록 구간.", 220, null,
                     new WavePlan(false, Spawn(goblin, 0, 6, 0.3f, 0.5f), Spawn(wolf, 1, 4, 0.8f, 0.55f), Spawn(bat, 2, 4, 1f, 0.6f)),
                     new WavePlan(false, Spawn(slime, 0, 3, 0.4f, 0.8f), Spawn(skeleton, 2, 4, 0.8f, 0.7f)),
                     new WavePlan(false, Spawn(orc, 0, 2, 0.5f, 1f), Spawn(wolf, 1, 5, 0.8f, 0.55f), Spawn(slime, 2, 3, 1.1f, 0.8f)),
                     new WavePlan(false, Spawn(skeleton, 0, 5, 0.4f, 0.65f), Spawn(orc, 1, 3, 0.8f, 0.9f), Spawn(bat, 2, 5, 1f, 0.55f))),
-                CreateStageFromPlan(9, "Goblin Forest 9", "재문 숲 9", "붕괴 전조", "그룸바르 출현 전 봉문 압력이 급격히 오른다.", 230, boss,
+                CreateStageFromPlan(9, "Goblin Forest 9", "재문 숲 9", "붕괴 전조", "그룸바르 출현 전 봉문 압력이 급격히 오른다.", 230, null,
                     new WavePlan(false, Spawn(wolf, 0, 5, 0.3f, 0.55f), Spawn(goblin, 1, 7, 0.7f, 0.45f)),
                     new WavePlan(false, Spawn(slime, 0, 3, 0.4f, 0.8f), Spawn(skeleton, 1, 4, 0.7f, 0.65f), Spawn(bat, 2, 4, 1f, 0.55f)),
                     new WavePlan(false, Spawn(orc, 0, 3, 0.5f, 0.9f), Spawn(wolf, 2, 5, 0.8f, 0.55f)),
@@ -781,6 +912,20 @@ namespace RuneGate.Editor
                 SetString(serializedObject, "formationId", "formation_default_mvp");
                 SetString(serializedObject, "displayName", "MVP Default Formation");
                 SetFormationSlotList(serializedObject, "slots", slots);
+            });
+            return asset;
+        }
+
+        private static RuntimeContentCatalog CreateOrUpdateRuntimeContentCatalog(ContentBundle content, UpgradeData[] upgrades)
+        {
+            RuntimeContentCatalog asset = CreateOrLoadAsset<RuntimeContentCatalog>($"{RootPath}/Resources/RuntimeContentCatalog.asset");
+            EditAsset(asset, serializedObject =>
+            {
+                SetObjectList(serializedObject, "stages", ToObjectArray(content != null ? content.Stages : null));
+                SetObjectList(serializedObject, "runes", ToObjectArray(content != null ? content.Runes : null));
+                SetObjectList(serializedObject, "upgrades", ToObjectArray(upgrades));
+                SetObject(serializedObject, "heroRoster", content != null ? content.HeroRoster : null);
+                SetObject(serializedObject, "defaultFormation", content != null ? content.DefaultFormation : null);
             });
             return asset;
         }
@@ -1415,6 +1560,7 @@ namespace RuneGate.Editor
             {
                 SetInt(serializedObject, "laneCount", 3);
                 SetFloat(serializedObject, "laneSpacing", 2.15f);
+                SetFloat(serializedObject, "portraitLaneSpacingRatio", 0.25f);
                 SetFloat(serializedObject, "spawnX", 5.75f);
                 SetFloat(serializedObject, "crystalX", -5.15f);
                 SetObjectList(serializedObject, "laneSpawnPoints", ToObjectArray(spawnPoints));

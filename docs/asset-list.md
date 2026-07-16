@@ -112,6 +112,8 @@ Required parameters:
 
 The v0.5 runtime adds an `AudioManager` and `SfxKey` enum. Clips are optional during prototype work; missing clips are ignored safely.
 
+As of v0.89, missing clips receive deterministic procedural fallbacks at runtime. A real `AudioClip` assigned to the same `SfxKey` always takes priority over the fallback.
+
 - `HeroAttack`
 - `MonsterHit`
 - `MonsterDeath`
