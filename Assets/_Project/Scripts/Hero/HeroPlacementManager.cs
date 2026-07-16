@@ -8,6 +8,7 @@ namespace RuneGate
         [SerializeField] private HeroRosterData heroRoster;
         [SerializeField] private FormationData defaultFormation;
         [SerializeField] private Transform heroRoot;
+        [SerializeField] private BattlefieldVisualController battlefieldVisualController;
         [SerializeField] private bool useSavedFormation = true;
         [SerializeField] private bool writeDefaultFormationToSave = true;
         [SerializeField] private Vector2 heroPlaceholderSize = new Vector2(0.72f, 0.72f);
@@ -239,6 +240,7 @@ namespace RuneGate
             heroController.Initialize(heroData);
             heroController.RefreshVisualAnchors(true);
             activeLaneManager?.ClampUnitInsideBattlefield(heroObject.transform, spriteRenderer);
+            battlefieldVisualController?.CreateUnitShadow(heroObject.transform, spriteRenderer, UnitVisualKind.Hero);
 
             return heroController;
         }

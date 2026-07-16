@@ -28,6 +28,13 @@ namespace RuneGate
         public int ShieldHp => shieldHp;
         public bool IsDestroyed => initialized && currentHp <= 0;
 
+        public void BindVisual(SpriteRenderer renderer, HitFlashController feedbackController)
+        {
+            spriteRenderer = renderer;
+            hitFlashController = feedbackController;
+            CaptureOriginalSpriteColor();
+        }
+
         private void Awake()
         {
             if (spriteRenderer == null)
@@ -160,7 +167,7 @@ namespace RuneGate
         private IEnumerator HitFlashRoutine()
         {
             spriteRenderer.color = new Color(1f, 0.35f, 0.35f, 1f);
-            yield return new WaitForSeconds(hitFlashDuration);
+            yield return new WaitForSecondsRealtime(hitFlashDuration);
 
             if (spriteRenderer != null)
             {

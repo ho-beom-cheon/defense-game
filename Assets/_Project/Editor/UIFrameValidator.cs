@@ -29,6 +29,9 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/BattleHUD.cs",
             "Assets/_Project/Scripts/UI/BattleCanvasController.cs",
             "Assets/_Project/Scripts/UI/BattleCanvasLayout.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs",
             "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs",
             "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
             "Assets/_Project/Scripts/UI/StageResultUI.cs",
@@ -70,7 +73,8 @@ namespace RuneGate.Editor
             "DrawStageSelectFrame",
             "BattleCanvasLayout",
             "BattlefieldViewport",
-            "BattleOverlayState"
+            "BattleOverlayState",
+            "BattlefieldVisualController"
         };
 
         private static readonly string[] SuspiciousUserFacingTokens =
@@ -101,6 +105,7 @@ namespace RuneGate.Editor
             ValidateStageSelectLegacySerialization(root, pass, failures);
             ValidateBuildSettings(pass, warnings);
             ValidateSceneDuplicates(root, pass, warnings);
+            ValidateBattlefieldScene(root, pass, failures);
             ValidateSuspiciousText(root, warnings);
 
             WriteReport(root, pass, warnings, failures);
@@ -160,6 +165,7 @@ namespace RuneGate.Editor
                 "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs",
                 "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
                 "Assets/_Project/Scripts/UI/StageResultUI.cs",
+                "Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs",
                 "Assets/_Project/Scripts/UI/Foundation/GameFrameLayout.cs"
             };
 
@@ -400,6 +406,51 @@ namespace RuneGate.Editor
                 {
                     warnings.Add($"EventSystem count is invalid: `{scene}` ({eventSystemCount})");
                 }
+            }
+        }
+
+        private static void ValidateBattlefieldScene(string root, List<string> pass, List<string> failures)
+        {
+            const string scene = "Assets/_Project/Scenes/BattleScene.unity";
+            string path = Path.Combine(root, scene.Replace('/', Path.DirectorySeparatorChar));
+            if (!File.Exists(path))
+            {
+                return;
+            }
+
+            string text = File.ReadAllText(path);
+            int artRootCount = CountOccurrences(text, "m_Name: Battlefield Art Root");
+            if (artRootCount == 1)
+            {
+                pass.Add($"Battlefield art root check passed: `{scene}`");
+            }
+            else
+            {
+                failures.Add($"Battlefield Art Root count is invalid: `{scene}` ({artRootCount})");
+            }
+
+            string[] forbidden =
+            {
+                "m_Name: Runtime Battlefield Visuals",
+                "m_Name: Crystal Ward Zone",
+                "m_Name: Spawn Rift Zone",
+                "m_Name: Lane 0 Path",
+                "m_Name: Lane 1 Path",
+                "m_Name: Lane 2 Path"
+            };
+            bool legacyFound = false;
+            for (int i = 0; i < forbidden.Length; i++)
+            {
+                if (text.Contains(forbidden[i], StringComparison.Ordinal))
+                {
+                    legacyFound = true;
+                    failures.Add($"Legacy battlefield visual remains in `{scene}`: `{forbidden[i]}`");
+                }
+            }
+
+            if (!legacyFound)
+            {
+                pass.Add($"Legacy battlefield visual check passed: `{scene}`");
             }
         }
 
