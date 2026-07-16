@@ -9,6 +9,8 @@
 
 RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지 디펜스 프로토타입이다. 한국 출시 우선 방향으로 문지기, 봉문, 균열, 재문 세계관 표현을 사용하며, 전투 런타임에는 `RuntimePixel` 스프라이트를 사용한다.
 
+현재 Android 공개 테스트 후보 버전은 `1.0.0` (`versionCode 10`)이며 패키지명은 `com.hobeomcheon.runegatedefense`다.
+
 ## 현재 개발 상태
 
 - Stage 1~10 진행 흐름
@@ -45,6 +47,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - Android Portrait 봉문 정비소 2x2 강화 카드, 구매 즉시 피드백, Gold/레벨 저장 재진입 검증
 - StageSelect 헤더에서 여는 그림자 계약서: 적성 7종 조각 진행, 계약, 단일 장착, 해제와 전투 패시브
 - Android 시스템 흐름에서 조각 5개 소비, 최초 자동 장착, 해제·재장착과 JSON 재실행 보존 검증
+- v1.0.0 APK/AAB 생성, QA 키스토어 서명, SHA-256 manifest 및 Android 15 전체 챕터 회귀 검증
 
 ## 실행 방법
 
@@ -135,6 +138,7 @@ RuneGate Defense는 Unity 6 기반 모바일 Portrait 우선 2D 픽셀 판타지
 - `docs/random-monster-system-v086.md`
 - `docs/pet-contract-system-v086.md`
 - `docs/android-pet-contract-screen-v090.md`
+- `docs/android-v1-public-test-package.md`
 - `docs/combat-lane-ai.md`
 - `docs/motion-sheet-pipeline.md`
 - `docs/ui-ux-v085.md`

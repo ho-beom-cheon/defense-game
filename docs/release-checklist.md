@@ -1,6 +1,6 @@
 # Release Checklist
 
-RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비어 있는 항목은 실제 Unity/기기 수동 확인이 아직 필요하다는 뜻이다.
+RuneGate Defense v1.0.0 Android 공개 테스트 후보 기준 체크리스트다. 체크가 비어 있는 항목은 실제 기기 또는 스토어 제출 확인이 아직 필요하다는 뜻이다.
 
 ## Project Validation
 
@@ -14,7 +14,13 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 ### Latest Validation Attempt
 
-- Date: 2026-07-12
+- Date: 2026-07-16
+- Branch: `codex/issue-95-v1-release-package`
+- v1.0 Release Track Validator: passed; product, package, Portrait, `1.0.0 (10)` verified
+- Progression Smoke Test: passed
+- Android v1.0 UI Capture: seven screens passed at 1080x2400
+- Android v1.0 System Flows: passed; formation, pet contract, tutorial, pause, save, defeat, and audio verified
+- Android v1.0 Normal Stage 1~10: passed; 10 upgrades, Grumbar phases 2/3, five reinforcements and all boss patterns verified
 - Project Validator: passed in Unity batchmode
 - Progression Smoke Test: passed; 20 rune records and all supported runtime effect keys validated
 - Windows Player Stage 1 E2E: passed
@@ -107,12 +113,12 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 - [x] Rune Selection에 `effectKey`가 기본 노출되지 않음
 - [x] 세로 화면에서 주요 버튼 텍스트가 잘리지 않음
 
-## Android RC Settings
+## Android v1.0 Settings
 
 - [x] Product Name: `RuneGate Defense`
 - [x] Package Name: `com.hobeomcheon.runegatedefense`
-- [x] Version: `0.9.0`
-- [x] Bundle Version Code: `9`
+- [x] Version: `1.0.0`
+- [x] Bundle Version Code: `10`
 - [x] Default Orientation: Portrait
 - [x] 앱 아이콘 후보 파일 포함
 - [x] 스플래시 후보 파일 포함
@@ -136,27 +142,17 @@ RuneGate Defense v0.9 Release Candidate 기준 체크리스트다. 체크가 비
 
 ### Latest Build Attempt
 
-- Difficulty progression APK (2026-07-16): `72,037,083 bytes`
-- SHA-256: `58A8CDA1FE642635DAEE4766B6C5B2446CCF3A945F8C9B508807712D74E903EF`
-- Android full-chapter result: Stage 1~10 Victory, Hard/Nightmare unlock chain, sequential Hard stage progress, and disk reload PASS
-
 - Date: 2026-07-16
-- Command: `RuneGate.Editor.RuneGateCurrentBuildPipeline.BuildCurrentAndroidApkFromCommandLine`
+- Branch: `codex/issue-95-v1-release-package`
 - Result: Succeeded
-- Clean branch: `codex/issue-34-clean-android-aab`
-- Output: `C:\workspace\defense-game-issue34-artifacts\RuneGateDefense-clean.apk`
-- File size: `71,887,387 bytes`
-- SHA-256: `61AC8D256976197BDEC30718124D048900BA533383FEE50AC5AAD46D4114E03A`
-- Package/Version: `com.hobeomcheon.runegatedefense`, `0.9.0` (`9`)
+- Package/Version: `com.hobeomcheon.runegatedefense`, `1.0.0` (`10`)
 - SDK: minimum 25, target 36
-- Integrity: zipalign 및 APK Signature Scheme v2 검증 통과
-- Signing: Android Debug 인증서 사용 중
-- ADB: 연결된 실기기 없음
-- Latest APK includes the system-flow, save recovery, Result navigation, and Stage 1~10 regression changes
-- AAB candidate: `71,825,497 bytes`, SHA-256 `0F0BB84567E9CA135B3825F90E6B55DF654C800CFAFC8E24DCD069EDB2782466`
-- AAB bundletool validation and JAR signature verification passed; signed with Android Debug certificate
-- App icon import uses uncompressed source textures and the Unity compressed-icon warning is no longer emitted
-- Permanent current-content APK/AAB menu and command-line entry points verified
+- APK: `72,149,651 bytes`, SHA-256 `C6CB618106A7AD7F2CA9382B3334050FEB535FD9277D03D11FB21E3A2189B310`
+- QA-signed AAB: `72,089,252 bytes`, SHA-256 `7936ECFD04D726BA24CA807EFC288D7C8BD01663A31032D3970E3AB5C1D06FAB`
+- AAB manifest independent SHA-256 match: passed
+- `jarsigner -verify`: passed; throwaway self-signed QA certificate
+- Android 15 API 35 install: passed; package manager reported `1.0.0 (10)`
+- QA artifacts: `C:\workspace\defense-game-issue95-artifacts` (Git 제외)
 - Remaining: Android 실기기 설치, 실기기 터치/Safe Area, 장시간 플레이 검증
 
 ### Latest Emulator QA

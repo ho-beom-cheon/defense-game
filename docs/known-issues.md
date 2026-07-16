@@ -64,6 +64,7 @@
 
 ## Android / Release
 
+- v1.0.0 APK와 일회성 QA 키스토어 서명 AAB가 2026-07-16 생성됐고 manifest SHA-256, Android 15 설치, 1080x2400 핵심 화면, System Flows, Normal Stage 1~10 회귀가 통과했다. QA 키스토어는 스토어 운영 서명으로 사용할 수 없다.
 - APK/AAB builds require Unity Android Build Support and a clean build environment.
 - Clean-branch Android APK/AAB builds succeeded on 2026-07-12. APK installation and the Stage 1 core flow passed on an Android 15 API 35 emulator; physical-device installation is not verified yet.
 - Android 15 API 35 emulator full-chapter QA passed on 2026-07-15: Stage 1~10 Victory, 10 upgrade purchases, and the Stage 10 Grumbar spawn were verified at 1080x2400 Portrait.

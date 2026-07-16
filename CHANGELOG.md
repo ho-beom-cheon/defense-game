@@ -2,6 +2,11 @@
 
 ## 1.0.0
 
+- Set the Android package to version 1.0.0 with version code 10.
+- Verified the v1.0 APK on Android 15 / API 35 at 1080x2400.
+- Verified a QA-signed AAB and SHA-256 artifact manifest.
+- Verified Title, StageSelect, pet contract, Battle, Tutorial, Result, and Upgrade rendering.
+- Verified system flows and the complete Normal Stage 1-10 campaign on the v1.0 APK.
 - Added v1.0 release-track bootstrap menu.
 - Added Android release setting configuration and APK build menu.
 - Added 10-stage Goblin Forest release-track validation.
