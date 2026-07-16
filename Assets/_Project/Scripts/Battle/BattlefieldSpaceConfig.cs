@@ -13,7 +13,7 @@ namespace RuneGate
         [SerializeField] private Rect riftSpawnNormalizedRect = new Rect(0.86f, 0.18f, 0.1f, 0.64f);
 
         [Header("Formation Anchors")]
-        [SerializeField] private float[] formationRowV = { 0.22f, 0.5f, 0.78f };
+        [SerializeField] private float[] formationRowV = { 0.18f, 0.5f, 0.82f };
         [SerializeField] private float backAnchorU = 0.2f;
         [SerializeField] private float middleAnchorU = 0.3f;
         [SerializeField] private float frontAnchorU = 0.4f;

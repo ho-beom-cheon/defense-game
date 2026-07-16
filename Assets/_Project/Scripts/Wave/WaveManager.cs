@@ -19,10 +19,12 @@ namespace RuneGate
         [SerializeField] private bool addDefaultColliderToGeneratedMonsters = true;
 
         private readonly List<MonsterController> aliveMonsters = new List<MonsterController>();
+        private readonly HashSet<int> usedApproachSlots = new HashSet<int>();
         private WaveData activeWave;
         private int pendingSpawns;
         private int activeSpawnRoutines;
         private int bossReinforcementSpawnCount;
+        private int nextMonsterStableId = 1000000;
 
         public event Action<WaveData> WaveStarted;
         public event Action<WaveData> WaveCompleted;
@@ -32,12 +34,14 @@ namespace RuneGate
 
         public IReadOnlyList<MonsterController> AliveMonsters => aliveMonsters;
         public int BossReinforcementSpawnCount => bossReinforcementSpawnCount;
+        public int UsedApproachPointCount => usedApproachSlots.Count;
 
         public void Initialize(StageData data, LaneManager lanes, CrystalController crystal)
         {
             stageData = data;
             laneManager = lanes;
             crystalController = crystal;
+            nextMonsterStableId = 1000000;
         }
 
         public void Initialize(
@@ -66,9 +70,14 @@ namespace RuneGate
                 return;
             }
 
-            if (laneManager == null)
+            if (battlefieldSpace == null ||
+                !battlefieldSpace.IsReady ||
+                battlefieldAgentRegistry == null ||
+                !battlefieldAgentRegistry.IsReady ||
+                crystalApproachPointProvider == null ||
+                !crystalApproachPointProvider.IsReady)
             {
-                Debug.LogWarning("WaveManager cannot start because LaneManager is missing.");
+                Debug.LogError("WaveManager cannot start because continuous battlefield services are not ready.", this);
                 return;
             }
 
@@ -84,6 +93,7 @@ namespace RuneGate
             pendingSpawns = CountPendingSpawns(waveData);
             activeSpawnRoutines = 0;
             bossReinforcementSpawnCount = 0;
+            usedApproachSlots.Clear();
 
             WaveStarted?.Invoke(waveData);
             Debug.Log($"Wave {waveData.WaveNo} started with {pendingSpawns} pending monsters.");
@@ -103,7 +113,7 @@ namespace RuneGate
                 }
 
                 activeSpawnRoutines++;
-                StartCoroutine(SpawnRoutine(spawnData));
+                StartCoroutine(SpawnRoutine(spawnData, i, waveData.WaveNo));
             }
 
             CheckWaveComplete();
@@ -124,7 +134,7 @@ namespace RuneGate
 
         public int RequestBossReinforcements(MonsterController boss, int count)
         {
-            if (activeWave == null || boss == null || !boss.IsAlive || !boss.IsBoss || laneManager == null)
+            if (activeWave == null || boss == null || !boss.IsAlive || !boss.IsBoss || battlefieldSpace == null)
             {
                 return 0;
             }
@@ -163,6 +173,7 @@ namespace RuneGate
                     if (monster != null)
                     {
                         Destroy(monster.gameObject);
+                        battlefieldAgentRegistry?.Unregister(monster.Agent);
                     }
                 }
             }
@@ -171,7 +182,7 @@ namespace RuneGate
             crystalApproachPointProvider?.ResetReservations();
         }
 
-        private IEnumerator SpawnRoutine(WaveSpawnData spawnData)
+        private IEnumerator SpawnRoutine(WaveSpawnData spawnData, int groupIndex, int waveNumber)
         {
             if (spawnData.StartDelay > 0f)
             {
@@ -180,7 +191,7 @@ namespace RuneGate
 
             for (int i = 0; i < spawnData.Count; i++)
             {
-                SpawnMonster(spawnData.MonsterData, spawnData.LaneIndex);
+                SpawnMonster(spawnData.MonsterData, spawnData.LaneIndex, groupIndex, waveNumber, i);
                 pendingSpawns = Mathf.Max(0, pendingSpawns - 1);
 
                 if (i < spawnData.Count - 1 && spawnData.SpawnInterval > 0f)
@@ -199,7 +210,9 @@ namespace RuneGate
             {
                 int laneCount = Mathf.Max(1, laneManager.LaneCount);
                 int laneIndex = (Mathf.Clamp(bossLaneIndex, 0, laneCount - 1) + i + 1) % laneCount;
-                MonsterController reinforcement = SpawnMonster(reinforcementData, laneIndex);
+                int groupIndex = activeWave != null && activeWave.Spawns != null ? activeWave.Spawns.Count + 1 : 4;
+                int waveNumber = activeWave != null ? activeWave.WaveNo : 1;
+                MonsterController reinforcement = SpawnMonster(reinforcementData, laneIndex, groupIndex, waveNumber, i);
                 pendingSpawns = Mathf.Max(0, pendingSpawns - 1);
                 if (reinforcement != null)
                 {
@@ -217,7 +230,12 @@ namespace RuneGate
             CheckWaveComplete();
         }
 
-        private MonsterController SpawnMonster(MonsterData monsterData, int requestedLaneIndex)
+        private MonsterController SpawnMonster(
+            MonsterData monsterData,
+            int requestedLaneIndex,
+            int groupIndex,
+            int waveNumber,
+            int spawnOrdinal)
         {
             if (monsterData == null)
             {
@@ -233,13 +251,19 @@ namespace RuneGate
             }
 
             float estimatedHalfWidth = RuntimeSpritePolicy.GetMonsterEstimatedHalfWidth(monsterData);
-            Vector3 spawnPosition = laneManager.GetSafeSpawnPosition(laneIndex, estimatedHalfWidth);
-            Vector3 targetPosition = laneManager.GetCrystalTargetPosition(laneIndex);
+            float estimatedHalfHeight = RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData) * 0.5f;
+            Vector2 estimatedHalfExtents = new Vector2(estimatedHalfWidth, estimatedHalfHeight);
+            Vector2 resolvedSpawn = battlefieldSpace.ResolveEnemySpawn(
+                laneIndex,
+                waveNumber,
+                groupIndex,
+                spawnOrdinal,
+                estimatedHalfExtents);
+            Vector3 spawnPosition = new Vector3(resolvedSpawn.x, resolvedSpawn.y, 0f);
+            Vector3 targetPosition = battlefieldSpace.CurrentBounds.ToWorld(new Vector2(0.05f, 0.5f));
             MonsterController monster = CreateMonsterInstance(monsterData, spawnPosition);
             MonsterVariantType variantType = ShadowContractService.RollVariant(monsterData, stageData, activeWave);
             monster.Initialize(monsterData, laneIndex, targetPosition, crystalController, this, variantType);
-            monster.RefreshBoundsAnchors();
-            laneManager.ClampUnitInsideBattlefield(monster.transform, monster.VisualSpriteRenderer);
             monster.RefreshBoundsAnchors();
             UnitVisualKind visualKind = monster.IsBoss
                 ? UnitVisualKind.Boss
@@ -247,6 +271,53 @@ namespace RuneGate
                     ? UnitVisualKind.FlyingMonster
                     : UnitVisualKind.Monster;
             battlefieldVisualController?.CreateUnitShadow(monster.transform, monster.VisualSpriteRenderer, visualKind);
+            Vector2 actualHalfExtents = monster.VisualSpriteRenderer != null
+                ? new Vector2(monster.VisualSpriteRenderer.bounds.extents.x, monster.VisualSpriteRenderer.bounds.extents.y)
+                : estimatedHalfExtents;
+            Vector2 clampedSpawn = battlefieldSpace.Clamp(monster.transform.position, actualHalfExtents);
+            monster.transform.position = new Vector3(clampedSpawn.x, clampedSpawn.y, monster.transform.position.z);
+            monster.RefreshBoundsAnchors();
+
+            BattlefieldAgentKind agentKind = monster.IsBoss
+                ? BattlefieldAgentKind.Boss
+                : monsterData.MonsterType == MonsterType.Flying
+                    ? BattlefieldAgentKind.FlyingMonster
+                    : BattlefieldAgentKind.GroundMonster;
+            BattlefieldAgent agent = monster.GetComponent<BattlefieldAgent>();
+            if (agent == null)
+            {
+                agent = monster.gameObject.AddComponent<BattlefieldAgent>();
+            }
+
+            float radius = monster.IsBoss
+                ? Mathf.Max(0.8f, actualHalfExtents.x * 0.65f)
+                : Mathf.Max(0.2f, actualHalfExtents.x * 0.68f);
+            agent.Configure(
+                agentKind,
+                BattlefieldFaction.Monster,
+                nextMonsterStableId++,
+                radius,
+                actualHalfExtents,
+                clampedSpawn,
+                battlefieldSpace.CurrentBounds.PlayableRect);
+            agent.AttachRegistry(battlefieldAgentRegistry);
+            BattlefieldApproachHandle approachHandle = crystalApproachPointProvider.Reserve(agent, laneIndex);
+            if (!approachHandle.IsValid)
+            {
+                Debug.LogError($"WaveManager failed to reserve a crystal approach point for {monster.name}.", monster);
+                battlefieldAgentRegistry.Unregister(agent);
+                Destroy(monster.gameObject);
+                return null;
+            }
+
+            usedApproachSlots.Add(approachHandle.PrimarySlotIndex);
+            monster.ConfigureSpatialCombat(
+                battlefieldSpace,
+                battlefieldAgentRegistry,
+                crystalApproachPointProvider,
+                agent,
+                approachHandle,
+                clampedSpawn);
             aliveMonsters.Add(monster);
             MonsterSpawned?.Invoke(monster);
             return monster;

@@ -41,7 +41,15 @@ namespace RuneGate
         private Vector3 crystalTargetPosition;
         private CrystalController crystalController;
         private WaveManager ownerWaveManager;
-        private LaneManager laneManager;
+        private BattlefieldSpaceController battlefieldSpace;
+        private BattlefieldAgentRegistry battlefieldAgentRegistry;
+        private CrystalApproachPointProvider crystalApproachPointProvider;
+        private BattlefieldApproachHandle approachHandle;
+        private BattlefieldAgent battlefieldAgent;
+        private BattlefieldTargetQuery battlefieldTargetQuery;
+        private readonly List<BattlefieldAgent> neighborAgents = new List<BattlefieldAgent>();
+        private Vector2 objectiveSpawnPosition;
+        private Vector2 objectivePosition;
         private MonsterVariantType variantType = MonsterVariantType.Normal;
         private float speedMultiplier = 1f;
         private float bossMoveSpeedMultiplier = 1f;
@@ -60,6 +68,7 @@ namespace RuneGate
         private Coroutine spawnPulseRoutine;
         private Coroutine attackRoutine;
         private MonsterCombatState combatState = MonsterCombatState.Spawn;
+        private bool spatialLayoutBound;
 
         public event Action<MonsterController> Died;
         public event Action<MonsterController> ReachedCrystal;
@@ -81,6 +90,9 @@ namespace RuneGate
         public bool HasActiveAttackRoutine => attackRoutine != null;
         public BossPhaseController BossPhaseController { get; private set; }
         public BossAttackPatternController BossPatternController { get; private set; }
+        public BattlefieldAgent Agent => battlefieldAgent;
+        public BattlefieldApproachHandle ApproachHandle => approachHandle;
+        public Vector2 ObjectivePosition => objectivePosition;
         public static IReadOnlyList<MonsterController> ActiveMonsters => activeMonsters;
 
         private void OnEnable()
@@ -94,6 +106,9 @@ namespace RuneGate
         private void OnDisable()
         {
             activeMonsters.Remove(this);
+            UnbindSpatialLayout();
+            ReleaseSpatialReservation();
+            battlefieldAgentRegistry?.Unregister(battlefieldAgent);
         }
 
         private void Awake()
@@ -184,7 +199,6 @@ namespace RuneGate
             crystalTargetPosition = targetPosition;
             crystalController = targetCrystal;
             ownerWaveManager = waveManager;
-            laneManager = FindAnyObjectByType<LaneManager>();
             variantType = data.IsBoss ? MonsterVariantType.Normal : assignedVariantType;
             maxHp = ShadowContractService.GetMaxHp(data, variantType);
             currentHp = maxHp;
@@ -224,6 +238,46 @@ namespace RuneGate
             PlaySpawnPulse();
             EnsureBossPhaseController();
             HpChanged?.Invoke(currentHp, maxHp);
+        }
+
+        public void ConfigureSpatialCombat(
+            BattlefieldSpaceController space,
+            BattlefieldAgentRegistry agentRegistry,
+            CrystalApproachPointProvider approachProvider,
+            BattlefieldAgent agent,
+            BattlefieldApproachHandle handle,
+            Vector2 spawnPosition)
+        {
+            battlefieldSpace = space;
+            battlefieldAgentRegistry = agentRegistry;
+            crystalApproachPointProvider = approachProvider;
+            battlefieldAgent = agent;
+            approachHandle = handle;
+            objectiveSpawnPosition = spawnPosition;
+            battlefieldTargetQuery = agentRegistry != null ? new BattlefieldTargetQuery(agentRegistry) : null;
+            if (crystalApproachPointProvider != null &&
+                crystalApproachPointProvider.TryGetPosition(approachHandle, out Vector2 resolvedObjective))
+            {
+                objectivePosition = resolvedObjective;
+                crystalTargetPosition = resolvedObjective;
+            }
+
+            battlefieldAgent?.SetObjectiveProgress(0f);
+            BindSpatialLayout();
+            SpriteRenderer body = spriteRenderer != null ? spriteRenderer : GetComponentInChildren<SpriteRenderer>();
+            Transform shadowTransform = transform.Find("Unit Ground Shadow");
+            SpriteRenderer shadow = shadowTransform != null ? shadowTransform.GetComponent<SpriteRenderer>() : null;
+            BattlefieldDepthSorter depthSorter = GetComponent<BattlefieldDepthSorter>();
+            if (depthSorter == null)
+            {
+                depthSorter = gameObject.AddComponent<BattlefieldDepthSorter>();
+            }
+
+            depthSorter.Configure(
+                body,
+                shadow,
+                battlefieldSpace,
+                battlefieldAgent != null ? battlefieldAgent.StableId : gameObject.GetHashCode());
         }
 
         private void ApplyRuntimeVisual(MonsterData data)
@@ -312,6 +366,11 @@ namespace RuneGate
 
         public void ApplyKnockback(float distance, float controlDuration)
         {
+            ApplyKnockback((Vector2)transform.position + Vector2.left, distance, controlDuration);
+        }
+
+        public void ApplyKnockback(Vector2 sourcePosition, float distance, float controlDuration)
+        {
             if (!IsAlive)
             {
                 return;
@@ -321,8 +380,21 @@ namespace RuneGate
             movementController?.SetAttackState(false);
             float resolvedDistance = IsBoss ? Mathf.Max(0f, distance) * 0.45f : Mathf.Max(0f, distance);
             float resolvedDuration = IsBoss ? Mathf.Max(0f, controlDuration) * 0.5f : Mathf.Max(0f, controlDuration);
-            transform.position += Vector3.right * resolvedDistance;
-            laneManager?.ClampUnitInsideBattlefield(transform, spriteRenderer);
+            Vector2 direction = (Vector2)transform.position - sourcePosition;
+            if (direction.sqrMagnitude <= 0.0001f)
+            {
+                direction = Vector2.right;
+            }
+
+            Vector2 nextPosition = (Vector2)transform.position + direction.normalized * resolvedDistance;
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                nextPosition = battlefieldSpace.Clamp(
+                    nextPosition,
+                    battlefieldAgent != null ? battlefieldAgent.HalfExtents : Vector2.zero);
+            }
+
+            transform.position = new Vector3(nextPosition.x, nextPosition.y, transform.position.z);
             AlignVisualToGround(false);
             UpdateHpBarAnchor();
             controlLockRemaining = Mathf.Max(controlLockRemaining, resolvedDuration);
@@ -368,6 +440,8 @@ namespace RuneGate
             }
 
             removedFromWave = true;
+            ReleaseSpatialReservation();
+            battlefieldAgentRegistry?.Unregister(battlefieldAgent);
             SetCombatState(MonsterCombatState.Dead);
             movementController?.SetDeadState(true);
             StopAttackRoutine();
@@ -398,6 +472,8 @@ namespace RuneGate
             }
 
             removedFromWave = true;
+            ReleaseSpatialReservation();
+            battlefieldAgentRegistry?.Unregister(battlefieldAgent);
             SetCombatState(MonsterCombatState.Dead);
             movementController?.SetDeadState(true);
             StopAttackRoutine();
@@ -432,13 +508,26 @@ namespace RuneGate
                 movementController.SetAttackState(false);
             }
 
-            movementController.Configure(baseSpeed * speedMultiplier * bossMoveSpeedMultiplier, meleeStopDistance, monsterPersonalSpace, 2f);
-            float destinationX = ApplyMonsterSeparation(ResolveCrystalContactX());
-            float laneY = ResolveLaneY();
-            float minX = laneManager != null ? laneManager.GetMinCombatX() : Mathf.Min(crystalTargetPosition.x, transform.position.x) - 0.25f;
-            float maxX = laneManager != null ? laneManager.GetMaxCombatX() : Mathf.Max(crystalTargetPosition.x, transform.position.x) + 0.25f;
-            movementController.MoveToX(destinationX, laneY, minX, maxX);
-            laneManager?.ClampUnitInsideBattlefield(transform, spriteRenderer);
+            float resolvedSpeed = baseSpeed * speedMultiplier * bossMoveSpeedMultiplier;
+            movementController.Configure(resolvedSpeed, meleeStopDistance, monsterPersonalSpace, 2f);
+            RefreshObjectivePosition();
+            Vector2 destination = objectivePosition;
+            HeroController interceptor = battlefieldTargetQuery?.FindInterceptorAhead(this, destination, 2.4f);
+            if (interceptor != null)
+            {
+                destination = interceptor.transform.position;
+            }
+
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                movementController.MoveTo(
+                    destination,
+                    battlefieldSpace.CurrentBounds,
+                    battlefieldAgent != null ? battlefieldAgent.HalfExtents : Vector2.zero,
+                    CalculateMonsterSeparation());
+            }
+
+            UpdateObjectiveProgress();
             AlignVisualToGround(false);
             UpdateHpBarAnchor();
 
@@ -456,13 +545,12 @@ namespace RuneGate
 
         private bool HasReachedCrystal()
         {
-            float leadingEdgeX = spriteRenderer != null ? spriteRenderer.bounds.min.x : transform.position.x;
-            return leadingEdgeX <= ResolveCrystalContactX() + Mathf.Max(0.01f, reachDistance);
-        }
-
-        private float ResolveCrystalContactX()
-        {
-            return laneManager != null ? laneManager.GetCrystalContactX(laneIndex) : crystalTargetPosition.x;
+            RefreshObjectivePosition();
+            float agentRadius = battlefieldAgent != null ? battlefieldAgent.Radius : 0f;
+            return CombatGeometry.IsCenterInRange(
+                transform.position,
+                objectivePosition,
+                Mathf.Max(0.01f, reachDistance) + agentRadius);
         }
 
         private void CaptureOriginalSpriteColor()
@@ -541,31 +629,9 @@ namespace RuneGate
 
         private HeroController FindBlockingHero()
         {
-            IReadOnlyList<HeroController> heroes = HeroController.ActiveHeroes;
-            HeroController selected = null;
-            float selectedDistance = float.MaxValue;
-            for (int i = 0; i < heroes.Count; i++)
-            {
-                HeroController hero = heroes[i];
-                if (hero == null || !hero.IsAlive || hero.LaneIndex != laneIndex)
-                {
-                    continue;
-                }
-
-                float distanceX = Mathf.Abs(transform.position.x - hero.transform.position.x);
-                if (distanceX > ResolveMeleeStopDistance())
-                {
-                    continue;
-                }
-
-                if (distanceX < selectedDistance)
-                {
-                    selected = hero;
-                    selectedDistance = distanceX;
-                }
-            }
-
-            return selected;
+            return battlefieldTargetQuery != null
+                ? battlefieldTargetQuery.FindAttackableBlocker(this, ResolveMeleeStopDistance())
+                : FindBlockingHeroFallback();
         }
 
         private void TryAttackHero(HeroController hero)
@@ -601,7 +667,7 @@ namespace RuneGate
             CombatFeedbackEvents.RaiseAttackStarted(transform.position);
             yield return new WaitForSeconds(Mathf.Max(0f, attackWindUp));
 
-            if (IsAlive && crystalController != null && crystalController.CurrentHp > 0)
+            if (IsAlive && crystalController != null && crystalController.CurrentHp > 0 && HasReachedCrystal())
             {
                 int baseDamage = ShadowContractService.GetDamageToCrystal(monsterData, variantType);
                 int damage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * bossAttackDamageMultiplier));
@@ -626,7 +692,9 @@ namespace RuneGate
             CombatFeedbackEvents.RaiseAttackStarted(transform.position);
             yield return new WaitForSeconds(Mathf.Max(0f, attackWindUp));
 
-            if (hero != null && hero.IsAlive)
+            if (hero != null &&
+                hero.IsAlive &&
+                CombatGeometry.IsCenterInRange(transform.position, hero.transform.position, ResolveMeleeStopDistance()))
             {
                 int damage = ResolveMonsterAttackDamage();
                 visualController?.PlayImpactPause();
@@ -681,34 +749,54 @@ namespace RuneGate
             return Mathf.Max(0.2f, baseDistance);
         }
 
-        private float ApplyMonsterSeparation(float desiredX)
+        private Vector2 CalculateMonsterSeparation()
         {
-            float personalSpace = ResolvePersonalSpace(monsterData, RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData));
-            for (int i = 0; i < activeMonsters.Count; i++)
+            if (battlefieldAgentRegistry == null || battlefieldAgent == null)
             {
-                MonsterController other = activeMonsters[i];
-                if (other == null || other == this || !other.IsAlive || other.LaneIndex != laneIndex)
+                return Vector2.zero;
+            }
+
+            float personalSpace = ResolvePersonalSpace(monsterData, RuntimeSpritePolicy.GetMonsterTargetHeight(monsterData));
+            battlefieldAgentRegistry.FillNeighbors(
+                battlefieldAgent,
+                Mathf.Max(personalSpace * 2.5f, battlefieldAgent.Radius * 3f),
+                neighborAgents);
+            Vector2 separation = Vector2.zero;
+            bool flying = battlefieldAgent.Kind == BattlefieldAgentKind.FlyingMonster;
+            for (int i = 0; i < neighborAgents.Count; i++)
+            {
+                BattlefieldAgent other = neighborAgents[i];
+                if (other == null)
                 {
                     continue;
                 }
 
-                float gap = Mathf.Abs(transform.position.x - other.transform.position.x);
-                if (gap >= personalSpace)
+                bool otherFlying = other.Kind == BattlefieldAgentKind.FlyingMonster;
+                if (flying != otherFlying)
                 {
                     continue;
                 }
 
-                if (transform.position.x >= other.transform.position.x)
+                Vector2 away = (Vector2)transform.position - (Vector2)other.transform.position;
+                float distance = away.magnitude;
+                float desiredGap = battlefieldAgent.Radius + other.Radius;
+                if (distance <= 0.001f)
                 {
-                    desiredX = Mathf.Max(desiredX, other.transform.position.x + personalSpace);
+                    away = battlefieldAgent.StableId < other.StableId ? Vector2.down : Vector2.up;
+                    distance = 0.001f;
                 }
-                else
+
+                if (distance < desiredGap)
                 {
-                    desiredX = Mathf.Min(desiredX, other.transform.position.x - personalSpace * 0.5f);
+                    separation += away.normalized * (desiredGap - distance);
                 }
             }
 
-            return desiredX;
+            float weight = battlefieldSpace != null && battlefieldSpace.Config != null
+                ? battlefieldSpace.Config.SeparationWeight
+                : 0.35f;
+            float maxOffset = Mathf.Max(0.05f, personalSpace * weight);
+            return Vector2.ClampMagnitude(separation, maxOffset);
         }
 
         private float ResolvePersonalSpace(MonsterData data, float targetHeight)
@@ -727,14 +815,97 @@ namespace RuneGate
             return resolved;
         }
 
-        private float ResolveLaneY()
+        private HeroController FindBlockingHeroFallback()
         {
-            if (laneManager == null)
+            IReadOnlyList<HeroController> heroes = HeroController.ActiveHeroes;
+            HeroController selected = null;
+            float selectedDistance = float.MaxValue;
+            for (int i = 0; i < heroes.Count; i++)
             {
-                laneManager = FindAnyObjectByType<LaneManager>();
+                HeroController hero = heroes[i];
+                if (hero == null || !hero.IsAlive)
+                {
+                    continue;
+                }
+
+                float distance = Vector2.Distance(transform.position, hero.transform.position);
+                if (distance <= ResolveMeleeStopDistance() && distance < selectedDistance)
+                {
+                    selected = hero;
+                    selectedDistance = distance;
+                }
             }
 
-            return laneManager != null ? laneManager.GetLaneY(laneIndex) : transform.position.y;
+            return selected;
+        }
+
+        private void RefreshObjectivePosition()
+        {
+            if (crystalApproachPointProvider != null &&
+                crystalApproachPointProvider.TryGetPosition(approachHandle, out Vector2 position))
+            {
+                objectivePosition = position;
+                crystalTargetPosition = position;
+            }
+        }
+
+        private void UpdateObjectiveProgress()
+        {
+            if (battlefieldAgent == null)
+            {
+                return;
+            }
+
+            Vector2 route = objectivePosition - objectiveSpawnPosition;
+            float denominator = route.sqrMagnitude;
+            float progress = denominator > 0.0001f
+                ? Vector2.Dot((Vector2)transform.position - objectiveSpawnPosition, route) / denominator
+                : 0f;
+            battlefieldAgent.SetObjectiveProgress(progress);
+        }
+
+        private void ReleaseSpatialReservation()
+        {
+            if (crystalApproachPointProvider != null && approachHandle.IsValid)
+            {
+                crystalApproachPointProvider.Release(approachHandle);
+            }
+
+            approachHandle = default;
+        }
+
+        private void BindSpatialLayout()
+        {
+            if (spatialLayoutBound || battlefieldSpace == null)
+            {
+                return;
+            }
+
+            battlefieldSpace.LayoutChanged += HandleSpatialLayoutChanged;
+            spatialLayoutBound = true;
+        }
+
+        private void UnbindSpatialLayout()
+        {
+            if (!spatialLayoutBound || battlefieldSpace == null)
+            {
+                spatialLayoutBound = false;
+                return;
+            }
+
+            battlefieldSpace.LayoutChanged -= HandleSpatialLayoutChanged;
+            spatialLayoutBound = false;
+        }
+
+        private void HandleSpatialLayoutChanged(BattlefieldBounds previous, BattlefieldBounds next)
+        {
+            if (previous.IsValid && next.IsValid)
+            {
+                objectiveSpawnPosition = next.ToWorld(previous.ToNormalized(objectiveSpawnPosition));
+            }
+
+            RefreshObjectivePosition();
+            UpdateObjectiveProgress();
         }
 
         private void SetCombatState(MonsterCombatState nextState)

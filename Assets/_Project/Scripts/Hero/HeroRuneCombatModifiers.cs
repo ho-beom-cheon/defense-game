@@ -85,7 +85,7 @@ namespace RuneGate
             ApplySplashDamage(primaryTarget, primaryDamage);
             if (owner.IsRangedCombatant)
             {
-                MonsterController chainTarget = FindNearestTarget(primaryTarget.transform.position, primaryTarget.LaneIndex, float.MaxValue);
+                MonsterController chainTarget = FindNearestTarget(primaryTarget.transform.position, LightningRange);
                 ApplySecondaryDamage(chainTarget, primaryDamage, chainDamagePercent);
             }
 
@@ -93,7 +93,7 @@ namespace RuneGate
             {
                 for (int i = 0; i < 2; i++)
                 {
-                    MonsterController lightningTarget = FindNearestTarget(primaryTarget.transform.position, -1, LightningRange);
+                    MonsterController lightningTarget = FindNearestTarget(primaryTarget.transform.position, LightningRange);
                     if (!ApplySecondaryDamage(lightningTarget, primaryDamage, lightningDamagePercent))
                     {
                         break;
@@ -114,7 +114,7 @@ namespace RuneGate
             for (int i = 0; i < monsters.Count; i++)
             {
                 MonsterController candidate = monsters[i];
-                if (!CanHit(candidate) || candidate.LaneIndex != primaryTarget.LaneIndex)
+                if (!CanHit(candidate))
                 {
                     continue;
                 }
@@ -126,7 +126,7 @@ namespace RuneGate
             }
         }
 
-        private MonsterController FindNearestTarget(Vector3 origin, int requiredLane, float maxDistance)
+        private MonsterController FindNearestTarget(Vector3 origin, float maxDistance)
         {
             MonsterController selected = null;
             float bestDistanceSquared = maxDistance < float.MaxValue ? maxDistance * maxDistance : float.MaxValue;
@@ -134,7 +134,7 @@ namespace RuneGate
             for (int i = 0; i < monsters.Count; i++)
             {
                 MonsterController candidate = monsters[i];
-                if (!CanHit(candidate) || requiredLane >= 0 && candidate.LaneIndex != requiredLane)
+                if (!CanHit(candidate))
                 {
                     continue;
                 }

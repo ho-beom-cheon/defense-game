@@ -76,6 +76,7 @@ namespace RuneGate.Editor
             ValidateBossPatternRules(errors);
             ValidateFormation(catalog, errors, warnings);
             ValidateBattlefieldSpace(errors);
+            ValidateContinuousCombatGeometry(errors);
             ValidateDefaultSave(catalog, errors);
             ValidateStageSessionResolution(catalog, errors);
             ValidateBattleResultProgression(catalog, errors);
@@ -203,6 +204,27 @@ namespace RuneGate.Editor
                 }
 
                 previousV = currentV;
+            }
+        }
+
+        private static void ValidateContinuousCombatGeometry(List<string> errors)
+        {
+            if (CombatGeometry.IsCenterInRange(new Vector2(0f, 0f), new Vector2(0f, 3f), 2f))
+            {
+                errors.Add("Continuous combat must not attack a target with the same X when its Y distance exceeds range.");
+            }
+
+            if (!CombatGeometry.IsCenterInRange(new Vector2(0f, 0f), new Vector2(1.5f, 1.5f), 2.2f))
+            {
+                errors.Add("Continuous combat must allow diagonal targets inside the 2D range.");
+            }
+
+            Bounds bounds = new Bounds(Vector3.zero, new Vector3(10f, 8f, 1f));
+            int lowerOrder = BattlefieldDepthSorter.CalculateOrder(new Vector3(0f, -2f, 0f), bounds);
+            int upperOrder = BattlefieldDepthSorter.CalculateOrder(new Vector3(0f, 2f, 0f), bounds);
+            if (lowerOrder <= upperOrder)
+            {
+                errors.Add("Battlefield depth sorting must render lower world-Y units in front of upper units.");
             }
         }
 

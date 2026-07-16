@@ -109,7 +109,8 @@ namespace RuneGate
             }
 
             Vector3 direction = targetPosition - transform.position;
-            attackLungeRoutine = StartCoroutine(AttackLungeRoutine(Mathf.Sign(Mathf.Approximately(direction.x, 0f) ? 1f : direction.x)));
+            Vector2 direction2D = direction.sqrMagnitude > 0.0001f ? ((Vector2)direction).normalized : Vector2.right;
+            attackLungeRoutine = StartCoroutine(AttackLungeRoutine(direction2D));
         }
 
         public void PlayHit()
@@ -240,7 +241,7 @@ namespace RuneGate
             restPoseCaptured = true;
         }
 
-        private IEnumerator AttackLungeRoutine(float directionX)
+        private IEnumerator AttackLungeRoutine(Vector2 direction)
         {
             CaptureRestPose(false);
             Transform visualTransform = GetVisualTransform();
@@ -249,7 +250,7 @@ namespace RuneGate
                 yield break;
             }
 
-            Vector3 peakPosition = restLocalPosition + new Vector3(directionX * attackLungeDistance, 0f, 0f);
+            Vector3 peakPosition = restLocalPosition + (Vector3)(direction * attackLungeDistance);
             float halfDuration = attackLungeDuration * 0.5f;
             yield return MoveVisualPosition(visualTransform, restLocalPosition, peakPosition, halfDuration);
             yield return MoveVisualPosition(visualTransform, peakPosition, restLocalPosition, halfDuration);

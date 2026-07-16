@@ -8,8 +8,10 @@ namespace RuneGate
         private static readonly List<TemporaryTurretController> activeTurrets = new List<TemporaryTurretController>();
 
         private HeroController owner;
-        private LaneManager laneManager;
         private int laneIndex;
+        private BattlefieldSpaceController battlefieldSpace;
+        private BattlefieldAgentRegistry battlefieldAgentRegistry;
+        private BattlefieldAgent battlefieldAgent;
         private int attackDamage;
         private float attackRange;
         private float attackInterval;
@@ -34,6 +36,7 @@ namespace RuneGate
         private void OnDisable()
         {
             activeTurrets.Remove(this);
+            battlefieldAgentRegistry?.Unregister(battlefieldAgent);
         }
 
         public void Initialize(HeroController caster, int assignedLaneIndex, int damage, float range, float lifetime, float interval)
@@ -46,13 +49,19 @@ namespace RuneGate
             attackInterval = Mathf.Max(0.15f, interval);
             attackCooldown = 0f;
             shotsFired = 0;
-            laneManager = FindAnyObjectByType<LaneManager>();
+            battlefieldSpace = FindAnyObjectByType<BattlefieldSpaceController>();
+            battlefieldAgentRegistry = FindAnyObjectByType<BattlefieldAgentRegistry>();
 
             Vector3 origin = caster != null ? caster.transform.position : transform.position;
-            float laneY = laneManager != null ? laneManager.GetLaneY(laneIndex) : origin.y;
-            transform.position = new Vector3(origin.x + 0.52f, laneY, origin.z - 0.01f);
+            Vector2 position = (Vector2)origin + new Vector2(0.52f, 0f);
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                position = battlefieldSpace.Clamp(position, new Vector2(0.26f, 0.2f));
+            }
+
+            transform.position = new Vector3(position.x, position.y, origin.z - 0.01f);
             CreateVisual();
-            laneManager?.ClampUnitInsideBattlefield(transform, GetComponent<SpriteRenderer>());
+            ConfigureSpatialPresentation();
         }
 
         private void Update()
@@ -90,17 +99,19 @@ namespace RuneGate
             for (int i = 0; i < monsters.Count; i++)
             {
                 MonsterController candidate = monsters[i];
-                if (candidate == null || !candidate.IsAlive || candidate.LaneIndex != laneIndex)
+                if (candidate == null || !candidate.IsAlive)
                 {
                     continue;
                 }
 
-                if (Mathf.Abs(candidate.transform.position.x - transform.position.x) > attackRange)
+                if (!CombatGeometry.IsCenterInRange(transform.position, candidate.transform.position, attackRange))
                 {
                     continue;
                 }
 
-                if (selected == null || candidate.transform.position.x < selected.transform.position.x)
+                float candidateProgress = candidate.Agent != null ? candidate.Agent.ObjectiveProgress : 0f;
+                float selectedProgress = selected != null && selected.Agent != null ? selected.Agent.ObjectiveProgress : -1f;
+                if (selected == null || candidateProgress > selectedProgress)
                 {
                     selected = candidate;
                 }
@@ -126,6 +137,31 @@ namespace RuneGate
 
             PlaceholderSprite placeholder = gameObject.AddComponent<PlaceholderSprite>();
             placeholder.Configure(new Color(0.68f, 0.48f, 0.24f, 1f), new Vector2(0.52f, 0.38f), 9);
+        }
+
+        private void ConfigureSpatialPresentation()
+        {
+            SpriteRenderer renderer = GetComponent<SpriteRenderer>();
+            Vector2 halfExtents = renderer != null
+                ? new Vector2(renderer.bounds.extents.x, renderer.bounds.extents.y)
+                : new Vector2(0.26f, 0.2f);
+            if (battlefieldAgentRegistry != null && battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                battlefieldAgent = gameObject.AddComponent<BattlefieldAgent>();
+                int stableId = gameObject.GetHashCode();
+                battlefieldAgent.Configure(
+                    BattlefieldAgentKind.Deployable,
+                    BattlefieldFaction.Hero,
+                    stableId == 0 ? 1 : stableId,
+                    Mathf.Max(0.18f, halfExtents.x * 0.7f),
+                    halfExtents,
+                    transform.position,
+                    battlefieldSpace.CurrentBounds.PlayableRect);
+                battlefieldAgent.AttachRegistry(battlefieldAgentRegistry);
+            }
+
+            BattlefieldDepthSorter depthSorter = gameObject.AddComponent<BattlefieldDepthSorter>();
+            depthSorter.Configure(renderer, null, battlefieldSpace, gameObject.GetHashCode());
         }
     }
 }

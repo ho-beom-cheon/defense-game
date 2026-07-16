@@ -1727,7 +1727,7 @@ namespace RuneGate.Editor
                 SetObject(serializedObject, "runeManager", runeManager);
                 SetObject(serializedObject, "runeEffectApplier", runeEffectApplier);
                 SetObject(serializedObject, "heroPlacementManager", heroPlacementManager);
-                SetEnum(serializedObject, "battlefieldMode", BattlefieldMode.LegacyLanes);
+                SetEnum(serializedObject, "battlefieldMode", BattlefieldMode.Continuous2D);
                 SetObject(serializedObject, "battlefieldSpace", battlefieldSpace);
                 SetObject(serializedObject, "battlefieldLayoutCoordinator", battlefieldLayoutCoordinator);
                 SetObject(serializedObject, "battlefieldAgentRegistry", battlefieldAgentRegistry);

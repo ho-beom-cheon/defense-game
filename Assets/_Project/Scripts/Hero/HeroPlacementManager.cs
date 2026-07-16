@@ -339,6 +339,7 @@ namespace RuneGate
                 anchor,
                 leashRect);
             agent.AttachRegistry(activeAgentRegistry);
+            heroController.ConfigureSpatialCombat(activeBattlefieldSpace, activeAgentRegistry);
         }
 
         private static int StableHash(string value)

@@ -33,6 +33,12 @@ namespace RuneGate
             }
 
             transform.position = Vector3.MoveTowards(transform.position, target.transform.position, moveSpeed * Time.deltaTime);
+            SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sortingOrder = BattlefieldDepthSorter.CalculateWorldOrder(transform.position, 3);
+            }
+
             if (Vector3.Distance(transform.position, target.transform.position) <= hitDistance)
             {
                 if (spawnImpactEffect)

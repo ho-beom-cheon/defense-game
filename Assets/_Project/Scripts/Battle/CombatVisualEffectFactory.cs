@@ -111,7 +111,7 @@ namespace RuneGate
             effectObject.transform.position = position;
             effectObject.AddComponent<SpriteRenderer>();
             PlaceholderSprite placeholderSprite = effectObject.AddComponent<PlaceholderSprite>();
-            placeholderSprite.Configure(color, size, sortingOrder);
+            placeholderSprite.Configure(color, size, ResolveWorldOrder(position, sortingOrder));
             AutoDestroyEffect autoDestroyEffect = effectObject.AddComponent<AutoDestroyEffect>();
             autoDestroyEffect.Configure(lifetime);
         }
@@ -151,7 +151,7 @@ namespace RuneGate
             SpriteRenderer spriteRenderer = effectObject.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = sprite;
             spriteRenderer.color = color;
-            spriteRenderer.sortingOrder = sortingOrder;
+            spriteRenderer.sortingOrder = ResolveWorldOrder(position, sortingOrder);
             FitSpriteTransform(effectObject.transform, spriteRenderer, targetSize);
             AutoDestroyEffect autoDestroyEffect = effectObject.AddComponent<AutoDestroyEffect>();
             autoDestroyEffect.Configure(lifetime);
@@ -169,7 +169,10 @@ namespace RuneGate
             effectObject.transform.rotation = Quaternion.Euler(0f, 0f, angle);
             effectObject.AddComponent<SpriteRenderer>();
             PlaceholderSprite placeholderSprite = effectObject.AddComponent<PlaceholderSprite>();
-            placeholderSprite.Configure(color, new Vector2(length, Mathf.Max(0.02f, thickness)), sortingOrder);
+            placeholderSprite.Configure(
+                color,
+                new Vector2(length, Mathf.Max(0.02f, thickness)),
+                ResolveWorldOrder(center, sortingOrder));
             AutoDestroyEffect autoDestroyEffect = effectObject.AddComponent<AutoDestroyEffect>();
             autoDestroyEffect.Configure(lifetime);
         }
@@ -188,6 +191,11 @@ namespace RuneGate
                 Mathf.Max(0.01f, targetSize.x) / width,
                 Mathf.Max(0.01f, targetSize.y) / height,
                 1f);
+        }
+
+        private static int ResolveWorldOrder(Vector3 position, int legacyOrder)
+        {
+            return BattlefieldDepthSorter.CalculateWorldOrder(position, Mathf.Clamp(legacyOrder - 15, -2, 6));
         }
     }
 }
