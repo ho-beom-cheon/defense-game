@@ -406,6 +406,7 @@ namespace RuneGate.Editor
             "docs/store-listing-draft.md",
             "docs/privacy-checklist.md",
             "docs/release-notes-v1.0.md",
+            "docs/android-v1-public-test-package.md",
             "docs/hero-character-bible.md",
             "docs/enemy-boss-bible.md",
             "docs/korean-world-identity-guide.md",
@@ -458,7 +459,29 @@ namespace RuneGate.Editor
         [MenuItem("Tools/RuneGate/Validate v1.0 Release Track")]
         public static void ValidateV10FromMenu()
         {
-            ValidateFromMenu();
+            bool valid = ValidateV10ReleaseTrack(out List<string> errors);
+            if (valid)
+            {
+                Debug.Log("RuneGate v1.0 release-track validation passed.");
+                Debug.Log($"RuneGate save path: {SaveManager.SavePath}");
+                return;
+            }
+
+            Debug.LogError("RuneGate v1.0 release-track validation failed:\n" + string.Join("\n", errors));
+        }
+
+        public static void ValidateV10FromCommandLine()
+        {
+            bool valid = ValidateV10ReleaseTrack(out List<string> errors);
+            if (valid)
+            {
+                Debug.Log("RuneGate v1.0 release-track command-line validation passed.");
+                EditorApplication.Exit(0);
+                return;
+            }
+
+            Debug.LogError("RuneGate v1.0 release-track command-line validation failed:\n" + string.Join("\n", errors));
+            EditorApplication.Exit(1);
         }
 
         public static void ValidateFromCommandLine()
@@ -633,6 +656,28 @@ namespace RuneGate.Editor
             if (!File.Exists(ToProjectPath(".gitattributes")))
             {
                 errors.Add("Missing .gitattributes for Git LFS tracking.");
+            }
+
+            return errors.Count == 0;
+        }
+
+        public static bool ValidateV10ReleaseTrack(out List<string> errors)
+        {
+            ValidateProject(out errors);
+
+            if (PlayerSettings.productName != "RuneGate Defense")
+            {
+                errors.Add("Product Name is not RuneGate Defense.");
+            }
+
+            if (PlayerSettings.bundleVersion != "1.0.0")
+            {
+                errors.Add($"Bundle Version is {PlayerSettings.bundleVersion}; expected 1.0.0.");
+            }
+
+            if (PlayerSettings.Android.bundleVersionCode != 10)
+            {
+                errors.Add($"Android Bundle Version Code is {PlayerSettings.Android.bundleVersionCode}; expected 10.");
             }
 
             return errors.Count == 0;
