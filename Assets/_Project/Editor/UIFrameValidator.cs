@@ -33,6 +33,7 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/UI/TitleCanvasLayout.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldArtTheme.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldVisualController.cs",
+            "Assets/_Project/Scripts/Battle/GroundFieldRenderer.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldVisualState.cs",
             "Assets/_Project/Scripts/UI/FormationSkillPanelUI.cs",
             "Assets/_Project/Scripts/UI/RuneSelectionUI.cs",
@@ -453,7 +454,11 @@ namespace RuneGate.Editor
                 "m_Name: Spawn Rift Zone",
                 "m_Name: Lane 0 Path",
                 "m_Name: Lane 1 Path",
-                "m_Name: Lane 2 Path"
+                "m_Name: Lane 2 Path",
+                "m_Name: Lane Points",
+                "m_Name: Lane 0 Monster Spawn",
+                "m_Name: Lane 0 Crystal Target",
+                "m_Name: Lane 0 Hero Slot 0"
             };
             bool legacyFound = false;
             for (int i = 0; i < forbidden.Length; i++)
