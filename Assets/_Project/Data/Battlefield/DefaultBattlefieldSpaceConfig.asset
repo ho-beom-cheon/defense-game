@@ -28,9 +28,9 @@ MonoBehaviour:
     width: 0.1
     height: 0.64
   formationRowV:
-  - 0.22
+  - 0.18
   - 0.5
-  - 0.78
+  - 0.82
   backAnchorU: 0.2
   middleAnchorU: 0.3
   frontAnchorU: 0.4

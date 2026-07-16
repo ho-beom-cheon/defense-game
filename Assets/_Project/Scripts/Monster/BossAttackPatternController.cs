@@ -17,6 +17,7 @@ namespace RuneGate
         private MonsterController boss;
         private BossPhaseController phaseController;
         private CrystalController crystalController;
+        private BattlefieldSpaceController battlefieldSpace;
         private Coroutine patternRoutine;
         private float cooldownRemaining;
         private int totalPatternsResolved;
@@ -42,6 +43,7 @@ namespace RuneGate
             boss = bossController;
             phaseController = bossPhaseController;
             crystalController = crystal;
+            battlefieldSpace = FindAnyObjectByType<BattlefieldSpaceController>();
             cooldownRemaining = Mathf.Max(0.1f, initialDelay);
             totalPatternsResolved = 0;
             totalHeroesHit = 0;
@@ -135,7 +137,9 @@ namespace RuneGate
             for (int i = 0; i < targets.Count; i++)
             {
                 HeroController hero = targets[i];
-                if (hero == null || !hero.IsAlive)
+                if (hero == null ||
+                    !hero.IsAlive ||
+                    phase <= 1 && !IsInSelectedBand(hero.transform.position))
                 {
                     continue;
                 }
@@ -182,7 +186,7 @@ namespace RuneGate
                 for (int i = 0; i < heroes.Count; i++)
                 {
                     HeroController hero = heroes[i];
-                    if (hero != null && hero.IsAlive && hero.LaneIndex == boss.LaneIndex)
+                    if (hero != null && hero.IsAlive && IsInSelectedBand(hero.transform.position))
                     {
                         targets.Add(hero);
                     }
@@ -193,7 +197,7 @@ namespace RuneGate
 
             if (phase == 2)
             {
-                Dictionary<int, HeroController> frontByLane = new Dictionary<int, HeroController>();
+                Dictionary<int, HeroController> frontByBand = new Dictionary<int, HeroController>();
                 for (int i = 0; i < heroes.Count; i++)
                 {
                     HeroController hero = heroes[i];
@@ -202,14 +206,15 @@ namespace RuneGate
                         continue;
                     }
 
-                    if (!frontByLane.TryGetValue(hero.LaneIndex, out HeroController selected) ||
+                    int bandIndex = ResolveBandIndex(hero.transform.position);
+                    if (!frontByBand.TryGetValue(bandIndex, out HeroController selected) ||
                         hero.transform.position.x > selected.transform.position.x)
                     {
-                        frontByLane[hero.LaneIndex] = hero;
+                        frontByBand[bandIndex] = hero;
                     }
                 }
 
-                foreach (HeroController hero in frontByLane.Values)
+                foreach (HeroController hero in frontByBand.Values)
                 {
                     targets.Add(hero);
                 }
@@ -227,6 +232,31 @@ namespace RuneGate
             }
 
             return targets;
+        }
+
+        private bool IsInSelectedBand(Vector2 position)
+        {
+            if (battlefieldSpace == null || !battlefieldSpace.IsReady || boss == null)
+            {
+                return Vector2.Distance(position, boss != null ? boss.transform.position : Vector3.zero) <= 2.2f;
+            }
+
+            Rect playable = battlefieldSpace.CurrentBounds.PlayableRect;
+            float centerV = battlefieldSpace.Config.GetFormationRowV(Mathf.Clamp(boss.LaneIndex, 0, 2));
+            float centerY = Mathf.Lerp(playable.yMin, playable.yMax, centerV);
+            float halfHeight = playable.height * 0.18f;
+            return position.y >= centerY - halfHeight && position.y <= centerY + halfHeight;
+        }
+
+        private int ResolveBandIndex(Vector2 position)
+        {
+            if (battlefieldSpace == null || !battlefieldSpace.IsReady)
+            {
+                return position.y < -0.5f ? 0 : position.y > 0.5f ? 2 : 1;
+            }
+
+            float v = battlefieldSpace.CurrentBounds.ToNormalized(position).y;
+            return v < 0.34f ? 0 : v > 0.66f ? 2 : 1;
         }
 
         private float ResolveInterval(int phase)

@@ -15,7 +15,6 @@ namespace RuneGate
         [SerializeField] private HeroRuneCombatModifiers runeCombatModifiers;
         [SerializeField] private ProjectileController projectilePrefab;
         [SerializeField] private Transform projectileSpawnPoint;
-        [SerializeField] private LayerMask monsterLayer = ~0;
         [SerializeField] private bool initializeOnAwake = true;
         [SerializeField] private int laneIndex = -1;
         [SerializeField] private int heroSlotIndex = -1;
@@ -26,8 +25,6 @@ namespace RuneGate
         [SerializeField] private float meleeStopDistance = 0.88f;
         [SerializeField] private float rangedStopDistanceMultiplier = 0.72f;
         [SerializeField] private float returnStopDistance = 0.05f;
-        [SerializeField] private float laneLeashLeftX = -4.85f;
-        [SerializeField] private float laneLeashRightX = 4.35f;
         [SerializeField] private float laneMoveAcceleration = 8.5f;
         [SerializeField] private float laneMoveDeceleration = 15f;
         [SerializeField] private float heroPersonalSpace = 0.58f;
@@ -52,13 +49,17 @@ namespace RuneGate
         private float bossDamageMultiplier = 1f;
         private float healingMultiplier = 1f;
         private bool initialized;
-        private LaneManager laneManager;
+        private BattlefieldSpaceController battlefieldSpace;
+        private BattlefieldAgentRegistry battlefieldAgentRegistry;
+        private BattlefieldAgent battlefieldAgent;
+        private readonly List<BattlefieldAgent> neighborAgents = new List<BattlefieldAgent>();
         private Vector3 anchorPosition;
         private bool anchorCaptured;
         private HeroCombatState combatState = HeroCombatState.Idle;
         private MonsterController lockedTarget;
         private float targetLockRemaining;
         private Coroutine attackRoutine;
+        private bool spatialLayoutBound;
 
         public event Action<int, int> HpChanged;
 
@@ -75,6 +76,7 @@ namespace RuneGate
         public HeroCombatState CombatState => combatState;
         public bool IsRangedCombatant => attackRange > 2.25f;
         public HeroRuneCombatModifiers RuneCombatModifiers => runeCombatModifiers;
+        public BattlefieldAgent Agent => battlefieldAgent;
         public static IReadOnlyList<HeroController> ActiveHeroes => activeHeroes;
 
         private void OnEnable()
@@ -88,6 +90,7 @@ namespace RuneGate
         private void OnDisable()
         {
             activeHeroes.Remove(this);
+            UnbindSpatialLayout();
         }
 
         private void Awake()
@@ -138,9 +141,10 @@ namespace RuneGate
                 return;
             }
 
-            float distanceToTarget = Mathf.Abs(transform.position.x - target.transform.position.x);
+            float distanceToTarget = CombatGeometry.CenterDistance(transform.position, target.transform.position);
             float stopDistance = GetStopDistance();
-            if (enableLaneAutoMove && ShouldRepositionForTarget(target, distanceToTarget, stopDistance))
+            if (enableLaneAutoMove &&
+                (distanceToTarget > attackRange || ShouldRepositionForTarget(target, distanceToTarget, stopDistance)))
             {
                 MoveTowardTarget(target, stopDistance);
                 return;
@@ -194,7 +198,7 @@ namespace RuneGate
             EnsureMovementController();
             EnsureRuneCombatModifiers();
             runeCombatModifiers.ResetModifiers();
-            movementController.Configure(laneMoveSpeed, attackRange, heroPersonalSpace, ResolveRoleLeashRange());
+            movementController.Configure(laneMoveSpeed, attackRange, heroPersonalSpace, ResolveMovementLeashHint());
             movementController.SetMotionTuning(laneMoveAcceleration, laneMoveDeceleration, returnStopDistance);
             visualController?.Initialize(data.BattleSprite, data.AnimatorController);
             RefreshVisualAnchors(true);
@@ -205,7 +209,7 @@ namespace RuneGate
         public void RefreshVisualAnchors(bool recaptureRestPose = false)
         {
             SpriteRenderer spriteRenderer = visualController != null ? visualController.SpriteRenderer : GetComponentInChildren<SpriteRenderer>();
-            RuntimeSpriteBoundsUtility.AlignVisualBottomToGround(spriteRenderer, transform, ResolveLaneY());
+            RuntimeSpriteBoundsUtility.AlignVisualBottomToGround(spriteRenderer, transform, transform.position.y);
             if (recaptureRestPose)
             {
                 visualController?.CaptureCurrentRestPose();
@@ -341,6 +345,39 @@ namespace RuneGate
             CaptureAnchorIfNeeded(true);
         }
 
+        public void ConfigureSpatialCombat(
+            BattlefieldSpaceController space,
+            BattlefieldAgentRegistry agentRegistry)
+        {
+            battlefieldSpace = space;
+            battlefieldAgentRegistry = agentRegistry;
+            battlefieldAgent = GetComponent<BattlefieldAgent>();
+            if (battlefieldAgent != null)
+            {
+                anchorPosition = battlefieldAgent.Anchor;
+                anchorCaptured = true;
+            }
+
+            BindSpatialLayout();
+
+            SpriteRenderer body = visualController != null
+                ? visualController.SpriteRenderer
+                : GetComponentInChildren<SpriteRenderer>();
+            Transform shadowTransform = transform.Find("Unit Ground Shadow");
+            SpriteRenderer shadow = shadowTransform != null ? shadowTransform.GetComponent<SpriteRenderer>() : null;
+            BattlefieldDepthSorter depthSorter = GetComponent<BattlefieldDepthSorter>();
+            if (depthSorter == null)
+            {
+                depthSorter = gameObject.AddComponent<BattlefieldDepthSorter>();
+            }
+
+            depthSorter.Configure(
+                body,
+                shadow,
+                battlefieldSpace,
+                battlefieldAgent != null ? battlefieldAgent.StableId : gameObject.GetHashCode());
+        }
+
         private void BasicAttack(MonsterController target)
         {
             if (target == null || attackRoutine != null)
@@ -365,7 +402,9 @@ namespace RuneGate
             float windUp = ShouldUseFallbackProjectile() || projectilePrefab != null ? rangedAttackWindUp : meleeAttackWindUp;
             yield return new WaitForSeconds(Mathf.Max(0f, windUp));
 
-            if (target == null || !target.IsAlive)
+            if (target == null ||
+                !target.IsAlive ||
+                !CombatGeometry.IsCenterInRange(transform.position, target.transform.position, attackRange))
             {
                 yield return new WaitForSeconds(Mathf.Max(0f, rangedAttackRecovery));
                 movementController?.SetAttackState(false);
@@ -425,11 +464,7 @@ namespace RuneGate
         private MonsterController FindTarget(float range, TargetingType targetingType)
         {
             float safeRange = Mathf.Max(0.1f, range);
-            MonsterController selected = FindTargetInRange(safeRange, targetingType, true);
-            if (selected == null)
-            {
-                selected = FindTargetInRange(safeRange, targetingType, false);
-            }
+            MonsterController selected = FindTargetInRange(safeRange, targetingType);
 
             if (selected == null && targetingType == TargetingType.Boss)
             {
@@ -459,33 +494,60 @@ namespace RuneGate
                 return false;
             }
 
-            if (laneIndex >= 0 && target.LaneIndex != laneIndex)
-            {
-                return false;
-            }
-
-            return Mathf.Abs(transform.position.x - target.transform.position.x) <= Mathf.Max(range, attackRange) + 0.5f;
+            float lockSlack = battlefieldSpace != null && battlefieldSpace.Config != null
+                ? battlefieldSpace.Config.TargetLockSlack
+                : 0.4f;
+            return CombatGeometry.IsCenterInRange(
+                transform.position,
+                target.transform.position,
+                Mathf.Max(range, attackRange) + lockSlack);
         }
 
-        private MonsterController FindTargetInRange(float range, TargetingType targetingType, bool requireSameLane)
+        private MonsterController FindTargetInRange(float range, TargetingType targetingType)
         {
-            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, range, monsterLayer);
             MonsterController selected = null;
-
-            for (int i = 0; i < hits.Length; i++)
+            if (battlefieldAgentRegistry != null)
             {
-                MonsterController monster = hits[i].GetComponentInParent<MonsterController>();
-                if (monster == null || !monster.IsAlive)
+                IReadOnlyList<BattlefieldAgent> agents = battlefieldAgentRegistry.ActiveAgents;
+                for (int i = 0; i < agents.Count; i++)
+                {
+                    BattlefieldAgent candidateAgent = agents[i];
+                    if (candidateAgent == null || candidateAgent.Faction != BattlefieldFaction.Monster)
+                    {
+                        continue;
+                    }
+
+                    MonsterController monster = candidateAgent.GetComponent<MonsterController>();
+                    if (monster == null ||
+                        !monster.IsAlive ||
+                        !CombatGeometry.IsCenterInRange(transform.position, monster.transform.position, range))
+                    {
+                        continue;
+                    }
+
+                    if (targetingType == TargetingType.Boss && !monster.IsBoss)
+                    {
+                        continue;
+                    }
+
+                    selected = PickBetterTarget(selected, monster, targetingType);
+                }
+
+                return selected;
+            }
+
+            IReadOnlyList<MonsterController> monsters = MonsterController.ActiveMonsters;
+            for (int i = 0; i < monsters.Count; i++)
+            {
+                MonsterController monster = monsters[i];
+                if (monster == null ||
+                    !monster.IsAlive ||
+                    !CombatGeometry.IsCenterInRange(transform.position, monster.transform.position, range))
                 {
                     continue;
                 }
 
-                if (requireSameLane && laneIndex >= 0 && monster.LaneIndex != laneIndex)
-                {
-                    continue;
-                }
-
-                if (targetingType == TargetingType.Boss && monster.Data != null && monster.Data.MonsterType != MonsterType.Boss)
+                if (targetingType == TargetingType.Boss && !monster.IsBoss)
                 {
                     continue;
                 }
@@ -567,60 +629,76 @@ namespace RuneGate
                 return;
             }
 
-            Vector3 current = transform.position;
-            Vector3 targetPosition = target.transform.position;
-            float desiredX = ResolveRoleDesiredX(target, targetPosition.x, stopDistance);
-            desiredX = ApplyHeroSeparation(desiredX);
-            float laneY = ResolveLaneY();
-            Vector3 destination = new Vector3(desiredX, laneY, current.z);
-            MoveAlongLane(destination);
+            Vector2 current = transform.position;
+            Vector2 targetPosition = target.transform.position;
+            Vector2 away = current - targetPosition;
+            if (away.sqrMagnitude <= 0.0001f)
+            {
+                away = (Vector2)anchorPosition - targetPosition;
+            }
+
+            if (away.sqrMagnitude <= 0.0001f)
+            {
+                away = Vector2.left;
+            }
+
+            Vector2 destination = targetPosition + away.normalized * stopDistance;
+            if (heroData != null &&
+                (heroData.Role == HeroRole.Healer || heroData.Role == HeroRole.Engineer || heroData.Role == HeroRole.Support))
+            {
+                destination = Vector2.Lerp(destination, anchorPosition, 0.55f);
+            }
+            else if (heroData != null &&
+                (heroData.Role == HeroRole.RangedDps || heroData.Role == HeroRole.Mage) &&
+                Vector2.Distance(current, targetPosition) < closeEnemyRetreatDistance)
+            {
+                destination = current + away.normalized * rangedSafeBackOffset;
+            }
+
+            destination = ClampToLeash(destination);
+            MoveContinuous(destination, CalculateHeroSeparation());
         }
 
-        private float ResolveRoleDesiredX(MonsterController target, float targetX, float stopDistance)
+        private Vector2 CalculateHeroSeparation()
         {
-            float distanceToTarget = Mathf.Abs(transform.position.x - targetX);
-            float forwardLimit = Mathf.Min(laneLeashRightX, anchorPosition.x + ResolveRoleLeashRange());
-            float backLimit = Mathf.Max(laneLeashLeftX, anchorPosition.x - ResolveRoleBackRange());
-            if (laneManager != null)
+            if (battlefieldAgentRegistry == null || battlefieldAgent == null)
             {
-                forwardLimit = Mathf.Min(forwardLimit, laneManager.GetMaxCombatX());
-                backLimit = Mathf.Max(backLimit, laneManager.GetMinCombatX());
+                return Vector2.zero;
             }
 
-            if (heroData == null)
+            battlefieldAgentRegistry.FillNeighbors(
+                battlefieldAgent,
+                Mathf.Max(heroPersonalSpace * 2.5f, battlefieldAgent.Radius * 3f),
+                neighborAgents);
+            Vector2 separation = Vector2.zero;
+            for (int i = 0; i < neighborAgents.Count; i++)
             {
-                return Mathf.Clamp(targetX - stopDistance, backLimit, forwardLimit);
+                BattlefieldAgent other = neighborAgents[i];
+                if (other == null || other.Kind != BattlefieldAgentKind.Hero)
+                {
+                    continue;
+                }
+
+                Vector2 away = (Vector2)transform.position - (Vector2)other.transform.position;
+                float distance = away.magnitude;
+                float desiredGap = battlefieldAgent.Radius + other.Radius;
+                if (distance <= 0.001f)
+                {
+                    away = heroSlotIndex <= 1 ? Vector2.down : Vector2.up;
+                    distance = 0.001f;
+                }
+
+                if (distance < desiredGap)
+                {
+                    separation += away.normalized * (desiredGap - distance);
+                }
             }
 
-            switch (heroData.Role)
-            {
-                case HeroRole.Healer:
-                case HeroRole.Engineer:
-                case HeroRole.Support:
-                    SetCombatState(distanceToTarget < closeEnemyRetreatDistance ? HeroCombatState.Reposition : HeroCombatState.ReturnToAnchor);
-                    return Mathf.Clamp(anchorPosition.x - rangedSafeBackOffset, backLimit, forwardLimit);
-                case HeroRole.RangedDps:
-                case HeroRole.Mage:
-                    if (distanceToTarget < closeEnemyRetreatDistance)
-                    {
-                        SetCombatState(HeroCombatState.Reposition);
-                        return Mathf.Clamp(anchorPosition.x - rangedSafeBackOffset, backLimit, forwardLimit);
-                    }
-
-                    SetCombatState(HeroCombatState.MoveToTarget);
-                    return Mathf.Clamp(targetX - stopDistance, backLimit, forwardLimit);
-                case HeroRole.Assassin:
-                    SetCombatState(HeroCombatState.MoveToTarget);
-                    return Mathf.Clamp(targetX - stopDistance * 0.65f, backLimit, forwardLimit);
-                case HeroRole.Tank:
-                case HeroRole.MeleeDps:
-                default:
-                    SetCombatState(HeroCombatState.MoveToTarget);
-                    return Mathf.Clamp(targetX - stopDistance, backLimit, forwardLimit);
-            }
+            float maxOffset = Mathf.Max(0.05f, heroPersonalSpace * 0.35f);
+            return Vector2.ClampMagnitude(separation, maxOffset);
         }
 
-        private float ResolveRoleLeashRange()
+        private float ResolveMovementLeashHint()
         {
             if (heroData == null)
             {
@@ -639,65 +717,9 @@ namespace RuneGate
                     return 0.72f;
                 case HeroRole.Mage:
                     return 0.55f;
-                case HeroRole.Engineer:
-                case HeroRole.Healer:
-                case HeroRole.Support:
                 default:
                     return 0.28f;
             }
-        }
-
-        private float ResolveRoleBackRange()
-        {
-            if (heroData == null)
-            {
-                return 0.45f;
-            }
-
-            switch (heroData.Role)
-            {
-                case HeroRole.RangedDps:
-                case HeroRole.Mage:
-                    return 0.85f;
-                case HeroRole.Healer:
-                case HeroRole.Engineer:
-                case HeroRole.Support:
-                    return 0.65f;
-                case HeroRole.Assassin:
-                    return 0.55f;
-                case HeroRole.Tank:
-                case HeroRole.MeleeDps:
-                default:
-                    return 0.35f;
-            }
-        }
-
-        private float ApplyHeroSeparation(float desiredX)
-        {
-            for (int i = 0; i < activeHeroes.Count; i++)
-            {
-                HeroController other = activeHeroes[i];
-                if (other == null || other == this || !other.IsAlive || other.LaneIndex != laneIndex)
-                {
-                    continue;
-                }
-
-                float gap = Mathf.Abs(desiredX - other.transform.position.x);
-                if (gap >= heroPersonalSpace)
-                {
-                    continue;
-                }
-
-                float direction = heroSlotIndex <= other.heroSlotIndex ? -1f : 1f;
-                if (Mathf.Approximately(direction, 0f))
-                {
-                    direction = desiredX <= other.transform.position.x ? -1f : 1f;
-                }
-
-                desiredX += direction * (heroPersonalSpace - gap) * 0.45f;
-            }
-
-            return desiredX;
         }
 
         private void ReturnToAnchor()
@@ -710,10 +732,10 @@ namespace RuneGate
             }
 
             CaptureAnchorIfNeeded(false);
-            Vector3 destination = new Vector3(anchorPosition.x, ResolveLaneY(), transform.position.z);
+            Vector2 destination = anchorPosition;
             if (Vector2.Distance(transform.position, destination) <= returnStopDistance)
             {
-                transform.position = destination;
+                transform.position = new Vector3(destination.x, destination.y, transform.position.z);
                 SetCombatState(HeroCombatState.Idle);
                 movementController?.Stop();
                 visualController?.PlayIdle();
@@ -721,17 +743,23 @@ namespace RuneGate
             }
 
             SetCombatState(HeroCombatState.ReturnToAnchor);
-            MoveAlongLane(destination);
+            MoveContinuous(destination, CalculateHeroSeparation());
         }
 
-        private void MoveAlongLane(Vector3 destination)
+        private void MoveContinuous(Vector2 destination, Vector2 steeringOffset)
         {
             Vector3 previousPosition = transform.position;
             EnsureMovementController();
-            float minX = laneManager != null ? laneManager.GetMinCombatX() : laneLeashLeftX;
-            float maxX = laneManager != null ? laneManager.GetMaxCombatX() : laneLeashRightX;
-            movementController.MoveToX(destination.x, destination.y, minX, maxX);
-            laneManager?.ClampUnitInsideBattlefield(transform, visualController != null ? visualController.SpriteRenderer : GetComponentInChildren<SpriteRenderer>());
+            if (battlefieldSpace != null && battlefieldSpace.IsReady)
+            {
+                Vector2 halfExtents = battlefieldAgent != null ? battlefieldAgent.HalfExtents : Vector2.one * 0.35f;
+                movementController.MoveTo(
+                    ClampToLeash(destination),
+                    battlefieldSpace.CurrentBounds,
+                    halfExtents,
+                    steeringOffset);
+            }
+
             RefreshVisualAnchors();
             Vector3 delta = transform.position - previousPosition;
             if (delta.sqrMagnitude > 0.000001f)
@@ -745,14 +773,20 @@ namespace RuneGate
             }
         }
 
-        private float ResolveLaneY()
+        private Vector2 ClampToLeash(Vector2 position)
         {
-            if (laneManager == null)
+            if (battlefieldAgent == null)
             {
-                laneManager = FindAnyObjectByType<LaneManager>();
+                return battlefieldSpace != null ? battlefieldSpace.Clamp(position, Vector2.zero) : position;
             }
 
-            return laneManager != null && laneIndex >= 0 ? laneManager.GetLaneY(laneIndex) : anchorPosition.y;
+            Rect leash = battlefieldAgent.LeashRect;
+            Vector2 clamped = new Vector2(
+                Mathf.Clamp(position.x, leash.xMin, leash.xMax),
+                Mathf.Clamp(position.y, leash.yMin, leash.yMax));
+            return battlefieldSpace != null
+                ? battlefieldSpace.Clamp(clamped, battlefieldAgent.HalfExtents)
+                : clamped;
         }
 
         private void CaptureAnchorIfNeeded(bool force)
@@ -763,11 +797,6 @@ namespace RuneGate
             }
 
             anchorPosition = transform.position;
-            if (laneIndex >= 0)
-            {
-                anchorPosition.y = ResolveLaneY();
-            }
-
             anchorCaptured = true;
         }
 
@@ -887,7 +916,9 @@ namespace RuneGate
                 case TargetingType.First:
                 case TargetingType.Boss:
                 default:
-                    return candidate.transform.position.x < current.transform.position.x ? candidate : current;
+                    float currentProgress = current.Agent != null ? current.Agent.ObjectiveProgress : 0f;
+                    float candidateProgress = candidate.Agent != null ? candidate.Agent.ObjectiveProgress : 0f;
+                    return candidateProgress > currentProgress ? candidate : current;
             }
         }
 
@@ -899,6 +930,37 @@ namespace RuneGate
             }
 
             return monster.Data.MonsterType == MonsterType.Fast || monster.Data.MonsterType == MonsterType.Flying;
+        }
+
+        private void BindSpatialLayout()
+        {
+            if (spatialLayoutBound || battlefieldSpace == null)
+            {
+                return;
+            }
+
+            battlefieldSpace.LayoutChanged += HandleSpatialLayoutChanged;
+            spatialLayoutBound = true;
+        }
+
+        private void UnbindSpatialLayout()
+        {
+            if (!spatialLayoutBound || battlefieldSpace == null)
+            {
+                spatialLayoutBound = false;
+                return;
+            }
+
+            battlefieldSpace.LayoutChanged -= HandleSpatialLayoutChanged;
+            spatialLayoutBound = false;
+        }
+
+        private void HandleSpatialLayoutChanged(BattlefieldBounds previous, BattlefieldBounds next)
+        {
+            if (battlefieldAgent != null)
+            {
+                anchorPosition = battlefieldAgent.Anchor;
+            }
         }
     }
 }

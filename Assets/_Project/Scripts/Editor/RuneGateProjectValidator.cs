@@ -201,6 +201,9 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Battle/BattlefieldAgent.cs",
             "Assets/_Project/Scripts/Battle/BattlefieldAgentRegistry.cs",
             "Assets/_Project/Scripts/Battle/CrystalApproachPointProvider.cs",
+            "Assets/_Project/Scripts/Battle/CombatGeometry.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldTargetQuery.cs",
+            "Assets/_Project/Scripts/Battle/BattlefieldDepthSorter.cs",
             "Assets/_Project/Scripts/Battle/UnitMovementController.cs",
             "Assets/_Project/Scripts/Hero/HeroController.cs",
             "Assets/_Project/Scripts/Hero/HeroRuneCombatModifiers.cs",
@@ -261,7 +264,8 @@ namespace RuneGate.Editor
             "Assets/_Project/Scripts/Editor/RuneGateProgressionSmokeTest.cs",
             "Assets/_Project/Scripts/Diagnostics/RuneGateRuntimeSmokeRunner.cs",
             "Assets/_Project/Scripts/Diagnostics/RuneGatePngEncoder.cs",
-            "Assets/_Project/Scripts/Diagnostics/RuneGateVisualCaptureRunner.cs"
+            "Assets/_Project/Scripts/Diagnostics/RuneGateVisualCaptureRunner.cs",
+            "Assets/_Project/Scripts/Diagnostics/RuneGateContinuousBattlefieldProbe.cs"
         };
 
         private static readonly string[] RequiredScenes =
@@ -1791,9 +1795,51 @@ namespace RuneGate.Editor
                 errors.Add("BattleScene must contain one BattlefieldRuntime root and one Battlefield Layout service root.");
             }
 
-            if (!sceneText.Contains("battlefieldMode: 0", StringComparison.Ordinal))
+            if (!sceneText.Contains("battlefieldMode: 1", StringComparison.Ordinal))
             {
-                errors.Add("Spatial foundation phase must keep BattleManager in LegacyLanes mode.");
+                errors.Add("BattleScene must use Continuous2D. LegacyLanes is not valid after the combat migration.");
+            }
+
+            ValidateContinuousCombatSource(errors);
+        }
+
+        private static void ValidateContinuousCombatSource(List<string> errors)
+        {
+            string[] runtimeFiles =
+            {
+                "Assets/_Project/Scripts/Hero/HeroController.cs",
+                "Assets/_Project/Scripts/Monster/MonsterController.cs",
+                "Assets/_Project/Scripts/Skill/TemporaryTurretController.cs",
+                "Assets/_Project/Scripts/Hero/HeroRuneCombatModifiers.cs",
+                "Assets/_Project/Scripts/Monster/BossAttackPatternController.cs"
+            };
+            string[] forbiddenFragments =
+            {
+                ".LaneIndex !=",
+                ".LaneIndex ==",
+                "MoveToX("
+            };
+
+            for (int fileIndex = 0; fileIndex < runtimeFiles.Length; fileIndex++)
+            {
+                string path = runtimeFiles[fileIndex];
+                string absolutePath = ToProjectPath(path);
+                string source = File.Exists(absolutePath) ? File.ReadAllText(absolutePath) : string.Empty;
+                for (int fragmentIndex = 0; fragmentIndex < forbiddenFragments.Length; fragmentIndex++)
+                {
+                    if (source.Contains(forbiddenFragments[fragmentIndex], StringComparison.Ordinal))
+                    {
+                        errors.Add($"Continuous2D runtime still contains legacy lane combat logic in {path}: {forbiddenFragments[fragmentIndex]}");
+                    }
+                }
+            }
+
+            string waveSourcePath = ToProjectPath("Assets/_Project/Scripts/Wave/WaveManager.cs");
+            string waveSource = File.Exists(waveSourcePath) ? File.ReadAllText(waveSourcePath) : string.Empty;
+            if (!waveSource.Contains("ResolveEnemySpawn(", StringComparison.Ordinal) ||
+                !waveSource.Contains("crystalApproachPointProvider.Reserve(", StringComparison.Ordinal))
+            {
+                errors.Add("WaveManager must spawn through BattlefieldSpaceController and reserve crystal approach points.");
             }
         }
 

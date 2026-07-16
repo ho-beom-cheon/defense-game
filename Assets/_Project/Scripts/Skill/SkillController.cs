@@ -157,7 +157,10 @@ namespace RuneGate
                 return false;
             }
 
-            target.ApplyKnockback(0.82f, 0.65f);
+            target.ApplyKnockback(
+                caster != null ? (Vector2)caster.transform.position : (Vector2)target.transform.position + Vector2.left,
+                0.82f,
+                0.65f);
             return true;
         }
 
@@ -182,6 +185,11 @@ namespace RuneGate
                     yield break;
                 }
 
+                if (!IsTargetInSkillRange(caster, target))
+                {
+                    yield break;
+                }
+
                 ApplyDirectDamage(caster, target, skillData.Power);
                 CombatVisualEffectFactory.SpawnRapidShotImpact(
                     caster != null ? caster.transform.position : transform.position,
@@ -199,6 +207,12 @@ namespace RuneGate
             if (target == null || !target.IsAlive)
             {
                 Debug.Log($"Skill {skillData.DisplayName} had no valid monster target.");
+                return false;
+            }
+
+            if (!IsTargetInSkillRange(caster, target))
+            {
+                Debug.Log($"Skill {skillData.DisplayName} target moved outside its 2D range.");
                 return false;
             }
 
@@ -326,6 +340,19 @@ namespace RuneGate
             }
 
             return selected;
+        }
+
+        private bool IsTargetInSkillRange(HeroController caster, MonsterController target)
+        {
+            if (caster == null || target == null)
+            {
+                return target != null;
+            }
+
+            return CombatGeometry.IsCenterInRange(
+                caster.transform.position,
+                target.transform.position,
+                Mathf.Max(0.1f, skillData != null ? skillData.Range : 0.1f));
         }
     }
 }
